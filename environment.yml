@@ -6,4 +6,9 @@ channels:
 dependencies:
   # TODO nf-core: Add required software dependencies here
   - fastqc=0.11.8
+  #- awscli=1.15.45
   - multiqc=1.6
+  - unicycler=0.4.6
+  #- kraken=1.1
+  - kraken2=2.0.7_beta
+  - prokka=1.13

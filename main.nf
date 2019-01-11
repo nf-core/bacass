@@ -30,18 +30,12 @@ def helpMessage() {
     nextflow run nf-core/bacass --reads '*_R{1,2}.fastq.gz' -profile docker
 
     Mandatory arguments:
-      --reads                       Path to input data (must be surrounded with quotes)
-      --genome                      Name of iGenomes reference
       -profile                      Configuration profile to use. Can use multiple (comma separated)
                                     Available: conda, docker, singularity, awsbatch, test and more.
 
-    Options:
-      --singleEnd                   Specifies that the input is single end reads
-
-    References                      If not specified in the configuration file or you wish to overwrite any of the references.
-      --fasta                       Path to Fasta reference
-
     Other options:
+      --skip-kraken2                Don't run Kraken2 for classification
+      --kraken2db                   Path to Kraken2 Database directory
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -62,19 +56,12 @@ if (params.help){
     exit 0
 }
 
-// TODO nf-core: Add any reference files that are needed
-// Configurable reference genomes
-fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
-if ( params.fasta ){
-    fasta = file(params.fasta)
-    if( !fasta.exists() ) exit 1, "Fasta file not found: ${params.fasta}"
+// see https://ccb.jhu.edu/software/kraken2/index.shtml#downloads
+if(!params.skip_kraken2) {
+    kraken2db = file(params.kraken2db)
+    if (!kraken2db.exists())
+    exit 1, "Missing Kraken2 DB: ${kraken2db}"
 }
-//
-// NOTE - THIS IS NOT USED IN THIS PIPELINE, EXAMPLE ONLY
-// If you want to use the above in a process, define the following:
-//   input:
-//   file fasta from fasta
-//
 
 
 // Has the run name been specified by the user?
@@ -98,29 +85,33 @@ if( workflow.profile == 'awsbatch') {
 ch_multiqc_config = Channel.fromPath(params.multiqc_config)
 ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
 
-/*
- * Create a channel for input read files
+/* Instead of methods like fromFilePairs we rely on a yaml file describing the input
+ * This allows for merging of libraries for samples that were sequenced twice
+ * and is generally better for reproducibility and keeping of records
  */
- if(params.readPaths){
-     if(params.singleEnd){
-         Channel
-             .from(params.readPaths)
-             .map { row -> [ row[0], [file(row[1][0])]] }
-             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-             .into { read_files_fastqc; read_files_trimming }
-     } else {
-         Channel
-             .from(params.readPaths)
-             .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-             .into { read_files_fastqc; read_files_trimming }
-     }
- } else {
-     Channel
-         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
-         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nIf this is single-end data, please specify --singleEnd on the command line." }
-         .into { read_files_fastqc; read_files_trimming }
- }
+def GetReadPair = { sk, rk ->
+    // FIXME if files don't exist, their path might be relative to the input yaml
+    // see https://gist.github.com/ysb33r/5804364
+    tuple(file(params.samples[sk].readunits[rk]['fq1']),
+          file(params.samples[sk].readunits[rk]['fq2']))
+}
+
+def GetReadUnitKeys = { sk ->
+    params.samples[sk].readunits.keySet()
+}
+
+/* FIXME allow other means of defining input, e.g. CSV.
+ * input for fastq files. channel has sample name as key and all read pairs following
+ * see https://groups.google.com/forum/#!topic/nextflow/CF7Joh5xrkU
+ */
+sample_keys = params.samples.keySet()
+println "List of samples: " +  sample_keys.join(", ")
+Channel
+    .from(sample_keys)
+    .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
+    .set { fastq_ch }
+//fastq_ch.subscribe { println "$it" }
+
 
 
 // Header log info
@@ -203,30 +194,125 @@ process get_software_versions {
 
 
 
-/*
- * STEP 1 - FastQC
+
+/* Trim and combine read-pairs per sample. Similar to nf-core vipr
+ */
+process trim_and_combine {
+    tag { "Preprocessing of reads for " + sample_id }
+    publishDir "${params.outdir}/${sample_id}/reads/", mode: 'copy'
+
+    input:
+    set sample_id, file(reads) from fastq_ch
+
+    output:
+    set sample_id, file("${sample_id}_trm-cmb.R1.fastq.gz"), file("${sample_id}_trm-cmb.R2.fastq.gz") \
+	into kraken_ch, unicycler_ch, fastqc_ch
+    // FIXME fastqc logs
+    // FIXME skewer logs
+
+    script:
+    """
+    # loop over readunits in pairs per sample
+    pairno=0
+    echo ${reads.join(" ")} | xargs -n2 | while read fq1 fq2; do
+	skewer --quiet -t ${task.cpus} -m pe -q 3 -n -z \$fq1 \$fq2;
+    done
+    cat \$(ls *trimmed-pair1.fastq.gz | sort) >> ${sample_id}_trm-cmb.R1.fastq.gz
+    cat \$(ls *trimmed-pair2.fastq.gz | sort) >> ${sample_id}_trm-cmb.R2.fastq.gz
+    fastqc -t {task.cpus} ${sample_id}_trm-cmb.R1.fastq.gz ${sample_id}_trm-cmb.R2.fastq.gz
+    """
+}
+
+
+/* fastqc
  */
 process fastqc {
     tag "$name"
-    publishDir "${params.outdir}/fastqc", mode: 'copy',
-        saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
+    publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
     input:
-    set val(name), file(reads) from read_files_fastqc
+    set sample_id, file(fq1), file(fq2) from fastqc_ch
 
     output:
     file "*_fastqc.{zip,html}" into fastqc_results
 
     script:
     """
-    fastqc -q $reads
+    fastqc -t {task.cpus} -q $reads
     """
 }
 
 
+/* unicycler
+ */
+process unicycler {
+    tag "$name"
+    publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
-/*
- * STEP 2 - MultiQC
+    input:
+    set sample_id, file(fq1), file(fq2) from unicycler_ch
+
+    output:
+    set sample_id, file("assembly.fasta") into kraken2_ch, prokka_ch
+    file("assembly.gfa")
+    file("unicycler.log")
+
+    script:
+    """
+    unicycler -1 $fq1 -2 $fq2 --keep 0 -o .
+    """
+}
+
+
+/* kraken classification: QC for sample purity
+ */
+if(!params.skip_kraken2) {
+    process kraken2 {
+        tag { "Running Kraken2 on " + sample_id }
+        publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+
+        input:
+        set sample_id, file(fq1), file(fq2) from kraken2_ch
+
+        output:
+        file("kraken2.report")
+
+        script:
+	"""
+        # stdout reports per read which is not needed. kraken.report can be used with pavian
+        # braken would be nice but requires readlength and correspondingly build db
+	kraken2 --threads ${task.cpus} --paired --db ${kraken2db} \
+		--report kraken2.report ${fq1} ${fq2} | gzip > kraken2.out.gz
+	"""
+    }
+}
+
+
+/* FIXME quast
+quast.py -t 10 --nanopore /mnt/projects/rpd/devs/joanna/blackfly/gridion/051118_WF3_8kb/all_8kb_20kb.fastq.gz /mnt/projects/rpd/devs/joanna/blackfly/gridion/output_wtdbg2/blacksoldier.ctg.lay.2nd.fa
+ */
+
+
+/* annotation with prokka
+ */
+process prokka {
+   tag "$name"
+   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+
+   input:
+   set sample_id, fasta from prokka_ch
+
+   output:
+   file("prokka/")
+
+   script:
+   """
+   prokka --cpus ${task.cpus} --outdir . ${fasta}
+   """
+}
+
+
+/* Multiqc
  */
 process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
@@ -234,6 +320,8 @@ process multiqc {
     input:
     file multiqc_config from ch_multiqc_config
     // TODO nf-core: Add in log files from your new processes for MultiQC to find!
+    // FIXME quast, prokka and skewer supported
+    // FIXME unicycler and kraken not supported
     file ('fastqc/*') from fastqc_results.collect().ifEmpty([])
     file ('software_versions/*') from software_versions_yaml
     file workflow_summary from create_workflow_summary(summary)
@@ -252,9 +340,7 @@ process multiqc {
 }
 
 
-
-/*
- * STEP 3 - Output Description HTML
+/* Output Description HTML
  */
 process output_documentation {
     publishDir "${params.outdir}/Documentation", mode: 'copy'
@@ -271,6 +357,8 @@ process output_documentation {
     """
 }
 
+// to enable poor man's syntax checking
+def testSyntaxOnly(){}
 
 
 /*
