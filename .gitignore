@@ -6,3 +6,6 @@ results/
 tests/test_data
 *.un~
 *.swp
+nohup.out
+tmp/
+._.DS_Store

@@ -27,7 +27,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/bacass --reads '*_R{1,2}.fastq.gz' -profile docker
+    nextflow run nf-core/bacass -params-file params.yaml -profile docker
 
     Mandatory arguments:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
@@ -50,7 +50,7 @@ def helpMessage() {
  * SET UP CONFIGURATION VARIABLES
  */
 
-// Show help emssage
+// Show help message
 if (params.help){
     helpMessage()
     exit 0
@@ -58,11 +58,12 @@ if (params.help){
 
 // see https://ccb.jhu.edu/software/kraken2/index.shtml#downloads
 if(!params.skip_kraken2) {
+    if (!params.kraken2db)
+        exit 1, "Missing Kraken2 DB arg"
     kraken2db = file(params.kraken2db)
     if (!kraken2db.exists())
-    exit 1, "Missing Kraken2 DB: ${kraken2db}"
+        exit 1, "Missing Kraken2 DB: ${kraken2db}"
 }
-
 
 // Has the run name been specified by the user?
 //  this has the bonus effect of catching both -name and --name
@@ -111,9 +112,6 @@ Channel
     .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
     .set { fastq_ch }
 //fastq_ch.subscribe { println "$it" }
-
-
-
 // Header log info
 log.info """=======================================================
                                           ,--./,-.
@@ -129,9 +127,6 @@ summary['Pipeline Name']  = 'nf-core/bacass'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name']     = custom_runName ?: workflow.runName
 // TODO nf-core: Report custom parameters here
-summary['Reads']        = params.reads
-summary['Fasta Ref']    = params.fasta
-summary['Data Type']    = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Max Memory']   = params.max_memory
 summary['Max CPUs']     = params.max_cpus
 summary['Max Time']     = params.max_time
@@ -172,7 +167,6 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
    return yaml_file
 }
 
-
 /*
  * Parse software version numbers
  */
@@ -194,11 +188,10 @@ process get_software_versions {
 
 
 
-
 /* Trim and combine read-pairs per sample. Similar to nf-core vipr
  */
 process trim_and_combine {
-    tag { "Preprocessing of reads for " + sample_id }
+    tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/reads/", mode: 'copy'
 
     input:
@@ -206,10 +199,8 @@ process trim_and_combine {
 
     output:
     set sample_id, file("${sample_id}_trm-cmb.R1.fastq.gz"), file("${sample_id}_trm-cmb.R2.fastq.gz") \
-	into kraken_ch, unicycler_ch, fastqc_ch
-    // FIXME fastqc logs
-    // FIXME skewer logs
-
+	into kraken2_ch, unicycler_ch, fastqc_ch
+    // not keeping logs for multiqc input. for that to be useful we would need to concat first and then run skewer
     script:
     """
     # loop over readunits in pairs per sample
@@ -219,7 +210,6 @@ process trim_and_combine {
     done
     cat \$(ls *trimmed-pair1.fastq.gz | sort) >> ${sample_id}_trm-cmb.R1.fastq.gz
     cat \$(ls *trimmed-pair2.fastq.gz | sort) >> ${sample_id}_trm-cmb.R2.fastq.gz
-    fastqc -t {task.cpus} ${sample_id}_trm-cmb.R1.fastq.gz ${sample_id}_trm-cmb.R2.fastq.gz
     """
 }
 
@@ -227,8 +217,8 @@ process trim_and_combine {
 /* fastqc
  */
 process fastqc {
-    tag "$name"
-    publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+    tag "$sample_id"
+    publishDir "${params.outdir}/${sample_id}/reads", mode: 'copy'
 
     input:
     set sample_id, file(fq1), file(fq2) from fastqc_ch
@@ -238,7 +228,7 @@ process fastqc {
 
     script:
     """
-    fastqc -t {task.cpus} -q $reads
+    fastqc -t {task.cpus} -q ${fq1} ${fq2}
     """
 }
 
@@ -246,20 +236,23 @@ process fastqc {
 /* unicycler
  */
 process unicycler {
-    tag "$name"
+    tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
     input:
     set sample_id, file(fq1), file(fq2) from unicycler_ch
 
     output:
-    set sample_id, file("assembly.fasta") into kraken2_ch, prokka_ch
-    file("assembly.gfa")
+    set sample_id, file("${sample_id}_assembly.fasta") into quast_ch, prokka_ch
+    file("${sample_id}_assembly.gfa")
     file("unicycler.log")
 
     script:
     """
     unicycler -1 $fq1 -2 $fq2 --keep 0 -o .
+    # rename so that quast can use the name 
+    mv assembly.gfa ${sample_id}_assembly.gfa
+    mv assembly.fasta ${sample_id}_assembly.fasta
     """
 }
 
@@ -268,7 +261,7 @@ process unicycler {
  */
 if(!params.skip_kraken2) {
     process kraken2 {
-        tag { "Running Kraken2 on " + sample_id }
+        tag "$sample_id"
         publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
         input:
@@ -288,26 +281,46 @@ if(!params.skip_kraken2) {
 }
 
 
-/* FIXME quast
-quast.py -t 10 --nanopore /mnt/projects/rpd/devs/joanna/blackfly/gridion/051118_WF3_8kb/all_8kb_20kb.fastq.gz /mnt/projects/rpd/devs/joanna/blackfly/gridion/output_wtdbg2/blacksoldier.ctg.lay.2nd.fa
+/* assembly qc with quast
  */
+process quast {
+  tag { "quast for each $sample_id" }
+  publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+  
+  input:
+  set sample_id, fasta from quast_ch
+  
+  output:
+  // multiqc only detects a file called report.tsv. to avoid
+  // name clash with other samples we need a directory named by sample
+  file("${sample_id}_assembly_QC/") into quast_logs_ch
+
+  script:
+  """
+  quast.py -t ${task.cpus} -o ${sample_id}_assembly_QC ${fasta} 
+  """
+}
 
 
 /* annotation with prokka
  */
 process prokka {
-   tag "$name"
+   tag "$sample_id"
    publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
    input:
    set sample_id, fasta from prokka_ch
 
    output:
-   file("prokka/")
+   file("annotation/")
+   // multiqc prokka module is just a stub using txt. see https://github.com/ewels/MultiQC/issues/587
+   // also, this only makes sense if we could set genus/species/strain. otherwise all samples
+   // are the same
+   // file("annotation/*txt") into prokka_logs_ch
 
    script:
    """
-   prokka --cpus ${task.cpus} --outdir . ${fasta}
+   prokka --cpus ${task.cpus} --prefix "${sample_id}" --outdir annotation ${fasta}
    """
 }
 
@@ -319,9 +332,9 @@ process multiqc {
 
     input:
     file multiqc_config from ch_multiqc_config
-    // TODO nf-core: Add in log files from your new processes for MultiQC to find!
-    // FIXME quast, prokka and skewer supported
-    // FIXME unicycler and kraken not supported
+    //file prokka_logs from prokka_logs_ch.collect().ifEmpty([])
+    file quast_logs from quast_logs_ch.collect().ifEmpty([])
+    // NOTE unicycler and kraken not supported
     file ('fastqc/*') from fastqc_results.collect().ifEmpty([])
     file ('software_versions/*') from software_versions_yaml
     file workflow_summary from create_workflow_summary(summary)
@@ -338,6 +351,7 @@ process multiqc {
     multiqc -f $rtitle $rfilename --config $multiqc_config .
     """
 }
+
 
 
 /* Output Description HTML
@@ -357,6 +371,7 @@ process output_documentation {
     """
 }
 
+
 // to enable poor man's syntax checking
 def testSyntaxOnly(){}
 
@@ -364,7 +379,7 @@ def testSyntaxOnly(){}
 /*
  * Completion e-mail notification
  */
-workflow.onComplete {
+ workflow.onComplete {
 
     // Set up the e-mail variables
     def subject = "[nf-core/bacass] Successful: $workflow.runName"
@@ -438,3 +453,4 @@ workflow.onComplete {
     log.info "[nf-core/bacass] Pipeline Complete"
 
 }
+
