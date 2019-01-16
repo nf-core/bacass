@@ -11,7 +11,6 @@
 
 
 def helpMessage() {
-    // TODO nf-core: Add to this help message with new command line parameters
     log.info"""
     =======================================================
                                               ,--./,-.
@@ -28,14 +27,22 @@ def helpMessage() {
     The typical command for running the pipeline is as follows:
 
     nextflow run nf-core/bacass -params-file params.yaml -profile docker
+    or
+    nextflow run nf-core/bacass --reads '*_R{1,2}.fastq.gz' --kraken2db 'path-to-kraken2db' -profile docker
 
     Mandatory arguments:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
                                     Available: conda, docker, singularity, awsbatch, test and more.
 
     Other options:
-      --skip-kraken2                Don't run Kraken2 for classification
+      -params-file                  A parameters file, listing parameters defined here, including paired FastQ input
+				    if not defined through `--reads` (see below). See docs for more info
+      --reads                       Path to paired-end input reads (must be surrounded with quotes; see also docs)
+                                    Can be replaced with samples dictionary in params-file (see above)
+      --skip_kraken2                Don't run Kraken2 for classification
       --kraken2db                   Path to Kraken2 Database directory
+      --unicycler_args              Advanced: Extra arguments to Unicycler (quote and add leading space)
+      --prokka_args                 Advanced: Extra arguments to Prokka (quote and add leading space)
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -86,9 +93,10 @@ if( workflow.profile == 'awsbatch') {
 ch_multiqc_config = Channel.fromPath(params.multiqc_config)
 ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
 
-/* Instead of methods like fromFilePairs we rely on a yaml file describing the input
+/* GetReadPair and GetReadUnitKeys support read pair input via yaml files
  * This allows for merging of libraries for samples that were sequenced twice
- * and is generally better for reproducibility and keeping of records
+ * and is generally better for reproducibility and keeping of records (all
+ * config done via files)
  */
 def GetReadPair = { sk, rk ->
     // FIXME if files don't exist, their path might be relative to the input yaml
@@ -101,17 +109,21 @@ def GetReadUnitKeys = { sk ->
     params.samples[sk].readunits.keySet()
 }
 
-/* FIXME allow other means of defining input, e.g. CSV.
- * input for fastq files. channel has sample name as key and all read pairs following
- * see https://groups.google.com/forum/#!topic/nextflow/CF7Joh5xrkU
- */
-sample_keys = params.samples.keySet()
+if (params.reads) {
+    Channel.fromFilePairs( params.reads )// flat: true
+	.into{ sample_keys_ch; fastq_ch }
+    sample_keys = sample_keys_ch.map{ it -> it[0] }.collect() as String
+} else {
+    sample_keys = params.samples? params.samples.keySet() : []
+    Channel
+        .from(sample_keys)
+        .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
+        .set { fastq_ch }
+}
 println "List of samples: " +  sample_keys.join(", ")
-Channel
-    .from(sample_keys)
-    .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
-    .set { fastq_ch }
 //fastq_ch.subscribe { println "$it" }
+
+
 // Header log info
 log.info """=======================================================
                                           ,--./,-.
@@ -125,21 +137,25 @@ nf-core/bacass v${workflow.manifest.version}"
 def summary = [:]
 summary['Pipeline Name']  = 'nf-core/bacass'
 summary['Pipeline Version'] = workflow.manifest.version
-summary['Run Name']     = custom_runName ?: workflow.runName
-// TODO nf-core: Report custom parameters here
-summary['Max Memory']   = params.max_memory
-summary['Max CPUs']     = params.max_cpus
-summary['Max Time']     = params.max_time
-summary['Output dir']   = params.outdir
-summary['Working dir']  = workflow.workDir
+summary['Run Name'] = custom_runName ?: workflow.runName
+summary['Sample keys'] = sample_keys
+summary['Skip Kraken2'] = params.skip_kraken2
+summary['Kraken2 DB'] = params.kraken2db
+summary['Extra Unicycler arguments'] = params.unicycler_args
+summary['Extra Prokka arguments'] = params.prokka_args
+summary['Max Memory'] = params.max_memory
+summary['Max CPUs'] = params.max_cpus
+summary['Max Time'] = params.max_time
+summary['Output dir'] = params.outdir
+summary['Working dir'] = workflow.workDir
 summary['Container Engine'] = workflow.containerEngine
 if(workflow.containerEngine) summary['Container'] = workflow.container
-summary['Current home']   = "$HOME"
-summary['Current user']   = "$USER"
-summary['Current path']   = "$PWD"
-summary['Working dir']    = workflow.workDir
-summary['Output dir']     = params.outdir
-summary['Script dir']     = workflow.projectDir
+summary['Current home'] = "$HOME"
+summary['Current user'] = "$USER"
+summary['Current path'] = "$PWD"
+summary['Working dir'] = workflow.workDir
+summary['Output dir'] = params.outdir
+summary['Script dir'] = workflow.projectDir
 summary['Config Profile'] = workflow.profile
 if(workflow.profile == 'awsbatch'){
    summary['AWS Region'] = params.awsregion
@@ -176,12 +192,16 @@ process get_software_versions {
     file 'software_versions_mqc.yaml' into software_versions_yaml
 
     script:
-    // TODO nf-core: Get all tools to print their version number here
     """
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     fastqc --version > v_fastqc.txt
     multiqc --version > v_multiqc.txt
+    prokka -v 2> v_prokka.txt
+    quast -v > v_quast.txt
+    skewer -v > v_skewer.txt
+    kraken2 -v > v_kraken2.txt
+    Bandage -v > v_bandage.txt
     scrape_software_versions.py > software_versions_mqc.yaml
     """
 }
@@ -192,7 +212,7 @@ process get_software_versions {
  */
 process trim_and_combine {
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/reads/", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/${sample_id}_reads/", mode: 'copy'
 
     input:
     set sample_id, file(reads) from fastq_ch
@@ -201,6 +221,7 @@ process trim_and_combine {
     set sample_id, file("${sample_id}_trm-cmb.R1.fastq.gz"), file("${sample_id}_trm-cmb.R2.fastq.gz") \
 	into kraken2_ch, unicycler_ch, fastqc_ch
     // not keeping logs for multiqc input. for that to be useful we would need to concat first and then run skewer
+    
     script:
     """
     # loop over readunits in pairs per sample
@@ -218,7 +239,7 @@ process trim_and_combine {
  */
 process fastqc {
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/reads", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/${sample_id}_reads", mode: 'copy'
 
     input:
     set sample_id, file(fq1), file(fq2) from fastqc_ch
@@ -244,17 +265,40 @@ process unicycler {
 
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into quast_ch, prokka_ch
+    set sample_id, file("${sample_id}_assembly.gfa") into bandage_ch
     file("${sample_id}_assembly.gfa")
-    file("unicycler.log")
-
+    file("${sample_id}_assembly.png")
+    file("${sample_id}_unicycler.log")
+    
     script:
     """
-    unicycler -1 $fq1 -2 $fq2 --keep 0 -o .
+    unicycler -1 $fq1 -2 $fq2 --threads ${task.cpus} ${params.unicycler_args} --keep 0 -o .
+    mv unicycler.log ${sample_id}_unicycler.log
     # rename so that quast can use the name 
     mv assembly.gfa ${sample_id}_assembly.gfa
     mv assembly.fasta ${sample_id}_assembly.fasta
+    Bandage image ${sample_id}_assembly.gfa ${sample_id}_assembly.png
     """
 }
+
+
+/* waste to have a separate process because it's superfast
+process bandage {
+   tag "$sample_id"
+   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+
+   input:
+   set sample_id, gfa from bandage_ch
+
+   output:
+   file("${sample_id}_assembly_bandage.png")
+
+   script:
+   """
+   Bandage image ${gfa} ${sample_id}_assembly_bandage.png
+   """
+}
+*/
 
 
 /* kraken classification: QC for sample purity
@@ -268,14 +312,14 @@ if(!params.skip_kraken2) {
         set sample_id, file(fq1), file(fq2) from kraken2_ch
 
         output:
-        file("kraken2.report")
+        file("${sample_id}_kraken2.report")
 
         script:
 	"""
         # stdout reports per read which is not needed. kraken.report can be used with pavian
         # braken would be nice but requires readlength and correspondingly build db
 	kraken2 --threads ${task.cpus} --paired --db ${kraken2db} \
-		--report kraken2.report ${fq1} ${fq2} | gzip > kraken2.out.gz
+		--report ${sample_id}_kraken2.report ${fq1} ${fq2} | gzip > kraken2.out.gz
 	"""
     }
 }
@@ -312,15 +356,15 @@ process prokka {
    set sample_id, fasta from prokka_ch
 
    output:
-   file("annotation/")
+   file("${sample_id}_annotation/")
    // multiqc prokka module is just a stub using txt. see https://github.com/ewels/MultiQC/issues/587
    // also, this only makes sense if we could set genus/species/strain. otherwise all samples
    // are the same
-   // file("annotation/*txt") into prokka_logs_ch
+   // file("${sample_id}_annotation/*txt") into prokka_logs_ch
 
    script:
    """
-   prokka --cpus ${task.cpus} --prefix "${sample_id}" --outdir annotation ${fasta}
+   prokka --cpus ${task.cpus} --prefix "${sample_id}" --outdir ${sample_id}_annotation ${params.prokka_args} ${fasta}
    """
 }
 
@@ -346,12 +390,10 @@ process multiqc {
     script:
     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
-    // TODO nf-core: Specify which MultiQC modules to use with -m for a faster run time
     """
     multiqc -f $rtitle $rfilename --config $multiqc_config .
     """
 }
-
 
 
 /* Output Description HTML

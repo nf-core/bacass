@@ -10,6 +10,12 @@
 https://img.shields.io/badge/singularity-available-7E4C74.svg)
 
 ### Introduction
+
+
+This pipeline is for bacterial assembly of next-gen sequencing reads. It quality-trims your reads, runs QC, including a
+metagenomics classifier on your reads to check for purity, assembles the reads with
+Unicycler, annotates the assembly with Prokka and runs Quast on the assembly for quality check.
+
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
 
 
@@ -25,7 +31,6 @@ The nf-core/bacass pipeline comes with documentation about the pipeline, found i
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](docs/troubleshooting.md)
 
-<!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
 
 ### Credits
 nf-core/bacass was originally written by Andreas Wilm.

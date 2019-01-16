@@ -14,11 +14,11 @@
         * [`singularity`](#singularity)
         * [`test`](#test)
     * [`--reads`](#--reads)
-    * [`--singleEnd`](#--singleend)
-* [Reference genomes](#reference-genomes)
-    * [`--genome`](#--genome)
-    * [`--fasta`](#--fasta)
-    * [`--igenomesIgnore`](#--igenomesignore)
+    * [`--skip_kraken2`](#--skip_kraken2)
+    * [`--kraken2db`](#--kraken2db)
+    * [`-params-file`](#-params-file)
+    * [`--unicycler_args`](#--unicycler_args)
+<!--    * [`--singleEnd`](#--singleend) -->
 * [Job resources](#job-resources)
 * [Automatic resubmission](#automatic-resubmission)
 * [Custom resource requests](#custom-resource-requests)
@@ -48,7 +48,6 @@ It is recommended to limit the Nextflow Java virtual machines memory. We recomme
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
-<!-- TODO nf-core: Document required command line parameters to run the pipeline-->
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 ```bash
@@ -103,7 +102,6 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
     * A profile with a complete configuration for automated testing
     * Includes links to test data so needs no other parameters
 
-<!-- TODO nf-core: Document required command line parameters -->
 ### `--reads`
 Use this to specify the location of your input FastQ files. For example:
 
@@ -119,62 +117,39 @@ Please note the following requirements:
 
 If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
-### `--singleEnd`
-By default, the pipeline expects paired-end data. If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
-
-```bash
---singleEnd --reads '*.fastq'
-```
-
-It is not possible to run a mixture of single-end and paired-end files in one run.
+See [`-params-file`](#-params-file) for an alternative way to specify read pairs
 
 
-## Reference genomes
+### `--skip_kraken2`
+Skip running Kraken2 classifier on reads.
 
-The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
+### `--kraken2db`
+Path to Kraken2 database.
+See [Kraken2 homepage](https://ccb.jhu.edu/software/kraken2/index.shtml#downloads) for download
+links. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for
+sample purity.
 
-### `--genome` (using iGenomes)
-There are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--genome` flag.
+### `-params-file`
 
-You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
+ A parameters file, listing parameters defined here, including paired FastQ input if not defined through `--reads`.
 
-* Human
-  * `--genome GRCh37`
-* Mouse
-  * `--genome GRCm38`
-* _Drosophila_
-  * `--genome BDGP6`
-* _S. cerevisiae_
-  * `--genome 'R64-1-1'`
+The format is as follows: `{'samples': {sm1: {'readunits': {ru1: {'fq1': p1, 'fq2': p2}, ...}}}, ...}`
+where sm1 is a sample name, ru1 is a readunit (fastq pair) name,
+and p1 and p2 are full paths to FastQ files 1 and 2.
+This allows to have multiple samples and multiple FastQ pairs per sample and a file-only
+configuration of pipeline behaviour.
 
-> There are numerous others - check the config file for more.
+This file can also list other parameters as described here (e.g. `--kraken2db`)
 
-Note that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.
+### `--unicycler_args`
 
-The syntax for this reference configuration is as follows:
+This advanced option allows you to pass extra arguments to Unicycler (e.g. `"--mode conservative"` or
+`"--no_correct"`). For this to work you need to quote the arguments and add at least one space
 
-<!-- TODO nf-core: Update reference genome example according to what is needed -->
-```nextflow
-params {
-  genomes {
-    'GRCh37' {
-      fasta   = '<path to the genome fasta file>' // Used if no star index given
-    }
-    // Any number of additional genomes, key is used with --genome
-  }
-}
-```
+### `--prokka_args`
 
-<!-- TODO nf-core: Describe reference path flags -->
-### `--fasta`
-If you prefer, you can specify the full path to your reference genome when you run the pipeline:
-
-```bash
---fasta '[path to Fasta reference]'
-```
-
-### `--igenomesIgnore`
-Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`.
+This advanced option allows you to pass extra arguments to Prokka (e.g. `" --rfam"` or
+`" --genus name"`). For this to work you need to quote the arguments and add at least one space
 
 ## Job resources
 ### Automatic resubmission
@@ -198,7 +173,6 @@ Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a 
 
 ## Other command line parameters
 
-<!-- TODO nf-core: Describe any other command line flags here -->
 
 ### `--outdir`
 The output directory where the results will be saved.

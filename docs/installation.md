@@ -105,6 +105,3 @@ To use it first ensure that you have conda installed (we recommend [miniconda](h
 
 See [`docs/configuration/adding_your_own.md`](configuration/adding_your_own.md)
 
-## 4) Reference genomes
-
-See [`docs/configuration/reference_genomes.md`](configuration/reference_genomes.md)
