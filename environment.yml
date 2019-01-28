@@ -1,6 +1,6 @@
 # You can use this file to create a conda environment for this pipeline:
 #   conda env create -f environment.yml
-name: nf-core-bacass-1.0dev
+name: nf-core-bacass-latest
 channels:
   - conda-forge
   - bioconda
@@ -15,4 +15,4 @@ dependencies:
   - quast=5.0.2
   - prokka=1.13
   - bandage=0.8.1
-
+  # - r-markdown for markdown_to_html.r
