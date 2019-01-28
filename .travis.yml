@@ -33,5 +33,7 @@ env:
 script:
   # Lint the pipeline code
   - nf-core lint ${TRAVIS_BUILD_DIR}
+  # poor man's syntax check
+  - nextflow main.nf -test
   # Run the pipeline with the test profile
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker
+  # FIXME - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker

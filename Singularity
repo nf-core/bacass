@@ -4,10 +4,10 @@ Bootstrap:docker
 %labels
     MAINTAINER Andreas Wilm
     DESCRIPTION Singularity image containing all requirements for the nf-core/bacass pipeline
-    VERSION 1.0dev
+    VERSION latest
 
 %environment
-    PATH=/opt/conda/envs/nf-core-bacass-1.0dev/bin:$PATH
+    PATH=/opt/conda/envs/nf-core-bacass-latest/bin:$PATH
     export PATH
 
 %files

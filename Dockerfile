@@ -4,4 +4,4 @@ LABEL authors="Andreas Wilm" \
 
 COPY environment.yml /
 RUN conda env create -f /environment.yml && conda clean -a
-ENV PATH /opt/conda/envs/nf-core-bacass-1.0dev/bin:$PATH
+ENV PATH /opt/conda/envs/nf-core-bacass-latest/bin:$PATH
