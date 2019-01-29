@@ -15,4 +15,6 @@ dependencies:
   - quast=5.0.2
   - prokka=1.13
   - bandage=0.8.1
-  # - r-markdown for markdown_to_html.r
+  # for markdown_to_html.r
+  - r-markdown=0.9
+
