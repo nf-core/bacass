@@ -37,4 +37,5 @@ script:
   # poor man's syntax check
   - nextflow run ${TRAVIS_BUILD_DIR} -test
   # Run the pipeline with the test profile
-  nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker
+ 
