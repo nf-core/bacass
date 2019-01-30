@@ -111,16 +111,20 @@ def GetReadUnitKeys = { sk ->
 
 if (params.reads) {
     Channel.fromFilePairs( params.reads )// flat: true
-	.into{ sample_keys_ch; fastq_ch }
-    sample_keys = sample_keys_ch.map{ it -> it[0] }.collect() as String
+	.set { fastq_ch }
+
+} else if (params.readPaths) {
+   Channel.from( params.readPaths )
+	.map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
+        .set { fastq_ch }
+
 } else {
     sample_keys = params.samples? params.samples.keySet() : []
-    Channel
-        .from(sample_keys)
+    Channel.from( sample_keys )
         .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
         .set { fastq_ch }
 }
-println "List of samples: " +  sample_keys.join(", ")
+//println "List of samples: " +  sample_keys.join(", ")
 //fastq_ch.subscribe { println "$it" }
 
 
@@ -138,7 +142,7 @@ def summary = [:]
 summary['Pipeline Name']  = 'nf-core/bacass'
 summary['Pipeline Version'] = workflow.manifest.version
 summary['Run Name'] = custom_runName ?: workflow.runName
-summary['Sample keys'] = sample_keys
+//summary['Sample keys'] = sample_keys
 summary['Skip Kraken2'] = params.skip_kraken2
 summary['Kraken2 DB'] = params.kraken2db
 summary['Extra Unicycler arguments'] = params.unicycler_args
