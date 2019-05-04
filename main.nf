@@ -56,7 +56,7 @@ if (params.help){
 }
 
 // see https://ccb.jhu.edu/software/kraken2/index.shtml#downloads
-params.skip_kraken2 ?: log.info """Continuing without Kraken2""" : params.kraken2db ?: {exit 1, "Missing Kraken2 DB arg"} : kraken2db = file(params.kraken2db)
+params.skip_kraken2 ? {log.info 'Continuing without Kraken2'} : {params.kraken2db ? {exit 1, "Missing Kraken2 DB arg"} : {kraken2db = file(params.kraken2db)}
 
 // Has the run name been specified by the user?
 //  this has the bonus effect of catching both -name and --name
@@ -543,4 +543,5 @@ def checkHostname(){
             }
         }
     }
+}
 }
