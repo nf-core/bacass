@@ -103,11 +103,11 @@ def GetReadUnitKeys = { sk ->
 if (params.reads) {
     Channel.fromFilePairs( params.reads )// flat: true
 	.set { fastq_ch }
-
 } else if (params.readPaths) {
    Channel.from( params.readPaths )
 	.map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-        .set { fastq_ch }
+    .dump()
+    .set { fastq_ch }
 
 } else {
     sample_keys = params.samples? params.samples.keySet() : []
