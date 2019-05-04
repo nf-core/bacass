@@ -11,7 +11,7 @@ and processes data using the following steps:
 * [Taxonomic classification](#taxonomic-classification) of trimmed reads
 * [Assembly](#assembly)  of trimmed reads
 * [Assembly visualization](#assembly-visualization)
-* [Assembly QC](#assembly-qc) 
+* [Assembly QC](#assembly-qc)
 * [Annotation](#annotation) of the assembly
 * [Report](#report) describing results of (most of) the pipeline
 
@@ -44,6 +44,7 @@ multiple species. If you like to visualize the report, try
 [Pavian](https://github.com/fbreitwieser/pavian) or [Krakey](http://krakey.info/).
 
 **Output directory: `{sample}/`**
+
 * `*_kraken2.report`
   * Classification in the Kraken(1) report format. See
     [webpage](http://ccb.jhu.edu/software/kraken/MANUAL.html#sample-reports) for more details
@@ -55,10 +56,10 @@ multiple species. If you like to visualize the report, try
 ## Assembly
 
 Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler).
-Unicycler is a pipeline on its own, which at least for Illumina reads mainly acts as a frontend to 
-Spades with added polishing steps.
+Unicycler is a pipeline on its own, which at least for Illumina reads mainly acts as a frontend to Spades with added polishing steps.
 
 **Output directory: `{sample}/`**
+
 * `{sample}_assembly.fasta`
   * Final assembly
 * `{sample}_assembly.gfa`
@@ -69,8 +70,7 @@ Spades with added polishing steps.
 ## Assembly Visualization
 
 The GFA file produced in the assembly step can be used to visualise the assembly graph, which is
-done here with [Bandage](https://rrwick.github.io/Bandage/). We highly recommend to run the Bandage GUI 
-for more versatile visualisation options (annotations etc).
+done here with [Bandage](https://rrwick.github.io/Bandage/). We highly recommend to run the Bandage GUI for more versatile visualisation options (annotations etc).
 
 **Output directory: `{sample}/`**
 
