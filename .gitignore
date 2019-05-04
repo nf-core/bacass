@@ -4,8 +4,12 @@ data/
 results/
 .DS_Store
 tests/test_data
+<<<<<<< HEAD
 *.un~
 *.swp
 nohup.out
 tmp/
 ._.DS_Store
+=======
+*.pyc
+>>>>>>> TEMPLATE

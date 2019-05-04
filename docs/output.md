@@ -1,21 +1,19 @@
 # nf-core/bacass: Output
 
-This document describes the output produced by the pipeline. 
-
+This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
 
 ## Pipeline overview
+
 The pipeline is built using [Nextflow](https://www.nextflow.io/)
 and processes data using the following steps:
-
 
 * [Quality trimming and QC](#quality-trimming-and-qc) of input reads
 * [Taxonomic classification](#taxonomic-classification) of trimmed reads
 * [Assembly](#assembly)  of trimmed reads
-* [Assembly visualization](#assembly-visualization) 
+* [Assembly visualization](#assembly-visualization)
 * [Assembly QC](#assembly-qc) 
-* [Annotation](#annotation) of the assembly 
-* [Report](#report) describing results of (most of) the pipeline 
-
+* [Annotation](#annotation) of the assembly
+* [Report](#report) describing results of (most of) the pipeline
 
 ## Quality trimming and QC
 
@@ -32,7 +30,7 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `*_fastqc.html`
   * FastQC report, containing quality metrics for your trimmed reads
 * `*_fastqc.zip`
-  *  zip file containing the FastQC report, tab-delimited data file and plot images
+  * zip file containing the FastQC report, tab-delimited data file and plot images
 
 ### FastQC screenshot
 
@@ -50,11 +48,9 @@ multiple species. If you like to visualize the report, try
   * Classification in the Kraken(1) report format. See
     [webpage](http://ccb.jhu.edu/software/kraken/MANUAL.html#sample-reports) for more details
 
-
 ### Kraken2 report screenshot
 
 ![Kraken2 report](images/kraken2.png)
-
 
 ## Assembly
 
@@ -71,12 +67,13 @@ Spades with added polishing steps.
   * Log file summarizing steps and intermediate results on the Unicycler execution
 
 ## Assembly Visualization
+
 The GFA file produced in the assembly step can be used to visualise the assembly graph, which is
 done here with [Bandage](https://rrwick.github.io/Bandage/). We highly recommend to run the Bandage GUI 
 for more versatile visualisation options (annotations etc).
 
-
 **Output directory: `{sample}/`**
+
 * `{sample}_assembly.png`
   * Bandage visualization of assembly
 
@@ -91,22 +88,24 @@ It reports multiple metrics including number of contigs, N50, lengths etc in for
 It further creates an HTML file with integrated contig viewer (Icarus).
 
 **Output directory: `{sample}/{sample}_assembly_QC`**
+
 * `icarus.html`
   * QUAST's contig browser as HTML
 * `report.html`
   * QUAST assembly QC as HTML report
 
 ### Quast Screenshot
+
 ![QUAST QC](images/quast.png)
 
 ### Icarus Screenshot
+
 ![Icarus](images/icarus.png)
 
 ## Annotation
 
 The assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend
 for several annotation tools and includes rRNA and ORF predictions. See [its documentation](https://github.com/tseemann/prokka#output-files) for a full description of all output files.
-
 
 **Output directory: `{sample}/{sample}_annotation`**
 
@@ -125,8 +124,4 @@ The pipeline has special steps which allow the software versions used to be repo
 * `Project_multiqc_data/`
   * Directory containing parsed statistics from the different tools used in the pipeline
 
-For more information about how to use MultiQC reports, see http://multiqc.info
-
-Please note that not all program output is captured by MultiQC.
-
-**Output directory: `MultiQC/`**
+For more information about how to use MultiQC reports, see [http://multiqc.info](http://multiqc.info)

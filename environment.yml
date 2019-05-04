@@ -1,14 +1,13 @@
 # You can use this file to create a conda environment for this pipeline:
 #   conda env create -f environment.yml
-name: nf-core-bacass-latest
+name: nf-core-bacass-1.0dev
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
   - fastqc=0.11.8
-  #- awscli=1.15.45 not needed if we use the right base image!?
-  - multiqc=1.6
+  - multiqc=1.7
   - unicycler=0.4.6
   - skewer=0.2.2
   - kraken2=2.0.7_beta
