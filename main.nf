@@ -13,7 +13,6 @@
 def helpMessage() {
     log.info nfcoreHeader()
     log.info"""
-
     Usage:
 
     The typical command for running the pipeline is as follows:
@@ -115,9 +114,6 @@ if (params.reads) {
         .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
         .set { fastq_ch }
 }
-//println "List of samples: " +  sample_keys.join(", ")
-//fastq_ch.subscribe { println "$it" }
-
 
 // Header log info
 log.info nfcoreHeader()
