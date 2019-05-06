@@ -1,4 +1,4 @@
-# ![nf-core/bacass](docs/images/bacass_logo.png)
+# ![nf-core/bacass](docs/images/nfcore-bacass_logo.png)
 
 A simple bacterial assembly and annotation pipeline
 
