@@ -11,17 +11,8 @@
 
 
 def helpMessage() {
+    log.info nfcoreHeader()
     log.info"""
-    =======================================================
-                                              ,--./,-.
-              ___     __   __   __   ___     /,-._.--~\'
-        |\\ | |__  __ /  ` /  \\ |__) |__         }  {
-        | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
-                                              `._,._,\'
-
-     nf-core/bacass v${workflow.manifest.version}
-    =======================================================
-
     Usage:
 
     The typical command for running the pipeline is as follows:
@@ -64,12 +55,14 @@ if (params.help){
 }
 
 // see https://ccb.jhu.edu/software/kraken2/index.shtml#downloads
-if(!params.skip_kraken2) {
-    if (!params.kraken2db)
-        exit 1, "Missing Kraken2 DB arg"
-    kraken2db = file(params.kraken2db)
-    if (!kraken2db.exists())
-        exit 1, "Missing Kraken2 DB: ${kraken2db}"
+
+
+if(!params.skip_kraken2){
+    if(params.kraken2db){
+      kraken2db = file(params.kraken2db)
+    } else {
+      exit 1, "Missing Kraken2 DB arg"
+    }
 }
 
 // Has the run name been specified by the user?
@@ -83,10 +76,11 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
 if( workflow.profile == 'awsbatch') {
   // AWSBatch sanity checking
   if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
-  if (!workflow.workDir.startsWith('s3') || !params.outdir.startsWith('s3')) exit 1, "Specify S3 URLs for workDir and outdir parameters on AWSBatch!"
-  // Check workDir/outdir paths to be S3 buckets if running on AWSBatch
+  // Check outdir paths to be S3 buckets if running on AWSBatch
   // related: https://github.com/nextflow-io/nextflow/issues/813
-  if (!workflow.workDir.startsWith('s3:') || !params.outdir.startsWith('s3:')) exit 1, "Workdir or Outdir not on S3 - specify S3 Buckets for each to run on AWSBatch!"
+  if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+  // Prevent trace files to be stored on S3 since S3 does not support rolling files.
+  if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
 
 // Stage config files
@@ -112,11 +106,11 @@ def GetReadUnitKeys = { sk ->
 if (params.reads) {
     Channel.fromFilePairs( params.reads )// flat: true
 	.set { fastq_ch }
-
 } else if (params.readPaths) {
    Channel.from( params.readPaths )
 	.map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-        .set { fastq_ch }
+    .dump()
+    .set { fastq_ch }
 
 } else {
     sample_keys = params.samples? params.samples.keySet() : []
@@ -124,51 +118,45 @@ if (params.reads) {
         .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
         .set { fastq_ch }
 }
-//println "List of samples: " +  sample_keys.join(", ")
-//fastq_ch.subscribe { println "$it" }
-
 
 // Header log info
-log.info """=======================================================
-                                          ,--./,-.
-          ___     __   __   __   ___     /,-._.--~\'
-    |\\ | |__  __ /  ` /  \\ |__) |__         }  {
-    | \\| |       \\__, \\__/ |  \\ |___     \\`-._,-`-,
-                                          `._,._,\'
-
-nf-core/bacass v${workflow.manifest.version}"
-======================================================="""
+log.info nfcoreHeader()
 def summary = [:]
+if(workflow.revision) summary['Pipeline Release'] = workflow.revision
 summary['Pipeline Name']  = 'nf-core/bacass'
-summary['Pipeline Version'] = workflow.manifest.version
-summary['Run Name'] = custom_runName ?: workflow.runName
+summary['Run Name']         = custom_runName ?: workflow.runName
+
 //summary['Sample keys'] = sample_keys
 summary['Skip Kraken2'] = params.skip_kraken2
 summary['Kraken2 DB'] = params.kraken2db
 summary['Extra Unicycler arguments'] = params.unicycler_args
 summary['Extra Prokka arguments'] = params.prokka_args
-summary['Max Memory'] = params.max_memory
-summary['Max CPUs'] = params.max_cpus
-summary['Max Time'] = params.max_time
+summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
+if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
+summary['Launch dir']       = workflow.launchDir
 summary['Output dir'] = params.outdir
 summary['Working dir'] = workflow.workDir
-summary['Container Engine'] = workflow.containerEngine
-if(workflow.containerEngine) summary['Container'] = workflow.container
-summary['Current home'] = "$HOME"
-summary['Current user'] = "$USER"
-summary['Current path'] = "$PWD"
-summary['Working dir'] = workflow.workDir
-summary['Output dir'] = params.outdir
 summary['Script dir'] = workflow.projectDir
-summary['Config Profile'] = workflow.profile
+summary['User'] = workflow.userName
 if(workflow.profile == 'awsbatch'){
    summary['AWS Region'] = params.awsregion
    summary['AWS Queue'] = params.awsqueue
 }
-if(params.email) summary['E-mail Address'] = params.email
-log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
-log.info "========================================="
+summary['Config Profile'] = workflow.profile
 
+if(params.config_profile_description) summary['Config Description'] = params.config_profile_description
+if(params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
+if(params.config_profile_url)         summary['Config URL']         = params.config_profile_url
+if(params.email) {
+  summary['E-mail Address']  = params.email
+  summary['MultiQC maxsize'] = params.maxMultiqcEmailFileSize
+}
+log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
+log.info "----------------------------------------------------"
+
+
+// Check the hostnames against configured profiles
+checkHostname()
 
 def create_workflow_summary(summary) {
     def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
@@ -191,9 +179,15 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
  * Parse software version numbers
  */
 process get_software_versions {
+    publishDir "${params.outdir}/pipeline_info", mode: 'copy',
+    saveAs: {filename ->
+        if (filename.indexOf(".csv") > 0) filename
+        else null
+    }
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
+    file "software_versions.csv"
 
     script:
     """
@@ -211,10 +205,11 @@ process get_software_versions {
 }
 
 
-
 /* Trim and combine read-pairs per sample. Similar to nf-core vipr
  */
 process trim_and_combine {
+    label 'medium'
+
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/${sample_id}_reads/", mode: 'copy'
 
@@ -238,10 +233,11 @@ process trim_and_combine {
     """
 }
 
-
-/* fastqc
+/*
+ * STEP 1 - FastQC
  */
 process fastqc {
+    label 'small'
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/${sample_id}_reads", mode: 'copy'
 
@@ -261,6 +257,7 @@ process fastqc {
 /* unicycler
  */
 process unicycler {
+    label 'large'
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
@@ -285,30 +282,11 @@ process unicycler {
     """
 }
 
-
-/* waste to have a separate process because it's superfast
-process bandage {
-   tag "$sample_id"
-   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
-
-   input:
-   set sample_id, gfa from bandage_ch
-
-   output:
-   file("${sample_id}_assembly_bandage.png")
-
-   script:
-   """
-   Bandage image ${gfa} ${sample_id}_assembly_bandage.png
-   """
-}
-*/
-
-
 /* kraken classification: QC for sample purity
  */
 if(!params.skip_kraken2) {
     process kraken2 {
+        label 'large'
         tag "$sample_id"
         publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
@@ -332,6 +310,7 @@ if(!params.skip_kraken2) {
 /* assembly qc with quast
  */
 process quast {
+  label 'small'
   tag { "quast for each $sample_id" }
   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
   
@@ -353,6 +332,7 @@ process quast {
 /* annotation with prokka
  */
 process prokka {
+   label 'large'
    tag "$sample_id"
    publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
@@ -373,9 +353,12 @@ process prokka {
 }
 
 
-/* Multiqc
+/*
+ * STEP - MultiQC
  */
+
 process multiqc {
+    label 'small'
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
     input:
@@ -384,12 +367,13 @@ process multiqc {
     file quast_logs from quast_logs_ch.collect().ifEmpty([])
     // NOTE unicycler and kraken not supported
     file ('fastqc/*') from fastqc_results.collect().ifEmpty([])
-    file ('software_versions/*') from software_versions_yaml
+    file ('software_versions/*') from software_versions_yaml.collect()
     file workflow_summary from create_workflow_summary(summary)
 
     output:
     file "*multiqc_report.html" into multiqc_report
     file "*_data"
+    file "multiqc_plots"
 
     script:
     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
@@ -400,10 +384,11 @@ process multiqc {
 }
 
 
-/* Output Description HTML
+/*
+ * STEP 3 - Output Description HTML
  */
 process output_documentation {
-    publishDir "${params.outdir}/Documentation", mode: 'copy'
+    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
     input:
     file output_docs from ch_output_docs
@@ -418,14 +403,10 @@ process output_documentation {
 }
 
 
-// to enable poor man's syntax checking
-def testSyntaxOnly(){}
-
-
 /*
  * Completion e-mail notification
  */
- workflow.onComplete {
+workflow.onComplete {
 
     // Set up the e-mail variables
     def subject = "[nf-core/bacass] Successful: $workflow.runName"
@@ -451,9 +432,24 @@ def testSyntaxOnly(){}
     if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
     if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
     if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
+    if(workflow.container) email_fields['summary']['Docker image'] = workflow.container
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
+
+    // On success try attach the multiqc report
+    def mqc_report = null
+    try {
+        if (workflow.success) {
+            mqc_report = multiqc_report.getVal()
+            if (mqc_report.getClass() == ArrayList){
+                log.warn "[nf-core/bacass] Found multiple reports from process 'multiqc', will use only one"
+                mqc_report = mqc_report[0]
+            }
+        }
+    } catch (all) {
+        log.warn "[nf-core/bacass] Could not attach MultiQC report to summary email"
+    }
 
     // Render the TXT template
     def engine = new groovy.text.GStringTemplateEngine()
@@ -467,7 +463,7 @@ def testSyntaxOnly(){}
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir" ]
+    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.maxMultiqcEmailFileSize.toBytes() ]
     def sf = new File("$baseDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
@@ -487,7 +483,7 @@ def testSyntaxOnly(){}
     }
 
     // Write summary e-mail HTML to a file
-    def output_d = new File( "${params.outdir}/Documentation/" )
+    def output_d = new File( "${params.outdir}/pipeline_info/" )
     if( !output_d.exists() ) {
       output_d.mkdirs()
     }
@@ -496,7 +492,68 @@ def testSyntaxOnly(){}
     def output_tf = new File( output_d, "pipeline_report.txt" )
     output_tf.withWriter { w -> w << email_txt }
 
-    log.info "[nf-core/bacass] Pipeline Complete"
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_red = params.monochrome_logs ? '' : "\033[0;31m";
 
+    if (workflow.stats.ignoredCountFmt > 0 && workflow.success) {
+      log.info "${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}"
+      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCountFmt} ${c_reset}"
+      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCountFmt} ${c_reset}"
+    }
+
+    if(workflow.success){
+        log.info "${c_purple}[nf-core/bacass]${c_green} Pipeline completed successfully${c_reset}"
+    } else {
+        checkHostname()
+        log.info "${c_purple}[nf-core/bacass]${c_red} Pipeline completed with errors${c_reset}"
+    }
+
+}
+
+
+def nfcoreHeader(){
+    // Log colors ANSI codes
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+    c_dim = params.monochrome_logs ? '' : "\033[2m";
+    c_black = params.monochrome_logs ? '' : "\033[0;30m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
+    c_blue = params.monochrome_logs ? '' : "\033[0;34m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
+    c_white = params.monochrome_logs ? '' : "\033[0;37m";
+
+    return """----------------------------------------------------
+                                            ${c_green},--.${c_black}/${c_green},-.${c_reset}
+    ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
+    ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
+    ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
+                                            ${c_green}`._,._,\'${c_reset}
+    ${c_purple}  nf-core/bacass v${workflow.manifest.version}${c_reset}
+    ${c_white}----------------------------------------------------${c_reset}
+    """.stripIndent()
+}
+
+def checkHostname(){
+    def c_reset = params.monochrome_logs ? '' : "\033[0m"
+    def c_white = params.monochrome_logs ? '' : "\033[0;37m"
+    def c_red = params.monochrome_logs ? '' : "\033[1;91m"
+    def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
+    if(params.hostnames){
+        def hostname = "hostname".execute().text.trim()
+        params.hostnames.each { prof, hnames ->
+            hnames.each { hname ->
+                if(hostname.contains(hname) && !workflow.profile.contains(prof)){
+                    log.error "====================================================\n" +
+                            "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
+                            "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +
+                            "  ${c_yellow_bold}It's highly recommended that you use `-profile $prof${c_reset}`\n" +
+                            "============================================================"
+                }
+            }
+        }
+    }
 }
 

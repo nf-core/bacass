@@ -1,36 +1,35 @@
-# nf-core/bacass
-**Simple bacterial assembly and annotation pipeline**
+# ![nf-core/bacass](docs/images/nfcore-bacass_logo.png)
 
-[![Build Status](https://travis-ci.org/nf-core/bacass.svg?branch=master)](https://travis-ci.org/nf-core/bacass)
+A simple bacterial assembly and annotation pipeline
+
+[![Build Status](https://travis-ci.com/nf-core/bacass.svg?branch=master)](https://travis-ci.com/nf-core/bacass)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A518.10.1-brightgreen.svg)](https://www.nextflow.io/)
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/bacass.svg)](https://hub.docker.com/r/nfcore/bacass)
-![Singularity Container available](
-https://img.shields.io/badge/singularity-available-7E4C74.svg)
 
-### Introduction
+## Introduction
 
+This pipeline is for bacterial assembly of next-generation sequencing reads. It can be used to quality trim your reads using [Skewer](https://github.com/relipmoc/skewer) and performs basic QC using [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/). Afterwards, the pipeline performs read assembly using [Unicycler](https://github.com/rrwick/Unicycler) and assesses assembly quality using [QUAST](http://bioinf.spbau.ru/quast). Contamination of the assembly is checked using [Kraken2](https://ccb.jhu.edu/software/kraken2/) to verify sample purity. The resulting bacterial assembly is annotated using [Prokka](https://github.com/tseemann/prokka).
 
-This pipeline is for bacterial assembly of next-gen sequencing reads. It quality-trims your reads, runs QC, including a
-metagenomics classifier on your reads to check for purity, assembles the reads with
-Unicycler, annotates the assembly with Prokka and runs Quast on the assembly for quality check.
+Furthermore, the pipeline creates various reports in the `results` directory specified, including a [MultiQC](https://multiqc.info) report summarizing some of the findings and software versions.
 
-The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker / singularity containers making installation trivial and results highly reproducible.
+The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
+## Documentation
 
-### Documentation
 The nf-core/bacass pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
-1. [Installation](docs/installation.md)
+1. [Installation](https://nf-co.re/usage/installation)
 2. Pipeline configuration
-    * [Local installation](docs/configuration/local.md)
-    * [Adding your own system](docs/configuration/adding_your_own.md)
-    * [Reference genomes](docs/configuration/reference_genomes.md)  
+    * [Local installation](https://nf-co.re/usage/local_installation)
+    * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
+    * [Reference genomes](https://nf-co.re/usage/reference_genomes)
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
-5. [Troubleshooting](docs/troubleshooting.md)
+5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
 
 
-### Credits
-nf-core/bacass was originally written by Andreas Wilm.
+## Credits
+
+nf-core/bacass was originally written by [Andreas Wilm](https://github.com/andreas-wilm) and is currently maintained by [Alexander Peltzer](https://github.com/apeltzer).
