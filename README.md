@@ -1,4 +1,6 @@
-# nf-core/bacass: Simple bacterial assembly and annotation pipeline
+# ![nf-core/bacass](docs/images/bacass_logo.svg)
+
+A simple bacterial assembly and annotation pipeline
 
 [![Build Status](https://travis-ci.com/nf-core/bacass.svg?branch=master)](https://travis-ci.com/nf-core/bacass)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A518.10.1-brightgreen.svg)](https://www.nextflow.io/)
