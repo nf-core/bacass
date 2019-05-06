@@ -9,3 +9,4 @@ tests/test_data
 nohup.out
 tmp/
 ._.DS_Store
+*.pyc
