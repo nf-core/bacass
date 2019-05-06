@@ -31,4 +31,4 @@ Unicycler, annotates the assembly with Prokka and runs Quast on the assembly for
 
 ## Credits
 
-nf-core/bacass was originally written by Andreas Wilm.
+nf-core/bacass was originally written by [Andreas Wilm](https://github.com/andreas-wilm) and is currently maintained by [Alexander Peltzer](https://github.com/apeltzer).
