@@ -204,6 +204,8 @@ process get_software_versions {
 /* Trim and combine read-pairs per sample. Similar to nf-core vipr
  */
 process trim_and_combine {
+    label 'medium'
+
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/${sample_id}_reads/", mode: 'copy'
 
@@ -231,6 +233,7 @@ process trim_and_combine {
  * STEP 1 - FastQC
  */
 process fastqc {
+    label 'small'
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/${sample_id}_reads", mode: 'copy'
 
@@ -250,6 +253,7 @@ process fastqc {
 /* unicycler
  */
 process unicycler {
+    label 'large'
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
@@ -278,6 +282,7 @@ process unicycler {
  */
 if(!params.skip_kraken2) {
     process kraken2 {
+        label 'large'
         tag "$sample_id"
         publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
@@ -301,6 +306,7 @@ if(!params.skip_kraken2) {
 /* assembly qc with quast
  */
 process quast {
+  label 'small'
   tag { "quast for each $sample_id" }
   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
   
@@ -322,6 +328,7 @@ process quast {
 /* annotation with prokka
  */
 process prokka {
+   label 'large'
    tag "$sample_id"
    publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
@@ -347,6 +354,7 @@ process prokka {
  */
 
 process multiqc {
+    label 'small'
     publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
     input:
