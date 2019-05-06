@@ -58,7 +58,10 @@ if (params.help){
 
 
 if(!params.skip_kraken2){
-    params.kraken2db ? {exit 1, "Missing Kraken2 DB arg"} : {kraken2db = file(params.kraken2db)}
+    if(!params.kraken2db){
+      kraken2db = file(params.kraken2db)
+    }
+    exit 1, "Missing Kraken2 DB arg"
 }
 
 // Has the run name been specified by the user?
