@@ -8,12 +8,23 @@ regexes = {
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'FastQC': ['v_fastqc.txt', r"FastQC v(\S+)"],
     'MultiQC': ['v_multiqc.txt', r"multiqc, version (\S+)"],
+    'Skewer': ['v_skewer.txt', r"version: (\S+)"],
+    'Kraken2': ['v_kraken2.txt', r"([\d\.]+)-beta"],
+    'Quast': ['v_quast.txt', r"QUAST v(\S+)"],
+    'Prokka': ['v_prokka.txt', r"prokka (\S+)"],
+    'Bandage': ['v_bandage.txt', r"Version: (\S+)"],    
 }
+
 results = OrderedDict()
 results['nf-core/bacass'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['FastQC'] = '<span style="color:#999999;\">N/A</span>'
 results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
+results['Skewer'] = '<span style="color:#999999;\">N/A</span>'
+results['Kraken2'] = '<span style="color:#999999;\">N/A</span>'
+results['Quast'] = '<span style="color:#999999;\">N/A</span>'
+results['Prokka'] = '<span style="color:#999999;\">N/A</span>'
+results['Bandage'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():
