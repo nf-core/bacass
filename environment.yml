@@ -24,3 +24,4 @@ dependencies:
   - porechop=0.2.3_seqan2.1.1
   - minimap2=2.17
   - samtools=1.9
+  - nanoplot=1.23.1
