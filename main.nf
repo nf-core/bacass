@@ -20,7 +20,8 @@ def helpMessage() {
     nextflow run nf-core/bacass -params-file params.yaml -profile docker
     or
     nextflow run nf-core/bacass --reads '*_R{1,2}.fastq.gz' --kraken2db 'path-to-kraken2db' -profile docker
-
+    or
+    nextflow run nf-core/bacass --reads '*_R{1,2}.fastq.gz' --longreads '*.fastq.gz' --assembler 'Unicycler'
     Mandatory arguments:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
                                     Available: conda, docker, singularity, awsbatch, test and more.
@@ -30,8 +31,13 @@ def helpMessage() {
 				    if not defined through `--reads` (see below). See docs for more info
       --reads                       Path to paired-end input reads (must be surrounded with quotes; see also docs)
                                     Can be replaced with samples dictionary in params-file (see above)
+      --longreads                   Path to Nanopore FastQ reads (must be surrounded with quotes; see also docs)
+      --fast5                       Path to Nanopore Fast5 input files for polishing the assembly (ONT only)
       --skip_kraken2                Don't run Kraken2 for classification
       --kraken2db                   Path to Kraken2 Database directory
+      --assembler                   Default: "Unicycler", Available: "Canu", "Miniasm", "Unicycler". Short reads can only use "Unicycler".
+      --assembly_type               Default: "Short", Available: "Short", "Long", "Hybrid".
+      --genome_size                 Genome size parameter for Canu Assembler. All others don't need this parameter.
       --unicycler_args              Advanced: Extra arguments to Unicycler (quote and add leading space)
       --prokka_args                 Advanced: Extra arguments to Prokka (quote and add leading space)
       --outdir                      The output directory where the results will be saved
@@ -103,6 +109,8 @@ def GetReadUnitKeys = { sk ->
     params.samples[sk].readunits.keySet()
 }
 
+
+//Short Read handling
 if (params.reads) {
     Channel.fromFilePairs( params.reads )// flat: true
 	.set { fastq_ch }
@@ -111,12 +119,26 @@ if (params.reads) {
 	.map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
     .dump()
     .set { fastq_ch }
-
 } else {
     sample_keys = params.samples? params.samples.keySet() : []
     Channel.from( sample_keys )
         .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
         .set { fastq_ch }
+}
+//Long Read Handling
+if (params.longreads) {
+    Channel.fromFilePairs( params.reads )// flat: true
+	.set { lr_fastq_ch }
+} else if (params.readPaths) {
+   Channel.from( params.readPaths )
+	.map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
+    .dump()
+    .set { lr_fastq_ch }
+} else {
+    sample_keys = params.samples? params.samples.keySet() : []
+    Channel.from( sample_keys )
+        .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
+        .set { lr_fastq_ch }
 }
 
 // Header log info
@@ -126,11 +148,14 @@ if(workflow.revision) summary['Pipeline Release'] = workflow.revision
 summary['Pipeline Name']  = 'nf-core/bacass'
 summary['Run Name']         = custom_runName ?: workflow.runName
 
-//summary['Sample keys'] = sample_keys
 summary['Skip Kraken2'] = params.skip_kraken2
 summary['Kraken2 DB'] = params.kraken2db
 summary['Extra Unicycler arguments'] = params.unicycler_args
 summary['Extra Prokka arguments'] = params.prokka_args
+summary['Assembler Method'] = params.assembler
+summary['Assembly Type'] = params.assembly_type
+params.fast5 ?: summary['Fast5 Path'] = params.fast5 : ''
+params.genome_size ?: summary['Genome Size'] = params.genome_size : ''
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
 summary['Launch dir']       = workflow.launchDir
@@ -211,7 +236,7 @@ process get_software_versions {
 }
 
 
-/* Trim and combine read-pairs per sample. Similar to nf-core vipr
+/* Trim and combine short read read-pairs per sample. Similar to nf-core vipr
  */
 process trim_and_combine {
     label 'medium'
@@ -239,9 +264,26 @@ process trim_and_combine {
     """
 }
 
+
+//AdapterTrimming for ONT reads
+process adapter_trimming {
+    label 'medium'
+    input:
+	set sample_id, file(reads) from lr_fastq_ch
+
+    output:
+	set sample_id, file('trimmed.fastq') into (long_trimmed_for_assembly, long_trimmed_for_consensus)
+
+	script:
+    """
+    porechop -i "${reads}" -t "${task.cpus}" -o trimmed.fastq
+    """
+}
+
+
 /*
- * STEP 1 - FastQC
- */
+ * STEP 1 - FastQC FOR SHORT READS
+*/
 process fastqc {
     label 'small'
     tag "$sample_id"
@@ -260,15 +302,16 @@ process fastqc {
 }
 
 
-/* unicycler
+/* unicycler (short, long or hybrid mode!)
  */
 process unicycler {
     label 'large'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+    publishDir "${params.outdir}/unicycler/${sample_id}/", mode: 'copy'
 
     input:
     set sample_id, file(fq1), file(fq2) from unicycler_ch
+    set sample_id, file(lrfastq) from long_trimmed_for_assembly
 
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into quast_ch, prokka_ch
@@ -278,8 +321,15 @@ process unicycler {
     file("${sample_id}_unicycler.log")
     
     script:
+    if(params.assembly_type == 'Long'){
+        data_param = "-l $lrfastq"
+    } else if (params.assembly_type == 'Short'){
+        data_param = "-1 $fq1 -2 $fq2"
+    } else if (params.assembly_type == 'Hybrid'){
+        data_param = "-1 $fq1 -2 $fq2 -l $lrfastq"
+    }
     """
-    unicycler -1 $fq1 -2 $fq2 --threads ${task.cpus} ${params.unicycler_args} --keep 0 -o .
+    unicycler $data_param --threads ${task.cpus} ${params.unicycler_args} --keep 0 -o .
     mv unicycler.log ${sample_id}_unicycler.log
     # rename so that quast can use the name 
     mv assembly.gfa ${sample_id}_assembly.gfa
@@ -288,28 +338,90 @@ process unicycler {
     """
 }
 
+process miniasm_assembly {
+    publishDir "${params.outDir}/miniasm/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
+    tag "$sample_id"
+    label 'large'
+
+    input:
+    set sample_id, file(reads) from trimmed_for_assembly
+
+    output:
+    file 'assembly.fasta' into assembly
+
+    script:
+    """
+    minimap2 -x ava-ont -t "${task.cpus}" "${reads}" "${reads}" > "${reads}.paf"
+    miniasm -f "${reads}" "${reads}.paf" > "${reads}.gfa"
+    awk '/^S/{print ">"\$2"\\n"\$3}' "${reads}.gfa" | fold > assembly.fasta
+    """
+}
+
+process canu_assembly {
+    publishDir "${params.outDir}/canu/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
+    tag "$sample_id"
+    label 'large'
+
+    input:
+    set sample_id, file(reads) from trimmed_for_assembly
+    val genome_size from params.genome_size
+    
+    output:
+    file 'assembly.fasta' into assembly
+
+    script:
+    """
+    canu -p assembly -d canu_out \
+        genomeSize="${genome_size}" -nanopore-raw "${reads}" \
+        maxThreads="${task.cpus}" useGrid=false gnuplotTested=true
+    mv canu_out/assembly.contigs.fasta assembly.fasta
+    """
+}
+
+//Run consensus for miniasm, the others don't need it.
+process consensus {
+	publishDir "${params.outDir}/miniasm/consensus/${sample_id}", mode: 'copy', pattern: 'assembly_consensus.fasta'
+    label 'large'
+
+    when: params.assembler == 'miniasm'
+
+    input:
+    file(reads) from trimmed_for_consensus
+    file(assembly) from assembly
+
+    output:
+    file 'assembly_consensus.fasta' into assembly_consensus
+
+	script:
+    """
+    minimap2 -x map-ont -t "${task.cpus}" "${assembly}" "${reads}" > assembly.paf
+    racon -t "${task.cpus}" "${reads}" assembly.paf "${assembly}" > assembly_consensus.fasta
+    """
+}
+
+
 /* kraken classification: QC for sample purity
  */
-if(!params.skip_kraken2) {
     process kraken2 {
-        label 'large'
-        tag "$sample_id"
-        publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+    label 'large'
+    tag "$sample_id"
+    publishDir "${params.outdir}/kraken/${sample_id}/", mode: 'copy'
 
-        input:
-        set sample_id, file(fq1), file(fq2) from kraken2_ch
+    when: !params.skip_kraken2
 
-        output:
-        file("${sample_id}_kraken2.report")
+    input:
+    set sample_id, file(fq1), file(fq2) from kraken2_ch
 
-        script:
+    output:
+    file("${sample_id}_kraken2.report")
+
+    script:
 	"""
-        # stdout reports per read which is not needed. kraken.report can be used with pavian
-        # braken would be nice but requires readlength and correspondingly build db
+    # stdout reports per read which is not needed. kraken.report can be used with pavian
+    # braken would be nice but requires readlength and correspondingly build db
 	kraken2 --threads ${task.cpus} --paired --db ${kraken2db} \
 		--report ${sample_id}_kraken2.report ${fq1} ${fq2} | gzip > kraken2.out.gz
 	"""
-    }
 }
 
 
@@ -356,6 +468,34 @@ process prokka {
    """
    prokka --cpus ${task.cpus} --prefix "${sample_id}" --outdir ${sample_id}_annotation ${params.prokka_args} ${fasta}
    """
+}
+
+//Polishes assembly using FAST5 files
+process polishing {
+    publishDir "${params.outDir}/", mode: 'copy', pattern: 'polished_genome.fa'
+
+    when: params.fast5
+
+    input:
+    file(assembly) from assembly_consensus
+    file(reads) from file(params.longreads)
+    val(fast5_dir) from params.fast5
+
+    output:
+    file 'polished_genome.fa' into assembly_polished
+
+    script:
+    """
+    nanopolish index -d "${fast5_dir}" "${reads}"
+    minimap2 -ax map-ont -t ${task.cpus} "${assembly}" "${reads}"| \
+    samtools sort -o reads.sorted.bam -T reads.tmp -
+    samtools index reads.sorted.bam
+    nanopolish_makerange.py "${assembly}" | parallel --results \
+        nanopolish.results -P "${task.cpus}" nanopolish variants --consensus \
+        polished.{1}.fa -w {1} -r "${reads}" -b reads.sorted.bam -g \
+        "${assembly}" -t 1 --min-candidate-frequency 0.1
+    nanopolish_merge.py polished.*.fa > polished_genome.fa
+    """
 }
 
 
