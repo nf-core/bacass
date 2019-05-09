@@ -231,6 +231,7 @@ process get_software_versions {
     porechop --version > v_porechop.txt
     samtools --version &> v_samtools.txt 2>&1 || true
     minimap2 --version &> v_minimap2.txt
+    NanoPlot --version > v_nanoplot.txt
     scrape_software_versions.py > software_versions_mqc.yaml
     """
 }
