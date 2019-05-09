@@ -12,7 +12,12 @@ regexes = {
     'Kraken2': ['v_kraken2.txt', r"([\d\.]+)-beta"],
     'Quast': ['v_quast.txt', r"QUAST v(\S+)"],
     'Prokka': ['v_prokka.txt', r"prokka (\S+)"],
-    'Bandage': ['v_bandage.txt', r"Version: (\S+)"],    
+    'Bandage': ['v_bandage.txt', r"Version: (\S+)"],
+    'Porechop': ['v_porechop.txt', r"(\S+)"],
+    'Nanopolish': ['v_porechop.txt', r"nanopolish version (\S+)"],
+    'Miniasm': ['v_miniasm.txt', r"(\S+)"],
+    'Racon': ['v_racon.txt', r"v(\S+)"],
+    'Canu': ['v_canu.txt', r"snapshot (\S+)"],
 }
 
 results = OrderedDict()
@@ -25,6 +30,13 @@ results['Kraken2'] = '<span style="color:#999999;\">N/A</span>'
 results['Quast'] = '<span style="color:#999999;\">N/A</span>'
 results['Prokka'] = '<span style="color:#999999;\">N/A</span>'
 results['Bandage'] = '<span style="color:#999999;\">N/A</span>'
+results['Porechop'] = '<span style="color:#999999;\">N/A</span>'
+results['Nanopolish'] = '<span style="color:#999999;\">N/A</span>'
+results['Miniasm'] = '<span style="color:#999999;\">N/A</span>'
+results['Racon'] = '<span style="color:#999999;\">N/A</span>'
+results['Canu'] = '<span style="color:#999999;\">N/A</span>'
+
+
 
 # Search each file using its regex
 for k, v in regexes.items():

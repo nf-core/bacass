@@ -200,6 +200,10 @@ process get_software_versions {
     skewer -v > v_skewer.txt
     kraken2 -v > v_kraken2.txt
     Bandage -v > v_bandage.txt
+    nanopolish --version > v_nanopolish.txt
+    miniasm -V > v_miniasm.txt
+    racon --version > v_racon.txt
+    porechop --version > v_porechop.txt
     scrape_software_versions.py > software_versions_mqc.yaml
     """
 }
