@@ -18,6 +18,8 @@ regexes = {
     'Miniasm': ['v_miniasm.txt', r"(\S+)"],
     'Racon': ['v_racon.txt', r"v(\S+)"],
     'Canu': ['v_canu.txt', r"snapshot (\S+)"],
+    'Samtools': ['v_samtools.txt', r"samtools (\S+)"],
+    'Minimap2': ['v_minimap2.txt', r"(\S+)"],
 }
 
 results = OrderedDict()
@@ -35,8 +37,8 @@ results['Nanopolish'] = '<span style="color:#999999;\">N/A</span>'
 results['Miniasm'] = '<span style="color:#999999;\">N/A</span>'
 results['Racon'] = '<span style="color:#999999;\">N/A</span>'
 results['Canu'] = '<span style="color:#999999;\">N/A</span>'
-
-
+results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
+results['Minimap2'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():
