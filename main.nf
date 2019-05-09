@@ -288,7 +288,7 @@ process adapter_trimming {
 process fastqc {
     label 'small'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/${sample_id}_reads", mode: 'copy'
+    publishDir "${params.outDir}/${sample_id}/${sample_id}_reads", mode: 'copy'
 
     input:
     set sample_id, file(fq1), file(fq2) from fastqc_ch
@@ -302,13 +302,34 @@ process fastqc {
     """
 }
 
+/*
+ * Quality check for nanopore reads and Quality/Length Plots
+ */
+process nanoplot {
+    tag "$id"
+    publishDir "${params.outDir}/QC_longreads/NanoPlot_${id}", mode: 'copy'
+
+    input:
+    set id, file(lr), type from files_nanoplot_raw.mix(files_nanoplot_filtered)
+
+    output:
+    file '*.png'
+    file '*.html'
+    file '*.txt'
+
+    script:
+    """
+    NanoPlot -t "${task.cpus}" -p ${type}_  --title ${id}_${type} -c darkblue --fastq ${lr}
+    """
+}
+
 
 /* unicycler (short, long or hybrid mode!)
  */
 process unicycler {
     label 'large'
     tag "$sample_id"
-    publishDir "${params.outdir}/unicycler/${sample_id}/", mode: 'copy'
+    publishDir "${params.outDir}/unicycler/${sample_id}/", mode: 'copy'
 
     input:
     set sample_id, file(fq1), file(fq2) from unicycler_ch
