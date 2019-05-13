@@ -128,17 +128,17 @@ if (params.reads) {
 //Long Read Handling
 if (params.longreads) {
     Channel.fromFilePairs( params.reads )// flat: true
-	.set { lr_fastq_ch; files_nanoplot_raw }
+	.set { lr_fastq_ch; files_nanoplot_raw; lr_polish_ch }
 } else if (params.readPaths) {
    Channel.from( params.readPaths )
 	.map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
     .dump()
-    .into { lr_fastq_ch; files_nanoplot_raw }
+    .into { lr_fastq_ch; files_nanoplot_raw; lr_polish_ch }
 } else {
     sample_keys = params.samples? params.samples.keySet() : []
     Channel.from( sample_keys )
         .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
-        .set { lr_fastq_ch; files_nanoplot_raw }
+        .set { lr_fastq_ch; files_nanoplot_raw; lr_polish_ch }
 }
 
 // Header log info
@@ -273,7 +273,7 @@ process adapter_trimming {
 	set sample_id, file(reads) from lr_fastq_ch
 
     output:
-	set sample_id, file('trimmed.fastq') into (long_trimmed_for_assembly, long_trimmed_for_consensus)
+	set sample_id, file('trimmed.fastq') into (long_trimmed_for_assembly,trim_miniasm_assembly,trim_canu_assembly,long_trimmed_for_consensus)
 
 	script:
     """
@@ -319,7 +319,7 @@ process nanoplot {
 
     script:
     """
-    NanoPlot -t "${task.cpus}" -p ${type}_  --title ${id} -c darkblue --fastq ${lr}
+    NanoPlot -t "${task.cpus}" --title ${id} -c darkblue --fastq ${lr}
     """
 }
 
@@ -334,7 +334,7 @@ process pycoqc{
     when: params.fast5
 
     input:
-    file(fast5path) from file(params.fast5)
+    file fast5path from params.fast5
 
     output:
     file('summary_sequencing.tsv')
@@ -353,6 +353,8 @@ process unicycler {
     label 'large'
     tag "$sample_id"
     publishDir "${params.outDir}/unicycler/${sample_id}/", mode: 'copy'
+
+    when: when: params.assembler == 'unicycler'
 
     input:
     set sample_id, file(fq1), file(fq2) from unicycler_ch
@@ -388,11 +390,13 @@ process miniasm_assembly {
     tag "$sample_id"
     label 'large'
 
+    when: params.assembler == 'miniasm'
+
     input:
-    set sample_id, file(reads) from trimmed_for_assembly
+    set sample_id, file(reads) from trim_miniasm_assembly
 
     output:
-    file 'assembly.fasta' into assembly
+    file 'assembly.fasta' into assembly_from_miniasm
 
     script:
     """
@@ -407,12 +411,14 @@ process canu_assembly {
     tag "$sample_id"
     label 'large'
 
+    when: params.assembler == 'canu'
+
     input:
-    set sample_id, file(reads) from trimmed_for_assembly
+    set sample_id, file(reads) from trim_canu_assembly
     val genome_size from params.genome_size
     
     output:
-    file 'assembly.fasta' into assembly
+    file 'assembly.fasta' into assembly_from_canu
 
     script:
     """
@@ -428,11 +434,9 @@ process consensus {
 	publishDir "${params.outDir}/miniasm/consensus/${sample_id}", mode: 'copy', pattern: 'assembly_consensus.fasta'
     label 'large'
 
-    when: params.assembler == 'miniasm'
-
     input:
-    file(reads) from trimmed_for_consensus
-    file(assembly) from assembly
+    file(reads) from long_trimmed_for_consensus
+    file(assembly) from assembly_from_miniasm
 
     output:
     file 'assembly_consensus.fasta' into assembly_consensus
@@ -523,7 +527,7 @@ process polishing {
 
     input:
     file(assembly) from assembly_consensus
-    file(reads) from file(params.longreads)
+    set sample_id, file(reads) from lr_polish_ch
     val(fast5_dir) from params.fast5
 
     output:
