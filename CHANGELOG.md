@@ -1,5 +1,18 @@
 # nf-core/bacass: Changelog
 
+## v1.1.0 nf-core/bacass: "Green Aluminium Shark"
+
+* Added support for hybrid assembly using Nanopore and Illumina Short Reads
+* Added methods for Nanopore data
+  * Nanopolish, for polishing of Nanopore data with Illumina reads
+  * PoreChop, for quality trimming of Nanopore data
+  * Nanoplot, for plotting quality metrics of Nanopore data
+  * PycoQC, to estimate Nanopore demultiplexing statistics
+* Added multiple tools to assemble long-reads
+  * Miniasm + Racon
+  * Canu Assembler
+
+
 ## v1.0.0 nf-core/bacass: "Green Tin Ant"
 
 Initial release of nf-core/bacass, created with the [nf-core](http://nf-co.re/) template.
