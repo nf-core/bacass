@@ -40,4 +40,8 @@ script:
   - markdownlint ${TRAVIS_BUILD_DIR} -c ${TRAVIS_BUILD_DIR}/.github/markdownlint.yml
   # Run the pipeline with the test profile
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test,docker
+  # Run the pipeline with the test_long profile (for long reads only)
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_long
+  # Run the pipeline with the test_hybrid profile (for short + long reads in combation)
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_hybrid
 
