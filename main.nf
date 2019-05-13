@@ -128,17 +128,17 @@ if (params.reads) {
 //Long Read Handling
 if (params.longreads) {
     Channel.fromFilePairs( params.reads )// flat: true
-	.set { lr_fastq_ch }
+	.set { lr_fastq_ch; files_nanoplot_raw }
 } else if (params.readPaths) {
    Channel.from( params.readPaths )
 	.map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
     .dump()
-    .set { lr_fastq_ch }
+    .into { lr_fastq_ch; files_nanoplot_raw }
 } else {
     sample_keys = params.samples? params.samples.keySet() : []
     Channel.from( sample_keys )
         .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
-        .set { lr_fastq_ch }
+        .set { lr_fastq_ch; files_nanoplot_raw }
 }
 
 // Header log info
@@ -154,8 +154,8 @@ summary['Extra Unicycler arguments'] = params.unicycler_args
 summary['Extra Prokka arguments'] = params.prokka_args
 summary['Assembler Method'] = params.assembler
 summary['Assembly Type'] = params.assembly_type
-params.fast5 ?: summary['Fast5 Path'] = params.fast5 : ''
-params.genome_size ?: summary['Genome Size'] = params.genome_size : ''
+params.fast5 ? summary['Fast5 Path'] = params.fast5 : ''
+params.genome_size ? summary['Genome Size'] = params.genome_size : ''
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
 summary['Launch dir']       = workflow.launchDir
@@ -310,7 +310,7 @@ process nanoplot {
     publishDir "${params.outDir}/QC_longreads/NanoPlot_${id}", mode: 'copy'
 
     input:
-    set id, file(lr), type from files_nanoplot_raw.mix(files_nanoplot_filtered)
+    set id, file(lr) from files_nanoplot_raw
 
     output:
     file '*.png'
@@ -319,8 +319,31 @@ process nanoplot {
 
     script:
     """
-    NanoPlot -t "${task.cpus}" -p ${type}_  --title ${id}_${type} -c darkblue --fastq ${lr}
+    NanoPlot -t "${task.cpus}" -p ${type}_  --title ${id} -c darkblue --fastq ${lr}
     """
+}
+
+
+/** Quality check for nanopore Fast5 files
+*/
+
+process pycoqc{
+    tag "$id"
+    publishDir "${params.outDir}/QC_longreads/PycoQC", mode: 'copy'
+
+    when: params.fast5
+
+    input:
+    file(fast5path) from file(params.fast5)
+
+    output:
+    file('summary_sequencing.tsv')
+
+    script:
+    """
+    Fast5_to_seq_summary -f $fast5path -t ${task.cpus} -s 'summary_sequencing.tsv'
+    """
+
 }
 
 
