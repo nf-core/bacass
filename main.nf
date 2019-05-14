@@ -17,22 +17,14 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/bacass -params-file params.yaml -profile docker
-    or
-    nextflow run nf-core/bacass --reads '*_R{1,2}.fastq.gz' --kraken2db 'path-to-kraken2db' -profile docker
-    or
-    nextflow run nf-core/bacass --reads '*_R{1,2}.fastq.gz' --longreads '*.fastq.gz' --assembler 'Unicycler'
+    nextflow run nf-core/bacass --design input.csv --kraken2db 'path-to-kraken2db' -profile docker
+
     Mandatory arguments:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
                                     Available: conda, docker, singularity, awsbatch, test and more.
 
     Other options:
-      -params-file                  A parameters file, listing parameters defined here, including paired FastQ input
-				    if not defined through `--reads` (see below). See docs for more info
-      --reads                       Path to paired-end input reads (must be surrounded with quotes; see also docs)
-                                    Can be replaced with samples dictionary in params-file (see above)
-      --longreads                   Path to Nanopore FastQ reads (must be surrounded with quotes; see also docs)
-      --fast5                       Path to Nanopore Fast5 input files for polishing the assembly (ONT only)
+      --design                      
       --skip_kraken2                Don't run Kraken2 for classification
       --kraken2db                   Path to Kraken2 Database directory
       --assembler                   Default: "Unicycler", Available: "Canu", "Miniasm", "Unicycler". Short reads can only use "Unicycler".
@@ -84,7 +76,7 @@ if( workflow.profile == 'awsbatch') {
   if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
   // Check outdir paths to be S3 buckets if running on AWSBatch
   // related: https://github.com/nextflow-io/nextflow/issues/813
-  if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+  if (!params.outDir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
   // Prevent trace files to be stored on S3 since S3 does not support rolling files.
   if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
@@ -93,22 +85,11 @@ if( workflow.profile == 'awsbatch') {
 ch_multiqc_config = Channel.fromPath(params.multiqc_config)
 ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
 
-/* GetReadPair and GetReadUnitKeys support read pair input via yaml files
- * This allows for merging of libraries for samples that were sequenced twice
- * and is generally better for reproducibility and keeping of records (all
- * config done via files)
- */
-def GetReadPair = { sk, rk ->
-    // FIXME if files don't exist, their path might be relative to the input yaml
-    // see https://gist.github.com/ysb33r/5804364
-    tuple(file(params.samples[sk].readunits[rk]['fq1']),
-          file(params.samples[sk].readunits[rk]['fq2']))
-}
 
-def GetReadUnitKeys = { sk ->
-    params.samples[sk].readunits.keySet()
+//Check whether we have a design file as input set
+if(!params.design){
+    exit 1, "Missing Design File - please see documentation how to create one."
 }
-
 
 //Short Read handling
 if (params.reads) {
@@ -117,7 +98,6 @@ if (params.reads) {
 } else if (params.readPaths) {
    Channel.from( params.readPaths )
 	.map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-    .dump()
     .set { fastq_ch }
 } else {
     sample_keys = params.samples? params.samples.keySet() : []
@@ -127,18 +107,17 @@ if (params.reads) {
 }
 //Long Read Handling
 if (params.longreads) {
-    Channel.fromFilePairs( params.reads )// flat: true
-	.set { lr_fastq_ch; files_nanoplot_raw; lr_polish_ch }
-} else if (params.readPaths) {
+    Channel.fromFilePairs( params.longreads )// flat: true
+	.into { lr_fastq_ch; files_nanoplot_raw; lr_polish_ch }
+} else if (params.readPaths && params.longreads) {
    Channel.from( params.readPaths )
 	.map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-    .dump()
     .into { lr_fastq_ch; files_nanoplot_raw; lr_polish_ch }
 } else {
     sample_keys = params.samples? params.samples.keySet() : []
     Channel.from( sample_keys )
         .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
-        .set { lr_fastq_ch; files_nanoplot_raw; lr_polish_ch }
+        .into { lr_fastq_ch; files_nanoplot_raw; lr_polish_ch }
 }
 
 // Header log info
@@ -159,7 +138,7 @@ params.genome_size ? summary['Genome Size'] = params.genome_size : ''
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
 summary['Launch dir']       = workflow.launchDir
-summary['Output dir'] = params.outdir
+summary['Output dir'] = params.outDir
 summary['Working dir'] = workflow.workDir
 summary['Script dir'] = workflow.projectDir
 summary['User'] = workflow.userName
@@ -204,7 +183,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
  * Parse software version numbers
  */
 process get_software_versions {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy',
+    publishDir "${params.outDir}/pipeline_info", mode: 'copy',
     saveAs: {filename ->
         if (filename.indexOf(".csv") > 0) filename
         else null
@@ -232,6 +211,7 @@ process get_software_versions {
     samtools --version &> v_samtools.txt 2>&1 || true
     minimap2 --version &> v_minimap2.txt
     NanoPlot --version > v_nanoplot.txt
+    canu --version > v_canu.txt
     scrape_software_versions.py > software_versions_mqc.yaml
     """
 }
@@ -243,7 +223,7 @@ process trim_and_combine {
     label 'medium'
 
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/${sample_id}_reads/", mode: 'copy'
+    publishDir "${params.outDir}/${sample_id}/${sample_id}_reads/", mode: 'copy'
 
     input:
     set sample_id, file(reads) from fastq_ch
@@ -271,6 +251,8 @@ process adapter_trimming {
     label 'medium'
     input:
 	set sample_id, file(reads) from lr_fastq_ch
+
+    when: params.longreads
 
     output:
 	set sample_id, file('trimmed.fastq') into (long_trimmed_for_assembly,trim_miniasm_assembly,trim_canu_assembly,long_trimmed_for_consensus)
@@ -309,6 +291,8 @@ process nanoplot {
     tag "$id"
     publishDir "${params.outDir}/QC_longreads/NanoPlot_${id}", mode: 'copy'
 
+    when: params.longreads
+
     input:
     set id, file(lr) from files_nanoplot_raw
 
@@ -331,7 +315,7 @@ process pycoqc{
     tag "$id"
     publishDir "${params.outDir}/QC_longreads/PycoQC", mode: 'copy'
 
-    when: params.fast5
+    when: params.fast5 && params.longreads
 
     input:
     file fast5path from params.fast5
@@ -346,6 +330,14 @@ process pycoqc{
 
 }
 
+/* Join channels for unicycler if possible
+*/ 
+
+unicycler_ch
+        .join(long_trimmed_for_assembly)
+        .dump()
+        .set {joint_unicycler_channel}
+
 
 /* unicycler (short, long or hybrid mode!)
  */
@@ -354,11 +346,12 @@ process unicycler {
     tag "$sample_id"
     publishDir "${params.outDir}/unicycler/${sample_id}/", mode: 'copy'
 
-    when: when: params.assembler == 'unicycler'
+    when: params.assembler == 'unicycler'
 
     input:
-    set sample_id, file(fq1), file(fq2) from unicycler_ch
-    set sample_id, file(lrfastq) from long_trimmed_for_assembly
+    set sample_id, file(fq1), file(fq2), file(lrfastq) from joint_unicycler_channel
+    //set sample_id, file(fq1), file(fq2) from unicycler_ch
+    //set sample_id, file(lrfastq) from long_trimmed_for_assembly
 
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into quast_ch, prokka_ch
@@ -375,6 +368,7 @@ process unicycler {
     } else if (params.assembly_type == 'Hybrid'){
         data_param = "-1 $fq1 -2 $fq2 -l $lrfastq"
     }
+
     """
     unicycler $data_param --threads ${task.cpus} ${params.unicycler_args} --keep 0 -o .
     mv unicycler.log ${sample_id}_unicycler.log
@@ -384,6 +378,8 @@ process unicycler {
     Bandage image ${sample_id}_assembly.gfa ${sample_id}_assembly.png
     """
 }
+
+
 
 process miniasm_assembly {
     publishDir "${params.outDir}/miniasm/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
@@ -454,7 +450,7 @@ process consensus {
     process kraken2 {
     label 'large'
     tag "$sample_id"
-    publishDir "${params.outdir}/kraken/${sample_id}/", mode: 'copy'
+    publishDir "${params.outDir}/kraken/${sample_id}/", mode: 'copy'
 
     when: !params.skip_kraken2
 
@@ -479,7 +475,7 @@ process consensus {
 process quast {
   label 'small'
   tag { "quast for each $sample_id" }
-  publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+  publishDir "${params.outDir}/${sample_id}/", mode: 'copy'
   
   input:
   set sample_id, fasta from quast_ch
@@ -501,7 +497,7 @@ process quast {
 process prokka {
    label 'large'
    tag "$sample_id"
-   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+   publishDir "${params.outDir}/${sample_id}/", mode: 'copy'
 
    input:
    set sample_id, fasta from prokka_ch
@@ -554,7 +550,7 @@ process polishing {
 
 process multiqc {
     label 'small'
-    publishDir "${params.outdir}/MultiQC", mode: 'copy'
+    publishDir "${params.outDir}/MultiQC", mode: 'copy'
 
     input:
     file multiqc_config from ch_multiqc_config
@@ -583,7 +579,7 @@ process multiqc {
  * STEP 3 - Output Description HTML
  */
 process output_documentation {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
+    publishDir "${params.outDir}/pipeline_info", mode: 'copy'
 
     input:
     file output_docs from ch_output_docs
@@ -678,7 +674,7 @@ workflow.onComplete {
     }
 
     // Write summary e-mail HTML to a file
-    def output_d = new File( "${params.outdir}/pipeline_info/" )
+    def output_d = new File( "${params.outDir}/pipeline_info/" )
     if( !output_d.exists() ) {
       output_d.mkdirs()
     }
