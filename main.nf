@@ -323,14 +323,15 @@ ch_short_for_unicycler
 /* unicycler (short, long or hybrid mode!)
  */
 process unicycler {
-    label 'large'
     tag "$sample_id"
     publishDir "${params.outDir}/unicycler/${sample_id}/", mode: 'copy'
+
+    label 'large'
 
     when: params.assembler == 'unicycler'
 
     input:
-    set sample_id, file(r1), file(r2), file(lr), file(fast5), val(genomeSize) from joint_unicycler_channel 
+    set sample_id, file(fq1), file(fq2), file(lrfastq), file(fast5), val(genomeSize) from joint_unicycler_channel 
 
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into quast_ch, prokka_ch
@@ -358,28 +359,49 @@ process unicycler {
     """
 }
 
-
-
 process miniasm_assembly {
-    publishDir "${params.outDir}/miniasm/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
     tag "$sample_id"
+    publishDir "${params.outDir}/miniasm/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
+    
     label 'large'
 
     when: params.assembler == 'miniasm'
 
     input:
-    set sample_id, file(reads) from trim_miniasm_assembly
+    set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize) ch_long_trimmed_miniasm
+
+    set sample_id, file(reads) from 
 
     output:
-    file 'assembly.fasta' into assembly_from_miniasm
+    file 'assembly.fasta' into ch_assembly_from_miniasm
 
     script:
     """
-    minimap2 -x ava-ont -t "${task.cpus}" "${reads}" "${reads}" > "${reads}.paf"
-    miniasm -f "${reads}" "${reads}.paf" > "${reads}.gfa"
-    awk '/^S/{print ">"\$2"\\n"\$3}' "${reads}.gfa" | fold > assembly.fasta
+    minimap2 -x ava-ont -t "${task.cpus}" "${lrfastq}" "${lrfastq}" > "${lrfastq}.paf"
+    miniasm -f "${lrfastq}" "${lrfastq}.paf" > "${lrfastq}.gfa"
+    awk '/^S/{print ">"\$2"\\n"\$3}' "${lrfastq}.gfa" | fold > assembly.fasta
     """
 }
+
+//Run consensus for miniasm, the others don't need it.
+process consensus {
+	publishDir "${params.outDir}/miniasm/consensus/${sample_id}", mode: 'copy', pattern: 'assembly_consensus.fasta'
+    label 'large'
+
+    input:
+    set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_consensus
+    file(assembly) from ch_assembly_from_miniasm
+
+    output:
+    file 'assembly_consensus.fasta' into ch_assembly_consensus
+
+	script:
+    """
+    minimap2 -x map-ont -t "${task.cpus}" "${assembly}" "${lrfastq}" > assembly.paf
+    racon -t "${task.cpus}" "${lrfastq}" assembly.paf "${assembly}" > assembly_consensus.fasta
+    """
+}
+
 
 process canu_assembly {
     publishDir "${params.outDir}/canu/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
@@ -404,27 +426,7 @@ process canu_assembly {
     """
 }
 
-//Run consensus for miniasm, the others don't need it.
-process consensus {
-	publishDir "${params.outDir}/miniasm/consensus/${sample_id}", mode: 'copy', pattern: 'assembly_consensus.fasta'
-    label 'large'
-
-    input:
-    file(reads) from long_trimmed_for_consensus
-    file(assembly) from assembly_from_miniasm
-
-    output:
-    file 'assembly_consensus.fasta' into assembly_consensus
-
-	script:
-    """
-    minimap2 -x map-ont -t "${task.cpus}" "${assembly}" "${reads}" > assembly.paf
-    racon -t "${task.cpus}" "${reads}" assembly.paf "${assembly}" > assembly_consensus.fasta
-    """
-}
-
-
-/* kraken classification: QC for sample purity
+/* kraken classification: QC for sample purity, only short end reads for now
  */
     process kraken2 {
     label 'large'
