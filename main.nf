@@ -95,10 +95,10 @@ if(!params.design){
     Channel
     .from(params.design)
     .splitCsv(header: true)
-    .map { row -> ${row.ID}, ${row.R1}, ${row.R2}, ${row.LongFastQ}, ${row.Fast5}, ${row.GenomeSize}}
+    .map { col -> tuple("${col.ID}", returnFile("${col.R1}"), returnFile("${col.R2}"), returnFile("${col.LongFastQ}"), returnFile("${col.Fast5}"), "${col.GenomeSize}")}
     .into {ch_for_short_trim; ch_for_long_trim; ch_for_fastqc; ch_for_nanoplot; ch_for_pycoqc; ch_for_nanopolish; ch_for_long_fastq}
-    }
 }
+
 
 // Header log info
 log.info nfcoreHeader()
@@ -738,3 +738,8 @@ def checkHostname(){
     }
 }
 
+// Return file if it exists
+static def returnFile(it) {
+    if (!file(it).exists()) exit 1, "Warning: Missing file in CSV file: ${it}, see --help for more information"
+    return file(it)
+}
