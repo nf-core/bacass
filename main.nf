@@ -70,7 +70,6 @@ if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
   custom_runName = workflow.runName
 }
 
-
 if( workflow.profile == 'awsbatch') {
   // AWSBatch sanity checking
   if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
@@ -89,35 +88,16 @@ ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
 //Check whether we have a design file as input set
 if(!params.design){
     exit 1, "Missing Design File - please see documentation how to create one."
-}
-
-//Short Read handling
-if (params.reads) {
-    Channel.fromFilePairs( params.reads )// flat: true
-	.set { fastq_ch }
-} else if (params.readPaths) {
-   Channel.from( params.readPaths )
-	.map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-    .set { fastq_ch }
 } else {
-    sample_keys = params.samples? params.samples.keySet() : []
-    Channel.from( sample_keys )
-        .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
-        .set { fastq_ch }
-}
-//Long Read Handling
-if (params.longreads) {
-    Channel.fromFilePairs( params.longreads )// flat: true
-	.into { lr_fastq_ch; files_nanoplot_raw; lr_polish_ch }
-} else if (params.readPaths && params.longreads) {
-   Channel.from( params.readPaths )
-	.map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
-    .into { lr_fastq_ch; files_nanoplot_raw; lr_polish_ch }
-} else {
-    sample_keys = params.samples? params.samples.keySet() : []
-    Channel.from( sample_keys )
-        .map { sk -> tuple(sk, GetReadUnitKeys(sk).collect{GetReadPair(sk, it)}.flatten()) }
-        .into { lr_fastq_ch; files_nanoplot_raw; lr_polish_ch }
+    //use the input design csv properly
+    //Header should be present ideally in this shape
+    //ID,R1,R2,LongFastQ,Fast5,GenomeSize
+    Channel
+    .from(params.design)
+    .splitCsv(header: true)
+    .map { row -> ${row.ID}, ${row.R1}, ${row.R2}, ${row.LongFastQ}, ${row.Fast5}, ${row.GenomeSize}}
+    .into {ch_for_short_trim; ch_for_long_trim; ch_for_fastqc; ch_for_nanoplot;   ch_for_pycoqc; ch_for_nanopolish; ch_for_long_fastq}
+    }
 }
 
 // Header log info
@@ -126,7 +106,6 @@ def summary = [:]
 if(workflow.revision) summary['Pipeline Release'] = workflow.revision
 summary['Pipeline Name']  = 'nf-core/bacass'
 summary['Run Name']         = custom_runName ?: workflow.runName
-
 summary['Skip Kraken2'] = params.skip_kraken2
 summary['Kraken2 DB'] = params.kraken2db
 summary['Extra Unicycler arguments'] = params.unicycler_args
@@ -226,11 +205,11 @@ process trim_and_combine {
     publishDir "${params.outDir}/${sample_id}/${sample_id}_reads/", mode: 'copy'
 
     input:
-    set sample_id, file(reads) from fastq_ch
+    set sample_id, file(r1), file(r2), file(lr), file(fast5), val(genomeSize) from ch_for_short_trim
 
     output:
-    set sample_id, file("${sample_id}_trm-cmb.R1.fastq.gz"), file("${sample_id}_trm-cmb.R2.fastq.gz") \
-	into kraken2_ch, unicycler_ch, fastqc_ch
+    set sample_id, file("${sample_id}_trm-cmb.R1.fastq.gz"), file("${sample_id}_trm-cmb.R2.fastq.gz"), file("$lr"), file("$fast5"), val("$genomeSize") \
+	into (ch_short_for_kraken2, ch_short_for_unicycler, ch_short_for_fastqc)
     // not keeping logs for multiqc input. for that to be useful we would need to concat first and then run skewer
     
     script:
@@ -249,20 +228,20 @@ process trim_and_combine {
 //AdapterTrimming for ONT reads
 process adapter_trimming {
     label 'medium'
-    input:
-	set sample_id, file(reads) from lr_fastq_ch
 
     when: params.longreads
 
-    output:
-	set sample_id, file('trimmed.fastq') into (long_trimmed_for_assembly,trim_miniasm_assembly,trim_canu_assembly,long_trimmed_for_consensus)
+    input:
+	set sample_id, file(R1), file(R2), file(lr), file(fast5), val(genomeSize) from ch_for_long_trim
 
+    output:
+    set sample_id, file(R1), file(R2), file('trimmed.fastq'), file(fast5), val(genomeSize) into (ch_long_trimmed_unicycler, ch_long_trimmed_miniasm, ch_long_trimmed_consensus)
+    
 	script:
     """
-    porechop -i "${reads}" -t "${task.cpus}" -o trimmed.fastq
+    porechop -i "${lr}" -t "${task.cpus}" -o trimmed.fastq
     """
 }
-
 
 /*
  * STEP 1 - FastQC FOR SHORT READS
@@ -273,10 +252,10 @@ process fastqc {
     publishDir "${params.outDir}/${sample_id}/${sample_id}_reads", mode: 'copy'
 
     input:
-    set sample_id, file(fq1), file(fq2) from fastqc_ch
+    set sample_id, file(fq1), file(fq2), file(lr), file(fast5), val(genomeSize) from ch_short_for_fastqc
 
     output:
-    file "*_fastqc.{zip,html}" into fastqc_results
+    file "*_fastqc.{zip,html}" into ch_fastqc_results
 
     script:
     """
@@ -294,7 +273,7 @@ process nanoplot {
     when: params.longreads
 
     input:
-    set id, file(lr) from files_nanoplot_raw
+    set sample_id, file(fq1), file(fq2), file(lr), file(fast5), val(genomeSize) from ch_for_nanoplot 
 
     output:
     file '*.png'
@@ -311,6 +290,8 @@ process nanoplot {
 /** Quality check for nanopore Fast5 files
 */
 
+//TODO remains to be checked that this is only run for the pycoqc stuff here...
+
 process pycoqc{
     tag "$id"
     publishDir "${params.outDir}/QC_longreads/PycoQC", mode: 'copy'
@@ -318,25 +299,25 @@ process pycoqc{
     when: params.fast5 && params.longreads
 
     input:
-    file fast5path from params.fast5
+    set sample_id, file(fq1), file(fq2), file(lr), file(fast5), val(genomeSize) from ch_for_pycoqc
 
     output:
     file('summary_sequencing.tsv')
 
     script:
     """
-    Fast5_to_seq_summary -f $fast5path -t ${task.cpus} -s 'summary_sequencing.tsv'
+    Fast5_to_seq_summary -f $fast5 -t ${task.cpus} -s 'summary_sequencing.tsv'
     """
 
 }
 
-/* Join channels for unicycler if possible
+/* Join channels for unicycler, as trimming the files happens in two separate processes for paralellization of individual steps. As samples have the same sampleID, we can simply use join() to merge the channels based on this.
 */ 
 
-unicycler_ch
-        .join(long_trimmed_for_assembly)
+ch_short_for_unicycler
+        .join(ch_long_trimmed_unicycler)
         .dump()
-        .set {joint_unicycler_channel}
+        .set {ch_short_long_joint_unicycler}
 
 
 /* unicycler (short, long or hybrid mode!)
@@ -349,9 +330,7 @@ process unicycler {
     when: params.assembler == 'unicycler'
 
     input:
-    set sample_id, file(fq1), file(fq2), file(lrfastq) from joint_unicycler_channel
-    //set sample_id, file(fq1), file(fq2) from unicycler_ch
-    //set sample_id, file(lrfastq) from long_trimmed_for_assembly
+    set sample_id, file(r1), file(r2), file(lr), file(fast5), val(genomeSize) from joint_unicycler_channel 
 
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into quast_ch, prokka_ch
@@ -557,7 +536,7 @@ process multiqc {
     //file prokka_logs from prokka_logs_ch.collect().ifEmpty([])
     file quast_logs from quast_logs_ch.collect().ifEmpty([])
     // NOTE unicycler and kraken not supported
-    file ('fastqc/*') from fastqc_results.collect().ifEmpty([])
+    file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
     file ('software_versions/*') from software_versions_yaml.collect()
     file workflow_summary from create_workflow_summary(summary)
 
