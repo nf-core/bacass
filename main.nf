@@ -199,10 +199,10 @@ process get_software_versions {
 /* Trim and combine short read read-pairs per sample. Similar to nf-core vipr
  */
 process trim_and_combine {
-    label 'medium'
-
     tag "$sample_id"
     publishDir "${params.outDir}/${sample_id}/${sample_id}_reads/", mode: 'copy'
+
+    label 'medium'
 
     input:
     set sample_id, file(r1), file(r2), file(lr), file(fast5), val(genomeSize) from ch_for_short_trim
@@ -235,7 +235,7 @@ process adapter_trimming {
 	set sample_id, file(R1), file(R2), file(lr), file(fast5), val(genomeSize) from ch_for_long_trim
 
     output:
-    set sample_id, file(R1), file(R2), file('trimmed.fastq'), file(fast5), val(genomeSize) into (ch_long_trimmed_unicycler, ch_long_trimmed_miniasm, ch_long_trimmed_consensus)
+    set sample_id, file(R1), file(R2), file('trimmed.fastq'), file(fast5), val(genomeSize) into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish)
     
 	script:
     """
@@ -402,16 +402,16 @@ process consensus {
     """
 }
 
-
 process canu_assembly {
-    publishDir "${params.outDir}/canu/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
     tag "$sample_id"
+    publishDir "${params.outDir}/canu/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
+
     label 'large'
 
     when: params.assembler == 'canu'
 
     input:
-    set sample_id, file(reads) from trim_canu_assembly
+    set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize)  from ch_long_trimmed_canu
     val genome_size from params.genome_size
     
     output:
@@ -420,7 +420,7 @@ process canu_assembly {
     script:
     """
     canu -p assembly -d canu_out \
-        genomeSize="${genome_size}" -nanopore-raw "${reads}" \
+        genomeSize="${genomeSize}" -nanopore-raw "${lrfastq}" \
         maxThreads="${task.cpus}" useGrid=false gnuplotTested=true
     mv canu_out/assembly.contigs.fasta assembly.fasta
     """
@@ -428,7 +428,7 @@ process canu_assembly {
 
 /* kraken classification: QC for sample purity, only short end reads for now
  */
-    process kraken2 {
+process kraken2 {
     label 'large'
     tag "$sample_id"
     publishDir "${params.outDir}/kraken/${sample_id}/", mode: 'copy'
@@ -436,7 +436,7 @@ process canu_assembly {
     when: !params.skip_kraken2
 
     input:
-    set sample_id, file(fq1), file(fq2) from kraken2_ch
+    set sample_id, file(fq1), file(fq2), file(lr), file(fast5), val(genomeSize) from ch_short_for_kraken2
 
     output:
     file("${sample_id}_kraken2.report")
@@ -450,14 +450,14 @@ process canu_assembly {
 	"""
 }
 
-
 /* assembly qc with quast
  */
 process quast {
-  label 'small'
-  tag { "quast for each $sample_id" }
+  tag {"$sample_id"}
   publishDir "${params.outDir}/${sample_id}/", mode: 'copy'
   
+  label 'small'
+
   input:
   set sample_id, fasta from quast_ch
   
@@ -472,8 +472,8 @@ process quast {
   """
 }
 
-
-/* annotation with prokka
+/*
+ * Annotation with prokka
  */
 process prokka {
    label 'large'
@@ -498,27 +498,26 @@ process prokka {
 
 //Polishes assembly using FAST5 files
 process polishing {
-    publishDir "${params.outDir}/", mode: 'copy', pattern: 'polished_genome.fa'
+    publishDir "${params.outDir}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
 
     when: params.fast5
 
     input:
-    file(assembly) from assembly_consensus
-    set sample_id, file(reads) from lr_polish_ch
-    val(fast5_dir) from params.fast5
+    file(assembly) from ch_assembly_consensus //Should take either miniasm, canu, or unicycler consensus sequence (!)
+    set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_nanopolish
 
     output:
-    file 'polished_genome.fa' into assembly_polished
+    file 'polished_genome.fa'
 
     script:
     """
-    nanopolish index -d "${fast5_dir}" "${reads}"
-    minimap2 -ax map-ont -t ${task.cpus} "${assembly}" "${reads}"| \
+    nanopolish index -d "${fast5}" "${lrfastq}"
+    minimap2 -ax map-ont -t ${task.cpus} "${assembly}" "${lrfastq}"| \
     samtools sort -o reads.sorted.bam -T reads.tmp -
     samtools index reads.sorted.bam
     nanopolish_makerange.py "${assembly}" | parallel --results \
         nanopolish.results -P "${task.cpus}" nanopolish variants --consensus \
-        polished.{1}.fa -w {1} -r "${reads}" -b reads.sorted.bam -g \
+        polished.{1}.fa -w {1} -r "${lrfastq}" -b reads.sorted.bam -g \
         "${assembly}" -t 1 --min-candidate-frequency 0.1
     nanopolish_merge.py polished.*.fa > polished_genome.fa
     """
