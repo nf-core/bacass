@@ -290,8 +290,6 @@ process nanoplot {
 /** Quality check for nanopore Fast5 files
 */
 
-//TODO remains to be checked that this is only run for the pycoqc stuff here...
-
 process pycoqc{
     tag "$id"
     publishDir "${params.outDir}/QC_longreads/PycoQC", mode: 'copy'
@@ -516,13 +514,14 @@ process polishing {
     input:
     file(assembly) from ch_assembly_consensus //Should take either miniasm, canu, or unicycler consensus sequence (!)
     set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_nanopolish
+    file summary from ch_summary_index_for_nanopolish
 
     output:
     file 'polished_genome.fa'
 
     script:
     """
-    nanopolish index -d "${fast5}" "${lrfastq}"
+    nanopolish index -d "${fast5}" -s "${summary}" "${lrfastq}"
     minimap2 -ax map-ont -t ${task.cpus} "${assembly}" "${lrfastq}"| \
     samtools sort -o reads.sorted.bam -T reads.tmp -
     samtools index reads.sorted.bam
