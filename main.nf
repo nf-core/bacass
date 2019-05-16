@@ -340,7 +340,7 @@ process unicycler {
     when: params.assembler == 'unicycler'
 
     input:
-    set sample_id, file(fq1), file(fq2), file(lrfastq), file(fast5), val(genomeSize) from joint_unicycler_channel 
+    set sample_id, file(fq1), file(fq2), file(lrfastq), file(fast5), val(genomeSize) from ch_short_long_joint_unicycler 
 
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into quast_ch, prokka_ch
@@ -377,9 +377,7 @@ process miniasm_assembly {
     when: params.assembler == 'miniasm'
 
     input:
-    set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize) ch_long_trimmed_miniasm
-
-    set sample_id, file(reads) from 
+    set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_miniasm
 
     output:
     file 'assembly.fasta' into ch_assembly_from_miniasm
@@ -421,7 +419,6 @@ process canu_assembly {
 
     input:
     set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize)  from ch_long_trimmed_canu
-    val genome_size from params.genome_size
     
     output:
     file 'assembly.fasta' into assembly_from_canu
