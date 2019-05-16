@@ -96,7 +96,7 @@ if(!params.design){
     .from(params.design)
     .splitCsv(header: true)
     .map { row -> ${row.ID}, ${row.R1}, ${row.R2}, ${row.LongFastQ}, ${row.Fast5}, ${row.GenomeSize}}
-    .into {ch_for_short_trim; ch_for_long_trim; ch_for_fastqc; ch_for_nanoplot;   ch_for_pycoqc; ch_for_nanopolish; ch_for_long_fastq}
+    .into {ch_for_short_trim; ch_for_long_trim; ch_for_fastqc; ch_for_nanoplot; ch_for_pycoqc; ch_for_nanopolish; ch_for_long_fastq}
     }
 }
 
@@ -302,13 +302,24 @@ process pycoqc{
     set sample_id, file(fq1), file(fq2), file(lr), file(fast5), val(genomeSize) from ch_for_pycoqc
 
     output:
-    file('summary_sequencing.tsv')
+    file('sequencing_summary.txt') into ch_summary_index_for_nanopolish
+    file("pycoQC_${sample_id}*")
 
     script:
+    //Find out whether the sequencing_summary already exists
+    if(file("${fast5}/sequencing_summary.txt").exists()){
+        run_summary = ''
+        prefix = "${fast5}/"
+    } else {
+        run_summary =  "Fast5_to_seq_summary -f $fast5 -t ${task.cpus} -s 'sequencing_summary.txt'"
+        prefix = ''
+    }
+    //Barcodes available? 
+    barcode_me = file("${fast5}/barcoding_sequencing.txt").exists() ? "-b ${fast5}/barcoding_sequencing.txt" : ''
     """
-    Fast5_to_seq_summary -f $fast5 -t ${task.cpus} -s 'summary_sequencing.tsv'
+    $run_summary
+    pycoQC -f "${prefix}sequencing_summary.txt" $barcode_me -o pycoQC_${sample_id}.html -j pycoQC_${sample_id}.json
     """
-
 }
 
 /* Join channels for unicycler, as trimming the files happens in two separate processes for paralellization of individual steps. As samples have the same sampleID, we can simply use join() to merge the channels based on this.
