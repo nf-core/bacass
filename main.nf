@@ -96,9 +96,9 @@ if(!params.design){
     .from(params.design)
     .splitCsv(header: true)
     .map { col -> tuple("${col.ID}", returnFile("${col.R1}"), returnFile("${col.R2}"), returnFile("${col.LongFastQ}"), returnFile("${col.Fast5}"), "${col.GenomeSize}")}
+    .dump()
     .into {ch_for_short_trim; ch_for_long_trim; ch_for_fastqc; ch_for_nanoplot; ch_for_pycoqc; ch_for_nanopolish; ch_for_long_fastq}
 }
-
 
 // Header log info
 log.info nfcoreHeader()
@@ -112,8 +112,6 @@ summary['Extra Unicycler arguments'] = params.unicycler_args
 summary['Extra Prokka arguments'] = params.prokka_args
 summary['Assembler Method'] = params.assembler
 summary['Assembly Type'] = params.assembly_type
-params.fast5 ? summary['Fast5 Path'] = params.fast5 : ''
-params.genome_size ? summary['Genome Size'] = params.genome_size : ''
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
 summary['Launch dir']       = workflow.launchDir
