@@ -93,11 +93,30 @@ if(!params.design){
     //Header should be present ideally in this shape
     //ID,R1,R2,LongFastQ,Fast5,GenomeSize
     Channel
-    .from(params.design)
-    .splitCsv(header: true)
-    .map { col -> tuple("${col.ID}", returnFile("${col.R1}"), returnFile("${col.R2}"), returnFile("${col.LongFastQ}"), returnFile("${col.Fast5}"), "${col.GenomeSize}")}
+    .fromPath(params.design)
+    .splitCsv(header: true, sep:'\t')
+    .map { col -> 
+           def id = "${col.ID}" 
+           def r1 = returnFile("${col.R1}")
+           def r2 = returnFile("${col.R2}")
+           def lr = returnFile("${col.LongFastQ}")
+           def f5 = returnFile("${col.Fast5}")
+           def genome_size = "${col.GenomeSize}"
+           tuple(id,r1,r2,lr,f5,genome_size)
+    }
     .dump()
-    .into {ch_for_short_trim; ch_for_long_trim; ch_for_fastqc; ch_for_nanoplot; ch_for_pycoqc; ch_for_nanopolish; ch_for_long_fastq}
+    .tap {ch_all_data}
+    .map { id,r1,r2,lr,f5,gs -> 
+    tuple(id,r1,r2) 
+    }
+    .into {ch_for_short_trim; ch_for_fastqc}
+
+    //Dump long read info to different channel! 
+    ch_all_data
+    .map { id, r1, r2, lr, f5, genomeSize -> 
+            tuple(id,lr,f5,genomeSize)
+    }
+    .into {ch_for_long_trim; ch_for_nanoplot; ch_for_pycoqc; ch_for_nanopolish; ch_for_long_fastq}
 }
 
 // Header log info
@@ -203,18 +222,17 @@ process trim_and_combine {
     label 'medium'
 
     input:
-    set sample_id, file(r1), file(r2), file(lr), file(fast5), val(genomeSize) from ch_for_short_trim
+    set sample_id, file(r1), file(r2) from ch_for_short_trim
 
     output:
-    set sample_id, file("${sample_id}_trm-cmb.R1.fastq.gz"), file("${sample_id}_trm-cmb.R2.fastq.gz"), file("$lr"), file("$fast5"), val("$genomeSize") \
-	into (ch_short_for_kraken2, ch_short_for_unicycler, ch_short_for_fastqc)
+    set sample_id, file("${sample_id}_trm-cmb.R1.fastq.gz"), file("${sample_id}_trm-cmb.R2.fastq.gz") into (ch_short_for_kraken2, ch_short_for_unicycler, ch_short_for_fastqc)
     // not keeping logs for multiqc input. for that to be useful we would need to concat first and then run skewer
     
     script:
     """
     # loop over readunits in pairs per sample
     pairno=0
-    echo ${reads.join(" ")} | xargs -n2 | while read fq1 fq2; do
+    echo "${r1} ${r2}" | xargs -n2 | while read fq1 fq2; do
 	skewer --quiet -t ${task.cpus} -m pe -q 3 -n -z \$fq1 \$fq2;
     done
     cat \$(ls *trimmed-pair1.fastq.gz | sort) >> ${sample_id}_trm-cmb.R1.fastq.gz
@@ -227,18 +245,22 @@ process trim_and_combine {
 process adapter_trimming {
     label 'medium'
 
-    when: params.longreads
+    when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
     input:
-	set sample_id, file(R1), file(R2), file(lr), file(fast5), val(genomeSize) from ch_for_long_trim
+	set sample_id, file(lr), file(fast5), val(genomeSize) from ch_for_long_trim
 
     output:
-    set sample_id, file(R1), file(R2), file('trimmed.fastq'), file(fast5), val(genomeSize) into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish)
+    set sample_id, file('trimmed.fastq'), file(fast5), val(genomeSize) into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish)
     
 	script:
+    if("${lr}".exists()) {
     """
     porechop -i "${lr}" -t "${task.cpus}" -o trimmed.fastq
     """
+    } else {
+    log.info "Skipping $sample_id"
+    }
 }
 
 /*
@@ -250,7 +272,7 @@ process fastqc {
     publishDir "${params.outDir}/${sample_id}/${sample_id}_reads", mode: 'copy'
 
     input:
-    set sample_id, file(fq1), file(fq2), file(lr), file(fast5), val(genomeSize) from ch_short_for_fastqc
+    set sample_id, file(fq1), file(fq2) from ch_short_for_fastqc
 
     output:
     file "*_fastqc.{zip,html}" into ch_fastqc_results
@@ -265,13 +287,13 @@ process fastqc {
  * Quality check for nanopore reads and Quality/Length Plots
  */
 process nanoplot {
-    tag "$id"
-    publishDir "${params.outDir}/QC_longreads/NanoPlot_${id}", mode: 'copy'
+    tag "$sample_id"
+    publishDir "${params.outDir}/QC_longreads/NanoPlot_${sample_id}", mode: 'copy'
 
-    when: params.longreads
+    when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
     input:
-    set sample_id, file(fq1), file(fq2), file(lr), file(fast5), val(genomeSize) from ch_for_nanoplot 
+    set sample_id, file(lr), file(fast5), val(genomeSize) from ch_for_nanoplot 
 
     output:
     file '*.png'
@@ -280,7 +302,7 @@ process nanoplot {
 
     script:
     """
-    NanoPlot -t "${task.cpus}" --title ${id} -c darkblue --fastq ${lr}
+    NanoPlot -t "${task.cpus}" --title ${sample_id} -c darkblue --fastq ${lr}
     """
 }
 
@@ -292,13 +314,13 @@ process pycoqc{
     tag "$id"
     publishDir "${params.outDir}/QC_longreads/PycoQC", mode: 'copy'
 
-    when: params.fast5 && params.longreads
+    when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
     input:
-    set sample_id, file(fq1), file(fq2), file(lr), file(fast5), val(genomeSize) from ch_for_pycoqc
+    set sample_id, file(lr), file(fast5), val(genomeSize) from ch_for_pycoqc
 
     output:
-    file('sequencing_summary.txt') into ch_summary_index_for_nanopolish
+    set sample_id, file('sequencing_summary.txt') into ch_summary_index_for_nanopolish
     file("pycoQC_${sample_id}*")
 
     script:
@@ -318,14 +340,26 @@ process pycoqc{
     """
 }
 
-/* Join channels for unicycler, as trimming the files happens in two separate processes for paralellization of individual steps. As samples have the same sampleID, we can simply use join() to merge the channels based on this.
+/* Join channels for unicycler, as trimming the files happens in two separate processes for paralellization of individual steps. As samples have the same sampleID, we can simply use join() to merge the channels based on this. If we only have one of the channels we insert 'NAs' which are not used in the unicycler process then subsequently, in case of short or long read only assembly.
 */ 
-
-ch_short_for_unicycler
+if(params.assembly_type == 'hybrid'){
+    ch_short_for_unicycler
         .join(ch_long_trimmed_unicycler)
         .dump()
         .set {ch_short_long_joint_unicycler}
-
+} else if(params.assembly_type == 'short'){
+    ch_short_for_unicycler
+        .map{id,R1,R2 -> 
+        tuple(id,R1,R2,'NA','NA','NA')}
+        .dump()
+        .set {ch_short_long_joint_unicycler}
+} else if(params.assembly_type == 'long'){
+    ch_long_trimmed_unicycler
+        .map{id,lr,f5,genomeSize -> 
+        tuple(id,'NA','NA',lr,f5,genomeSize)}
+        .dump()
+        .set {ch_short_long_joint_unicycler}
+}
 
 /* unicycler (short, long or hybrid mode!)
  */
@@ -348,11 +382,11 @@ process unicycler {
     file("${sample_id}_unicycler.log")
     
     script:
-    if(params.assembly_type == 'Long'){
+    if(params.assembly_type == 'long'){
         data_param = "-l $lrfastq"
-    } else if (params.assembly_type == 'Short'){
+    } else if (params.assembly_type == 'short'){
         data_param = "-1 $fq1 -2 $fq2"
-    } else if (params.assembly_type == 'Hybrid'){
+    } else if (params.assembly_type == 'hybrid'){
         data_param = "-1 $fq1 -2 $fq2 -l $lrfastq"
     }
 
@@ -375,7 +409,7 @@ process miniasm_assembly {
     when: params.assembler == 'miniasm'
 
     input:
-    set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_miniasm
+    set sample_id, file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_miniasm
 
     output:
     file 'assembly.fasta' into ch_assembly_from_miniasm
@@ -394,7 +428,7 @@ process consensus {
     label 'large'
 
     input:
-    set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_consensus
+    set sample_id, file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_consensus
     file(assembly) from ch_assembly_from_miniasm
 
     output:
@@ -416,7 +450,7 @@ process canu_assembly {
     when: params.assembler == 'canu'
 
     input:
-    set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize)  from ch_long_trimmed_canu
+    set sample_id, file(lrfastq), file(fast5), val(genomeSize)  from ch_long_trimmed_canu
     
     output:
     file 'assembly.fasta' into assembly_from_canu
@@ -440,7 +474,7 @@ process kraken2 {
     when: !params.skip_kraken2
 
     input:
-    set sample_id, file(fq1), file(fq2), file(lr), file(fast5), val(genomeSize) from ch_short_for_kraken2
+    set sample_id, file(fq1), file(fq2) from ch_short_for_kraken2
 
     output:
     file("${sample_id}_kraken2.report")
@@ -504,12 +538,12 @@ process prokka {
 process polishing {
     publishDir "${params.outDir}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
 
-    when: params.fast5
+    when: !params.skip_nanopolish
 
     input:
     file(assembly) from ch_assembly_consensus //Should take either miniasm, canu, or unicycler consensus sequence (!)
-    set sample_id, file(R1), file(R2), file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_nanopolish
-    file summary from ch_summary_index_for_nanopolish
+    set sample_id, file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_nanopolish
+    set identifier, file(summary) from ch_summary_index_for_nanopolish
 
     output:
     file 'polished_genome.fa'
@@ -733,8 +767,12 @@ def checkHostname(){
     }
 }
 
-// Return file if it exists
+// Return file if it exists, if NA is found this gets treated as a String information
 static def returnFile(it) {
+    if(it == 'NA') {
+        return 'NA'
+    } else { 
     if (!file(it).exists()) exit 1, "Warning: Missing file in CSV file: ${it}, see --help for more information"
-    return file(it)
+        return file(it)
+    }
 }
