@@ -105,18 +105,42 @@ if(!params.design){
            tuple(id,r1,r2,lr,f5,genome_size)
     }
     .dump()
-    .tap {ch_all_data}
+    .tap {ch_all_data; ch_all_data_for_fast5; ch_all_data_for_genomesize}
     .map { id,r1,r2,lr,f5,gs -> 
     tuple(id,r1,r2) 
     }
+    .filter{ id,r1,r2 -> 
+    r1 != 'NA' && r2 != 'NA'}
+    //should use filter here to drop if R1/R2 are NA
     .into {ch_for_short_trim; ch_for_fastqc}
 
     //Dump long read info to different channel! 
     ch_all_data
     .map { id, r1, r2, lr, f5, genomeSize -> 
-            tuple(id,lr,f5,genomeSize)
+            tuple(id, lr)
     }
+    .dump()
     .into {ch_for_long_trim; ch_for_nanoplot; ch_for_pycoqc; ch_for_nanopolish; ch_for_long_fastq}
+
+    //Dump fast5 to separate channel
+    ch_all_data_for_fast5
+    .map { id, r1, r2, lr, f5, genomeSize -> 
+            tuple(id, f5)
+    }
+    .filter {id, fast5 -> 
+        fast5 != 'NA'
+    }
+    .into {ch_fast5_for_pycoqc; ch_fast5_for_nanopolish}
+
+    //Dump genomeSize to separate channel, too
+    ch_all_data_for_genomesize
+    .map { id, r1, r2, lr, f5, genomeSize -> 
+    tuple(id,genomeSize)
+    }
+    .filter{id, genomeSize -> 
+      genomeSize != 'NA'
+    }
+    .into {ch_genomeSize_forCanu}
 }
 
 // Header log info
@@ -248,19 +272,15 @@ process adapter_trimming {
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
     input:
-	set sample_id, file(lr), file(fast5), val(genomeSize) from ch_for_long_trim
+	set sample_id, file(lr) from ch_for_long_trim
 
     output:
-    set sample_id, file('trimmed.fastq'), file(fast5), val(genomeSize) into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish)
+    set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish)
     
 	script:
-    if("${lr}".exists()) {
     """
     porechop -i "${lr}" -t "${task.cpus}" -o trimmed.fastq
     """
-    } else {
-    log.info "Skipping $sample_id"
-    }
 }
 
 /*
@@ -293,7 +313,7 @@ process nanoplot {
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
     input:
-    set sample_id, file(lr), file(fast5), val(genomeSize) from ch_for_nanoplot 
+    set sample_id, file(lr) from ch_for_nanoplot 
 
     output:
     file '*.png'
@@ -302,7 +322,7 @@ process nanoplot {
 
     script:
     """
-    NanoPlot -t "${task.cpus}" --title ${sample_id} -c darkblue --fastq ${lr}
+    NanoPlot -t "${task.cpus}" --title "${sample_id}" -c darkblue --fastq ${lr}
     """
 }
 
@@ -311,13 +331,13 @@ process nanoplot {
 */
 
 process pycoqc{
-    tag "$id"
+    tag "$sample_id"
     publishDir "${params.outDir}/QC_longreads/PycoQC", mode: 'copy'
 
-    when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
+    when: params.assembly_type == 'hybrid' || params.assembly_type == 'long' && fast5
 
     input:
-    set sample_id, file(lr), file(fast5), val(genomeSize) from ch_for_pycoqc
+    set sample_id, file(lr), file(fast5) from ch_for_pycoqc.join(ch_fast5_for_pycoqc)
 
     output:
     set sample_id, file('sequencing_summary.txt') into ch_summary_index_for_nanopolish
@@ -345,19 +365,19 @@ process pycoqc{
 if(params.assembly_type == 'hybrid'){
     ch_short_for_unicycler
         .join(ch_long_trimmed_unicycler)
-        .dump()
+        .dump(tag: 'unicycler')
         .set {ch_short_long_joint_unicycler}
 } else if(params.assembly_type == 'short'){
     ch_short_for_unicycler
         .map{id,R1,R2 -> 
-        tuple(id,R1,R2,'NA','NA','NA')}
-        .dump()
+        tuple(id,R1,R2,'NA')}
+        .dump(tag: 'unicycler')
         .set {ch_short_long_joint_unicycler}
 } else if(params.assembly_type == 'long'){
     ch_long_trimmed_unicycler
-        .map{id,lr,f5,genomeSize -> 
-        tuple(id,'NA','NA',lr,f5,genomeSize)}
-        .dump()
+        .map{id,lr -> 
+        tuple(id,'NA','NA',lr)}
+        .dump(tag: 'unicycler')
         .set {ch_short_long_joint_unicycler}
 }
 
@@ -372,7 +392,7 @@ process unicycler {
     when: params.assembler == 'unicycler'
 
     input:
-    set sample_id, file(fq1), file(fq2), file(lrfastq), file(fast5), val(genomeSize) from ch_short_long_joint_unicycler 
+    set sample_id, file(fq1), file(fq2), file(lrfastq) from ch_short_long_joint_unicycler 
 
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into quast_ch, prokka_ch
@@ -409,7 +429,7 @@ process miniasm_assembly {
     when: params.assembler == 'miniasm'
 
     input:
-    set sample_id, file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_miniasm
+    set sample_id, file(lrfastq) from ch_long_trimmed_miniasm
 
     output:
     file 'assembly.fasta' into ch_assembly_from_miniasm
@@ -424,11 +444,12 @@ process miniasm_assembly {
 
 //Run consensus for miniasm, the others don't need it.
 process consensus {
+    tag "$sample_id"
 	publishDir "${params.outDir}/miniasm/consensus/${sample_id}", mode: 'copy', pattern: 'assembly_consensus.fasta'
     label 'large'
 
     input:
-    set sample_id, file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_consensus
+    set sample_id, file(lrfastq) from ch_long_trimmed_consensus
     file(assembly) from ch_assembly_from_miniasm
 
     output:
@@ -450,7 +471,7 @@ process canu_assembly {
     when: params.assembler == 'canu'
 
     input:
-    set sample_id, file(lrfastq), file(fast5), val(genomeSize)  from ch_long_trimmed_canu
+    set sample_id, file(lrfastq), val(genomeSize) from ch_long_trimmed_canu.join(ch_genomeSize_forCanu)
     
     output:
     file 'assembly.fasta' into assembly_from_canu
@@ -542,7 +563,7 @@ process polishing {
 
     input:
     file(assembly) from ch_assembly_consensus //Should take either miniasm, canu, or unicycler consensus sequence (!)
-    set sample_id, file(lrfastq), file(fast5), val(genomeSize) from ch_long_trimmed_nanopolish
+    set sample_id, file(lrfastq), file(fast5) from ch_long_trimmed_nanopolish.join(ch_fast5_for_nanopolish)
     set identifier, file(summary) from ch_summary_index_for_nanopolish
 
     output:
