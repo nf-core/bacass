@@ -89,9 +89,10 @@ ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
 if(!params.design){
     exit 1, "Missing Design File - please see documentation how to create one."
 } else {
-    //use the input design csv properly
-    //Header should be present ideally in this shape
-    //ID,R1,R2,LongFastQ,Fast5,GenomeSize
+    //Design file looks like this
+    // ID R1 R2 Long-ReadFastQ Fast5Path GenomeSize
+    // ID is required, everything else (can!) be optional and causes some pipeline components to turn off!
+    // Tapping the parsed input design to multiple channels to get some data to specific downstream processes that don't need full information!
     Channel
     .fromPath(params.design)
     .splitCsv(header: true, sep:'\t')
@@ -104,16 +105,15 @@ if(!params.design){
            def genome_size = "${col.GenomeSize}"
            tuple(id,r1,r2,lr,f5,genome_size)
     }
-    .dump()
+    .dump(tag: "input")
     .tap {ch_all_data; ch_all_data_for_fast5; ch_all_data_for_genomesize}
     .map { id,r1,r2,lr,f5,gs -> 
     tuple(id,r1,r2) 
     }
     .filter{ id,r1,r2 -> 
     r1 != 'NA' && r2 != 'NA'}
-    //should use filter here to drop if R1/R2 are NA
+    //Filter to get rid of R1/R2 that are NA
     .into {ch_for_short_trim; ch_for_fastqc}
-
     //Dump long read info to different channel! 
     ch_all_data
     .map { id, r1, r2, lr, f5, genomeSize -> 
