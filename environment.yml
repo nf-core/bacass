@@ -26,3 +26,7 @@ dependencies:
   - samtools=1.9
   - nanoplot=1.23.1
   - pycoqc=2.2.3
+  - h5py=2.9.0 #until the pycoqc recipe has been updated
+  - tqdm
+  - jinja2
+  - plotly

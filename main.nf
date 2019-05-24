@@ -140,7 +140,7 @@ if(!params.design){
     .filter{id, genomeSize -> 
       genomeSize != 'NA'
     }
-    .into {ch_genomeSize_forCanu}
+    .set {ch_genomeSize_forCanu}
 }
 
 // Header log info
@@ -151,6 +151,7 @@ summary['Pipeline Name']  = 'nf-core/bacass'
 summary['Run Name']         = custom_runName ?: workflow.runName
 summary['Skip Kraken2'] = params.skip_kraken2
 summary['Kraken2 DB'] = params.kraken2db
+summary['Skip PycoQC'] = params.skip_pycoqc
 summary['Extra Unicycler arguments'] = params.unicycler_args
 summary['Extra Prokka arguments'] = params.prokka_args
 summary['Assembler Method'] = params.assembler
@@ -332,9 +333,10 @@ process nanoplot {
 
 process pycoqc{
     tag "$sample_id"
+    label 'medium'
     publishDir "${params.outDir}/QC_longreads/PycoQC", mode: 'copy'
 
-    when: params.assembly_type == 'hybrid' || params.assembly_type == 'long' && fast5
+    when: (params.assembly_type == 'hybrid' || params.assembly_type == 'long') && !params.skip_pycoqc && fast5
 
     input:
     set sample_id, file(lr), file(fast5) from ch_for_pycoqc.join(ch_fast5_for_pycoqc)
@@ -349,7 +351,7 @@ process pycoqc{
         run_summary = ''
         prefix = "${fast5}/"
     } else {
-        run_summary =  "Fast5_to_seq_summary -f $fast5 -t ${task.cpus} -s 'sequencing_summary.txt'"
+        run_summary =  "Fast5_to_seq_summary -f $fast5 -t ${task.cpus} -s sequencing_summary.txt --verbose_level 2"
         prefix = ''
     }
     //Barcodes available? 
