@@ -8,7 +8,7 @@ channels:
 dependencies:
   - fastqc=0.11.8
   - multiqc=1.7
-  - unicycler=0.4.7
+  - unicycler=0.4.4 #0.4.7 has quite severe bugs for hybrid assembly, see https://github.com/rrwick/Unicycler/issues/140 
   - skewer=0.2.2
   - kraken2=2.0.8_beta
   - quast=5.0.2
