@@ -1,5 +1,5 @@
 FROM nfcore/base
-LABEL authors="Andreas Wilm" \
+LABEL authors="Andreas Wilm, Alexander Peltzer" \
       description="Docker image containing all requirements for nf-core/bacass pipeline"
 
 COPY environment.yml /
