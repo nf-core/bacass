@@ -200,44 +200,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
    return yaml_file
 }
 
-/*
- * Parse software version numbers
- */
-process get_software_versions {
-    publishDir "${params.outDir}/pipeline_info", mode: 'copy',
-    saveAs: {filename ->
-        if (filename.indexOf(".csv") > 0) filename
-        else null
-    }
 
-    input:
-    file quast_version from ch_quast_version
-
-    output:
-    file 'software_versions_mqc.yaml' into software_versions_yaml
-    file "software_versions.csv"
-
-    script:
-    """
-    echo $workflow.manifest.version > v_pipeline.txt
-    echo $workflow.nextflow.version > v_nextflow.txt
-    fastqc --version > v_fastqc.txt
-    multiqc --version > v_multiqc.txt
-    prokka -v 2> v_prokka.txt
-    skewer -v > v_skewer.txt
-    kraken2 -v > v_kraken2.txt
-    Bandage -v > v_bandage.txt
-    nanopolish --version > v_nanopolish.txt
-    miniasm -V > v_miniasm.txt
-    racon --version > v_racon.txt
-    porechop --version > v_porechop.txt
-    samtools --version &> v_samtools.txt 2>&1 || true
-    minimap2 --version &> v_minimap2.txt
-    NanoPlot --version > v_nanoplot.txt
-    canu --version > v_canu.txt
-    scrape_software_versions.py > software_versions_mqc.yaml
-    """
-}
 
 
 /* Trim and combine short read read-pairs per sample. Similar to nf-core vipr
@@ -526,7 +489,7 @@ process quast {
   // multiqc only detects a file called report.tsv. to avoid
   // name clash with other samples we need a directory named by sample
   file("${sample_id}_assembly_QC/") into quast_logs_ch
-  file 'v_quast.txt' into ch_quast_version
+  file("v_quast.txt") into ch_quast_version
 
   script:
   """
@@ -587,6 +550,44 @@ process polishing {
     """
 }
 
+/*
+ * Parse software version numbers
+ */
+process get_software_versions {
+    publishDir "${params.outDir}/pipeline_info", mode: 'copy',
+    saveAs: {filename ->
+        if (filename.indexOf(".csv") > 0) filename
+        else null
+    }
+
+    input:
+    file quast_version from ch_quast_version
+
+    output:
+    file 'software_versions_mqc.yaml' into software_versions_yaml
+    file "software_versions.csv"
+
+    script:
+    """
+    echo $workflow.manifest.version > v_pipeline.txt
+    echo $workflow.nextflow.version > v_nextflow.txt
+    fastqc --version > v_fastqc.txt
+    multiqc --version > v_multiqc.txt
+    prokka -v 2> v_prokka.txt
+    skewer -v > v_skewer.txt
+    kraken2 -v > v_kraken2.txt
+    Bandage -v > v_bandage.txt
+    nanopolish --version > v_nanopolish.txt
+    miniasm -V > v_miniasm.txt
+    racon --version > v_racon.txt
+    porechop --version > v_porechop.txt
+    samtools --version &> v_samtools.txt 2>&1 || true
+    minimap2 --version &> v_minimap2.txt
+    NanoPlot --version > v_nanoplot.txt
+    canu --version > v_canu.txt
+    scrape_software_versions.py > software_versions_mqc.yaml
+    """
+}
 
 /*
  * STEP - MultiQC
