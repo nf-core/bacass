@@ -6,6 +6,7 @@ channels:
   - bioconda
   - defaults
 dependencies:
+  - python=3.7
   - fastqc=0.11.8
   - multiqc=1.7
   - unicycler=0.4.7

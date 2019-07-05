@@ -210,6 +210,9 @@ process get_software_versions {
         else null
     }
 
+    input:
+    file quast_version from ch_quast_version
+
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
     file "software_versions.csv"
@@ -221,7 +224,6 @@ process get_software_versions {
     fastqc --version > v_fastqc.txt
     multiqc --version > v_multiqc.txt
     prokka -v 2> v_prokka.txt
-    quast -v > v_quast.txt
     skewer -v > v_skewer.txt
     kraken2 -v > v_kraken2.txt
     Bandage -v > v_bandage.txt
@@ -517,8 +519,6 @@ process quast {
   tag {"$sample_id"}
   publishDir "${params.outDir}/${sample_id}/", mode: 'copy'
   
-  label 'small'
-
   input:
   set sample_id, fasta from quast_ch
   
@@ -526,10 +526,12 @@ process quast {
   // multiqc only detects a file called report.tsv. to avoid
   // name clash with other samples we need a directory named by sample
   file("${sample_id}_assembly_QC/") into quast_logs_ch
+  file 'v_quast.txt' into ch_quast_version
 
   script:
   """
-  quast.py -t ${task.cpus} -o ${sample_id}_assembly_QC ${fasta} 
+  quast.py -t ${task.cpus} -o ${sample_id}_assembly_QC ${fasta}
+  quast -v > v_quast.txt
   """
 }
 
