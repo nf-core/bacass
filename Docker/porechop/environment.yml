@@ -1,4 +1,4 @@
-name: bacassquast
+name: bacassporechop
 channels:
   - bioconda
 dependencies:
