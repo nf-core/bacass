@@ -242,10 +242,11 @@ process adapter_trimming {
 
     output:
     set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish)
-    
+    file ("v_porechop.txt") into ch_porechop_version
 	script:
     """
     porechop -i "${lr}" -t "${task.cpus}" -o trimmed.fastq
+    porechop --version > v_porechop.txt
     """
 }
 
@@ -562,6 +563,7 @@ process get_software_versions {
 
     input:
     file quast_version from ch_quast_version
+    file porechop_version from ch_porechop_version
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
@@ -580,7 +582,6 @@ process get_software_versions {
     nanopolish --version > v_nanopolish.txt
     miniasm -V > v_miniasm.txt
     racon --version > v_racon.txt
-    porechop --version > v_porechop.txt
     samtools --version &> v_samtools.txt 2>&1 || true
     minimap2 --version &> v_minimap2.txt
     NanoPlot --version > v_nanoplot.txt

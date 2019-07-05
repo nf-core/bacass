@@ -1,0 +1,5 @@
+name: bacassquast
+channels:
+  - bioconda
+dependencies:
+  - porechop=0.2.3_seqan2.1.1
