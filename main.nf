@@ -233,9 +233,12 @@ process trim_and_combine {
 
 //AdapterTrimming for ONT reads
 process adapter_trimming {
-    label 'medium'
+    
+    publishDir "${params.outDir}/${sample_id}/${sample_id}_longreads/", mode: 'copy'
 
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
+
+    label 'medium'
 
     input:
 	set sample_id, file(lr) from ch_for_long_trim
