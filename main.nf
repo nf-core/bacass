@@ -233,6 +233,7 @@ process trim_and_combine {
 
 //AdapterTrimming for ONT reads
 process adapter_trimming {
+    label 'medium'
 
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
