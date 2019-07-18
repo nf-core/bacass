@@ -492,7 +492,8 @@ process quast {
   output:
   // multiqc only detects a file called report.tsv. to avoid
   // name clash with other samples we need a directory named by sample
-  file("${sample_id}_assembly_QC/") into quast_logs_ch
+  file("${sample_id}_assembly_QC/")
+  file("${sample_id}_assembly_QC/report.tsv") into quast_logs_ch
   file("v_quast.txt") into ch_quast_version
 
   script:
@@ -604,7 +605,7 @@ process multiqc {
     input:
     file multiqc_config from ch_multiqc_config
     //file prokka_logs from prokka_logs_ch.collect().ifEmpty([])
-    file quast_logs from quast_logs_ch.collect().ifEmpty([])
+    file ('quast_logs/*') from quast_logs_ch.collect().ifEmpty([])
     // NOTE unicycler and kraken not supported
     file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
     file ('software_versions/*') from software_versions_yaml.collect()
