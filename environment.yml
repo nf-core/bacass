@@ -12,7 +12,7 @@ dependencies:
   - unicycler=0.4.7
   - skewer=0.2.2
   - kraken2=2.0.8_beta
-  - prokka=1.13.4
+  - prokka=1.13.7
   - bandage=0.8.1
   # for markdown_to_html.r
   - r-markdown=0.9

@@ -506,6 +506,8 @@ process prokka {
    label 'large'
    tag "$sample_id"
    publishDir "${params.outDir}/${sample_id}/", mode: 'copy'
+   
+   when: !params.skip_annotation
 
    input:
    set sample_id, fasta from prokka_ch
