@@ -244,7 +244,7 @@ process adapter_trimming {
 	set sample_id, file(lr) from ch_for_long_trim
 
     output:
-    set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish)
+    set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish, ch_long_trimmed_kraken)
     file ("v_porechop.txt") into ch_porechop_version
 	script:
     """
@@ -477,6 +477,30 @@ process kraken2 {
     # braken would be nice but requires readlength and correspondingly build db
 	kraken2 --threads ${task.cpus} --paired --db ${kraken2db} \
 		--report ${sample_id}_kraken2.report ${fq1} ${fq2} | gzip > kraken2.out.gz
+	"""
+}
+
+/* kraken classification: QC for sample purity, only short end reads for now
+ */
+process kraken2_long {
+    label 'large'
+    tag "$sample_id"
+    publishDir "${params.outDir}/kraken_long/${sample_id}/", mode: 'copy'
+
+    when: !params.skip_kraken2
+
+    input:
+    set sample_id, file(lr) from ch_long_trimmed_kraken
+
+    output:
+    file("${sample_id}_kraken2.report")
+
+    script:
+	"""
+    # stdout reports per read which is not needed. kraken.report can be used with pavian
+    # braken would be nice but requires readlength and correspondingly build db
+	kraken2 --threads ${task.cpus} --db ${kraken2db} \
+		--report ${sample_id}_kraken2.report ${lr} | gzip > kraken2.out.gz
 	"""
 }
 
