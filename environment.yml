@@ -12,7 +12,7 @@ dependencies:
   - skewer=0.2.2
   - kraken2=2.0.8_beta
   - quast=5.0.2
-  - prokka=1.13.4
+  - prokka=1.14.0
   - bandage=0.8.1
   # for markdown_to_html.r
   - r-markdown=0.9
