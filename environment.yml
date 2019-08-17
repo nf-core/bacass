@@ -12,7 +12,7 @@ dependencies:
   - skewer=0.2.2
   - kraken2=2.0.8_beta
   - quast=5.0.2
-  - prokka=1.13.4
+  - prokka=1.14.0
   - bandage=0.8.1
   # for markdown_to_html.r
   - r-markdown=0.9
@@ -27,6 +27,6 @@ dependencies:
   - nanoplot=1.23.1
   - pycoqc=2.2.3
   - h5py=2.9.0 #until the pycoqc recipe has been updated
-  - tqdm
-  - jinja2
-  - plotly
+  - tqdm=4.33.0
+  - jinja2=2.10.1
+  - plotly=4.1.0
