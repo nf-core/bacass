@@ -7,6 +7,7 @@ A simple bacterial assembly and annotation pipeline
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/bacass.svg)](https://hub.docker.com/r/nfcore/bacass)
+[![DOI](https://zenodo.org/badge/168486714.svg)](https://zenodo.org/badge/latestdoi/168486714)
 
 ## Introduction
 
