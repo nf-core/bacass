@@ -7,6 +7,7 @@ A simple bacterial assembly and annotation pipeline
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/bacass.svg)](https://hub.docker.com/r/nfcore/bacass)
+[![DOI](https://zenodo.org/badge/168486714.svg)](https://zenodo.org/badge/latestdoi/168486714)
 
 ## Introduction
 
@@ -29,7 +30,13 @@ The nf-core/bacass pipeline comes with documentation about the pipeline, found i
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
 
-
 ## Credits
 
 nf-core/bacass was originally written by [Andreas Wilm](https://github.com/andreas-wilm) and is currently maintained by [Alexander Peltzer](https://github.com/apeltzer).
+
+## Citation
+
+If you use nf-core/atacseq for your analysis, please cite it using the following doi: [10.5281/zenodo.2634132](https://doi.org/10.5281/zenodo.2634132)
+
+You can cite the `nf-core` pre-print as follows:  
+Ewels PA, Peltzer A, Fillinger S, Alneberg JA, Patel H, Wilm A, Garcia MU, Di Tommaso P, Nahnsen S. **nf-core: Community curated bioinformatics pipelines**. *bioRxiv*. 2019. p. 610741. [doi: 10.1101/610741](https://www.biorxiv.org/content/10.1101/610741v1).
