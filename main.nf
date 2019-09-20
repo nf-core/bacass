@@ -337,7 +337,7 @@ process prokka {
    publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
 
    input:
-   set sample_id, fasta from prokka_ch
+   set sample_id, file(fasta) from prokka_ch
 
    output:
    file("${sample_id}_annotation/")
