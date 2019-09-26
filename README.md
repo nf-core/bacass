@@ -12,11 +12,11 @@ A simple bacterial assembly and annotation pipeline
 
 ### Short Read Assembly
 
-This pipeline is for bacterial assembly of next-generation sequencing reads. It can be used to quality trim your reads using [Skewer](https://github.com/relipmoc/skewer) and performs basic QC using [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/). Afterwards, the pipeline performs read assembly using [Unicycler](https://github.com/rrwick/Unicycler). Contamination of the assembly is checked using [Kraken2](https://ccb.jhu.edu/software/kraken2/) to verify sample purity. 
+This pipeline is for bacterial assembly of next-generation sequencing reads. It can be used to quality trim your reads using [Skewer](https://github.com/relipmoc/skewer) and performs basic QC using [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/). Afterwards, the pipeline performs read assembly using [Unicycler](https://github.com/rrwick/Unicycler). Contamination of the assembly is checked using [Kraken2](https://ccb.jhu.edu/software/kraken2/) to verify sample purity.
 
 ### Long Read Assembly
 
-For users that only have NanoPore data, the pipeline quality trims these using [PoreChop](https://github.com/rrwick/Porechop) and assesses basic QC utilizing [NanoPlot](https://github.com/wdecoster/NanoPlot) and [PycoQC](https://github.com/a-slide/pycoQC). 
+For users that only have NanoPore data, the pipeline quality trims these using [PoreChop](https://github.com/rrwick/Porechop) and assesses basic QC utilizing [NanoPlot](https://github.com/wdecoster/NanoPlot) and [PycoQC](https://github.com/a-slide/pycoQC).
 The pipeline can then perform long read assembly utilizing [Unicycler](https://github.com/rrwick/Unicycler), [Miniasm](https://github.com/lh3/miniasm) in combination with [Racon](https://github.com/isovic/racon) or [Canu](https://github.com/marbl/canu). Long reads can be polished using specified Fast5 files using [NanoPolish](https://github.com/jts/nanopolish).
 
 ### Hybrid Assembly
