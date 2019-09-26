@@ -514,7 +514,7 @@ process prokka {
    when: !params.skip_annotation
 
    input:
-   set sample_id, fasta from prokka_ch
+   set sample_id, file(fasta) from prokka_ch
 
    output:
    file("${sample_id}_annotation/")
