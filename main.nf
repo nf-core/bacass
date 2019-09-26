@@ -75,7 +75,7 @@ if( workflow.profile == 'awsbatch') {
   if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
   // Check outdir paths to be S3 buckets if running on AWSBatch
   // related: https://github.com/nextflow-io/nextflow/issues/813
-  if (!params.outDir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+  if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
   // Prevent trace files to be stored on S3 since S3 does not support rolling files.
   if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
@@ -159,7 +159,7 @@ summary['Assembly Type'] = params.assembly_type
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
 summary['Launch dir']       = workflow.launchDir
-summary['Output dir'] = params.outDir
+summary['Output dir'] = params.outdir
 summary['Working dir'] = workflow.workDir
 summary['Script dir'] = workflow.projectDir
 summary['User'] = workflow.userName
@@ -207,7 +207,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
  */
 process trim_and_combine {
     tag "$sample_id"
-    publishDir "${params.outDir}/${sample_id}/${sample_id}_reads/", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/${sample_id}_reads/", mode: 'copy'
 
     label 'medium'
 
@@ -234,7 +234,7 @@ process trim_and_combine {
 //AdapterTrimming for ONT reads
 process adapter_trimming {
     
-    publishDir "${params.outDir}/${sample_id}/${sample_id}_longreads/", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/${sample_id}_longreads/", mode: 'copy'
 
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
@@ -259,7 +259,7 @@ process adapter_trimming {
 process fastqc {
     label 'small'
     tag "$sample_id"
-    publishDir "${params.outDir}/${sample_id}/${sample_id}_reads", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/${sample_id}_reads", mode: 'copy'
 
     input:
     set sample_id, file(fq1), file(fq2) from ch_short_for_fastqc
@@ -278,7 +278,7 @@ process fastqc {
  */
 process nanoplot {
     tag "$sample_id"
-    publishDir "${params.outDir}/QC_longreads/NanoPlot_${sample_id}", mode: 'copy'
+    publishDir "${params.outdir}/QC_longreads/NanoPlot_${sample_id}", mode: 'copy'
 
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
@@ -303,7 +303,7 @@ process nanoplot {
 process pycoqc{
     tag "$sample_id"
     label 'medium'
-    publishDir "${params.outDir}/QC_longreads/PycoQC", mode: 'copy'
+    publishDir "${params.outdir}/QC_longreads/PycoQC", mode: 'copy'
 
     when: (params.assembly_type == 'hybrid' || params.assembly_type == 'long') && !params.skip_pycoqc && fast5
 
@@ -356,7 +356,7 @@ if(params.assembly_type == 'hybrid'){
  */
 process unicycler {
     tag "$sample_id"
-    publishDir "${params.outDir}/unicycler/${sample_id}/", mode: 'copy'
+    publishDir "${params.outdir}/unicycler/${sample_id}/", mode: 'copy'
 
     label 'large'
 
@@ -368,6 +368,7 @@ process unicycler {
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into quast_ch, prokka_ch
     set sample_id, file("${sample_id}_assembly.gfa") into bandage_ch
+    file("${sample_id}_assembly.fasta") into ch_assembly_polish_unicycler
     file("${sample_id}_assembly.gfa")
     file("${sample_id}_assembly.png")
     file("${sample_id}_unicycler.log")
@@ -393,7 +394,7 @@ process unicycler {
 
 process miniasm_assembly {
     tag "$sample_id"
-    publishDir "${params.outDir}/miniasm/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
+    publishDir "${params.outdir}/miniasm/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
     
     label 'large'
 
@@ -416,7 +417,7 @@ process miniasm_assembly {
 //Run consensus for miniasm, the others don't need it.
 process consensus {
     tag "$sample_id"
-	publishDir "${params.outDir}/miniasm/consensus/${sample_id}", mode: 'copy', pattern: 'assembly_consensus.fasta'
+	publishDir "${params.outdir}/miniasm/consensus/${sample_id}", mode: 'copy', pattern: 'assembly_consensus.fasta'
     label 'large'
 
     input:
@@ -435,7 +436,7 @@ process consensus {
 
 process canu_assembly {
     tag "$sample_id"
-    publishDir "${params.outDir}/canu/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
+    publishDir "${params.outdir}/canu/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
 
     label 'large'
 
@@ -461,7 +462,7 @@ process canu_assembly {
 process kraken2 {
     label 'large'
     tag "$sample_id"
-    publishDir "${params.outDir}/kraken/${sample_id}/", mode: 'copy'
+    publishDir "${params.outdir}/kraken/${sample_id}/", mode: 'copy'
 
     when: !params.skip_kraken2
 
@@ -485,7 +486,7 @@ process kraken2 {
 process kraken2_long {
     label 'large'
     tag "$sample_id"
-    publishDir "${params.outDir}/kraken_long/${sample_id}/", mode: 'copy'
+    publishDir "${params.outdir}/kraken_long/${sample_id}/", mode: 'copy'
 
     when: !params.skip_kraken2
 
@@ -508,7 +509,7 @@ process kraken2_long {
  */
 process quast {
   tag {"$sample_id"}
-  publishDir "${params.outDir}/${sample_id}/", mode: 'copy'
+  publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
   
   input:
   set sample_id, fasta from quast_ch
@@ -533,7 +534,7 @@ process quast {
 process prokka {
    label 'large'
    tag "$sample_id"
-   publishDir "${params.outDir}/${sample_id}/", mode: 'copy'
+   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
    
    when: !params.skip_annotation
 
@@ -555,12 +556,12 @@ process prokka {
 
 //Polishes assembly using FAST5 files
 process polishing {
-    publishDir "${params.outDir}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
+    publishDir "${params.outdir}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
 
     when: !params.skip_nanopolish
 
     input:
-    file(assembly) from ch_assembly_consensus //Should take either miniasm, canu, or unicycler consensus sequence (!)
+    file(assembly) from ch_assembly_consensus.mix(ch_assembly_polish_unicycler,assembly_from_canu) //Should take either miniasm, canu, or unicycler consensus sequence (!)
     set sample_id, file(lrfastq), file(fast5) from ch_long_trimmed_nanopolish.join(ch_fast5_for_nanopolish)
     set identifier, file(summary) from ch_summary_index_for_nanopolish
 
@@ -585,7 +586,7 @@ process polishing {
  * Parse software version numbers
  */
 process get_software_versions {
-    publishDir "${params.outDir}/pipeline_info", mode: 'copy',
+    publishDir "${params.outdir}/pipeline_info", mode: 'copy',
     saveAs: {filename ->
         if (filename.indexOf(".csv") > 0) filename
         else null
@@ -626,7 +627,7 @@ process get_software_versions {
 
 process multiqc {
     label 'small'
-    publishDir "${params.outDir}/MultiQC", mode: 'copy'
+    publishDir "${params.outdir}/MultiQC", mode: 'copy'
 
     input:
     file multiqc_config from ch_multiqc_config
@@ -655,7 +656,7 @@ process multiqc {
  * STEP 3 - Output Description HTML
  */
 process output_documentation {
-    publishDir "${params.outDir}/pipeline_info", mode: 'copy'
+    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
     input:
     file output_docs from ch_output_docs
@@ -750,7 +751,7 @@ workflow.onComplete {
     }
 
     // Write summary e-mail HTML to a file
-    def output_d = new File( "${params.outDir}/pipeline_info/" )
+    def output_d = new File( "${params.outdir}/pipeline_info/" )
     if( !output_d.exists() ) {
       output_d.mkdirs()
     }
