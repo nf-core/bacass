@@ -44,4 +44,6 @@ script:
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_long,docker
   # Run the pipeline with the test_hybrid profile (for short + long reads in combation)
   - nextflow run ${TRAVIS_BUILD_DIR} -profile test_hybrid,docker
+  # Run long profile with NanoPolish in the end
+  - nextflow run ${TRAVIS_BUILD_DIR} -profile test_long,docker --skip_nanopolish false
 
