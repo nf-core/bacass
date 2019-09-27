@@ -119,7 +119,7 @@ if(!params.design){
     .map { id, r1, r2, lr, f5, genomeSize -> 
             tuple(id, file(lr))
     }
-    .dump()
+    .dump(tag: 'longinput')
     .into {ch_for_long_trim; ch_for_nanoplot; ch_for_pycoqc; ch_for_nanopolish; ch_for_long_fastq}
 
     //Dump fast5 to separate channel
