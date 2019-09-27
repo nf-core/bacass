@@ -200,7 +200,10 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
    return yaml_file
 }
 
-
+//Check compatible parameters
+if((params.assembler == 'canu' || params.assembler == 'miniasm') && (params.assembly_type = 'short' || params.assembly_type = 'hybrid')){
+    exit 1, "Canu and Miniasm can only be used for long read assembly and neither for Hybrid nor Shortread assembly!"
+}
 
 
 /* Trim and combine short read read-pairs per sample. Similar to nf-core vipr
