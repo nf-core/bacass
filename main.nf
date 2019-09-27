@@ -281,7 +281,7 @@ process fastqc {
  * Quality check for nanopore reads and Quality/Length Plots
  */
 process nanoplot {
-    tag "$sample_id"
+    tag "${sample_id}"
     publishDir "${params.outdir}/QC_longreads/NanoPlot_${sample_id}", mode: 'copy'
 
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
@@ -397,7 +397,7 @@ process unicycler {
 }
 
 process miniasm_assembly {
-    tag "$sample_id"
+    tag "${sample_id}"
     publishDir "${params.outdir}/miniasm/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
     
     label 'large'
