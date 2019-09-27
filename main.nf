@@ -236,11 +236,13 @@ process trim_and_combine {
 
 //AdapterTrimming for ONT reads
 process adapter_trimming {
-    label 'medium'
+    tag "$sample_id"
 
     publishDir "${params.outdir}/${sample_id}/${sample_id}_longreads/", mode: 'copy'
 
     when: "${params.assembly_type}" == 'hybrid' || "${params.assembly_type}" == 'long'
+
+    label 'medium'
 
 
     input:
