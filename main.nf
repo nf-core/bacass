@@ -201,7 +201,7 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 }
 
 //Check compatible parameters
-if((params.assembler == 'canu' || params.assembler == 'miniasm') && (params.assembly_type = 'short' || params.assembly_type = 'hybrid')){
+if(("${params.assembler}" == 'canu' || "${params.assembler}" == 'miniasm') && ("${params.assembly_type}" == 'short' || "${params.assembly_type}" == 'hybrid')){
     exit 1, "Canu and Miniasm can only be used for long read assembly and neither for Hybrid nor Shortread assembly!"
 }
 
@@ -236,12 +236,12 @@ process trim_and_combine {
 
 //AdapterTrimming for ONT reads
 process adapter_trimming {
-    
+    label 'medium'
+
     publishDir "${params.outdir}/${sample_id}/${sample_id}_longreads/", mode: 'copy'
 
-    when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
+    when: "${params.assembly_type}" == 'hybrid' || "${params.assembly_type}" == 'long'
 
-    label 'medium'
 
     input:
 	set sample_id, file(lr) from ch_for_long_trim
