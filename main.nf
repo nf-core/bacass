@@ -244,7 +244,6 @@ process adapter_trimming {
 
     label 'medium'
 
-
     input:
 	set sample_id, file(lr) from ch_for_long_trim
 
