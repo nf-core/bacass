@@ -456,7 +456,7 @@ process canu_assembly {
     """
     canu -p assembly -d canu_out \
         genomeSize="${genomeSize}" -nanopore-raw "${lrfastq}" \
-        maxThreads="${task.cpus}" useGrid=false gnuplotTested=true
+        maxThreads="${task.cpus}"
     mv canu_out/assembly.contigs.fasta assembly.fasta
     """
 }
@@ -562,7 +562,7 @@ process prokka {
 process polishing {
     publishDir "${params.outdir}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
 
-    when: !params.skip_nanopolish
+    when: !params.skip_nanopolish && params.assembly_type == 'long'
 
     input:
     file(assembly) from ch_assembly_consensus.mix(ch_assembly_polish_unicycler,assembly_from_canu) //Should take either miniasm, canu, or unicycler consensus sequence (!)
