@@ -12,22 +12,17 @@ dependencies:
   - unicycler=0.4.7
   - skewer=0.2.2
   - kraken2=2.0.8_beta
-  - quast=5.0.2
   - prokka=1.14.0
   - bandage=0.8.1
   # for markdown_to_html.r
-  - r-markdown=1.0
+  - r-markdown=1.1
   # Nanopore analysis stuff
   - nanopolish=0.11.1
   - miniasm=0.3_r179
-  - racon=1.4.3
+  - racon=1.4.7
   - canu=1.8
   - minimap2=2.17
   - samtools=1.9
-  - nanoplot=1.26.3
+  - nanoplot=1.27.0
   - pycoqc=2.2.4
   - h5py=2.9.0 #until the pycoqc recipe has been updated
-  - matplotlib=3.0.3        # Current 3.1.0 build incompatible with multiqc=1.7
-  - tqdm=4.33.0
-  - jinja2=2.10.1
-  - plotly=4.1.0
