@@ -237,11 +237,7 @@ process trim_and_combine {
 //AdapterTrimming for ONT reads
 process adapter_trimming {
     tag "$sample_id"
-
     publishDir "${params.outdir}/${sample_id}/${sample_id}_longreads/", mode: 'copy'
-
-    when: "${params.assembly_type}" == 'hybrid' || "${params.assembly_type}" == 'long'
-
     label 'medium'
 
     input:
@@ -250,6 +246,10 @@ process adapter_trimming {
     output:
     set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish, ch_long_trimmed_kraken)
     file ("v_porechop.txt") into ch_porechop_version
+
+    when: !('short' in params.assembly_type)
+
+
 	script:
     """
     porechop -i "${lr}" -t "${task.cpus}" -o trimmed.fastq
@@ -284,7 +284,7 @@ process nanoplot {
     tag "${sample_id}"
     publishDir "${params.outdir}/QC_longreads/NanoPlot_${sample_id}", mode: 'copy'
 
-    when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
+    when: (params.assembly_type != 'short')
 
     input:
     set sample_id, file(lr) from ch_for_nanoplot 
@@ -455,9 +455,10 @@ process canu_assembly {
     script:
     """
     canu -p assembly -d canu_out \
-        genomeSize=${genomeSize} -nanopore-raw ${lrfastq} \
-        maxThreads=${task.cpus} merylMemory=${task.memory} \
-        merylThreads=${task.cpus} hapThreads=${task.cpus} batMemory=${task.memory}
+        genomeSize="${genomeSize}" -nanopore-raw "${lrfastq}" \
+        maxThreads="${task.cpus}" merylMemory="${task.memory.toGiga()}G" \
+        merylThreads="${task.cpus}" hapThreads="${task.cpus}" batMemory="${task.memory.toGiga()}G" \
+        corMemory="${task.memory.toGiga()}G" corThreads="${task.cpus}"
     mv canu_out/assembly.contigs.fasta assembly.fasta
     """
 }
