@@ -532,7 +532,7 @@ process quast {
 
   script:
   """
-  quast.py -t ${task.cpus} -o ${sample_id}_assembly_QC ${fasta}
+  quast -t ${task.cpus} -o ${sample_id}_assembly_QC ${fasta}
   quast -v > v_quast.txt
   """
 }
