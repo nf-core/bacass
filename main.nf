@@ -327,7 +327,7 @@ process pycoqc{
         run_summary = ''
         prefix = "${fast5}/"
     } else {
-        run_summary =  "Fast5_to_seq_summary -f $fast5 -t ${task.cpus} -s './sequencing_summary.txt' --verbose_level 2"
+        run_summary =  "Fast5_to_seq_summary -f $fast5 -t ${task.cpus} -s "${fast5}/sequencing_summary.txt" --verbose_level 2"
         prefix = ''
     }
     //Barcodes available? 
