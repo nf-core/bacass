@@ -521,7 +521,7 @@ process quast {
   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
   
   input:
-  set sample_id, fasta from quast_ch
+  set sample_id, file(fasta) from quast_ch
   
   output:
   // multiqc only detects a file called report.tsv. to avoid
