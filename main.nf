@@ -117,9 +117,9 @@ if(!params.design){
     //Dump long read info to different channel! 
     ch_all_data
     .map { id, r1, r2, lr, f5, genomeSize -> 
-            tuple(id, lr)
+            tuple(id, file(lr))
     }
-    .dump()
+    .dump(tag: 'longinput')
     .into {ch_for_long_trim; ch_for_nanoplot; ch_for_pycoqc; ch_for_nanopolish; ch_for_long_fastq}
 
     //Dump fast5 to separate channel
@@ -200,7 +200,10 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
    return yaml_file
 }
 
-
+//Check compatible parameters
+if(("${params.assembler}" == 'canu' || "${params.assembler}" == 'miniasm') && ("${params.assembly_type}" == 'short' || "${params.assembly_type}" == 'hybrid')){
+    exit 1, "Canu and Miniasm can only be used for long read assembly and neither for Hybrid nor Shortread assembly!"
+}
 
 
 /* Trim and combine short read read-pairs per sample. Similar to nf-core vipr
@@ -244,8 +247,12 @@ process adapter_trimming {
 	set sample_id, file(lr) from ch_for_long_trim
 
     output:
-    set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish)
+    set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish, ch_long_trimmed_kraken)
     file ("v_porechop.txt") into ch_porechop_version
+
+    when: !('short' in params.assembly_type)
+
+
 	script:
     """
     porechop -i "${lr}" -t "${task.cpus}" -o trimmed.fastq
@@ -269,7 +276,7 @@ process fastqc {
 
     script:
     """
-    fastqc -t {task.cpus} -q ${fq1} ${fq2}
+    fastqc -t ${task.cpus} -q ${fq1} ${fq2}
     """
 }
 
@@ -280,7 +287,7 @@ process nanoplot {
     tag "$sample_id"
     publishDir "${params.outdir}/QC_longreads/NanoPlot_${sample_id}", mode: 'copy'
 
-    when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
+    when: (params.assembly_type != 'short')
 
     input:
     set sample_id, file(lr) from ch_for_nanoplot 
@@ -368,6 +375,7 @@ process unicycler {
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into quast_ch, prokka_ch
     set sample_id, file("${sample_id}_assembly.gfa") into bandage_ch
+    file("${sample_id}_assembly.fasta") into ch_assembly_polish_unicycler
     file("${sample_id}_assembly.gfa")
     file("${sample_id}_assembly.png")
     file("${sample_id}_unicycler.log")
@@ -451,7 +459,9 @@ process canu_assembly {
     """
     canu -p assembly -d canu_out \
         genomeSize="${genomeSize}" -nanopore-raw "${lrfastq}" \
-        maxThreads="${task.cpus}" useGrid=false gnuplotTested=true
+        maxThreads="${task.cpus}" merylMemory="${task.memory.toGiga()}G" \
+        merylThreads="${task.cpus}" hapThreads="${task.cpus}" batMemory="${task.memory.toGiga()}G" \
+        corMemory="${task.memory.toGiga()}G" corThreads="${task.cpus}"
     mv canu_out/assembly.contigs.fasta assembly.fasta
     """
 }
@@ -477,6 +487,30 @@ process kraken2 {
     # braken would be nice but requires readlength and correspondingly build db
 	kraken2 --threads ${task.cpus} --paired --db ${kraken2db} \
 		--report ${sample_id}_kraken2.report ${fq1} ${fq2} | gzip > kraken2.out.gz
+	"""
+}
+
+/* kraken classification: QC for sample purity, only short end reads for now
+ */
+process kraken2_long {
+    label 'large'
+    tag "$sample_id"
+    publishDir "${params.outdir}/kraken_long/${sample_id}/", mode: 'copy'
+
+    when: !params.skip_kraken2
+
+    input:
+    set sample_id, file(lr) from ch_long_trimmed_kraken
+
+    output:
+    file("${sample_id}_kraken2.report")
+
+    script:
+	"""
+    # stdout reports per read which is not needed. kraken.report can be used with pavian
+    # braken would be nice but requires readlength and correspondingly build db
+	kraken2 --threads ${task.cpus} --db ${kraken2db} \
+		--report ${sample_id}_kraken2.report ${lr} | gzip > kraken2.out.gz
 	"""
 }
 
@@ -533,10 +567,10 @@ process prokka {
 process polishing {
     publishDir "${params.outdir}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
 
-    when: !params.skip_nanopolish
+    when: !params.skip_nanopolish && params.assembly_type == 'long'
 
     input:
-    file(assembly) from ch_assembly_consensus //Should take either miniasm, canu, or unicycler consensus sequence (!)
+    file(assembly) from ch_assembly_consensus.mix(ch_assembly_polish_unicycler,assembly_from_canu) //Should take either miniasm, canu, or unicycler consensus sequence (!)
     set sample_id, file(lrfastq), file(fast5) from ch_long_trimmed_nanopolish.join(ch_fast5_for_nanopolish)
     set identifier, file(summary) from ch_summary_index_for_nanopolish
 
@@ -740,10 +774,10 @@ workflow.onComplete {
     c_green = params.monochrome_logs ? '' : "\033[0;32m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
 
-    if (workflow.stats.ignoredCountFmt > 0 && workflow.success) {
+    if (workflow.stats.ignoredCount > 0 && workflow.success) {
       log.info "${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}"
-      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCountFmt} ${c_reset}"
-      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCountFmt} ${c_reset}"
+      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}"
+      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}"
     }
 
     if(workflow.success){
