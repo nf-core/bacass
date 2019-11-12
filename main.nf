@@ -373,7 +373,7 @@ process unicycler {
     set sample_id, file(fq1), file(fq2), file(lrfastq) from ch_short_long_joint_unicycler 
 
     output:
-    set sample_id, file("${sample_id}_assembly.fasta") into quast_ch, prokka_ch
+    set sample_id, file("${sample_id}_assembly.fasta") into (quast_ch, prokka_ch)
     set sample_id, file("${sample_id}_assembly.gfa") into bandage_ch
     file("${sample_id}_assembly.fasta") into ch_assembly_polish_unicycler
     file("${sample_id}_assembly.gfa")
