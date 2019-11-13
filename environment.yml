@@ -18,6 +18,7 @@ dependencies:
   - r-markdown=1.1
   # Nanopore analysis stuff
   - nanopolish=0.11.1
+  - parallel=v20190922
   - miniasm=0.3_r179
   - racon=1.4.7
   - canu=1.8
