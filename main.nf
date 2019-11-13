@@ -583,7 +583,7 @@ process polishing {
     minimap2 -ax map-ont -t ${task.cpus} "${assembly}" "${lrfastq}"| \
     samtools sort -o reads.sorted.bam -T reads.tmp -
     samtools index reads.sorted.bam
-    nanopolish_makerange.py "${assembly}" | parallel --results nanopolish.results -P "${task.cpus}" nanopolish variants --consensus polished.{1}.fa -w {1} -r "${lrfastq}" -b reads.sorted.bam -g "${assembly}" -t "${task.cpus}" --min-candidate-frequency 0.1
+    nanopolish_makerange.py "${assembly}" | parallel --results nanopolish.results -P "${task.cpus}" nanopolish variants --consensus -o polished.{1}.fa -w {1} -r "${lrfastq}" -b reads.sorted.bam -g "${assembly}" -t "${task.cpus}" --min-candidate-frequency 0.1
     nanopolish vcf2fasta -g "${assembly}" polished.*.vcf > polished_genome.fa
     """
 }
