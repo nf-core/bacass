@@ -572,7 +572,6 @@ process polishing {
     input:
     file(assembly) from ch_assembly_consensus.mix(ch_assembly_polish_unicycler,assembly_from_canu) //Should take either miniasm, canu, or unicycler consensus sequence (!)
     set sample_id, file(lrfastq), file(fast5) from ch_long_trimmed_nanopolish.join(ch_fast5_for_nanopolish)
-    set identifier, file(summary) from ch_summary_index_for_nanopolish
 
     output:
     file 'polished_genome.fa'
