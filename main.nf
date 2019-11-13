@@ -565,6 +565,7 @@ process prokka {
 
 //Polishes assembly using FAST5 files
 process polishing {
+    label 'large'
     publishDir "${params.outdir}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
 
     when: !params.skip_nanopolish && params.assembly_type == 'long'
