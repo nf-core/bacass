@@ -365,8 +365,6 @@ process unicycler {
     tag "$sample_id"
     publishDir "${params.outdir}/unicycler/${sample_id}/", mode: 'copy'
 
-    label 'large'
-
     when: params.assembler == 'unicycler'
 
     input:
