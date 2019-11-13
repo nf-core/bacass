@@ -578,7 +578,7 @@ process polishing {
 
     script:
     """
-    nanopolish index -d "${fast5}" -s "${summary}" "${lrfastq}"
+    nanopolish index -d "${fast5}" "${lrfastq}"
     minimap2 -ax map-ont -t ${task.cpus} "${assembly}" "${lrfastq}"| \
     samtools sort -o reads.sorted.bam -T reads.tmp -
     samtools index reads.sorted.bam
