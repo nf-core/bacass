@@ -8,14 +8,20 @@
   - [Running the pipeline](#running-the-pipeline)
     - [Updating the pipeline](#updating-the-pipeline)
     - [Reproducibility](#reproducibility)
-  - [Main arguments](#main-arguments)
+  - [Main Nextflow arguments](#main-nextflow-arguments)
     - [`-profile`](#profile)
-    - [`--reads`](#reads)
-    - [`--skip_kraken2`](#skipkraken2)
+  - [Main Pipeline Arguments](#main-pipeline-arguments)
+    - [`--assembler`](#assembler)
+    - [`--assembly_type`](#assemblytype)
+    - [`--input`](#input)
     - [`--kraken2db`](#kraken2db)
-    - [`-params-file`](#params-file)
-    - [`--unicycler_args`](#unicyclerargs)
     - [`--prokka_args`](#prokkaargs)
+    - [`--unicycler_args`](#unicyclerargs)
+  - [Skipping Options](#skipping-options)
+    - [`--skip_annotation`](#skipannotation)
+    - [`--skip_kraken2`](#skipkraken2)
+    - [`--skip_nanopolish`](#skipnanopolish)
+    - [`--skip_pycoqc`](#skippycoqc)
   - [Job resources](#job-resources)
     - [Automatic resubmission](#automatic-resubmission)
     - [Custom resource requests](#custom-resource-requests)
@@ -52,7 +58,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/bacass --reads '*_R{1,2}.fastq.gz' -profile docker
+nextflow run nf-core/bacass --design 'design.tsv' -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -82,7 +88,7 @@ First, go to the [nf-core/bacass releases page](https://github.com/nf-core/bacas
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
-## Main arguments
+## Main Nextflow arguments
 
 ### `-profile`
 
@@ -90,42 +96,51 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 
 If `-profile` is not specified at all the pipeline will be run locally and expects all software to be installed and available on the `PATH`.
 
-* `awsbatch`
-  * A generic configuration profile to be used with AWS Batch.
-* `conda`
-  * A generic configuration profile to be used with [conda](https://conda.io/docs/)
-  * Pulls most software from [Bioconda](https://bioconda.github.io/)
-* `docker`
-  * A generic configuration profile to be used with [Docker](http://docker.com/)
-  * Pulls software from DockerHub: [`nfcore/bacass`](http://hub.docker.com/r/nfcore/bacass/)
-* `singularity`
-  * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
-  * Pulls software from DockerHub
-* `test`
-  * A profile with a complete configuration for automated testing
-  * Includes links to test data so needs no other parameters
+- `awsbatch`
+  - A generic configuration profile to be used with AWS Batch.
+- `docker`
+  - A generic configuration profile to be used with [Docker](http://docker.com/)
+  - Pulls software from DockerHub: [`nfcore/bacass`](http://hub.docker.com/r/nfcore/bacass/)
+- `singularity`
+  - A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
+  - Pulls software from DockerHub
+- `test`
+  - A profile with a complete configuration for automated testing
+  - Includes links to test data so needs no other parameters
 
-### `--reads`
+## Main Pipeline Arguments
 
-Use this to specify the location of your input FastQ files. For example:
+### `--assembler`
+
+The assembler to use for assembly. Available options are `Unicycler`, `Canu`, `Miniasm`. The latter two are only available for long-read data, whereas Unicycler can be used for short or hybrid assembly projects.
+
+### `--assembly_type`
+
+This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`. Short & Hybrid assembly will always run Unicycler, whereas long-read assembly can be configured separately using the `--assembler` parameter.
+
+### `--input`
+
+Use this to specify the location of your input design file. For example:
 
 ```bash
---reads 'path/to/data/sample_*_{1,2}.fastq'
+--input 'design_hybrid.tsv'
 ```
 
-Please note the following requirements:
+An example of properly formatted input files can be found at the [nf-core/testData](https://github.com/nf-core/test-datasets/tree/bacass). Exemplarily, this is the input used for a hybrid assembly in testing:
 
-1. The path must be enclosed in quotes
-2. The path must have at least one `*` wildcard character
-3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.
+```bash
+ID	R1	R2	LongFastQ	Fast5	GenomeSize
+ERR044595	https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_1.fastq.gz	https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_2.fastq.gz	https://github.com/nf-core/test-datasets/raw/bacass/nanopore/subset15000.fq.gz	NA	2.8m
+```
 
-If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
+- `ID` The identifier to use for handling the dataset
+- `R1` The forward reads in case of available short-read data
+- `R2` The reverse reads in case of available short-read data
+- `LongFastQ` The long-read FastQ file with reads in FASTQ format
+- `Fast5` The folder containing the basecalled FAST5 files
+- `GenomeSize` The expected genome size of the assembly. Only used by the canu assembler.
 
-See [`-params-file`](#-params-file) for an alternative way to specify read pairs
-
-### `--skip_kraken2`
-
-Skip running Kraken2 classifier on reads.
+Missing values (e.g. FAST5 folder in case of short reads) can be omitted by using a `NA` in the TSV file. The pipeline will handle such cases appropriately then.
 
 ### `--kraken2db`
 
@@ -134,27 +149,31 @@ See [Kraken2 homepage](https://ccb.jhu.edu/software/kraken2/index.shtml#download
 links. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for
 sample purity.
 
-### `-params-file`
+### `--prokka_args`
 
- A parameters file, listing parameters defined here, including paired FastQ input if not defined through `--reads`.
-
-The format is as follows: `{'samples': {sm1: {'readunits': {ru1: {'fq1': p1, 'fq2': p2}, ...}}}, ...}`
-where sm1 is a sample name, ru1 is a readunit (fastq pair) name,
-and p1 and p2 are full paths to FastQ files 1 and 2.
-This allows to have multiple samples and multiple FastQ pairs per sample and a file-only
-configuration of pipeline behaviour.
-
-This file can also list other parameters as described here (e.g. `--kraken2db`)
+This advanced option allows you to pass extra arguments to Prokka (e.g. `" --rfam"` or `" --genus name"`). For this to work you need to quote the arguments and add at least one space
 
 ### `--unicycler_args`
 
-This advanced option allows you to pass extra arguments to Unicycler (e.g. `"--mode conservative"` or
-`"--no_correct"`). For this to work you need to quote the arguments and add at least one space
+This advanced option allows you to pass extra arguments to Unicycler (e.g. `"--mode conservative"` or `"--no_correct"`). For this to work you need to quote the arguments and add at least one space.
 
-### `--prokka_args`
+## Skipping Options
 
-This advanced option allows you to pass extra arguments to Prokka (e.g. `" --rfam"` or
-`" --genus name"`). For this to work you need to quote the arguments and add at least one space
+### `--skip_annotation`
+
+Skip annotating the assembly with Prokka.
+
+### `--skip_kraken2`
+
+Skip running Kraken2 classifier on reads.
+
+### `--skip_nanopolish`
+
+Skip polishing the long-read assembly with FAST5 input. Will not affect short/hybrid assemblies.
+
+### `--skip_pycoqc`
+
+Skip running `PycoQC` on long read input.
 
 ## Job resources
 

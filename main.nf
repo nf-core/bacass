@@ -17,24 +17,29 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/bacass --design input.csv --kraken2db 'path-to-kraken2db' -profile docker
+    nextflow run nf-core/bacass --input input.csv --kraken2db 'path-to-kraken2db' -profile docker
 
     Mandatory arguments:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
                                     Available: conda, docker, singularity, awsbatch, test and more.
+      --input                       The design file used for running the pipeline.
 
+    Pipeline arguments:
+        --assembler                   Default: "Unicycler", Available: "Canu", "Miniasm", "Unicycler". Short & Hybrid assembly always runs "Unicycler".
+        --assembly_type               Default: "Short", Available: "Short", "Long", "Hybrid".
+        --kraken2db                   Path to Kraken2 Database directory
+        --prokka_args                 Advanced: Extra arguments to Prokka (quote and add leading space)
+        --unicycler_args              Advanced: Extra arguments to Unicycler (quote and add leading space)
+  
     Other options:
-      --design                      
-      --skip_kraken2                Don't run Kraken2 for classification
-      --kraken2db                   Path to Kraken2 Database directory
-      --assembler                   Default: "Unicycler", Available: "Canu", "Miniasm", "Unicycler". Short reads can only use "Unicycler".
-      --assembly_type               Default: "Short", Available: "Short", "Long", "Hybrid".
-      --genome_size                 Genome size parameter for Canu Assembler. All others don't need this parameter.
-      --unicycler_args              Advanced: Extra arguments to Unicycler (quote and add leading space)
-      --prokka_args                 Advanced: Extra arguments to Prokka (quote and add leading space)
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
+   Skipping options:
+      --skip_annotation             Skips the annotation with Prokka
+      --skip_kraken2                Skips the read classification with Kraken2
+      --skip_nanopolish             Skips polishing long-reads with Nanopolish
+      --skip_pycoqc                 Skips long-read raw signal QC
 
     AWSBatch options:
       --awsqueue                    The AWSBatch JobQueue that needs to be set when running on AWSBatch
@@ -86,7 +91,7 @@ ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
 
 
 //Check whether we have a design file as input set
-if(!params.design){
+if(!params.input){
     exit 1, "Missing Design File - please see documentation how to create one."
 } else {
     //Design file looks like this
@@ -94,7 +99,7 @@ if(!params.design){
     // ID is required, everything else (can!) be optional and causes some pipeline components to turn off!
     // Tapping the parsed input design to multiple channels to get some data to specific downstream processes that don't need full information!
     Channel
-    .fromPath(params.design)
+    .fromPath(params.input)
     .splitCsv(header: true, sep:'\t')
     .map { col -> 
            def id = "${col.ID}" 
