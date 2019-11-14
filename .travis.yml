@@ -8,21 +8,21 @@ matrix:
   fast_finish: true
   include:
   - name: "Minimum Nextflow version, regular test suite with Unicycler assembly"
-    env: NXF_VER='18.10.1' SUITE=test FLAGS=
+    env: NXF_VER='19.10.0' SUITE=test FLAGS= NXF_ANSI_LOG=0
     language: java
     jdk: openjdk8
   - name: "Latest Nextflow version, short read suite with Unicycler assembly"
-    env: NXF_VER='' SUITE=test FLAGS=
+    env: NXF_VER='' SUITE=test FLAGS= NXF_ANSI_LOG=0
   - name: "Latest Nextflow version, long read suite with Canu assembly"
-    env: NXF_VER='' SUITE=test_long FLAGS='--assembler "canu"'
+    env: NXF_VER='' SUITE=test_long FLAGS='--assembler "canu"' NXF_ANSI_LOG=0
   - name: "Latest Nextflow version, long read suite with Miniasm assembly"
-    env: NXF_VER='' SUITE=test_long FLAGS='--assembler "miniasm"'
-  - name: "Latest Nextflow version, long read suite default"
-    env: NXF_VER='' SUITE=test_long FLAGS=
+    env: NXF_VER='' SUITE=test_long FLAGS='--assembler "miniasm"' NXF_ANSI_LOG=0
+  - name: "Latest Nextflow version, long read suite default" 
+    env: NXF_VER='' SUITE=test_long FLAGS= NXF_ANSI_LOG=0
   - name: "Latest Nextflow version, test hybrid read approach"
-    env: NXF_VER='' SUITE=test_hybrid FLAGS=
+    env: NXF_VER='' SUITE=test_hybrid FLAGS= NXF_ANSI_LOG=0
   - name: "Latest Nextflow version, test long reads with Nanopolish"
-    env: NXF_VER='' SUITE=test_long FLAGS='--skip_nanopolish false'
+    env: NXF_VER='' SUITE=test_long FLAGS='--skip_nanopolish false' NXF_ANSI_LOG=0
   - name: "Lint the pipeline code"
     install:
       # Install nf-core/tools
@@ -30,7 +30,7 @@ matrix:
       - pip install nf-core
     script: nf-core lint ${TRAVIS_BUILD_DIR}
     python: '3.6'
-    env: NXF_VER='0.32.0'
+    env: NXF_VER='19.10.0'
     jdk: openjdk8
   - name: "Lint the documentation"
     script: markdownlint ${TRAVIS_BUILD_DIR} -c ${TRAVIS_BUILD_DIR}/.github/markdownlint.yml

@@ -13,6 +13,7 @@
   * Canu Assembler
   * Unicycler in Long read Mode
 
+* Bumped Nextflow Version to 19.10.0
 
 ## v1.0.0 nf-core/bacass: "Green Tin Ant"
 
