@@ -7,34 +7,72 @@ This document describes the output produced by the pipeline. Most of the plots a
 The pipeline is built using [Nextflow](https://www.nextflow.io/)
 and processes data using the following steps:
 
-* [Quality trimming and QC](#quality-trimming-and-qc) of input reads
-* [Taxonomic classification](#taxonomic-classification) of trimmed reads
-* [Assembly](#assembly)  of trimmed reads
-* [Assembly visualization](#assembly-visualization)
-* [Assembly QC](#assembly-qc)
-* [Annotation](#annotation) of the assembly
-* [Report](#report) describing results of (most of) the pipeline
+* [nf-core/bacass: Output](#nf-corebacass-output)
+  * [Pipeline overview](#pipeline-overview)
+  * [Quality trimming and QC](#quality-trimming-and-qc)
+    * [Short Read Trimming](#short-read-trimming)
+    * [Short Read RAW QC](#short-read-raw-qc)
+    * [Long Read Trimming](#long-read-trimming)
+    * [Long Read RAW QC](#long-read-raw-qc)
+  * [Taxonomic classification](#taxonomic-classification)
+    * [Kraken2 report screenshot](#kraken2-report-screenshot)
+  * [Assembly Output](#assembly-output)
+  * [Assembly Visualization with Bandage](#assembly-visualization-with-bandage)
+  * [Assembly QC with QUAST](#assembly-qc-with-quast)
+  * [Annotation with Prokka](#annotation-with-prokka)
+  * [Report](#report)
 
 ## Quality trimming and QC
 
-This steps quality trims the end of reads, removes degenerate or too short reads and if needed,
-combines reads coming from multiple sequencing runs. It also runs FastQC which produces
-general quality metrics on your (trimmed) samples and plots them.
+### Short Read Trimming
 
-For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
+This step quality trims the end of reads, removes degenerate or too short reads and if needed,
+combines reads coming from multiple sequencing runs.
 
-**Output directory: `{sample}/{sample}_reads/`**
+**Output directory: `{sample_id}/trimming/shortreads/`**
 
 * `*.fastq.gz`
   * trimmed (and combined reads)
+
+### Short Read RAW QC
+
+This step runs FastQC which produces
+general quality metrics on your (trimmed) samples and plots them.
+
+**Output directory: `{sample_id}/trimming/shortreads/`**
+
 * `*_fastqc.html`
   * FastQC report, containing quality metrics for your trimmed reads
 * `*_fastqc.zip`
   * zip file containing the FastQC report, tab-delimited data file and plot images
 
-### FastQC screenshot
+For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
 ![FastQC report](images/fastqc.png)
+
+### Long Read Trimming
+
+This step performs long read trimming on Nanopore input (if provided).
+
+**Output directory: `{sample_id}/trimming/longreads/`**
+
+* `trimmed.fastq`
+  * The trimmed FASTQ file
+
+### Long Read RAW QC
+
+These steps perform long read QC for input data (if provided). 
+
+**Output directory: `{sample_id}/QC_Longreads/`**
+
+* `NanoPlot`
+* `PycoQC`
+
+Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/NanoPlot) and [PycoQC](https://a-slide.github.io/pycoQC/) if you want to know more about the plots created by these tools.
+
+Example plot from Nanoplot:
+
+![Nanoplot](images/nanoplot.png)
 
 ## Taxonomic classification
 
@@ -53,12 +91,12 @@ multiple species. If you like to visualize the report, try
 
 ![Kraken2 report](images/kraken2.png)
 
-## Assembly
+## Assembly Output
 
-Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler).
+Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler) in `short` or `hybrid` assembly modes. For long-read assembly, there are also `canu` and `miniasm` available.
 Unicycler is a pipeline on its own, which at least for Illumina reads mainly acts as a frontend to Spades with added polishing steps.
 
-**Output directory: `{sample}/`**
+**Output directory: `{sample_id}/unicycler`**
 
 * `{sample}_assembly.fasta`
   * Final assembly
@@ -67,47 +105,54 @@ Unicycler is a pipeline on its own, which at least for Illumina reads mainly act
 * `{sample}_unicycler.log`
   * Log file summarizing steps and intermediate results on the Unicycler execution
 
-## Assembly Visualization
+Check out the [Unicycler documentation](https://github.com/rrwick/Unicycler) for more information on Unicycler output.
 
-The GFA file produced in the assembly step can be used to visualise the assembly graph, which is
+**Output directory: `{sample_id}/canu`**
+
+Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.html) for more information on Canu output.
+
+**Output directory: `{sample_id}/miniasm`**
+
+* `consensus`
+  * The consensus sequence created by `miniasm`
+
+Check out the [Miniasm documentation](https://github.com/lh3/miniasm) for more information on Miniasm output.
+
+## Assembly Visualization with Bandage
+
+The GFA file produced in the assembly step with Unicycler can be used to visualise the assembly graph, which is
 done here with [Bandage](https://rrwick.github.io/Bandage/). We highly recommend to run the Bandage GUI for more versatile visualisation options (annotations etc).
 
-**Output directory: `{sample}/`**
+**Output directory: `{sample_id}/unicycler`**
 
 * `{sample}_assembly.png`
   * Bandage visualization of assembly
 
-### Bandage Screenshot
-
 ![Assembly visualization](images/bandage.png)
 
-## Assembly QC
+## Assembly QC with QUAST
 
 The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast).
 It reports multiple metrics including number of contigs, N50, lengths etc in form of an html report.
 It further creates an HTML file with integrated contig viewer (Icarus).
 
-**Output directory: `{sample}/{sample}_assembly_QC`**
+**Output directory: `{sample_id}/QUAST`**
 
 * `icarus.html`
   * QUAST's contig browser as HTML
 * `report.html`
   * QUAST assembly QC as HTML report
 
-### Quast Screenshot
-
 ![QUAST QC](images/quast.png)
-
-### Icarus Screenshot
 
 ![Icarus](images/icarus.png)
 
-## Annotation
+## Annotation with Prokka
 
 The assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend
 for several annotation tools and includes rRNA and ORF predictions. See [its documentation](https://github.com/tseemann/prokka#output-files) for a full description of all output files.
 
-**Output directory: `{sample}/{sample}_annotation`**
+**Output directory: `{sample_id}/{sample_id}_annotation`**
 
 ![Prokka annotation](images/prokka.png)
 

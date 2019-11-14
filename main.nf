@@ -215,7 +215,7 @@ if(("${params.assembler}" == 'canu' || "${params.assembler}" == 'miniasm') && ("
  */
 process trim_and_combine {
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/${sample_id}_reads/", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/trimming/shortreads/", mode: 'copy'
 
     label 'medium'
 
@@ -242,7 +242,7 @@ process trim_and_combine {
 //AdapterTrimming for ONT reads
 process adapter_trimming {
     
-    publishDir "${params.outdir}/${sample_id}/${sample_id}_longreads/", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/trimming/longreads/", mode: 'copy'
 
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
@@ -271,7 +271,7 @@ process adapter_trimming {
 process fastqc {
     label 'small'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/${sample_id}_reads", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/FastQC", mode: 'copy'
 
     input:
     set sample_id, file(fq1), file(fq2) from ch_short_for_fastqc
@@ -290,7 +290,7 @@ process fastqc {
  */
 process nanoplot {
     tag "$sample_id"
-    publishDir "${params.outdir}/QC_longreads/NanoPlot_${sample_id}", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/QC_longreads/NanoPlot", mode: 'copy'
 
     when: (params.assembly_type != 'short')
 
@@ -315,7 +315,7 @@ process nanoplot {
 process pycoqc{
     tag "$sample_id"
     label 'medium'
-    publishDir "${params.outdir}/QC_longreads/PycoQC", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/QC_longreads/PycoQC", mode: 'copy'
 
     when: (params.assembly_type == 'hybrid' || params.assembly_type == 'long') && !params.skip_pycoqc && fast5
 
@@ -368,7 +368,7 @@ if(params.assembly_type == 'hybrid'){
  */
 process unicycler {
     tag "$sample_id"
-    publishDir "${params.outdir}/unicycler/${sample_id}/", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/unicycler", mode: 'copy'
 
     when: params.assembler == 'unicycler'
 
@@ -404,7 +404,7 @@ process unicycler {
 
 process miniasm_assembly {
     tag "$sample_id"
-    publishDir "${params.outdir}/miniasm/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
+    publishDir "${params.outdir}/${sample_id}/miniasm", mode: 'copy', pattern: 'assembly.fasta'
     
     label 'large'
 
@@ -427,7 +427,7 @@ process miniasm_assembly {
 //Run consensus for miniasm, the others don't need it.
 process consensus {
     tag "$sample_id"
-	publishDir "${params.outdir}/miniasm/consensus/${sample_id}", mode: 'copy', pattern: 'assembly_consensus.fasta'
+	publishDir "${params.outdir}/${sample_id}/miniasm/consensus", mode: 'copy', pattern: 'assembly_consensus.fasta'
     label 'large'
 
     input:
@@ -446,7 +446,7 @@ process consensus {
 
 process canu_assembly {
     tag "$sample_id"
-    publishDir "${params.outdir}/canu/${sample_id}", mode: 'copy', pattern: 'assembly.fasta'
+    publishDir "${params.outdir}/${sample_id}/canu", mode: 'copy', pattern: 'assembly.fasta'
 
     label 'large'
 
@@ -474,7 +474,7 @@ process canu_assembly {
 process kraken2 {
     label 'large'
     tag "$sample_id"
-    publishDir "${params.outdir}/kraken/${sample_id}/", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/kraken", mode: 'copy'
 
     when: !params.skip_kraken2
 
@@ -498,7 +498,7 @@ process kraken2 {
 process kraken2_long {
     label 'large'
     tag "$sample_id"
-    publishDir "${params.outdir}/kraken_long/${sample_id}/", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/kraken_long", mode: 'copy'
 
     when: !params.skip_kraken2
 
@@ -521,7 +521,7 @@ process kraken2_long {
  */
 process quast {
   tag {"$sample_id"}
-  publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+  publishDir "${params.outdir}/${sample_id}/QUAST", mode: 'copy'
   
   input:
   set sample_id, file(fasta) from quast_ch
@@ -568,8 +568,10 @@ process prokka {
 
 //Polishes assembly using FAST5 files
 process polishing {
+    tag "$assembly"
     label 'large'
-    publishDir "${params.outdir}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
+
+    publishDir "${params.outdir}/${sample_id}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
 
     when: !params.skip_nanopolish && params.assembly_type == 'long'
 
