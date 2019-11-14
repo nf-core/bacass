@@ -1,40 +1,10 @@
 sudo: required
 language: python
+jdk: openjdk8
 services: docker
 cache: pip
-jdk: openjdk8
-
 matrix:
   fast_finish: true
-  include:
-  - name: "Minimum Nextflow version, regular test suite with Unicycler assembly"
-    env: NXF_VER='19.10.0' SUITE=test FLAGS= NXF_ANSI_LOG=0
-    language: java
-    jdk: openjdk8
-  - name: "Latest Nextflow version, short read suite with Unicycler assembly"
-    env: NXF_VER='' SUITE=test FLAGS= NXF_ANSI_LOG=0
-  - name: "Latest Nextflow version, long read suite with Canu assembly"
-    env: NXF_VER='' SUITE=test_long FLAGS='--assembler "canu"' NXF_ANSI_LOG=0
-  - name: "Latest Nextflow version, long read suite with Miniasm assembly"
-    env: NXF_VER='' SUITE=test_long FLAGS='--assembler "miniasm"' NXF_ANSI_LOG=0
-  - name: "Latest Nextflow version, long read suite default" 
-    env: NXF_VER='' SUITE=test_long FLAGS= NXF_ANSI_LOG=0
-  - name: "Latest Nextflow version, test hybrid read approach"
-    env: NXF_VER='' SUITE=test_hybrid FLAGS= NXF_ANSI_LOG=0
-  - name: "Latest Nextflow version, test long reads with Nanopolish"
-    env: NXF_VER='' SUITE=test_long FLAGS='--skip_nanopolish false' NXF_ANSI_LOG=0
-  - name: "Lint the pipeline code"
-    install:
-      # Install nf-core/tools
-      - pip install --upgrade pip
-      - pip install nf-core
-    script: nf-core lint ${TRAVIS_BUILD_DIR}
-    python: '3.6'
-    env: NXF_VER='19.10.0'
-    jdk: openjdk8
-  - name: "Lint the documentation"
-    script: markdownlint ${TRAVIS_BUILD_DIR} -c ${TRAVIS_BUILD_DIR}/.github/markdownlint.yml
-    python: '3.6'
 
 before_install:
   # PRs to master are only ok if coming from dev branch
@@ -43,17 +13,44 @@ before_install:
   - docker pull nfcore/bacass:dev
   # Fake the tag locally so that the pipeline runs properly
   # Looks weird when this is :dev to :dev, but makes sense when testing code for a release (:dev to :1.0.1)
-  - docker tag nfcore/bacass:dev nfcore/bacass:dev
+  - docker tag nfcore/bacass:dev nfcore/eager:dev
 
 install:
   # Install Nextflow
   - mkdir /tmp/nextflow && cd /tmp/nextflow
   - wget -qO- get.nextflow.io | bash
   - sudo ln -s /tmp/nextflow/nextflow /usr/local/bin/nextflow
+  # Install nf-core/tools
+  - pip install --upgrade pip
+  - pip install nf-core
+  # Install Conda 
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+  - bash Miniconda3-latest-Linux-x86_64.sh -b -f -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
   # Reset
   - mkdir ${TRAVIS_BUILD_DIR}/tests && cd ${TRAVIS_BUILD_DIR}/tests
   # Install markdownlint-cli
   - sudo apt-get install npm && npm install -g markdownlint-cli
 
+env:
+  - NXF_VER='19.04.0' NXF_ANSI_LOG=0 RUN_NAME="bacass-${TRAVIS_PULL_REQUEST_BRANCH}-${TRAVIS_JOB_NUMBER}" TOWER='' # Specify a minimum NF version that should be tested and work
+  - NXF_VER='' NXF_ANSI_LOG=0 RUN_NAME="bacass-${TRAVIS_PULL_REQUEST_BRANCH}-${TRAVIS_JOB_NUMBER}" TOWER='-with-tower' TOWER_ACCESS_TOKEN="1c1f493bc2703472d6f1b9f6fb9e9d117abab7b1" NXF_ANSI_LOG=0 # Plus: get the latest NF version and check that it works
+
+
 script:
-  - nextflow run ${TRAVIS_BUILD_DIR} -profile ${SUITE},docker ${FLAGS}
+  # Lint the pipeline code
+  - nf-core lint ${TRAVIS_BUILD_DIR}
+  # Markdownlint the Documentation
+  - markdownlint ${TRAVIS_BUILD_DIR} -c ${TRAVIS_BUILD_DIR}/.github/markdownlint.yml
+  # Regular test suite with Unicycler assembly"
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-basic" -profile test,docker $TOWER
+  # Long read suite with Canu assembly"
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-basic" -profile test_long,docker --assembler "canu" $TOWER
+  # Long read suite with Miniasm assembly"
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-basic" -profile test_long,docker --assembler "miniasm" $TOWER 
+  # Long read suite default" 
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-basic" -profile test_long,docker $TOWER 
+  # Test hybrid read approach"
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-basic" -profile test_hybrid,docker $TOWER 
+  # Test Long with Nanopolish
+  - nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-basic" -profile test_long,docker --skip_nanopolish false $TOWER 
