@@ -7,13 +7,16 @@
   * Nanopolish, for polishing of Nanopore data with Illumina reads
   * PoreChop, for quality trimming of Nanopore data
   * Nanoplot, for plotting quality metrics of Nanopore data
-  * PycoQC, to estimate Nanopore demultiplexing statistics
+  * PycoQC, to QC Nanopore data
 * Added multiple tools to assemble long-reads
   * Miniasm + Racon
   * Canu Assembler
   * Unicycler in Long read Mode
 
+### Dependency updates
+
 * Bumped Nextflow Version to 19.10.0
+* Various tools updated (will update before release!)
 
 ## v1.0.0 nf-core/bacass: "Green Tin Ant"
 
