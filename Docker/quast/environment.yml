@@ -1,5 +1,0 @@
-name: bacassquast
-channels:
-  - bioconda
-dependencies:
-- quast=5.0.2
