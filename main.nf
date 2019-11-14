@@ -152,15 +152,17 @@ if(!params.input){
 log.info nfcoreHeader()
 def summary = [:]
 if(workflow.revision) summary['Pipeline Release'] = workflow.revision
-summary['Pipeline Name']  = 'nf-core/bacass'
-summary['Run Name']         = custom_runName ?: workflow.runName
-summary['Skip Kraken2'] = params.skip_kraken2
-summary['Kraken2 DB'] = params.kraken2db
-summary['Skip PycoQC'] = params.skip_pycoqc
-summary['Extra Unicycler arguments'] = params.unicycler_args
-summary['Extra Prokka arguments'] = params.prokka_args
+summary['Pipeline Name'] = 'nf-core/bacass'
+summary['Run Name'] = custom_runName ?: workflow.runName
 summary['Assembler Method'] = params.assembler
 summary['Assembly Type'] = params.assembly_type
+if (params.kraken2db) summary['Kraken2 DB'] = params.kraken2db 
+summary['Extra Prokka arguments'] = params.prokka_args
+summary['Extra Unicycler arguments'] = params.unicycler_args
+if (params.skip_annotation) summary['Skip Annotation'] = params.skip_annotation
+if (params.skip_kraken2) summary['Skip Kraken2'] = params.skip_kraken2
+if (params.skip_nanopolish) summary['Skip Nanopolish'] = params.skip_nanopolish
+if (params.skip_pycoqc) summary['Skip PycoQC'] = params.skip_pycoqc
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
 summary['Launch dir']       = workflow.launchDir
@@ -804,14 +806,14 @@ def nfcoreHeader(){
     c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
     c_white = params.monochrome_logs ? '' : "\033[0;37m";
 
-    return """----------------------------------------------------
+    return """    -${c_dim}--------------------------------------------------${c_reset}-
                                             ${c_green},--.${c_black}/${c_green},-.${c_reset}
     ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
     ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
     ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
                                             ${c_green}`._,._,\'${c_reset}
-    ${c_purple}  nf-core/bacass v${workflow.manifest.version}${c_reset}
-    ${c_white}----------------------------------------------------${c_reset}
+    ${c_purple} nf-core/bacass v${workflow.manifest.version}${c_reset}
+    -${c_dim}--------------------------------------------------${c_reset}-
     """.stripIndent()
 }
 
