@@ -61,7 +61,7 @@ This step performs long read trimming on Nanopore input (if provided).
 
 ### Long Read RAW QC
 
-These steps perform long read QC for input data (if provided). 
+These steps perform long read QC for input data (if provided).
 
 **Output directory: `{sample_id}/QC_Longreads/`**
 

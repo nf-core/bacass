@@ -129,16 +129,16 @@ Use this to specify the location of your input design file. For example:
 An example of properly formatted input files can be found at the [nf-core/testData](https://github.com/nf-core/test-datasets/tree/bacass). Exemplarily, this is the input used for a hybrid assembly in testing:
 
 ```bash
-ID	R1	R2	LongFastQ	Fast5	GenomeSize
-ERR044595	https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_1.fastq.gz	https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_2.fastq.gz	https://github.com/nf-core/test-datasets/raw/bacass/nanopore/subset15000.fq.gz	NA	2.8m
+ID R1 R2 LongFastQ Fast5 GenomeSize
+ERR044595 https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_1.fastq.gz https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_2.fastq.gz https://github.com/nf-core/test-datasets/raw/bacass/nanopore/subset15000.fq.gz NA 2.8m
 ```
 
-- `ID` The identifier to use for handling the dataset
-- `R1` The forward reads in case of available short-read data
-- `R2` The reverse reads in case of available short-read data
-- `LongFastQ` The long-read FastQ file with reads in FASTQ format
-- `Fast5` The folder containing the basecalled FAST5 files
-- `GenomeSize` The expected genome size of the assembly. Only used by the canu assembler.
+* `ID` The identifier to use for handling the dataset
+* `R1` The forward reads in case of available short-read data
+* `R2` The reverse reads in case of available short-read data
+* `LongFastQ` The long*read FastQ file with reads in FASTQ format
+* `Fast5` The folder containing the basecalled FAST5 files
+* `GenomeSize` The expected genome size of the assembly. Only used by the canu assembler.
 
 Missing values (e.g. FAST5 folder in case of short reads) can be omitted by using a `NA` in the TSV file. The pipeline will handle such cases appropriately then.
 
