@@ -13,7 +13,7 @@ before_install:
   - docker pull nfcore/bacass:dev
   # Fake the tag locally so that the pipeline runs properly
   # Looks weird when this is :dev to :dev, but makes sense when testing code for a release (:dev to :1.0.1)
-  - docker tag nfcore/bacass:dev nfcore/eager:dev
+  - docker tag nfcore/bacass:dev nfcore/bacass:dev
 
 install:
   # Install Nextflow
@@ -33,7 +33,7 @@ install:
   - sudo apt-get install npm && npm install -g markdownlint-cli
 
 env:
-  - NXF_VER='19.04.0' NXF_ANSI_LOG=0 RUN_NAME="bacass-${TRAVIS_PULL_REQUEST_BRANCH}-${TRAVIS_JOB_NUMBER}" TOWER='' # Specify a minimum NF version that should be tested and work
+  - NXF_VER='19.10.0' NXF_ANSI_LOG=0 RUN_NAME="bacass-${TRAVIS_PULL_REQUEST_BRANCH}-${TRAVIS_JOB_NUMBER}" TOWER='' # Specify a minimum NF version that should be tested and work
   - NXF_VER='' NXF_ANSI_LOG=0 RUN_NAME="bacass-${TRAVIS_PULL_REQUEST_BRANCH}-${TRAVIS_JOB_NUMBER}" TOWER='-with-tower' TOWER_ACCESS_TOKEN="1c1f493bc2703472d6f1b9f6fb9e9d117abab7b1" NXF_ANSI_LOG=0 # Plus: get the latest NF version and check that it works
 
 
