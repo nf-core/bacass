@@ -2,46 +2,46 @@
 
 ## Table of contents
 
-- [nf-core/bacass: Usage](#nf-corebacass-usage)
-  - [Table of contents](#table-of-contents)
-  - [General Nextflow info](#general-nextflow-info)
-  - [Running the pipeline](#running-the-pipeline)
-    - [Updating the pipeline](#updating-the-pipeline)
-    - [Reproducibility](#reproducibility)
-  - [Main Nextflow arguments](#main-nextflow-arguments)
-    - [`-profile`](#profile)
-  - [Main Pipeline Arguments](#main-pipeline-arguments)
-    - [`--assembler`](#assembler)
-    - [`--assembly_type`](#assemblytype)
-    - [`--input`](#input)
-    - [`--kraken2db`](#kraken2db)
-    - [`--prokka_args`](#prokkaargs)
-    - [`--unicycler_args`](#unicyclerargs)
-  - [Skipping Options](#skipping-options)
-    - [`--skip_annotation`](#skipannotation)
-    - [`--skip_kraken2`](#skipkraken2)
-    - [`--skip_nanopolish`](#skipnanopolish)
-    - [`--skip_pycoqc`](#skippycoqc)
-  - [Job resources](#job-resources)
-    - [Automatic resubmission](#automatic-resubmission)
-    - [Custom resource requests](#custom-resource-requests)
-  - [AWS Batch specific parameters](#aws-batch-specific-parameters)
-    - [`--awsqueue`](#awsqueue)
-    - [`--awsregion`](#awsregion)
-  - [Other command line parameters](#other-command-line-parameters)
-    - [`--outdir`](#outdir)
-    - [`--email`](#email)
-    - [`-name`](#name)
-    - [`-resume`](#resume)
-    - [`-c`](#c)
-    - [`--custom_config_version`](#customconfigversion)
-    - [`--custom_config_base`](#customconfigbase)
-    - [`--max_memory`](#maxmemory)
-    - [`--max_time`](#maxtime)
-    - [`--max_cpus`](#maxcpus)
-    - [`--plaintext_email`](#plaintextemail)
-    - [`--monochrome_logs`](#monochromelogs)
-    - [`--multiqc_config`](#multiqcconfig)
+* [nf-core/bacass: Usage](#nf-corebacass-usage)
+  * [Table of contents](#table-of-contents)
+  * [General Nextflow info](#general-nextflow-info)
+  * [Running the pipeline](#running-the-pipeline)
+    * [Updating the pipeline](#updating-the-pipeline)
+    * [Reproducibility](#reproducibility)
+  * [Main Nextflow arguments](#main-nextflow-arguments)
+    * [`-profile`](#profile)
+  * [Main Pipeline Arguments](#main-pipeline-arguments)
+    * [`--assembler`](#assembler)
+    * [`--assembly_type`](#assemblytype)
+    * [`--input`](#input)
+    * [`--kraken2db`](#kraken2db)
+    * [`--prokka_args`](#prokkaargs)
+    * [`--unicycler_args`](#unicyclerargs)
+  * [Skipping Options](#skipping-options)
+    * [`--skip_annotation`](#skipannotation)
+    * [`--skip_kraken2`](#skipkraken2)
+    * [`--skip_nanopolish`](#skipnanopolish)
+    * [`--skip_pycoqc`](#skippycoqc)
+  * [Job resources](#job-resources)
+    * [Automatic resubmission](#automatic-resubmission)
+    * [Custom resource requests](#custom-resource-requests)
+  * [AWS Batch specific parameters](#aws-batch-specific-parameters)
+    * [`--awsqueue`](#awsqueue)
+    * [`--awsregion`](#awsregion)
+  * [Other command line parameters](#other-command-line-parameters)
+    * [`--outdir`](#outdir)
+    * [`--email`](#email)
+    * [`-name`](#name)
+    * [`-resume`](#resume)
+    * [`-c`](#c)
+    * [`--custom_config_version`](#customconfigversion)
+    * [`--custom_config_base`](#customconfigbase)
+    * [`--max_memory`](#maxmemory)
+    * [`--max_time`](#maxtime)
+    * [`--max_cpus`](#maxcpus)
+    * [`--plaintext_email`](#plaintextemail)
+    * [`--monochrome_logs`](#monochromelogs)
+    * [`--multiqc_config`](#multiqcconfig)
 
 ## General Nextflow info
 
@@ -96,17 +96,17 @@ Use this parameter to choose a configuration profile. Profiles can give configur
 
 If `-profile` is not specified at all the pipeline will be run locally and expects all software to be installed and available on the `PATH`.
 
-- `awsbatch`
-  - A generic configuration profile to be used with AWS Batch.
-- `docker`
-  - A generic configuration profile to be used with [Docker](http://docker.com/)
-  - Pulls software from DockerHub: [`nfcore/bacass`](http://hub.docker.com/r/nfcore/bacass/)
-- `singularity`
-  - A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
-  - Pulls software from DockerHub
-- `test`
-  - A profile with a complete configuration for automated testing
-  - Includes links to test data so needs no other parameters
+* `awsbatch`
+  * A generic configuration profile to be used with AWS Batch.
+* `docker`
+  * A generic configuration profile to be used with [Docker](http://docker.com/)
+  * Pulls software from DockerHub: [`nfcore/bacass`](http://hub.docker.com/r/nfcore/bacass/)
+* `singularity`
+  * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
+  * Pulls software from DockerHub
+* `test`
+  * A profile with a complete configuration for automated testing
+  * Includes links to test data so needs no other parameters
 
 ## Main Pipeline Arguments
 
