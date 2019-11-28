@@ -51,6 +51,6 @@ script:
   # Long read suite default" 
   #- nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-long_default" -profile test_long_miniasm,docker $TOWER 
   # Test hybrid read approach"
-  - travis_wait 30 nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-hybrid" -profile test_hybrid,docker $TOWER 
+  - travis_wait 50 nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-hybrid" -profile test_hybrid,docker $TOWER 
   # Test Long with Nanopolish
   #- nextflow run ${TRAVIS_BUILD_DIR} -name "$RUN_NAME-with-polish" -profile test_long_miniasm,docker --skip_nanopolish false $TOWER 
