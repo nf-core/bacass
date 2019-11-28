@@ -466,7 +466,7 @@ process canu_assembly {
         genomeSize="${genomeSize}" -nanopore-raw "${lrfastq}" \
         maxThreads="${task.cpus}" merylMemory="${task.memory.toGiga()}G" \
         merylThreads="${task.cpus}" hapThreads="${task.cpus}" batMemory="${task.memory.toGiga()}G" \
-        corMemory="${task.memory.toGiga()}G" corThreads="${task.cpus}"
+        corMemory="${task.memory.toGiga()}G" corThreads="${task.cpus}" ${params.canu_args}
     mv canu_out/assembly.contigs.fasta assembly.fasta
     """
 }
