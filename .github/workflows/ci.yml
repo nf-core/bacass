@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         nxf_ver: ['19.10.0', '']
-        options: ["test,docker", "test_long,docker --assembler \"canu\"", "test_long_miniasm,docker", "test_hybrid,docker" ]
+        options: ["test,docker", "test_long,docker --assembler canu, "test_long_miniasm,docker", "test_hybrid,docker" ]
     steps:
       - uses: actions/checkout@v1
       - name: Install Nextflow
