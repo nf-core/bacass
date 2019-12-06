@@ -378,7 +378,7 @@ process unicycler {
     set sample_id, file(fq1), file(fq2), file(lrfastq) from ch_short_long_joint_unicycler 
 
     output:
-    set sample_id, file("${sample_id}_assembly.fasta") into (quast_ch, prokka_ch)
+    set sample_id, file("${sample_id}_assembly.fasta") into (quast_ch, prokka_ch, dfast_ch)
     set sample_id, file("${sample_id}_assembly.gfa") into bandage_ch
     file("${sample_id}_assembly.fasta") into ch_assembly_polish_unicycler
     file("${sample_id}_assembly.gfa")
@@ -550,8 +550,6 @@ process prokka {
    tag "$sample_id"
    publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
    
-   when: !params.skip_annotation
-
    input:
    set sample_id, file(fasta) from prokka_ch
 
@@ -562,10 +560,35 @@ process prokka {
    // are the same
    // file("${sample_id}_annotation/*txt") into prokka_logs_ch
 
+   when: !params.skip_annotation && params.annotation_tool == 'prokka'
+
    script:
    """
    prokka --cpus ${task.cpus} --prefix "${sample_id}" --outdir ${sample_id}_annotation ${params.prokka_args} ${fasta}
    """
+}
+
+process dfast {
+   label 'large'
+   tag "$sample_id"
+   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+   
+
+   input:
+   set sample_id, file(fasta) from dfast_ch
+
+   output:
+   file("${sample_id}_annotation/")
+
+
+   when: !params.skip_annotation && params.annotation_tool == 'dfast'
+
+
+   script:
+   """
+   dfast --genome ${fasta} --config ${params.dfast_config}
+   """
+}
 }
 
 //Polishes assembly using FAST5 files

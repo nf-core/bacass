@@ -11,8 +11,10 @@
   * [Main Nextflow arguments](#main-nextflow-arguments)
     * [`-profile`](#profile)
   * [Main Pipeline Arguments](#main-pipeline-arguments)
+    * [`--annotation_tool`](#annotationtool)
     * [`--assembler`](#assembler)
     * [`--assembly_type`](#assemblytype)
+    * [`--dfast_config`](#dfastconfig)
     * [`--input`](#input)
     * [`--kraken2db`](#kraken2db)
     * [`--prokka_args`](#prokkaargs)
@@ -110,6 +112,10 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
 
 ## Main Pipeline Arguments
 
+### `--annotation_tool`
+
+The annotation method to annotate the final assembly. Default choice is `prokka`, but the `dfast` tool is also available. For the latter, make sure to create your specific config if you're not happy with the default one provided. See [#dfast_config](#dfastconfig) to find out how.
+
 ### `--assembler`
 
 The assembler to use for assembly. Available options are `Unicycler`, `Canu`, `Miniasm`. The latter two are only available for long-read data, whereas Unicycler can be used for short or hybrid assembly projects.
@@ -117,6 +123,10 @@ The assembler to use for assembly. Available options are `Unicycler`, `Canu`, `M
 ### `--assembly_type`
 
 This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`. Short & Hybrid assembly will always run Unicycler, whereas long-read assembly can be configured separately using the `--assembler` parameter.
+
+### `--dfast_config`
+
+Specifies a configuration file for the [DFAST](https://github.com/nigyta/dfast_core) annotation method. This can be used instead of PROKKA if required to specify a specific config file for annotation. If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.
 
 ### `--input`
 
