@@ -579,14 +579,15 @@ process dfast {
 
    output:
    file("${sample_id}_annotation/")
+   file v_dfast.txt into ch_dfast_version_for_multiqc
 
 
    when: !params.skip_annotation && params.annotation_tool == 'dfast'
 
-
    script:
    """
    dfast --genome ${fasta} --config ${params.dfast_config}
+   dfast &> v_dfast.txt 2>&1 || true
    """
 }
 
@@ -631,6 +632,8 @@ process get_software_versions {
     input:
     file quast_version from ch_quast_version
     file porechop_version from ch_porechop_version
+    file dfast_version from ch_dfast_version_for_multiqc
+
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml

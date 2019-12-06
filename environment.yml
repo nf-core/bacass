@@ -27,4 +27,3 @@ dependencies:
   - nanoplot=1.28.1
   - pycoqc=2.5.0.3
   - h5py=2.10.0 #until the pycoqc recipe has been updated
-  - dfast=1.2.5

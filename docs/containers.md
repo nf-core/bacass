@@ -11,3 +11,7 @@ This container contains the porechop tool that is incompatible to be distributed
 ## `QUAST` container
 
 This container contains the QUAST tool that is incompatible to be distributed with the standard container itself. Therefore, we have a secondary container that is used instead to run QUAST only. We utilize the Biocontainers container that is built using the bioconda recipe for this instead.
+
+## `DFAST` container
+
+This container contains the DFAST tool for annotation of the assembled genome and cannot be distributed along with the standard container due to incompatible Python requirements with Prokka. Therefore, we have a secondary container that is used instead to run DFAST only. We utilize the Biocontainers container that is built using the bioconda recipe for this instead.
