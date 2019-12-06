@@ -9,7 +9,7 @@ dependencies:
   - python=3.7.3
   - fastqc=0.11.8
   - multiqc=1.8
-  - unicycler=0.4.8 #Needs to stay like this, 0.4.7 release broken on bioconda with random segfaults
+  - unicycler=0.4.4 #Needs to stay like this, 0.4.7/0.4.8 release broken on bioconda with random segfaults
   - skewer=0.2.2
   - kraken2=2.0.8_beta
   - prokka=1.14.5
