@@ -589,7 +589,7 @@ process dfast {
    dfast --genome ${fasta} --config ${params.dfast_config}
    """
 }
-}
+
 
 //Polishes assembly using FAST5 files
 process polishing {
