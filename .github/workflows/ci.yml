@@ -1,0 +1,21 @@
+name: nf-core CI
+# This workflow is triggered on pushes and PRs to the repository.
+on: [push, pull_request]  
+
+jobs:
+  test:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        nxf_ver: ['19.10.0', '']
+        options: ["test,docker", "test_long,docker --assembler canu, "test_long_miniasm,docker", "test_hybrid,docker" ]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Nextflow
+        run: |
+          export NXF_VER=${{ matrix.nxf_ver }}
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Run tests
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.options }}
