@@ -2,7 +2,7 @@
 
 A simple bacterial assembly and annotation pipeline
 
-[![Build Status](https://travis-ci.com/nf-core/bacass.svg?branch=master)](https://travis-ci.com/nf-core/bacass)
+[![GitHub Actions](https://github.com/nf-core/bacass/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/bacass/workflows/nf-core%20CI/badge.svg)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
