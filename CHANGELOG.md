@@ -12,11 +12,19 @@
   * Miniasm + Racon
   * Canu Assembler
   * Unicycler in Long read Mode
+* Add alternative assembly annotation using DFAST
 
 ### Dependency updates
 
 * Bumped Nextflow Version to 19.10.0
-* Various tools updated (will update before release!)
+
+## Added tools
+
+* DFAST
+* PycoQC
+* Nanoplot
+* PoreChop
+* Nanopolish
 
 ## v1.0.0 nf-core/bacass: "Green Tin Ant"
 
