@@ -579,7 +579,7 @@ process dfast {
 
    output:
    file("${sample_id}_annotation/")
-   file v_dfast.txt into ch_dfast_version_for_multiqc
+   file("v_dfast.txt") into ch_dfast_version_for_multiqc
 
 
    when: !params.skip_annotation && params.annotation_tool == 'dfast'
