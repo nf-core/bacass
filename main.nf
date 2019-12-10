@@ -161,7 +161,8 @@ summary['Extra Prokka arguments'] = params.prokka_args
 summary['Extra Unicycler arguments'] = params.unicycler_args
 if (params.skip_annotation) summary['Skip Annotation'] = params.skip_annotation
 if (params.skip_kraken2) summary['Skip Kraken2'] = params.skip_kraken2
-if (params.skip_nanopolish) summary['Skip Nanopolish'] = params.skip_nanopolish
+if (params.skip_polish) summary['Skip Polish'] = params.skip_polish
+if (!params.skip_polish) summary['Polish Method'] = params.polish_method
 if (params.skip_pycoqc) summary['Skip PycoQC'] = params.skip_pycoqc
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
@@ -380,7 +381,7 @@ process unicycler {
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into (quast_ch, prokka_ch, dfast_ch)
     set sample_id, file("${sample_id}_assembly.gfa") into bandage_ch
-    file("${sample_id}_assembly.fasta") into ch_assembly_nanopolish_unicycler,ch_assembly_medaka_unicycler
+    file("${sample_id}_assembly.fasta") into (ch_assembly_nanopolish_unicycler,ch_assembly_medaka_unicycler)
     file("${sample_id}_assembly.gfa")
     file("${sample_id}_assembly.png")
     file("${sample_id}_unicycler.log")
