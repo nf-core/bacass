@@ -89,6 +89,7 @@ if( workflow.profile == 'awsbatch') {
 // Stage config files
 ch_multiqc_config = Channel.fromPath(params.multiqc_config)
 ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
+ch_dfast_config = Channel.fromPath(params.dfast_config)
 
 
 //Check whether we have a design file as input set
@@ -581,6 +582,7 @@ process dfast {
 
    input:
    set sample_id, file(fasta) from dfast_ch
+   file(config) from ch_dfast_config
 
    output:
    file("${sample_id}_annotation/")
@@ -590,7 +592,7 @@ process dfast {
 
    script:
    """
-   dfast --genome ${fasta} --config ${params.dfast_config}
+   dfast --genome ${fasta} --config ${config}
    dfast &> v_dfast.txt 2>&1 || true
    """
 }
