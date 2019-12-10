@@ -30,6 +30,7 @@ def helpMessage() {
         --kraken2db                   Path to Kraken2 Database directory
         --prokka_args                 Advanced: Extra arguments to Prokka (quote and add leading space)
         --unicycler_args              Advanced: Extra arguments to Unicycler (quote and add leading space)
+        --canu_args                   Advanced: Extra arguments for Canu assembly (quote and add leading space)
   
     Other options:
       --outdir                      The output directory where the results will be saved
@@ -159,6 +160,7 @@ summary['Assembly Type'] = params.assembly_type
 if (params.kraken2db) summary['Kraken2 DB'] = params.kraken2db 
 summary['Extra Prokka arguments'] = params.prokka_args
 summary['Extra Unicycler arguments'] = params.unicycler_args
+summary['Extra Canu arguments'] = params.canu_args
 if (params.skip_annotation) summary['Skip Annotation'] = params.skip_annotation
 if (params.skip_kraken2) summary['Skip Kraken2'] = params.skip_kraken2
 if (params.skip_polish) summary['Skip Polish'] = params.skip_polish

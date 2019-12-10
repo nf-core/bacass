@@ -1,50 +1,49 @@
-# nf-core/bacass: Usage
+# nf-core/bacass: Usage <!-- omit in toc -->
 
-## Table of contents
+## Table of contents <!-- omit in toc -->
 
-* [nf-core/bacass: Usage](#nf-corebacass-usage)
-  * [Table of contents](#table-of-contents)
-  * [General Nextflow info](#general-nextflow-info)
-  * [Running the pipeline](#running-the-pipeline)
-    * [Updating the pipeline](#updating-the-pipeline)
-    * [Reproducibility](#reproducibility)
-  * [Main Nextflow arguments](#main-nextflow-arguments)
-    * [-profile](#-profile)
-  * [Main Pipeline Arguments](#main-pipeline-arguments)
-    * [--annotation_tool](#--annotation_tool)
-    * [--assembler](#--assembler)
-    * [--assembly_type](#--assembly_type)
-    * [--dfast_config](#--dfast_config)
-    * [--input](#--input)
-    * [--kraken2db](#--kraken2db)
-    * [--polish_method](#--polish_method)
-    * [--prokka_args](#--prokka_args)
-    * [--unicycler_args](#--unicycler_args)
-  * [Skipping Options](#skipping-options)
-    * [--skip_annotation](#--skip_annotation)
-    * [--skip_kraken2](#--skip_kraken2)
-    * [--skip_polish](#--skip_polish)
-    * [--skip_pycoqc](#--skip_pycoqc)
-  * [Job resources](#job-resources)
-    * [Automatic resubmission](#automatic-resubmission)
-    * [Custom resource requests](#custom-resource-requests)
-  * [AWS Batch specific parameters](#aws-batch-specific-parameters)
-    * [--awsqueue](#--awsqueue)
-    * [--awsregion](#--awsregion)
-  * [Other command line parameters](#other-command-line-parameters)
-    * [--outdir](#--outdir)
-    * [--email](#--email)
-    * [-name](#-name)
-    * [-resume](#-resume)
-    * [-c](#-c)
-    * [--custom_config_version](#--custom_config_version)
-    * [--custom_config_base](#--custom_config_base)
-    * [--max_memory](#--max_memory)
-    * [--max_time](#--max_time)
-    * [--max_cpus](#--max_cpus)
-    * [--plaintext_email](#--plaintext_email)
-    * [--monochrome_logs](#--monochrome_logs)
-    * [--multiqc_config](#--multiqc_config)
+* [General Nextflow info](#general-nextflow-info)
+* [Running the pipeline](#running-the-pipeline)
+  * [Updating the pipeline](#updating-the-pipeline)
+  * [Reproducibility](#reproducibility)
+* [Main Nextflow arguments](#main-nextflow-arguments)
+  * [-profile](#-profile)
+* [Main Pipeline Arguments](#main-pipeline-arguments)
+  * [--annotation_tool](#--annotation_tool)
+  * [--assembler](#--assembler)
+  * [--assembly_type](#--assembly_type)
+  * [--canu_args](#--canu_args)
+  * [--dfast_config](#--dfast_config)
+  * [--input](#--input)
+  * [--kraken2db](#--kraken2db)
+  * [--polish_method](#--polish_method)
+  * [--prokka_args](#--prokka_args)
+  * [--unicycler_args](#--unicycler_args)
+* [Skipping Options](#skipping-options)
+  * [--skip_annotation](#--skip_annotation)
+  * [--skip_kraken2](#--skip_kraken2)
+  * [--skip_polish](#--skip_polish)
+  * [--skip_pycoqc](#--skip_pycoqc)
+* [Job resources](#job-resources)
+  * [Automatic resubmission](#automatic-resubmission)
+  * [Custom resource requests](#custom-resource-requests)
+* [AWS Batch specific parameters](#aws-batch-specific-parameters)
+  * [--awsqueue](#--awsqueue)
+  * [--awsregion](#--awsregion)
+* [Other command line parameters](#other-command-line-parameters)
+  * [--outdir](#--outdir)
+  * [--email](#--email)
+  * [-name](#-name)
+  * [-resume](#-resume)
+  * [-c](#-c)
+  * [--custom_config_version](#--custom_config_version)
+  * [--custom_config_base](#--custom_config_base)
+  * [--max_memory](#--max_memory)
+  * [--max_time](#--max_time)
+  * [--max_cpus](#--max_cpus)
+  * [--plaintext_email](#--plaintext_email)
+  * [--monochrome_logs](#--monochrome_logs)
+  * [--multiqc_config](#--multiqc_config)
 
 ## General Nextflow info
 
@@ -124,6 +123,10 @@ The assembler to use for assembly. Available options are `Unicycler`, `Canu`, `M
 ### `--assembly_type`
 
 This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`. Short & Hybrid assembly will always run Unicycler, whereas long-read assembly can be configured separately using the `--assembler` parameter.
+
+### `--canu_args`
+
+This can be used to supply [extra options](https://canu.readthedocs.io/en/latest/quick-start.html) to the Canu assembler. Will be ignored when other assemblers are used.
 
 ### `--dfast_config`
 
