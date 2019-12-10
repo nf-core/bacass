@@ -219,10 +219,10 @@ if(("${params.assembler}" == 'canu' || "${params.assembler}" == 'miniasm') && ("
 /* Trim and combine short read read-pairs per sample. Similar to nf-core vipr
  */
 process trim_and_combine {
+    label 'medium'
+
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/trimming/shortreads/", mode: 'copy'
-
-    label 'medium'
 
     input:
     set sample_id, file(r1), file(r2) from ch_for_short_trim
@@ -250,8 +250,6 @@ process adapter_trimming {
     publishDir "${params.outdir}/${sample_id}/trimming/longreads/", mode: 'copy'
 
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
-
-    label 'medium'
 
     input:
 	set sample_id, file(lr) from ch_for_long_trim
@@ -294,6 +292,7 @@ process fastqc {
  * Quality check for nanopore reads and Quality/Length Plots
  */
 process nanoplot {
+    label 'medium'
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/QC_longreads/NanoPlot", mode: 'copy'
 
@@ -318,8 +317,9 @@ process nanoplot {
 */
 
 process pycoqc{
-    tag "$sample_id"
     label 'medium'
+
+    tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/QC_longreads/PycoQC", mode: 'copy'
 
     when: (params.assembly_type == 'hybrid' || params.assembly_type == 'long') && !params.skip_pycoqc && fast5
@@ -408,12 +408,11 @@ process unicycler {
 }
 
 process miniasm_assembly {
+    label 'large'
+
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/miniasm", mode: 'copy', pattern: 'assembly.fasta'
     
-    label 'large'
-
-
     input:
     set sample_id, file(lrfastq) from ch_long_trimmed_miniasm
 
@@ -432,9 +431,10 @@ process miniasm_assembly {
 
 //Run consensus for miniasm, the others don't need it.
 process consensus {
+    label 'large'
+
     tag "$sample_id"
 	publishDir "${params.outdir}/${sample_id}/miniasm/consensus", mode: 'copy', pattern: 'assembly_consensus.fasta'
-    label 'large'
 
     input:
     set sample_id, file(lrfastq) from ch_long_trimmed_consensus
@@ -451,10 +451,10 @@ process consensus {
 }
 
 process canu_assembly {
+    label 'large'
+
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/canu", mode: 'copy', pattern: 'assembly.fasta'
-
-    label 'large'
 
     input:
     set sample_id, file(lrfastq), val(genomeSize) from ch_long_trimmed_canu.join(ch_genomeSize_forCanu)
@@ -575,7 +575,6 @@ process prokka {
 }
 
 process dfast {
-   label 'large'
    tag "$sample_id"
    publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
    
@@ -645,9 +644,6 @@ process medaka {
     medaka_consensus -i ${lrfastq} -d ${assembly} -o "polished_genome.fa" -t ${task.cpus}
     """
 }
-
-
-
 
 /*
  * Parse software version numbers
