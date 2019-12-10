@@ -5,6 +5,7 @@
 * Added support for hybrid assembly using Nanopore and Illumina Short Reads
 * Added methods for long-read Nanopore data
   * Nanopolish, for polishing of Nanopore data with Illumina reads
+  * Medaka, as alternative assembly polishing method
   * PoreChop, for quality trimming of Nanopore data
   * Nanoplot, for plotting quality metrics of Nanopore data
   * PycoQC, to QC Nanopore data

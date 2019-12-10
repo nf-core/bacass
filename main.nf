@@ -38,7 +38,7 @@ def helpMessage() {
    Skipping options:
       --skip_annotation             Skips the annotation with Prokka
       --skip_kraken2                Skips the read classification with Kraken2
-      --skip_nanopolish             Skips polishing long-reads with Nanopolish
+      --skip_polish                 Skips polishing long-reads with Nanopolish or Medaka
       --skip_pycoqc                 Skips long-read raw signal QC
 
     AWSBatch options:
@@ -181,7 +181,7 @@ if(params.config_profile_contact)     summary['Config Contact']     = params.con
 if(params.config_profile_url)         summary['Config URL']         = params.config_profile_url
 if(params.email) {
   summary['E-mail Address']  = params.email
-  summary['MultiQC maxsize'] = params.maxMultiqcEmailFileSize
+  summary['MultiQC maxsize'] = params.max_multiqc_email_size
 }
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "----------------------------------------------------"
@@ -254,7 +254,7 @@ process adapter_trimming {
 	set sample_id, file(lr) from ch_for_long_trim
 
     output:
-    set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish, ch_long_trimmed_kraken)
+    set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish, ch_long_trimmed_kraken, ch_long_trimmed_medaka)
     file ("v_porechop.txt") into ch_porechop_version
 
     when: !('short' in params.assembly_type)
@@ -380,7 +380,7 @@ process unicycler {
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into (quast_ch, prokka_ch, dfast_ch)
     set sample_id, file("${sample_id}_assembly.gfa") into bandage_ch
-    file("${sample_id}_assembly.fasta") into ch_assembly_polish_unicycler
+    file("${sample_id}_assembly.fasta") into ch_assembly_nanopolish_unicycler,ch_assembly_medaka_unicycler
     file("${sample_id}_assembly.gfa")
     file("${sample_id}_assembly.png")
     file("${sample_id}_unicycler.log")
@@ -410,13 +410,14 @@ process miniasm_assembly {
     
     label 'large'
 
-    when: params.assembler == 'miniasm'
 
     input:
     set sample_id, file(lrfastq) from ch_long_trimmed_miniasm
 
     output:
     file 'assembly.fasta' into ch_assembly_from_miniasm
+
+    when: params.assembler == 'miniasm'
 
     script:
     """
@@ -437,7 +438,7 @@ process consensus {
     file(assembly) from ch_assembly_from_miniasm
 
     output:
-    file 'assembly_consensus.fasta' into ch_assembly_consensus
+    file 'assembly_consensus.fasta' into (ch_assembly_consensus_for_nanopolish, ch_assembly_consensus_for_medaka)
 
 	script:
     """
@@ -452,13 +453,13 @@ process canu_assembly {
 
     label 'large'
 
-    when: params.assembler == 'canu'
-
     input:
     set sample_id, file(lrfastq), val(genomeSize) from ch_long_trimmed_canu.join(ch_genomeSize_forCanu)
     
     output:
-    file 'assembly.fasta' into assembly_from_canu
+    file 'assembly.fasta' into (assembly_from_canu_for_nanopolish, assembly_from_canu_for_medaka)
+
+    when: params.assembler == 'canu'
 
     script:
     """
@@ -478,13 +479,13 @@ process kraken2 {
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/kraken", mode: 'copy'
 
-    when: !params.skip_kraken2
-
     input:
     set sample_id, file(fq1), file(fq2) from ch_short_for_kraken2
 
     output:
     file("${sample_id}_kraken2.report")
+
+    when: !params.skip_kraken2
 
     script:
 	"""
@@ -502,13 +503,13 @@ process kraken2_long {
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/kraken_long", mode: 'copy'
 
-    when: !params.skip_kraken2
-
     input:
     set sample_id, file(lr) from ch_long_trimmed_kraken
 
     output:
     file("${sample_id}_kraken2.report")
+
+    when: !params.skip_kraken2
 
     script:
 	"""
@@ -581,7 +582,6 @@ process dfast {
    file("${sample_id}_annotation/")
    file("v_dfast.txt") into ch_dfast_version_for_multiqc
 
-
    when: !params.skip_annotation && params.annotation_tool == 'dfast'
 
    script:
@@ -593,20 +593,20 @@ process dfast {
 
 
 //Polishes assembly using FAST5 files
-process polishing {
+process nanopolish {
     tag "$assembly"
     label 'large'
 
     publishDir "${params.outdir}/${sample_id}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
 
-    when: !params.skip_nanopolish && params.assembly_type == 'long'
-
     input:
-    file(assembly) from ch_assembly_consensus.mix(ch_assembly_polish_unicycler,assembly_from_canu) //Should take either miniasm, canu, or unicycler consensus sequence (!)
+    file(assembly) from ch_assembly_consensus_for_nanopolish.mix(ch_assembly_nanopolish_unicycler,assembly_from_canu_for_nanopolish) //Should take either miniasm, canu, or unicycler consensus sequence (!)
     set sample_id, file(lrfastq), file(fast5) from ch_long_trimmed_nanopolish.join(ch_fast5_for_nanopolish)
 
     output:
     file 'polished_genome.fa'
+
+    when: !params.skip_polish && params.assembly_type == 'long' && params.polish_method != 'medaka'
 
     script:
     """
@@ -618,6 +618,31 @@ process polishing {
     nanopolish vcf2fasta -g "${assembly}" polished.*.vcf > polished_genome.fa
     """
 }
+
+//Polishes assembly using FAST5 files
+process medaka {
+    tag "$assembly"
+    label 'large'
+
+    publishDir "${params.outdir}/${sample_id}/medaka/", mode: 'copy', pattern: 'polished_genome.fa'
+
+    input:
+    file(assembly) from ch_assembly_consensus_for_medaka.mix(ch_assembly_medaka_unicycler,assembly_from_canu_for_medaka) //Should take either miniasm, canu, or unicycler consensus sequence (!)
+    set sample_id, file(lrfastq) from ch_long_trimmed_medaka
+
+    output:
+    file 'polished_genome.fa'
+
+    when: !params.skip_polish && params.assembly_type == 'long' && params.polish_method == 'medaka'
+
+    script:
+    """
+    medaka_consensus -i ${lrfastq} -d ${assembly} -o ${polished_genome} -t ${task.cpus}
+    """
+}
+
+
+
 
 /*
  * Parse software version numbers
@@ -770,7 +795,7 @@ workflow.onComplete {
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.maxMultiqcEmailFileSize.toBytes() ]
+    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.max_multiqc_email_size.toBytes() ]
     def sf = new File("$baseDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
