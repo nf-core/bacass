@@ -620,7 +620,7 @@ process nanopolish {
     """
 }
 
-//Polishes assembly using FAST5 files
+//Polishes assembly
 process medaka {
     tag "$assembly"
     label 'large'
@@ -638,7 +638,7 @@ process medaka {
 
     script:
     """
-    medaka_consensus -i ${lrfastq} -d ${assembly} -o ${polished_genome} -t ${task.cpus}
+    medaka_consensus -i ${lrfastq} -d ${assembly} -o "polished_genome.fa" -t ${task.cpus}
     """
 }
 
