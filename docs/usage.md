@@ -132,6 +132,8 @@ This can be used to supply [extra options](https://canu.readthedocs.io/en/latest
 
 Specifies a configuration file for the [DFAST](https://github.com/nigyta/dfast_core) annotation method. This can be used instead of PROKKA if required to specify a specific config file for annotation. If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.
 
+> The default config is just included for testing, so if you want to annotate using DFAST, you have to create a config!
+
 ### `--input`
 
 Use this to specify the location of your input design file. For example:
