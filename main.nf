@@ -460,6 +460,7 @@ process canu_assembly {
     
     output:
     file 'assembly.fasta' into (assembly_from_canu_for_nanopolish, assembly_from_canu_for_medaka)
+    file "${sample_id}_assembly.png"
 
     when: params.assembler == 'canu'
 
@@ -473,6 +474,7 @@ process canu_assembly {
         oeaMemory="${task.memory.toGiga()}G" oeaThreads="${task.cpus}" \
         corMemory="${task.memory.toGiga()}G" corThreads="${task.cpus}" ${params.canu_args}
     mv canu_out/assembly.contigs.fasta assembly.fasta
+    Bandage image canu_out/assembly.contigs.gfa ${sample_id}_assembly.png
     """
 }
 
