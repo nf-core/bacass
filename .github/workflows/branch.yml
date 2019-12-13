@@ -11,6 +11,6 @@ jobs:
     steps:
        - uses: actions/checkout@v1
       # PRs are only ok if coming from an nf-core dev branch
-      - name: Check PRs
-        run: |
+       - name: Check PRs
+         run: |
           { [[ $(git remote get-url origin) == *nf-core/bacass ]] && [[ ${GITHUB_HEAD_REF} = "dev" ]]; } || [[ ${GITHUB_HEAD_REF} == "patch" ]]
