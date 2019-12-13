@@ -17,6 +17,10 @@ jobs:
           export NXF_VER=${{ matrix.nxf_ver }}
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
+      - name: Download and tag image
+        run: |
+          docker pull nfcore/bacass:dev
+          docker tag nfcore/bacass:dev nfcore/bacass:1.1.0
       - name: Run tests
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.options }}
