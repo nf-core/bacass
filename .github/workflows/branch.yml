@@ -9,6 +9,7 @@ jobs:
   test:
     runs-on: ubuntu-18.04
     steps:
+       - uses: actions/checkout@v1
       # PRs are only ok if coming from an nf-core dev branch
       - name: Check PRs
         run: |
