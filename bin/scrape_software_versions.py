@@ -12,7 +12,16 @@ regexes = {
     'Kraken2': ['v_kraken2.txt', r"([\d\.]+)-beta"],
     'Quast': ['v_quast.txt', r"QUAST v(\S+)"],
     'Prokka': ['v_prokka.txt', r"prokka (\S+)"],
-    'Bandage': ['v_bandage.txt', r"Version: (\S+)"],    
+    'Bandage': ['v_bandage.txt', r"Version: (\S+)"],
+    'Porechop': ['v_porechop.txt', r"(\S+)"],
+    'Nanopolish': ['v_porechop.txt', r"nanopolish version (\S+)"],
+    'Miniasm': ['v_miniasm.txt', r"(\S+)"],
+    'Racon': ['v_racon.txt', r"v(\S+)"],
+    'Canu': ['v_canu.txt', r"snapshot (\S+)"],
+    'DFAST': ['v_dfast.txt', r" version (\S+)"],
+    'Samtools': ['v_samtools.txt', r"samtools (\S+)"],
+    'Minimap2': ['v_minimap2.txt', r"(\S+)"],
+    'NanoPlot': ['v_nanoplot.txt', r"NanoPlot (\S+)"],
 }
 
 results = OrderedDict()
@@ -25,6 +34,16 @@ results['Kraken2'] = '<span style="color:#999999;\">N/A</span>'
 results['Quast'] = '<span style="color:#999999;\">N/A</span>'
 results['Prokka'] = '<span style="color:#999999;\">N/A</span>'
 results['Bandage'] = '<span style="color:#999999;\">N/A</span>'
+results['Porechop'] = '<span style="color:#999999;\">N/A</span>'
+results['Nanopolish'] = '<span style="color:#999999;\">N/A</span>'
+results['Miniasm'] = '<span style="color:#999999;\">N/A</span>'
+results['Racon'] = '<span style="color:#999999;\">N/A</span>'
+results['Canu'] = '<span style="color:#999999;\">N/A</span>'
+results['DFAST'] = '<span style="color:#999999;\">N/A</span>'
+results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
+results['Minimap2'] = '<span style="color:#999999;\">N/A</span>'
+results['NanoPlot'] = '<span style="color:#999999;\">N/A</span>'
+
 
 # Search each file using its regex
 for k, v in regexes.items():
