@@ -22,7 +22,7 @@ def helpMessage() {
     Mandatory arguments:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
                                     Available: conda, docker, singularity, awsbatch, test and more.
-      --input                       The design file used for running the pipeline.
+      --input                       The design file used for running the pipeline in TSV format.
 
     Pipeline arguments:
         --assembler                   Default: "Unicycler", Available: "Canu", "Miniasm", "Unicycler". Short & Hybrid assembly always runs "Unicycler".
@@ -36,6 +36,7 @@ def helpMessage() {
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
+      
    Skipping options:
       --skip_annotation             Skips the annotation with Prokka
       --skip_kraken2                Skips the read classification with Kraken2

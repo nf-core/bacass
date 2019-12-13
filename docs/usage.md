@@ -149,7 +149,7 @@ ID R1 R2 LongFastQ Fast5 GenomeSize
 ERR044595 https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_1.fastq.gz https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_2.fastq.gz https://github.com/nf-core/test-datasets/raw/bacass/nanopore/subset15000.fq.gz NA 2.8m
 ```
 
-* `ID` The identifier to use for handling the dataset
+* `ID` The identifier to use for handling the dataset e.g. sample name
 * `R1` The forward reads in case of available short-read data
 * `R2` The reverse reads in case of available short-read data
 * `LongFastQ` The long*read FastQ file with reads in FASTQ format
