@@ -1,6 +1,6 @@
 # nf-core/bacass: Changelog
 
-## v1.1.0dev nf-core/bacass: "Green Aluminium Shark"
+## v1.1.0 nf-core/bacass: "Green Aluminium Shark" 2019/12/13
 
 * Added support for hybrid assembly using Nanopore and Illumina Short Reads
 * Added methods for long-read Nanopore data
