@@ -25,13 +25,13 @@ def helpMessage() {
       --input                       The design file used for running the pipeline in TSV format.
 
     Pipeline arguments:
-        --assembler                   Default: "Unicycler", Available: "Canu", "Miniasm", "Unicycler". Short & Hybrid assembly always runs "Unicycler".
-        --assembly_type               Default: "Short", Available: "Short", "Long", "Hybrid".
-        --kraken2db                   Path to Kraken2 Database directory
-        --prokka_args                 Advanced: Extra arguments to Prokka (quote and add leading space)
-        --unicycler_args              Advanced: Extra arguments to Unicycler (quote and add leading space)
-        --canu_args                   Advanced: Extra arguments for Canu assembly (quote and add leading space)
-  
+      --assembler                   Default: "Unicycler", Available: "Canu", "Miniasm", "Unicycler". Short & Hybrid assembly always runs "Unicycler".
+      --assembly_type               Default: "Short", Available: "Short", "Long", "Hybrid".
+      --kraken2db                   Path to Kraken2 Database directory
+      --prokka_args                 Advanced: Extra arguments to Prokka (quote and add leading space)
+      --unicycler_args              Advanced: Extra arguments to Unicycler (quote and add leading space)
+      --canu_args                   Advanced: Extra arguments for Canu assembly (quote and add leading space)
+
     Other options:
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
@@ -252,7 +252,7 @@ process adapter_trimming {
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
     input:
-	set sample_id, file(lr) from ch_for_long_trim
+    set sample_id, file(lr) from ch_for_long_trim
 
     output:
     set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish, ch_long_trimmed_kraken, ch_long_trimmed_medaka)
@@ -260,8 +260,7 @@ process adapter_trimming {
 
     when: !('short' in params.assembly_type)
 
-
-	script:
+    script:
     """
     porechop -i "${lr}" -t "${task.cpus}" -o trimmed.fastq
     porechop --version > v_porechop.txt
@@ -434,7 +433,7 @@ process consensus {
     label 'large'
 
     tag "$sample_id"
-	publishDir "${params.outdir}/${sample_id}/miniasm/consensus", mode: 'copy', pattern: 'assembly_consensus.fasta'
+    publishDir "${params.outdir}/${sample_id}/miniasm/consensus", mode: 'copy', pattern: 'assembly_consensus.fasta'
 
     input:
     set sample_id, file(lrfastq) from ch_long_trimmed_consensus
@@ -443,7 +442,7 @@ process consensus {
     output:
     file 'assembly_consensus.fasta' into (ch_assembly_consensus_for_nanopolish, ch_assembly_consensus_for_medaka)
 
-	script:
+    script:
     """
     minimap2 -x map-ont -t "${task.cpus}" "${assembly}" "${lrfastq}" > assembly.paf
     racon -t "${task.cpus}" "${lrfastq}" assembly.paf "${assembly}" > assembly_consensus.fasta

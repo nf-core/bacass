@@ -171,7 +171,11 @@ Can be used to define which polishing method is used by default for long reads. 
 
 ### `--prokka_args`
 
-This advanced option allows you to pass extra arguments to Prokka (e.g. `" --rfam"` or `" --genus name"`). For this to work you need to quote the arguments and add at least one space
+This advanced option allows you to pass extra arguments to Prokka (e.g. `" --rfam"` or `" --genus name"`). For this to work you need to quote the arguments and add at least one space between the arguments. Example:
+
+```bash
+--prokka_args `--rfam --genus Escherichia Coli`
+```
 
 ### `--unicycler_args`
 
