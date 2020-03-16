@@ -14,6 +14,7 @@
   * Canu Assembler
   * Unicycler in Long read Mode
 * Add alternative assembly annotation using DFAST
+* Add social preview image
 
 ### Dependency updates
 
