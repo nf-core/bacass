@@ -1,4 +1,4 @@
-FROM nfcore/base:1.10.1
+FROM nfcore/base:1.10.2
 LABEL authors="Andreas Wilm, Alexander Peltzer" \
       description="Docker image containing all software requirements for the nf-core/bacass pipeline"
 
