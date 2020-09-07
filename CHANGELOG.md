@@ -14,6 +14,7 @@
   * Canu Assembler
   * Unicycler in Long read Mode
 * Add alternative assembly annotation using DFAST
+* Modified Singularity/Docker profiles to fix scope issue
 
 ### Dependency updates
 
