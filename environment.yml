@@ -8,15 +8,15 @@ channels:
 dependencies:
   - python=3.7.3
   #Stuff for the documentation output
-  - conda-forge::markdown=3.1.1
-  - conda-forge::pymdown-extensions=6.0
-  - conda-forge::pygments=2.5.2
+  - conda-forge::markdown=3.3
+  - conda-forge::pymdown-extensions=8.0.1
+  - conda-forge::pygments=2.7.1
   #Other dependencies
   - fastqc=0.11.9
   - multiqc=1.9
   - unicycler=0.4.4 #Needs to stay like this, 0.4.7/0.4.8 release broken on bioconda with random segfaults
   - skewer=0.2.2
-  - kraken2=2.0.9_beta
+  - kraken2=2.0.9beta
   - prokka=1.14.6
   - bioconda::bandage=0.8.1
   # Nanopore analysis stuff
