@@ -9,7 +9,6 @@
 ----------------------------------------------------------------------------------------
 */
 
-
 def helpMessage() {
     log.info nfcoreHeader()
     log.info"""
@@ -44,17 +43,14 @@ def helpMessage() {
       --skip_pycoqc                 Skips long-read raw signal QC
 
     AWSBatch options:
-      --awsqueue                    The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion                   The AWS Region for your AWS Batch job to run on
+      --awsqueue [str]                The AWSBatch JobQueue that needs to be set when running on AWSBatch
+      --awsregion [str]               The AWS Region for your AWS Batch job to run on
+      --awscli [str]                  Path to the AWS CLI tool
     """.stripIndent()
 }
 
-/*
- * SET UP CONFIGURATION VARIABLES
- */
-
 // Show help message
-if (params.help){
+if (params.help) {
     helpMessage()
     exit 0
 }
@@ -71,25 +67,28 @@ if(!params.skip_kraken2){
 }
 
 // Has the run name been specified by the user?
-//  this has the bonus effect of catching both -name and --name
+// this has the bonus effect of catching both -name and --name
 custom_runName = params.name
-if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
-  custom_runName = workflow.runName
+if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
+    custom_runName = workflow.runName
 }
 
-if( workflow.profile == 'awsbatch') {
-  // AWSBatch sanity checking
-  if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
-  // Check outdir paths to be S3 buckets if running on AWSBatch
-  // related: https://github.com/nextflow-io/nextflow/issues/813
-  if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
-  // Prevent trace files to be stored on S3 since S3 does not support rolling files.
-  if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
+// Check AWS batch settings
+if (workflow.profile.contains('awsbatch')) {
+    // AWSBatch sanity checking
+    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
+    // Check outdir paths to be S3 buckets if running on AWSBatch
+    // related: https://github.com/nextflow-io/nextflow/issues/813
+    if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+    // Prevent trace files to be stored on S3 since S3 does not support rolling files.
+    if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
 
 // Stage config files
-ch_multiqc_config = Channel.fromPath(params.multiqc_config)
-ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
+ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
+ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
 
 //Check whether we have a design file as input set
 if(!params.input){
@@ -193,9 +192,10 @@ log.info "----------------------------------------------------"
 // Check the hostnames against configured profiles
 checkHostname()
 
-def create_workflow_summary(summary) {
-    def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
-    yaml_file.text  = """
+Channel.from(summary.collect{ [it.key, it.value] })
+    .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
+    .reduce { a, b -> return [a, b].join("\n            ") }
+    .map { x -> """
     id: 'nf-core-bacass-summary'
     description: " - this information is collected when the pipeline is started."
     section_name: 'nf-core/bacass Workflow Summary'
@@ -203,12 +203,11 @@ def create_workflow_summary(summary) {
     plot_type: 'html'
     data: |
         <dl class=\"dl-horizontal\">
-${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }.join("\n")}
+            $x
         </dl>
-    """.stripIndent()
+    """.stripIndent() }
+    .set { ch_workflow_summary }
 
-   return yaml_file
-}
 
 //Check compatible parameters
 if(("${params.assembler}" == 'canu' || "${params.assembler}" == 'miniasm') && ("${params.assembly_type}" == 'short' || "${params.assembly_type}" == 'hybrid')){
@@ -701,10 +700,10 @@ process multiqc {
     // NOTE unicycler and kraken not supported
     file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
     file ('software_versions/*') from software_versions_yaml.collect()
-    file workflow_summary from create_workflow_summary(summary)
+    file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
     output:
-    file "*multiqc_report.html" into multiqc_report
+    file "*multiqc_report.html" into ch_multiqc_report
     file "*_data"
     file "multiqc_plots"
 
@@ -712,29 +711,28 @@ process multiqc {
     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
     """
-    multiqc -f $rtitle $rfilename --config $multiqc_config .
+    multiqc -f $rtitle $rfilename $custom_config_file .
     """
 }
-
 
 /*
  * STEP 3 - Output Description HTML
  */
 process output_documentation {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
 
     input:
     file output_docs from ch_output_docs
+    file images from ch_output_docs_images
 
     output:
     file "results_description.html"
 
     script:
     """
-    markdown_to_html.r $output_docs results_description.html
+    markdown_to_html.py $output_docs -o results_description.html
     """
 }
-
 
 /*
  * Completion e-mail notification
@@ -743,8 +741,8 @@ workflow.onComplete {
 
     // Set up the e-mail variables
     def subject = "[nf-core/bacass] Successful: $workflow.runName"
-    if(!workflow.success){
-      subject = "[nf-core/bacass] FAILED: $workflow.runName"
+    if (!workflow.success) {
+        subject = "[nf-core/bacass] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
@@ -762,10 +760,9 @@ workflow.onComplete {
     email_fields['summary']['Date Completed'] = workflow.complete
     email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
     email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
-    if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
-    if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
-    if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
-    if(workflow.container) email_fields['summary']['Docker image'] = workflow.container
+    if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
+    if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
+    if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
@@ -774,14 +771,20 @@ workflow.onComplete {
     def mqc_report = null
     try {
         if (workflow.success) {
-            mqc_report = multiqc_report.getVal()
-            if (mqc_report.getClass() == ArrayList){
+            mqc_report = ch_multiqc_report.getVal()
+            if (mqc_report.getClass() == ArrayList) {
                 log.warn "[nf-core/bacass] Found multiple reports from process 'multiqc', will use only one"
                 mqc_report = mqc_report[0]
             }
         }
     } catch (all) {
         log.warn "[nf-core/bacass] Could not attach MultiQC report to summary email"
+    }
+
+    // Check if we are only sending emails on failure
+    email_address = params.email
+    if (!params.email && params.email_on_fail && !workflow.success) {
+        email_address = params.email_on_fail
     }
 
     // Render the TXT template
@@ -802,61 +805,65 @@ workflow.onComplete {
     def sendmail_html = sendmail_template.toString()
 
     // Send the HTML e-mail
-    if (params.email) {
+    if (email_address) {
         try {
-          if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
-          // Try to send HTML e-mail using sendmail
-          [ 'sendmail', '-t' ].execute() << sendmail_html
-          log.info "[nf-core/bacass] Sent summary e-mail to $params.email (sendmail)"
+            if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
+            // Try to send HTML e-mail using sendmail
+            [ 'sendmail', '-t' ].execute() << sendmail_html
+            log.info "[nf-core/bacass] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
-          // Catch failures and try with plaintext
-          [ 'mail', '-s', subject, params.email ].execute() << email_txt
-          log.info "[nf-core/bacass] Sent summary e-mail to $params.email (mail)"
+            // Catch failures and try with plaintext
+            def mail_cmd = [ 'mail', '-s', subject, '--content-type=text/html', email_address ]
+            if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
+              mail_cmd += [ '-A', mqc_report ]
+            }
+            mail_cmd.execute() << email_html
+            log.info "[nf-core/bacass] Sent summary e-mail to $email_address (mail)"
         }
     }
 
     // Write summary e-mail HTML to a file
-    def output_d = new File( "${params.outdir}/pipeline_info/" )
-    if( !output_d.exists() ) {
-      output_d.mkdirs()
+    def output_d = new File("${params.outdir}/pipeline_info/")
+    if (!output_d.exists()) {
+        output_d.mkdirs()
     }
-    def output_hf = new File( output_d, "pipeline_report.html" )
+    def output_hf = new File(output_d, "pipeline_report.html")
     output_hf.withWriter { w -> w << email_html }
-    def output_tf = new File( output_d, "pipeline_report.txt" )
+    def output_tf = new File(output_d, "pipeline_report.txt")
     output_tf.withWriter { w -> w << email_txt }
 
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
 
     if (workflow.stats.ignoredCount > 0 && workflow.success) {
-      log.info "${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}"
-      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}"
-      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}"
+        log.info "-${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}-"
+        log.info "-${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}-"
+        log.info "-${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}-"
     }
 
-    if(workflow.success){
-        log.info "${c_purple}[nf-core/bacass]${c_green} Pipeline completed successfully${c_reset}"
+    if (workflow.success) {
+        log.info "-${c_purple}[nf-core/bacass]${c_green} Pipeline completed successfully${c_reset}-"
     } else {
         checkHostname()
-        log.info "${c_purple}[nf-core/bacass]${c_red} Pipeline completed with errors${c_reset}"
+        log.info "-${c_purple}[nf-core/bacass]${c_red} Pipeline completed with errors${c_reset}-"
     }
 
 }
 
 
-def nfcoreHeader(){
+def nfcoreHeader() {
     // Log colors ANSI codes
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_dim = params.monochrome_logs ? '' : "\033[2m";
     c_black = params.monochrome_logs ? '' : "\033[0;30m";
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
     c_blue = params.monochrome_logs ? '' : "\033[0;34m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
+    c_dim = params.monochrome_logs ? '' : "\033[2m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
     c_white = params.monochrome_logs ? '' : "\033[0;37m";
+    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
 
     return """    -${c_dim}--------------------------------------------------${c_reset}-
                                             ${c_green},--.${c_black}/${c_green},-.${c_reset}
@@ -864,21 +871,21 @@ def nfcoreHeader(){
     ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
     ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
                                             ${c_green}`._,._,\'${c_reset}
-    ${c_purple} nf-core/bacass v${workflow.manifest.version}${c_reset}
+    ${c_purple}  nf-core/bacass v${workflow.manifest.version}${c_reset}
     -${c_dim}--------------------------------------------------${c_reset}-
     """.stripIndent()
 }
 
-def checkHostname(){
+def checkHostname() {
     def c_reset = params.monochrome_logs ? '' : "\033[0m"
     def c_white = params.monochrome_logs ? '' : "\033[0;37m"
     def c_red = params.monochrome_logs ? '' : "\033[1;91m"
     def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
-    if(params.hostnames){
+    if (params.hostnames) {
         def hostname = "hostname".execute().text.trim()
         params.hostnames.each { prof, hnames ->
             hnames.each { hname ->
-                if(hostname.contains(hname) && !workflow.profile.contains(prof)){
+                if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
                     log.error "====================================================\n" +
                             "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
                             "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +

@@ -7,43 +7,44 @@
   * [Updating the pipeline](#updating-the-pipeline)
   * [Reproducibility](#reproducibility)
 * [Main Nextflow arguments](#main-nextflow-arguments)
-  * [-profile](#-profile)
+  * [`-profile`](#-profile)
 * [Main Pipeline Arguments](#main-pipeline-arguments)
-  * [--annotation_tool](#--annotation_tool)
-  * [--assembler](#--assembler)
-  * [--assembly_type](#--assembly_type)
-  * [--canu_args](#--canu_args)
-  * [--dfast_config](#--dfast_config)
-  * [--input](#--input)
-  * [--kraken2db](#--kraken2db)
-  * [--polish_method](#--polish_method)
-  * [--prokka_args](#--prokka_args)
-  * [--unicycler_args](#--unicycler_args)
+  * [`--annotation_tool`](#--annotation_tool)
+  * [`--assembler`](#--assembler)
+  * [`--assembly_type`](#--assembly_type)
+  * [`--canu_args`](#--canu_args)
+  * [`--dfast_config`](#--dfast_config)
+  * [`--input`](#--input)
+  * [`--kraken2db`](#--kraken2db)
+  * [`--polish_method`](#--polish_method)
+  * [`--prokka_args`](#--prokka_args)
+  * [`--unicycler_args`](#--unicycler_args)
 * [Skipping Options](#skipping-options)
-  * [--skip_annotation](#--skip_annotation)
-  * [--skip_kraken2](#--skip_kraken2)
-  * [--skip_polish](#--skip_polish)
-  * [--skip_pycoqc](#--skip_pycoqc)
+  * [`--skip_annotation`](#--skip_annotation)
+  * [`--skip_kraken2`](#--skip_kraken2)
+  * [`--skip_polish`](#--skip_polish)
+  * [`--skip_pycoqc`](#--skip_pycoqc)
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
   * [Custom resource requests](#custom-resource-requests)
 * [AWS Batch specific parameters](#aws-batch-specific-parameters)
-  * [--awsqueue](#--awsqueue)
-  * [--awsregion](#--awsregion)
+  * [`--awsqueue`](#--awsqueue)
+  * [`--awsregion`](#--awsregion)
 * [Other command line parameters](#other-command-line-parameters)
-  * [--outdir](#--outdir)
-  * [--email](#--email)
-  * [-name](#-name)
-  * [-resume](#-resume)
-  * [-c](#-c)
-  * [--custom_config_version](#--custom_config_version)
-  * [--custom_config_base](#--custom_config_base)
-  * [--max_memory](#--max_memory)
-  * [--max_time](#--max_time)
-  * [--max_cpus](#--max_cpus)
-  * [--plaintext_email](#--plaintext_email)
-  * [--monochrome_logs](#--monochrome_logs)
-  * [--multiqc_config](#--multiqc_config)
+  * [`--outdir`](#--outdir)
+  * [`--email`](#--email)
+  * [`-name`](#-name)
+  * [Running in the background](#running-in-the-background)
+  * [`-resume`](#-resume)
+  * [`-c`](#-c)
+  * [`--custom_config_version`](#--custom_config_version)
+  * [`--custom_config_base`](#--custom_config_base)
+  * [`--max_memory`](#--max_memory)
+  * [`--max_time`](#--max_time)
+  * [`--max_cpus`](#--max_cpus)
+  * [`--plaintext_email`](#--plaintext_email)
+  * [`--monochrome_logs`](#--monochrome_logs)
+  * [`--multiqc_config`](#--multiqc_config)
 
 ## General Nextflow info
 
@@ -243,13 +244,13 @@ Name for the pipeline run. If not specified, Nextflow will automatically generat
 
 This is used in the MultiQC report (if not default) and in the summary HTML / e-mail (always).
 
-**NB:** Single hyphen (core Nextflow option)
+### Running in the background
 
 ### `-resume`
 
 Specify this when restarting a pipeline. Nextflow will used cached results from any pipeline steps where the inputs are the same, continuing from where it got to previously.
 
-You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
+The Nextflow `-bg` flag launches Nextflow in the background, detached from your terminal so that the workflow does not stop if you log out of your session. The logs are saved to a file.
 
 **NB:** Single hyphen (core Nextflow option)
 
@@ -278,14 +279,7 @@ you should download the files from the repo and tell nextflow where to find them
 `custom_config_base` option. For example:
 
 ```bash
-## Download and unzip the config files
-cd /path/to/my/configs
-wget https://github.com/nf-core/configs/archive/master.zip
-unzip master.zip
-
-## Run the pipeline
-cd /path/to/my/data
-nextflow run /path/to/pipeline/ --custom_config_base /path/to/my/configs/configs-master/
+NXF_OPTS='-Xms1g -Xmx4g'
 ```
 
 > Note that the nf-core/tools helper package has a `download` command to download all required pipeline
