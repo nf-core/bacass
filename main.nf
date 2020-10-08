@@ -220,7 +220,7 @@ process trim_and_combine {
     label 'medium'
 
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/trimming/shortreads/", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/trimming/shortreads/", mode: params.publish_dir_mode
 
     input:
     set sample_id, file(r1), file(r2) from ch_for_short_trim
@@ -245,7 +245,7 @@ process trim_and_combine {
 //AdapterTrimming for ONT reads
 process adapter_trimming {
     
-    publishDir "${params.outdir}/${sample_id}/trimming/longreads/", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/trimming/longreads/", mode: params.publish_dir_mode
 
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
@@ -271,7 +271,7 @@ process adapter_trimming {
 process fastqc {
     label 'small'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/FastQC", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/FastQC", mode: params.publish_dir_mode
 
     input:
     set sample_id, file(fq1), file(fq2) from ch_short_for_fastqc
@@ -291,7 +291,7 @@ process fastqc {
 process nanoplot {
     label 'medium'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/QC_longreads/NanoPlot", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/QC_longreads/NanoPlot", mode: params.publish_dir_mode
 
     when: (params.assembly_type != 'short')
 
@@ -317,7 +317,7 @@ process pycoqc{
     label 'medium'
 
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/QC_longreads/PycoQC", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/QC_longreads/PycoQC", mode: params.publish_dir_mode
 
     when: (params.assembly_type == 'hybrid' || params.assembly_type == 'long') && !params.skip_pycoqc && fast5
 
@@ -370,7 +370,7 @@ if(params.assembly_type == 'hybrid'){
  */
 process unicycler {
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/unicycler", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/unicycler", mode: params.publish_dir_mode
 
     when: params.assembler == 'unicycler'
 
@@ -408,7 +408,7 @@ process miniasm_assembly {
     label 'large'
 
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/miniasm", mode: 'copy', pattern: 'assembly.fasta'
+    publishDir "${params.outdir}/${sample_id}/miniasm", mode: params.publish_dir_mode, pattern: 'assembly.fasta'
     
     input:
     set sample_id, file(lrfastq) from ch_long_trimmed_miniasm
@@ -431,7 +431,7 @@ process consensus {
     label 'large'
 
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/miniasm/consensus", mode: 'copy', pattern: 'assembly_consensus.fasta'
+    publishDir "${params.outdir}/${sample_id}/miniasm/consensus", mode: params.publish_dir_mode, pattern: 'assembly_consensus.fasta'
 
     input:
     set sample_id, file(lrfastq) from ch_long_trimmed_consensus
@@ -451,7 +451,7 @@ process canu_assembly {
     label 'large'
 
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/canu", mode: 'copy', pattern: 'assembly.fasta'
+    publishDir "${params.outdir}/${sample_id}/canu", mode: params.publish_dir_mode, pattern: 'assembly.fasta'
 
     input:
     set sample_id, file(lrfastq), val(genomeSize) from ch_long_trimmed_canu.join(ch_genomeSize_forCanu)
@@ -479,7 +479,7 @@ process canu_assembly {
 process kraken2 {
     label 'large'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/kraken", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/kraken", mode: params.publish_dir_mode
 
     input:
     set sample_id, file(fq1), file(fq2) from ch_short_for_kraken2
@@ -503,7 +503,7 @@ process kraken2 {
 process kraken2_long {
     label 'large'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/kraken_long", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/kraken_long", mode: params.publish_dir_mode
 
     input:
     set sample_id, file(lr) from ch_long_trimmed_kraken
@@ -526,7 +526,7 @@ process kraken2_long {
  */
 process quast {
   tag {"$sample_id"}
-  publishDir "${params.outdir}/${sample_id}/QUAST", mode: 'copy'
+  publishDir "${params.outdir}/${sample_id}/QUAST", mode: params.publish_dir_mode
   
   input:
   set sample_id, file(fasta) from quast_ch
@@ -551,7 +551,7 @@ process quast {
 process prokka {
    label 'large'
    tag "$sample_id"
-   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+   publishDir "${params.outdir}/${sample_id}/", mode: params.publish_dir_mode
    
    input:
    set sample_id, file(fasta) from prokka_ch
@@ -573,7 +573,7 @@ process prokka {
 
 process dfast {
    tag "$sample_id"
-   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+   publishDir "${params.outdir}/${sample_id}/", mode: params.publish_dir_mode
    
 
    input:
@@ -599,7 +599,7 @@ process nanopolish {
     tag "$assembly"
     label 'large'
 
-    publishDir "${params.outdir}/${sample_id}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
+    publishDir "${params.outdir}/${sample_id}/nanopolish/", mode: params.publish_dir_mode, pattern: 'polished_genome.fa'
 
     input:
     file(assembly) from ch_assembly_consensus_for_nanopolish.mix(ch_assembly_nanopolish_unicycler,assembly_from_canu_for_nanopolish) //Should take either miniasm, canu, or unicycler consensus sequence (!)
@@ -626,7 +626,7 @@ process medaka {
     tag "$assembly"
     label 'large'
 
-    publishDir "${params.outdir}/${sample_id}/medaka/", mode: 'copy', pattern: 'polished_genome.fa'
+    publishDir "${params.outdir}/${sample_id}/medaka/", mode: params.publish_dir_mode, pattern: 'polished_genome.fa'
 
     input:
     file(assembly) from ch_assembly_consensus_for_medaka.mix(ch_assembly_medaka_unicycler,assembly_from_canu_for_medaka) //Should take either miniasm, canu, or unicycler consensus sequence (!)
@@ -647,7 +647,7 @@ process medaka {
  * Parse software version numbers
  */
 process get_software_versions {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy',
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
     saveAs: {filename ->
         if (filename.indexOf(".csv") > 0) filename
         else null
@@ -690,7 +690,7 @@ process get_software_versions {
 
 process multiqc {
     label 'small'
-    publishDir "${params.outdir}/MultiQC", mode: 'copy'
+    publishDir "${params.outdir}/MultiQC", mode: params.publish_dir_mode
 
     input:
     file multiqc_config from ch_multiqc_config
