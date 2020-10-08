@@ -14,19 +14,13 @@ dependencies:
   #Other dependencies
   - fastqc=0.11.9
   - multiqc=1.9
-  - unicycler=0.4.4 #Needs to stay like this, 0.4.7/0.4.8 release broken on bioconda with random segfaults
   - skewer=0.2.2
   - kraken2=2.0.9beta
-  - prokka=1.14.6
-  - bioconda::bandage=0.8.1
   # Nanopore analysis stuff
   - nanopolish=0.13.2
   - conda-forge::parallel=20200922
   - miniasm=0.3_r179
   - racon=1.4.13
-  - bioconda::canu=2.0
   - minimap2=2.17
-  - samtools=1.11
-  - nanoplot=1.32.1
-  - pycoqc=2.5.0.23
+  - samtools=1.9
   - h5py=2.10.0 #until the pycoqc recipe has been updated

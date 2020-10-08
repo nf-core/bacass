@@ -379,7 +379,6 @@ process unicycler {
 
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into (quast_ch, prokka_ch, dfast_ch)
-    set sample_id, file("${sample_id}_assembly.gfa") into bandage_ch
     file("${sample_id}_assembly.fasta") into (ch_assembly_nanopolish_unicycler,ch_assembly_medaka_unicycler)
     file("${sample_id}_assembly.gfa")
     file("${sample_id}_assembly.png")
@@ -400,7 +399,6 @@ process unicycler {
     # rename so that quast can use the name 
     mv assembly.gfa ${sample_id}_assembly.gfa
     mv assembly.fasta ${sample_id}_assembly.fasta
-    Bandage image ${sample_id}_assembly.gfa ${sample_id}_assembly.png
     """
 }
 
@@ -549,7 +547,7 @@ process quast {
  * Annotation with prokka
  */
 process prokka {
-   label 'large'
+
    tag "$sample_id"
    publishDir "${params.outdir}/${sample_id}/", mode: params.publish_dir_mode
    
@@ -574,7 +572,6 @@ process prokka {
 process dfast {
    tag "$sample_id"
    publishDir "${params.outdir}/${sample_id}/", mode: params.publish_dir_mode
-   
 
    input:
    set sample_id, file(fasta) from dfast_ch
@@ -672,7 +669,6 @@ process get_software_versions {
     prokka -v 2> v_prokka.txt
     skewer -v > v_skewer.txt
     kraken2 -v > v_kraken2.txt
-    Bandage -v > v_bandage.txt
     nanopolish --version > v_nanopolish.txt
     miniasm -V > v_miniasm.txt
     racon --version > v_racon.txt
