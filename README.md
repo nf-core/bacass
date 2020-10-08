@@ -9,6 +9,7 @@ A simple bacterial assembly and annotation pipeline
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/bacass.svg)](https://hub.docker.com/r/nfcore/bacass)
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23bacass-4A154B?logo=slack)](https://nfcore.slack.com/channels/bacass)
+[![DOI](https://zenodo.org/badge/168486714.svg)](https://zenodo.org/badge/latestdoi/168486714)
 
 ## Introduction
 
@@ -52,8 +53,7 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 ## Citation
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi. -->
-<!-- If you use  nf-core/bacass for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+If you use nf-core/bacass for your analysis, please cite it using the following doi: [10.5281/zenodo.3574476](https://zenodo.org/badge/latestdoi/168486714)
 
 You can cite the `nf-core` publication as follows:
 
