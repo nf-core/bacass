@@ -57,7 +57,6 @@ if (params.help) {
 
 // see https://ccb.jhu.edu/software/kraken2/index.shtml#downloads
 
-
 if(!params.skip_kraken2){
     if(params.kraken2db){
       kraken2db = file(params.kraken2db)
