@@ -13,7 +13,7 @@ before_install:
   - docker pull nfcore/bacass:dev
   # Fake the tag locally so that the pipeline runs properly
   # Looks weird when this is :dev to :dev, but makes sense when testing code for a release (:dev to :1.0.1)
-  - docker tag nfcore/bacass:dev nfcore/bacass:dev
+  - docker tag nfcore/bacass:dev nfcore/bacass:1.1.0
 
 install:
   # Install Nextflow
