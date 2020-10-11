@@ -105,6 +105,14 @@
                     "default": "${params.outdir}/pipeline_info",
                     "fa_icon": "fas fa-cogs",
                     "hidden": true
+                },
+                "igenomes_base": {
+                    "type": "string",
+                    "default": "s3://ngi-igenomes/igenomes/"
+                },
+                "igenomes_ignore": {
+                    "type": "string",
+                    "default": "true"
                 }
             }
         },
@@ -190,32 +198,18 @@
                 }
             }
         },
-        "skipping_options": {
-            "title": "Skipping Options",
+        "contamination_screening": {
+            "title": "Contamination Screening",
             "type": "object",
             "description": "",
             "default": "",
-            "fa_icon": "fas fa-forward",
+            "fa_icon": "fas fa-box",
             "properties": {
-                "skip_kraken2": {
+                "kraken2db": {
                     "type": "string",
-                    "fa_icon": "fas fa-forward",
-                    "description": "Skip running Kraken2 classifier on reads."
-                },
-                "skip_annotation": {
-                    "type": "string",
-                    "fa_icon": "fas fa-forward",
-                    "description": "Skip annotating the assembly with Prokka /DFAST."
-                },
-                "skip_pycoqc": {
-                    "type": "string",
-                    "fa_icon": "fas fa-forward",
-                    "description": "Skip running `PycoQC` on long read input."
-                },
-                "skip_polish": {
-                    "type": "string",
-                    "fa_icon": "fas fa-forward",
-                    "description": "Skip polishing the long-read assembly with FAST5 input. Will not affect short/hybrid assemblies."
+                    "fa_icon": "fab fa-gitkraken",
+                    "help_text": "See [Kraken2 homepage](https://benlangmead.github.io/aws-indexes/k2) for download\nlinks. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for\nsample purity.",
+                    "description": "Path to Kraken2 database."
                 }
             }
         },
@@ -275,6 +269,51 @@
                     "description": "Specifies a configuration file for the [DFAST](https://github.com/nigyta/dfast_core) annotation method. This can be used instead of PROKKA if required to specify a specific config file for annotation. If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.  > The default config is just included for testing, so if you want to annotate using DFAST, you have to create a config!"
                 }
             }
+        },
+        "assembly_polishing": {
+            "title": "Assembly Polishing",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-user-astronaut",
+            "properties": {
+                "polish_method": {
+                    "type": "string",
+                    "default": "medaka",
+                    "fa_icon": "fas fa-hotdog",
+                    "description": "Which assembly polishing method to use.",
+                    "help_text": "Can be used to define which polishing method is used by default for long reads. Default is `medaka`, available options are `nanopolish` or `medaka`."
+                }
+            }
+        },
+        "skipping_options": {
+            "title": "Skipping Options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-forward",
+            "properties": {
+                "skip_kraken2": {
+                    "type": "string",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip running Kraken2 classifier on reads."
+                },
+                "skip_annotation": {
+                    "type": "string",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip annotating the assembly with Prokka /DFAST."
+                },
+                "skip_pycoqc": {
+                    "type": "string",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip running `PycoQC` on long read input."
+                },
+                "skip_polish": {
+                    "type": "string",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip polishing the long-read assembly with FAST5 input. Will not affect short/hybrid assemblies."
+                }
+            }
         }
     },
     "allOf": [
@@ -291,28 +330,19 @@
             "$ref": "#/definitions/institutional_config_options"
         },
         {
-            "$ref": "#/definitions/skipping_options"
+            "$ref": "#/definitions/contamination_screening"
         },
         {
             "$ref": "#/definitions/assembly_parameters"
         },
         {
             "$ref": "#/definitions/annotation"
-        }
-    ],
-    "properties": {
-        "kraken2db": {
-            "type": "string",
-            "fa_icon": "fab fa-gitkraken",
-            "help_text": "See [Kraken2 homepage](https://benlangmead.github.io/aws-indexes/k2) for download\nlinks. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for\nsample purity.",
-            "description": "Path to Kraken2 database."
         },
-        "polish_method": {
-            "type": "string",
-            "default": "medaka",
-            "fa_icon": "fas fa-hotdog",
-            "description": "Which assembly polishing method to use.",
-            "help_text": "Can be used to define which polishing method is used by default for long reads. Default is `medaka`, available options are `nanopolish` or `medaka`."
+        {
+            "$ref": "#/definitions/assembly_polishing"
+        },
+        {
+            "$ref": "#/definitions/skipping_options"
         }
-    }
+    ]
 }
