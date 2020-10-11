@@ -669,7 +669,6 @@ process get_software_versions {
     path pycoqc_version from ch_pycoqc_version.first().ifEmpty([])
     path unicycler_version from ch_unicycler_version.first().ifEmpty([])
     path canu_version from ch_canu_version.first().ifEmpty([])
-    path quast_version from ch_quast_version.first().ifEmpty([])
     path prokka_version from ch_prokka_version.first().ifEmpty([])
     path dfast_version from ch_dfast_version.first().ifEmpty([])
     path nanopolish_version from ch_nanopolish_version.first().ifEmpty([])
@@ -692,7 +691,7 @@ process get_software_versions {
     miniasm -V > miniasm.version.txt
     minimap2 --version &> minimap2.version.txt
     racon --version | sed -e "s/v//g" > racon.version.txt
-    skewer --version | sed -e "s/skewer version://g" | sed -e 's/\s//g' | head -n 1  > skewer.version.txt
+    skewer --version | sed -e "s/skewer version://g" | sed -e 's/\\s//g' | head -n 1  > skewer.version.txt
     kraken2 --version | sed -e "s/Kraken version //g" | head -n 1 > kraken2.version.txt
     multiqc --version | sed -e "s/multiqc, version//g" > multiqc.version.txt
     scrape_software_versions.py > software_versions_mqc.yaml
