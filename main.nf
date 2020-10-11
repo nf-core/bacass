@@ -254,14 +254,14 @@ process adapter_trimming {
 
     output:
     set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish, ch_long_trimmed_kraken, ch_long_trimmed_medaka)
-    file ("v_porechop.txt") into ch_porechop_version
+    file ("porechop.version.txt") into ch_porechop_version
 
     when: !('short' in params.assembly_type)
 
     script:
     """
     porechop -i "${lr}" -t "${task.cpus}" -o trimmed.fastq
-    porechop --version > v_porechop.txt
+    porechop --version > porechop.version.txt
     """
 }
 
@@ -289,7 +289,6 @@ process fastqc {
  * Quality check for nanopore reads and Quality/Length Plots
  */
 process nanoplot {
-    label 'medium'
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/QC_longreads/NanoPlot", mode: params.publish_dir_mode
 
@@ -302,10 +301,12 @@ process nanoplot {
     file '*.png'
     file '*.html'
     file '*.txt'
+    file 'nanoplot.version.txt' into ch_nanoplot_version
 
     script:
     """
     NanoPlot -t "${task.cpus}" --title "${sample_id}" -c darkblue --fastq ${lr}
+    NanoPlot --version | sed -e "s/NanoPlot //g" > nanoplot.version.txt
     """
 }
 
@@ -327,6 +328,7 @@ process pycoqc{
     output:
     set sample_id, file('sequencing_summary.txt') into ch_summary_index_for_nanopolish
     file("pycoQC_${sample_id}*")
+    file("pycoQC.version.txt") into ch_pycoqc_version
 
     script:
     //Find out whether the sequencing_summary already exists
@@ -342,6 +344,7 @@ process pycoqc{
     """
     $run_summary
     pycoQC -f "${prefix}sequencing_summary.txt" $barcode_me -o pycoQC_${sample_id}.html -j pycoQC_${sample_id}.json
+    pycoQC --version | sed -e "s/pycoQC v//g" > pycoQC.version.txt
     """
 }
 
@@ -383,6 +386,7 @@ process unicycler {
     file("${sample_id}_assembly.gfa")
     file("${sample_id}_assembly.png")
     file("${sample_id}_unicycler.log")
+    file("unicycler.version.txt") into ch_unicycler_version
     
     script:
     if(params.assembly_type == 'long'){
@@ -399,6 +403,7 @@ process unicycler {
     # rename so that quast can use the name 
     mv assembly.gfa ${sample_id}_assembly.gfa
     mv assembly.fasta ${sample_id}_assembly.fasta
+    unicycler --version | sed -e "s/Unicycler v//g" > unicycler.version.txt
     """
 }
 
@@ -456,6 +461,7 @@ process canu_assembly {
     
     output:
     file 'assembly.fasta' into (assembly_from_canu_for_nanopolish, assembly_from_canu_for_medaka)
+    file 'canu.version.txt' into ch_canu_version
 
     when: params.assembler == 'canu'
 
@@ -469,6 +475,7 @@ process canu_assembly {
         oeaMemory="${task.memory.toGiga()}G" oeaThreads="${task.cpus}" \
         corMemory="${task.memory.toGiga()}G" corThreads="${task.cpus}" ${params.canu_args}
     mv canu_out/assembly.contigs.fasta assembly.fasta
+    canu --version | sed -e "s/Canu //g" > canu.version.txt
     """
 }
 
@@ -534,12 +541,12 @@ process quast {
   // name clash with other samples we need a directory named by sample
   file("${sample_id}_assembly_QC/")
   file("${sample_id}_assembly_QC/report.tsv") into quast_logs_ch
-  file("v_quast.txt") into ch_quast_version
+  file("quast.version.txt") into ch_quast_version
 
   script:
   """
   quast -t ${task.cpus} -o ${sample_id}_assembly_QC ${fasta}
-  quast -v > v_quast.txt
+  quast --version | sed -e "s/QUAST v//g" > quast.version.txt
   """
 }
 
@@ -556,16 +563,14 @@ process prokka {
 
    output:
    file("${sample_id}_annotation/")
-   // multiqc prokka module is just a stub using txt. see https://github.com/ewels/MultiQC/issues/587
-   // also, this only makes sense if we could set genus/species/strain. otherwise all samples
-   // are the same
-   // file("${sample_id}_annotation/*txt") into prokka_logs_ch
+   file("prokka.version.txt") into ch_prokka_version
 
    when: !params.skip_annotation && params.annotation_tool == 'prokka'
 
    script:
    """
    prokka --cpus ${task.cpus} --prefix "${sample_id}" --outdir ${sample_id}_annotation ${params.prokka_args} ${fasta}
+   prokka --version | sed -e "s/prokka //g" > prokka.version.txt
    """
 }
 
@@ -579,14 +584,14 @@ process dfast {
 
    output:
    file("RESULT*")
-   file("v_dfast.txt") into ch_dfast_version_for_multiqc
+   file("dfast.version.txt") into ch_dfast_version
 
    when: !params.skip_annotation && params.annotation_tool == 'dfast'
 
    script:
    """
    dfast --genome ${fasta} --config $config
-   dfast &> v_dfast.txt 2>&1 || true
+   dfast --version | sed -e "s/DFAST ver. //g" > dfast.version.txt
    """
 }
 
@@ -604,6 +609,8 @@ process nanopolish {
 
     output:
     file 'polished_genome.fa'
+    file 'nanopolish.version.txt' into ch_nanopolish_version
+    file 'samtools.version.txt' into ch_samtools_version
 
     when: !params.skip_polish && params.assembly_type == 'long' && params.polish_method != 'medaka'
 
@@ -615,6 +622,10 @@ process nanopolish {
     samtools index reads.sorted.bam
     nanopolish_makerange.py "${assembly}" | parallel --results nanopolish.results -P "${task.cpus}" nanopolish variants --consensus -o polished.{1}.vcf -w {1} -r "${lrfastq}" -b reads.sorted.bam -g "${assembly}" -t "${task.cpus}" --min-candidate-frequency 0.1
     nanopolish vcf2fasta -g "${assembly}" polished.*.vcf > polished_genome.fa
+
+    #Versions
+    nanopolish --version | sed -e "s/nanopolish version //g" | head -n 1 > nanopolish.version.txt
+    samtools --version | sed -e "s/samtools //g" | head -n 1 > samtools.version.txt
     """
 }
 
@@ -631,12 +642,14 @@ process medaka {
 
     output:
     file 'polished_genome.fa'
+    file 'medaka.version.txt' into ch_medaka_version
 
     when: !params.skip_polish && params.assembly_type == 'long' && params.polish_method == 'medaka'
 
     script:
     """
     medaka_consensus -i ${lrfastq} -d ${assembly} -o "polished_genome.fa" -t ${task.cpus}
+    medaka --version | sed -e "s/medaka //g" > medaka.version.txt
     """
 }
 
@@ -651,10 +664,18 @@ process get_software_versions {
     }
 
     input:
-    file quast_version from ch_quast_version
-    file porechop_version from ch_porechop_version
-    file dfast_version from ch_dfast_version_for_multiqc
-
+    path quast_version from ch_quast_version
+    path porechop_version from ch_porechop_version
+    path pycoqc_version from ch_pycoqc_version
+    path unicycler_version from ch_unicycler_version
+    path canu_version from ch_canu_version
+    path quast_version from ch_quast_version
+    path prokka_version from ch_prokka_version
+    path dfast_version from ch_dfast_version
+    path nanopolish_version from ch_nanopolish_version
+    path samtools_version from ch_samtools_version
+    path nanoplot_version from ch_nanoplot_version
+    path medaka_version from ch_medaka_version
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
@@ -662,20 +683,19 @@ process get_software_versions {
 
     script:
     """
-    echo $workflow.manifest.version > v_pipeline.txt
-    echo $workflow.nextflow.version > v_nextflow.txt
-    fastqc --version > v_fastqc.txt
-    multiqc --version > v_multiqc.txt
-    prokka -v 2> v_prokka.txt
-    skewer -v > v_skewer.txt
-    kraken2 -v > v_kraken2.txt
-    nanopolish --version > v_nanopolish.txt
-    miniasm -V > v_miniasm.txt
-    racon --version > v_racon.txt
-    samtools --version &> v_samtools.txt 2>&1 || true
-    minimap2 --version &> v_minimap2.txt
-    NanoPlot --version > v_nanoplot.txt
-    canu --version > v_canu.txt
+    #All in main container
+    echo $workflow.manifest.version > pipeline.version.txt
+    echo $workflow.nextflow.version > nextflow.version.txt
+    fastqc --version | sed -e "s/FastQC v//g" > fastqc.version.txt
+    
+    #Check if version is fine
+    NanoPlot --version > nanoplot.version.txt
+    miniasm -V > miniasm.version.txt
+    minimap2 --version &> minimap2.version.txt
+    racon --version | sed -e "s/v//g" > racon.version.txt
+    skewer --version | sed -e "s/skewer version://g" | sed -e 's/\s//g' | head -n 1  > skewer.version.txt
+    kraken2 --version | sed -e "s/Kraken version //g" | head -n 1 > kraken2.version.txt
+    multiqc --version | sed -e "s/multiqc, version//g" > multiqc.version.txt
     scrape_software_versions.py > software_versions_mqc.yaml
     """
 }
