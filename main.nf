@@ -664,18 +664,18 @@ process get_software_versions {
     }
 
     input:
-    path quast_version from ch_quast_version
-    path porechop_version from ch_porechop_version
-    path pycoqc_version from ch_pycoqc_version
-    path unicycler_version from ch_unicycler_version
-    path canu_version from ch_canu_version
-    path quast_version from ch_quast_version
-    path prokka_version from ch_prokka_version
-    path dfast_version from ch_dfast_version
-    path nanopolish_version from ch_nanopolish_version
-    path samtools_version from ch_samtools_version
-    path nanoplot_version from ch_nanoplot_version
-    path medaka_version from ch_medaka_version
+    path quast_version from ch_quast_version.first().ifEmpty([])
+    path porechop_version from ch_porechop_version.first().ifEmpty([])
+    path pycoqc_version from ch_pycoqc_version.first().ifEmpty([])
+    path unicycler_version from ch_unicycler_version.first().ifEmpty([])
+    path canu_version from ch_canu_version.first().ifEmpty([])
+    path quast_version from ch_quast_version.first().ifEmpty([])
+    path prokka_version from ch_prokka_version.first().ifEmpty([])
+    path dfast_version from ch_dfast_version.first().ifEmpty([])
+    path nanopolish_version from ch_nanopolish_version.first().ifEmpty([])
+    path samtools_version from ch_samtools_version.first().ifEmpty([])
+    path nanoplot_version from ch_nanoplot_version.first().ifEmpty([])
+    path medaka_version from ch_medaka_version.first().ifEmpty([])
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
@@ -688,8 +688,7 @@ process get_software_versions {
     echo $workflow.nextflow.version > nextflow.version.txt
     fastqc --version | sed -e "s/FastQC v//g" > fastqc.version.txt
     
-    #Check if version is fine
-    NanoPlot --version > nanoplot.version.txt
+    #Inside main container
     miniasm -V > miniasm.version.txt
     minimap2 --version &> minimap2.version.txt
     racon --version | sed -e "s/v//g" > racon.version.txt
