@@ -466,7 +466,7 @@ process canu_assembly {
     script:
     """
     canu -p assembly -d canu_out \
-        genomeSize="${genomeSize}" -nanopore-raw "${lrfastq}" \
+        genomeSize="${genomeSize}" -nanopore "${lrfastq}" \
         maxThreads="${task.cpus}" merylMemory="${task.memory.toGiga()}G" \
         merylThreads="${task.cpus}" hapThreads="${task.cpus}" batMemory="${task.memory.toGiga()}G" \
         redMemory="${task.memory.toGiga()}G" redThreads="${task.cpus}" \
