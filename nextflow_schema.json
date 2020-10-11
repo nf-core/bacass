@@ -17,8 +17,8 @@
                 "input": {
                     "type": "string",
                     "fa_icon": "fas fa-dna",
-                    "description": "Input Design files.",
-                    "help_text": "Use this to specify the location of your input FastQ files. For example:\n\n```bash\n--input 'path/to/data/sample_*_{1,2}.fastq'\n```\n\nPlease note the following requirements:\n\n1. The path must be enclosed in quotes\n2. The path must have at least one `*` wildcard character\n3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.\n\nIf left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`"
+                    "description": "The input design file for the pipeline.",
+                    "help_text": "\nUse this to specify the location of your input design file. For example:\n\n```\n--input 'design_hybrid.tsv'\n```\n\nAn example of properly formatted input files can be found at the [nf-core/testData](https://github.com/nf-core/test-datasets/tree/bacass). Exemplarily, this is the input used for a hybrid assembly in testing:\n\n```\nID R1 R2 LongFastQ Fast5 GenomeSize\nERR044595 https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_1.fastq.gz https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_2.fastq.gz https://github.com/nf-core/test-datasets/raw/bacass/nanopore/subset15000.fq.gz NA 2.8m\n```\n\n* `ID` The identifier to use for handling the dataset e.g. sample name\n* `R1` The forward reads in case of available short-read data\n* `R2` The reverse reads in case of available short-read data\n* `LongFastQ` The long*read FastQ file with reads in FASTQ format\n* `Fast5` The folder containing the basecalled FAST5 files\n* `GenomeSize` The expected genome size of the assembly. Only used by the canu assembler.\n\nMissing values (e.g. FAST5 folder in case of short reads) can be omitted by using a `NA` in the TSV file. The pipeline will handle such cases appropriately then."
                 },
                 "outdir": {
                     "type": "string",
@@ -32,21 +32,6 @@
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
-                }
-            }
-        },
-        "reference_genome_options": {
-            "title": "Reference genome options",
-            "type": "object",
-            "fa_icon": "fas fa-dna",
-            "description": "Options for the reference genome indices used to align reads.",
-            "properties": {
-                "igenomes_ignore": {
-                    "type": "boolean",
-                    "description": "Do not load the iGenomes reference config.",
-                    "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
                 }
             }
         },
@@ -214,19 +199,23 @@
             "properties": {
                 "skip_kraken2": {
                     "type": "string",
-                    "fa_icon": "fas fa-forward"
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip running Kraken2 classifier on reads."
                 },
                 "skip_annotation": {
                     "type": "string",
-                    "fa_icon": "fas fa-forward"
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip annotating the assembly with Prokka /DFAST."
                 },
                 "skip_pycoqc": {
                     "type": "string",
-                    "fa_icon": "fas fa-forward"
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip running `PycoQC` on long read input."
                 },
                 "skip_polish": {
                     "type": "string",
-                    "fa_icon": "fas fa-forward"
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip polishing the long-read assembly with FAST5 input. Will not affect short/hybrid assemblies."
                 }
             }
         },
@@ -240,20 +229,26 @@
                 "assembler": {
                     "type": "string",
                     "default": "unicycler",
-                    "fa_icon": "fas fa-puzzle-piece"
+                    "fa_icon": "fas fa-puzzle-piece",
+                    "description": "The assembler to use for assembly. Available options are `Unicycler`, `Canu`, `Miniasm`. The latter two are only available for long-read data, whereas Unicycler can be used for short or hybrid assembly projects."
                 },
                 "assembly_type": {
                     "type": "string",
                     "default": "short",
-                    "fa_icon": "fas fa-fingerprint"
+                    "fa_icon": "fas fa-fingerprint",
+                    "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`. Short & Hybrid assembly will always run Unicycler, whereas long-read assembly can be configured separately using the `--assembler` parameter.",
+                    "description": "Which type of assembly to perform."
                 },
                 "unicycler_args": {
                     "type": "string",
-                    "fa_icon": "fas fa-bicycle"
+                    "fa_icon": "fas fa-bicycle",
+                    "description": "Extra arguments for Unicycler",
+                    "help_text": "This advanced option allows you to pass extra arguments to Unicycler (e.g. `\"--mode conservative\"` or `\"--no_correct\"`). For this to work you need to quote the arguments and add at least one space."
                 },
                 "canu_args": {
                     "type": "string",
-                    "fa_icon": "fas fa-ship"
+                    "fa_icon": "fas fa-ship",
+                    "description": "This can be used to supply [extra options](https://canu.readthedocs.io/en/latest/quick-start.html) to the Canu assembler. Will be ignored when other assemblers are used."
                 }
             }
         },
@@ -266,14 +261,18 @@
             "properties": {
                 "annotation_tool": {
                     "type": "string",
-                    "default": "prokka"
+                    "default": "prokka",
+                    "description": "The annotation method to annotate the final assembly. Default choice is `prokka`, but the `dfast` tool is also available. For the latter, make sure to create your specific config if you're not happy with the default one provided. See [#dfast_config](#dfastconfig) to find out how."
                 },
                 "prokka_args": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Extra arguments for prokka annotation tool.",
+                    "help_text": "This advanced option allows you to pass extra arguments to Prokka (e.g. `\" --rfam\"` or `\" --genus name\"`). For this to work you need to quote the arguments and add at least one space between the arguments. Example:\n\n```bash\n--prokka_args `--rfam --genus Escherichia Coli`\n```\n"
                 },
                 "dfast_config": {
                     "type": "string",
-                    "default": "/Users/alexanderpeltzer/IDEA/nf-core/bacass/assets/test_config_dfast.py"
+                    "default": "/Users/alexanderpeltzer/IDEA/nf-core/bacass/assets/test_config_dfast.py",
+                    "description": "Specifies a configuration file for the [DFAST](https://github.com/nigyta/dfast_core) annotation method. This can be used instead of PROKKA if required to specify a specific config file for annotation. If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.  > The default config is just included for testing, so if you want to annotate using DFAST, you have to create a config!"
                 }
             }
         }
@@ -281,9 +280,6 @@
     "allOf": [
         {
             "$ref": "#/definitions/input_output_options"
-        },
-        {
-            "$ref": "#/definitions/reference_genome_options"
         },
         {
             "$ref": "#/definitions/generic_options"
@@ -307,12 +303,16 @@
     "properties": {
         "kraken2db": {
             "type": "string",
-            "fa_icon": "fab fa-gitkraken"
+            "fa_icon": "fab fa-gitkraken",
+            "help_text": "See [Kraken2 homepage](https://benlangmead.github.io/aws-indexes/k2) for download\nlinks. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for\nsample purity.",
+            "description": "Path to Kraken2 database."
         },
         "polish_method": {
             "type": "string",
             "default": "medaka",
-            "fa_icon": "fas fa-hotdog"
+            "fa_icon": "fas fa-hotdog",
+            "description": "Which assembly polishing method to use.",
+            "help_text": "Can be used to define which polishing method is used by default for long reads. Default is `medaka`, available options are `nanopolish` or `medaka`."
         }
     }
 }
