@@ -17,6 +17,7 @@ This is basically a maintenance update that includes template updates, fixed env
   * samtools=1.9, 1.11
   * nanoplot=1.28.1, 1.32.1
   * pycoqc=2.5.0.3, 2.5.0.23
+* Switched out containers for many tools to make DSLv2 transition easier (escape from dependency hell)
 
 ## v1.1.0 nf-core/bacass: "Green Aluminium Shark" 2019/12/13
 
