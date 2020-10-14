@@ -705,7 +705,8 @@ process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: params.publish_dir_mode
 
     input:
-    file multiqc_config from ch_multiqc_config
+    file (multiqc_config) from ch_multiqc_config
+    file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
     //file prokka_logs from prokka_logs_ch.collect().ifEmpty([])
     file ('quast_logs/*') from quast_logs_ch.collect().ifEmpty([])
     // NOTE unicycler and kraken not supported
@@ -721,6 +722,7 @@ process multiqc {
     script:
     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
+    custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
     """
     multiqc -f $rtitle $rfilename $custom_config_file .
     """
