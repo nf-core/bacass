@@ -35,13 +35,13 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/bacass:dev
+        run: docker build --no-cache . -t nfcore/bacass:1.1.1
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/bacass:dev
-          docker tag nfcore/bacass:dev nfcore/bacass:dev
+          docker tag nfcore/bacass:dev nfcore/bacass:1.1.1
 
       - name: Install Nextflow
         run: |
