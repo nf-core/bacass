@@ -242,7 +242,7 @@ process trim_and_combine {
 
 //AdapterTrimming for ONT reads
 process adapter_trimming {
-    
+    label 'medium'
     publishDir "${params.outdir}/${sample_id}/trimming/longreads/", mode: params.publish_dir_mode
 
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
@@ -287,6 +287,7 @@ process fastqc {
  * Quality check for nanopore reads and Quality/Length Plots
  */
 process nanoplot {
+    label 'medium'
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/QC_longreads/NanoPlot", mode: params.publish_dir_mode
 
@@ -370,6 +371,7 @@ if(params.assembly_type == 'hybrid'){
 /* unicycler (short, long or hybrid mode!)
  */
 process unicycler {
+    label 'large'
     tag "$sample_id"
     publishDir "${params.outdir}/${sample_id}/unicycler", mode: params.publish_dir_mode
 
@@ -528,6 +530,7 @@ process kraken2_long {
 /* assembly qc with quast
  */
 process quast {
+  label 'small'
   tag {"$sample_id"}
   publishDir "${params.outdir}/${sample_id}/QUAST", mode: params.publish_dir_mode
   
@@ -552,7 +555,7 @@ process quast {
  * Annotation with prokka
  */
 process prokka {
-
+   label 'large'
    tag "$sample_id"
    publishDir "${params.outdir}/${sample_id}/", mode: params.publish_dir_mode
    
@@ -573,6 +576,7 @@ process prokka {
 }
 
 process dfast {
+   label 'medium-extramem' 
    tag "$sample_id"
    publishDir "${params.outdir}/${sample_id}/", mode: params.publish_dir_mode
 
