@@ -3,7 +3,10 @@ work/
 data/
 results/
 .DS_Store
-tests/
-testing/
-testing*
+tests/test_data
+*.un~
+*.swp
+nohup.out
+tmp/
+._.DS_Store
 *.pyc
