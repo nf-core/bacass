@@ -576,7 +576,7 @@ process prokka {
 }
 
 process dfast {
-   label 'medium-extramem' 
+   label 'medium_extramem' 
    tag "$sample_id"
    publishDir "${params.outdir}/${sample_id}/", mode: params.publish_dir_mode
 
