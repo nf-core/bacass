@@ -384,7 +384,6 @@ process unicycler {
     set sample_id, file("${sample_id}_assembly.fasta") into (quast_ch, prokka_ch, dfast_ch)
     file("${sample_id}_assembly.fasta") into (ch_assembly_nanopolish_unicycler,ch_assembly_medaka_unicycler)
     file("${sample_id}_assembly.gfa")
-    file("${sample_id}_assembly.png")
     file("${sample_id}_unicycler.log")
     file("unicycler.version.txt") into ch_unicycler_version
     
