@@ -1,29 +1,25 @@
 # You can use this file to create a conda environment for this pipeline:
 #   conda env create -f environment.yml
-name: nf-core-bacass-1.1.0
+name: nf-core-bacass-1.1.1
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
   - python=3.7.3
-  - fastqc=0.11.8
-  - multiqc=1.8
-  - unicycler=0.4.4 #Needs to stay like this, 0.4.7/0.4.8 release broken on bioconda with random segfaults
+  #Stuff for the documentation output
+  - conda-forge::markdown=3.3
+  - conda-forge::pymdown-extensions=8.0.1
+  - conda-forge::pygments=2.7.1
+  #Other dependencies
+  - fastqc=0.11.9
+  - multiqc=1.9
   - skewer=0.2.2
-  - kraken2=2.0.8_beta
-  - prokka=1.14.5
-  - bioconda::bandage=0.8.1
-  # for markdown_to_html.r
-  - r-markdown=1.1
+  - kraken2=2.0.9beta
   # Nanopore analysis stuff
-  - nanopolish=0.11.2
-  - conda-forge::parallel=20191122
+  - conda-forge::parallel=20200922
   - miniasm=0.3_r179
-  - racon=1.4.10
-  - bioconda::canu=1.9
+  - racon=1.4.13
   - minimap2=2.17
-  - samtools=1.9
-  - nanoplot=1.28.1
-  - pycoqc=2.5.0.3
+  - canu=2.0
   - h5py=2.10.0 #until the pycoqc recipe has been updated

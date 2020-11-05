@@ -9,7 +9,6 @@
 ----------------------------------------------------------------------------------------
 */
 
-
 def helpMessage() {
     log.info nfcoreHeader()
     log.info"""
@@ -44,25 +43,19 @@ def helpMessage() {
       --skip_pycoqc                 Skips long-read raw signal QC
 
     AWSBatch options:
-      --awsqueue                    The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion                   The AWS Region for your AWS Batch job to run on
+      --awsqueue [str]                The AWSBatch JobQueue that needs to be set when running on AWSBatch
+      --awsregion [str]               The AWS Region for your AWS Batch job to run on
+      --awscli [str]                  Path to the AWS CLI tool
     """.stripIndent()
 }
 
-/*
- * SET UP CONFIGURATION VARIABLES
- */
-
 // Show help message
-if (params.help){
+if (params.help) {
     helpMessage()
     exit 0
 }
 
-// see https://ccb.jhu.edu/software/kraken2/index.shtml#downloads
-
-
-if(!params.skip_kraken2){
+if(! params.skip_kraken2){
     if(params.kraken2db){
       kraken2db = file(params.kraken2db)
     } else {
@@ -71,25 +64,28 @@ if(!params.skip_kraken2){
 }
 
 // Has the run name been specified by the user?
-//  this has the bonus effect of catching both -name and --name
+// this has the bonus effect of catching both -name and --name
 custom_runName = params.name
-if( !(workflow.runName ==~ /[a-z]+_[a-z]+/) ){
-  custom_runName = workflow.runName
+if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
+    custom_runName = workflow.runName
 }
 
-if( workflow.profile == 'awsbatch') {
-  // AWSBatch sanity checking
-  if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
-  // Check outdir paths to be S3 buckets if running on AWSBatch
-  // related: https://github.com/nextflow-io/nextflow/issues/813
-  if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
-  // Prevent trace files to be stored on S3 since S3 does not support rolling files.
-  if (workflow.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
+// Check AWS batch settings
+if (workflow.profile.contains('awsbatch')) {
+    // AWSBatch sanity checking
+    if (!params.awsqueue || !params.awsregion) exit 1, "Specify correct --awsqueue and --awsregion parameters on AWSBatch!"
+    // Check outdir paths to be S3 buckets if running on AWSBatch
+    // related: https://github.com/nextflow-io/nextflow/issues/813
+    if (!params.outdir.startsWith('s3:')) exit 1, "Outdir not on S3 - specify S3 Bucket to run on AWSBatch!"
+    // Prevent trace files to be stored on S3 since S3 does not support rolling files.
+    if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
 
 // Stage config files
-ch_multiqc_config = Channel.fromPath(params.multiqc_config)
-ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
+ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
+ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
 
 //Check whether we have a design file as input set
 if(!params.input){
@@ -193,9 +189,10 @@ log.info "----------------------------------------------------"
 // Check the hostnames against configured profiles
 checkHostname()
 
-def create_workflow_summary(summary) {
-    def yaml_file = workDir.resolve('workflow_summary_mqc.yaml')
-    yaml_file.text  = """
+Channel.from(summary.collect{ [it.key, it.value] })
+    .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
+    .reduce { a, b -> return [a, b].join("\n            ") }
+    .map { x -> """
     id: 'nf-core-bacass-summary'
     description: " - this information is collected when the pipeline is started."
     section_name: 'nf-core/bacass Workflow Summary'
@@ -203,12 +200,11 @@ def create_workflow_summary(summary) {
     plot_type: 'html'
     data: |
         <dl class=\"dl-horizontal\">
-${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }.join("\n")}
+            $x
         </dl>
-    """.stripIndent()
+    """.stripIndent() }
+    .set { ch_workflow_summary }
 
-   return yaml_file
-}
 
 //Check compatible parameters
 if(("${params.assembler}" == 'canu' || "${params.assembler}" == 'miniasm') && ("${params.assembly_type}" == 'short' || "${params.assembly_type}" == 'hybrid')){
@@ -222,7 +218,7 @@ process trim_and_combine {
     label 'medium'
 
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/trimming/shortreads/", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/trimming/shortreads/", mode: params.publish_dir_mode
 
     input:
     set sample_id, file(r1), file(r2) from ch_for_short_trim
@@ -246,8 +242,8 @@ process trim_and_combine {
 
 //AdapterTrimming for ONT reads
 process adapter_trimming {
-    
-    publishDir "${params.outdir}/${sample_id}/trimming/longreads/", mode: 'copy'
+    label 'medium'
+    publishDir "${params.outdir}/${sample_id}/trimming/longreads/", mode: params.publish_dir_mode
 
     when: params.assembly_type == 'hybrid' || params.assembly_type == 'long'
 
@@ -256,14 +252,14 @@ process adapter_trimming {
 
     output:
     set sample_id, file('trimmed.fastq') into (ch_long_trimmed_unicycler, ch_long_trimmed_canu, ch_long_trimmed_miniasm, ch_long_trimmed_consensus, ch_long_trimmed_nanopolish, ch_long_trimmed_kraken, ch_long_trimmed_medaka)
-    file ("v_porechop.txt") into ch_porechop_version
+    file ("porechop.version.txt") into ch_porechop_version
 
     when: !('short' in params.assembly_type)
 
     script:
     """
     porechop -i "${lr}" -t "${task.cpus}" -o trimmed.fastq
-    porechop --version > v_porechop.txt
+    porechop --version > porechop.version.txt
     """
 }
 
@@ -273,7 +269,7 @@ process adapter_trimming {
 process fastqc {
     label 'small'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/FastQC", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/FastQC", mode: params.publish_dir_mode
 
     input:
     set sample_id, file(fq1), file(fq2) from ch_short_for_fastqc
@@ -293,7 +289,7 @@ process fastqc {
 process nanoplot {
     label 'medium'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/QC_longreads/NanoPlot", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/QC_longreads/NanoPlot", mode: params.publish_dir_mode
 
     when: (params.assembly_type != 'short')
 
@@ -304,10 +300,12 @@ process nanoplot {
     file '*.png'
     file '*.html'
     file '*.txt'
+    file 'nanoplot.version.txt' into ch_nanoplot_version
 
     script:
     """
     NanoPlot -t "${task.cpus}" --title "${sample_id}" -c darkblue --fastq ${lr}
+    NanoPlot --version | sed -e "s/NanoPlot //g" > nanoplot.version.txt
     """
 }
 
@@ -319,7 +317,7 @@ process pycoqc{
     label 'medium'
 
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/QC_longreads/PycoQC", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/QC_longreads/PycoQC", mode: params.publish_dir_mode
 
     when: (params.assembly_type == 'hybrid' || params.assembly_type == 'long') && !params.skip_pycoqc && fast5
 
@@ -329,6 +327,7 @@ process pycoqc{
     output:
     set sample_id, file('sequencing_summary.txt') into ch_summary_index_for_nanopolish
     file("pycoQC_${sample_id}*")
+    file("pycoQC.version.txt") into ch_pycoqc_version
 
     script:
     //Find out whether the sequencing_summary already exists
@@ -344,6 +343,7 @@ process pycoqc{
     """
     $run_summary
     pycoQC -f "${prefix}sequencing_summary.txt" $barcode_me -o pycoQC_${sample_id}.html -j pycoQC_${sample_id}.json
+    pycoQC --version | sed -e "s/pycoQC v//g" > pycoQC.version.txt
     """
 }
 
@@ -371,8 +371,9 @@ if(params.assembly_type == 'hybrid'){
 /* unicycler (short, long or hybrid mode!)
  */
 process unicycler {
+    label 'large'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/unicycler", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/unicycler", mode: params.publish_dir_mode
 
     when: params.assembler == 'unicycler'
 
@@ -381,11 +382,10 @@ process unicycler {
 
     output:
     set sample_id, file("${sample_id}_assembly.fasta") into (quast_ch, prokka_ch, dfast_ch)
-    set sample_id, file("${sample_id}_assembly.gfa") into bandage_ch
     file("${sample_id}_assembly.fasta") into (ch_assembly_nanopolish_unicycler,ch_assembly_medaka_unicycler)
     file("${sample_id}_assembly.gfa")
-    file("${sample_id}_assembly.png")
     file("${sample_id}_unicycler.log")
+    file("unicycler.version.txt") into ch_unicycler_version
     
     script:
     if(params.assembly_type == 'long'){
@@ -402,7 +402,7 @@ process unicycler {
     # rename so that quast can use the name 
     mv assembly.gfa ${sample_id}_assembly.gfa
     mv assembly.fasta ${sample_id}_assembly.fasta
-    Bandage image ${sample_id}_assembly.gfa ${sample_id}_assembly.png
+    unicycler --version | sed -e "s/Unicycler v//g" > unicycler.version.txt
     """
 }
 
@@ -410,7 +410,7 @@ process miniasm_assembly {
     label 'large'
 
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/miniasm", mode: 'copy', pattern: 'assembly.fasta'
+    publishDir "${params.outdir}/${sample_id}/miniasm", mode: params.publish_dir_mode, pattern: 'assembly.fasta'
     
     input:
     set sample_id, file(lrfastq) from ch_long_trimmed_miniasm
@@ -433,7 +433,7 @@ process consensus {
     label 'large'
 
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/miniasm/consensus", mode: 'copy', pattern: 'assembly_consensus.fasta'
+    publishDir "${params.outdir}/${sample_id}/miniasm/consensus", mode: params.publish_dir_mode, pattern: 'assembly_consensus.fasta'
 
     input:
     set sample_id, file(lrfastq) from ch_long_trimmed_consensus
@@ -453,26 +453,28 @@ process canu_assembly {
     label 'large'
 
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/canu", mode: 'copy', pattern: 'assembly.fasta'
+    publishDir "${params.outdir}/${sample_id}/canu", mode: params.publish_dir_mode, pattern: 'assembly.fasta'
 
     input:
     set sample_id, file(lrfastq), val(genomeSize) from ch_long_trimmed_canu.join(ch_genomeSize_forCanu)
     
     output:
     file 'assembly.fasta' into (assembly_from_canu_for_nanopolish, assembly_from_canu_for_medaka)
+    file 'canu.version.txt' into ch_canu_version
 
     when: params.assembler == 'canu'
 
     script:
     """
     canu -p assembly -d canu_out \
-        genomeSize="${genomeSize}" -nanopore-raw "${lrfastq}" \
+        genomeSize="${genomeSize}" -nanopore "${lrfastq}" \
         maxThreads="${task.cpus}" merylMemory="${task.memory.toGiga()}G" \
         merylThreads="${task.cpus}" hapThreads="${task.cpus}" batMemory="${task.memory.toGiga()}G" \
         redMemory="${task.memory.toGiga()}G" redThreads="${task.cpus}" \
         oeaMemory="${task.memory.toGiga()}G" oeaThreads="${task.cpus}" \
         corMemory="${task.memory.toGiga()}G" corThreads="${task.cpus}" ${params.canu_args}
     mv canu_out/assembly.contigs.fasta assembly.fasta
+    canu --version | sed -e "s/Canu //g" > canu.version.txt
     """
 }
 
@@ -481,7 +483,7 @@ process canu_assembly {
 process kraken2 {
     label 'large'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/kraken", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/kraken", mode: params.publish_dir_mode
 
     input:
     set sample_id, file(fq1), file(fq2) from ch_short_for_kraken2
@@ -505,7 +507,7 @@ process kraken2 {
 process kraken2_long {
     label 'large'
     tag "$sample_id"
-    publishDir "${params.outdir}/${sample_id}/kraken_long", mode: 'copy'
+    publishDir "${params.outdir}/${sample_id}/kraken_long", mode: params.publish_dir_mode
 
     input:
     set sample_id, file(lr) from ch_long_trimmed_kraken
@@ -527,8 +529,9 @@ process kraken2_long {
 /* assembly qc with quast
  */
 process quast {
+  label 'small'
   tag {"$sample_id"}
-  publishDir "${params.outdir}/${sample_id}/QUAST", mode: 'copy'
+  publishDir "${params.outdir}/${sample_id}/QUAST", mode: params.publish_dir_mode
   
   input:
   set sample_id, file(fasta) from quast_ch
@@ -537,13 +540,14 @@ process quast {
   // multiqc only detects a file called report.tsv. to avoid
   // name clash with other samples we need a directory named by sample
   file("${sample_id}_assembly_QC/")
-  file("${sample_id}_assembly_QC/report.tsv") into quast_logs_ch
-  file("v_quast.txt") into ch_quast_version
+  file("${sample_id}_assembly_QC/${sample_id}_report.tsv") into quast_logs_ch
+  file("quast.version.txt") into ch_quast_version
 
   script:
   """
   quast -t ${task.cpus} -o ${sample_id}_assembly_QC ${fasta}
-  quast -v > v_quast.txt
+  quast --version | sed -e "s/QUAST v//g" > quast.version.txt
+  mv ${sample_id}_assembly_QC/report.tsv ${sample_id}_assembly_QC/${sample_id}_report.tsv
   """
 }
 
@@ -553,30 +557,28 @@ process quast {
 process prokka {
    label 'large'
    tag "$sample_id"
-   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
+   publishDir "${params.outdir}/${sample_id}/", mode: params.publish_dir_mode
    
    input:
    set sample_id, file(fasta) from prokka_ch
 
    output:
    file("${sample_id}_annotation/")
-   // multiqc prokka module is just a stub using txt. see https://github.com/ewels/MultiQC/issues/587
-   // also, this only makes sense if we could set genus/species/strain. otherwise all samples
-   // are the same
-   // file("${sample_id}_annotation/*txt") into prokka_logs_ch
+   file("prokka.version.txt") into ch_prokka_version
 
    when: !params.skip_annotation && params.annotation_tool == 'prokka'
 
    script:
    """
    prokka --cpus ${task.cpus} --prefix "${sample_id}" --outdir ${sample_id}_annotation ${params.prokka_args} ${fasta}
+   prokka --version | sed -e "s/prokka //g" > prokka.version.txt
    """
 }
 
 process dfast {
+   label 'medium_extramem' 
    tag "$sample_id"
-   publishDir "${params.outdir}/${sample_id}/", mode: 'copy'
-   
+   publishDir "${params.outdir}/${sample_id}/", mode: params.publish_dir_mode
 
    input:
    set sample_id, file(fasta) from dfast_ch
@@ -584,14 +586,14 @@ process dfast {
 
    output:
    file("RESULT*")
-   file("v_dfast.txt") into ch_dfast_version_for_multiqc
+   file("dfast.version.txt") into ch_dfast_version
 
    when: !params.skip_annotation && params.annotation_tool == 'dfast'
 
    script:
    """
    dfast --genome ${fasta} --config $config
-   dfast &> v_dfast.txt 2>&1 || true
+   dfast --version | sed -e "s/DFAST ver. //g" > dfast.version.txt
    """
 }
 
@@ -601,7 +603,7 @@ process nanopolish {
     tag "$assembly"
     label 'large'
 
-    publishDir "${params.outdir}/${sample_id}/nanopolish/", mode: 'copy', pattern: 'polished_genome.fa'
+    publishDir "${params.outdir}/${sample_id}/nanopolish/", mode: params.publish_dir_mode, pattern: 'polished_genome.fa'
 
     input:
     file(assembly) from ch_assembly_consensus_for_nanopolish.mix(ch_assembly_nanopolish_unicycler,assembly_from_canu_for_nanopolish) //Should take either miniasm, canu, or unicycler consensus sequence (!)
@@ -609,6 +611,8 @@ process nanopolish {
 
     output:
     file 'polished_genome.fa'
+    file 'nanopolish.version.txt' into ch_nanopolish_version
+    file 'samtools.version.txt' into ch_samtools_version
 
     when: !params.skip_polish && params.assembly_type == 'long' && params.polish_method != 'medaka'
 
@@ -620,6 +624,10 @@ process nanopolish {
     samtools index reads.sorted.bam
     nanopolish_makerange.py "${assembly}" | parallel --results nanopolish.results -P "${task.cpus}" nanopolish variants --consensus -o polished.{1}.vcf -w {1} -r "${lrfastq}" -b reads.sorted.bam -g "${assembly}" -t "${task.cpus}" --min-candidate-frequency 0.1
     nanopolish vcf2fasta -g "${assembly}" polished.*.vcf > polished_genome.fa
+
+    #Versions
+    nanopolish --version | sed -e "s/nanopolish version //g" | head -n 1 > nanopolish.version.txt
+    samtools --version | sed -e "s/samtools //g" | head -n 1 > samtools.version.txt
     """
 }
 
@@ -628,7 +636,7 @@ process medaka {
     tag "$assembly"
     label 'large'
 
-    publishDir "${params.outdir}/${sample_id}/medaka/", mode: 'copy', pattern: 'polished_genome.fa'
+    publishDir "${params.outdir}/${sample_id}/medaka/", mode: params.publish_dir_mode, pattern: 'polished_genome.fa'
 
     input:
     file(assembly) from ch_assembly_consensus_for_medaka.mix(ch_assembly_medaka_unicycler,assembly_from_canu_for_medaka) //Should take either miniasm, canu, or unicycler consensus sequence (!)
@@ -636,12 +644,14 @@ process medaka {
 
     output:
     file 'polished_genome.fa'
+    file 'medaka.version.txt' into ch_medaka_version
 
     when: !params.skip_polish && params.assembly_type == 'long' && params.polish_method == 'medaka'
 
     script:
     """
     medaka_consensus -i ${lrfastq} -d ${assembly} -o "polished_genome.fa" -t ${task.cpus}
+    medaka --version | sed -e "s/medaka //g" > medaka.version.txt
     """
 }
 
@@ -649,17 +659,24 @@ process medaka {
  * Parse software version numbers
  */
 process get_software_versions {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy',
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
     saveAs: {filename ->
         if (filename.indexOf(".csv") > 0) filename
         else null
     }
 
     input:
-    file quast_version from ch_quast_version
-    file porechop_version from ch_porechop_version
-    file dfast_version from ch_dfast_version_for_multiqc
-
+    path quast_version from ch_quast_version.first().ifEmpty([])
+    path porechop_version from ch_porechop_version.first().ifEmpty([])
+    path pycoqc_version from ch_pycoqc_version.first().ifEmpty([])
+    path unicycler_version from ch_unicycler_version.first().ifEmpty([])
+    path canu_version from ch_canu_version.first().ifEmpty([])
+    path prokka_version from ch_prokka_version.first().ifEmpty([])
+    path dfast_version from ch_dfast_version.first().ifEmpty([])
+    path nanopolish_version from ch_nanopolish_version.first().ifEmpty([])
+    path samtools_version from ch_samtools_version.first().ifEmpty([])
+    path nanoplot_version from ch_nanoplot_version.first().ifEmpty([])
+    path medaka_version from ch_medaka_version.first().ifEmpty([])
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
@@ -667,21 +684,18 @@ process get_software_versions {
 
     script:
     """
-    echo $workflow.manifest.version > v_pipeline.txt
-    echo $workflow.nextflow.version > v_nextflow.txt
-    fastqc --version > v_fastqc.txt
-    multiqc --version > v_multiqc.txt
-    prokka -v 2> v_prokka.txt
-    skewer -v > v_skewer.txt
-    kraken2 -v > v_kraken2.txt
-    Bandage -v > v_bandage.txt
-    nanopolish --version > v_nanopolish.txt
-    miniasm -V > v_miniasm.txt
-    racon --version > v_racon.txt
-    samtools --version &> v_samtools.txt 2>&1 || true
-    minimap2 --version &> v_minimap2.txt
-    NanoPlot --version > v_nanoplot.txt
-    canu --version > v_canu.txt
+    #All in main container
+    echo $workflow.manifest.version > pipeline.version.txt
+    echo $workflow.nextflow.version > nextflow.version.txt
+    fastqc --version | sed -e "s/FastQC v//g" > fastqc.version.txt
+    
+    #Inside main container
+    miniasm -V > miniasm.version.txt
+    minimap2 --version &> minimap2.version.txt
+    racon --version | sed -e "s/v//g" > racon.version.txt
+    skewer --version | sed -e "s/skewer version://g" | sed -e 's/\\s//g' | head -n 1  > skewer.version.txt
+    kraken2 --version | sed -e "s/Kraken version //g" | head -n 1 > kraken2.version.txt
+    multiqc --version | sed -e "s/multiqc, version//g" > multiqc.version.txt
     scrape_software_versions.py > software_versions_mqc.yaml
     """
 }
@@ -692,49 +706,52 @@ process get_software_versions {
 
 process multiqc {
     label 'small'
-    publishDir "${params.outdir}/MultiQC", mode: 'copy'
+    publishDir "${params.outdir}/MultiQC", mode: params.publish_dir_mode
 
     input:
-    file multiqc_config from ch_multiqc_config
+
+    path (multiqc_config) from ch_multiqc_config
+    path (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
+    
     //file prokka_logs from prokka_logs_ch.collect().ifEmpty([])
     file ('quast_logs/*') from quast_logs_ch.collect().ifEmpty([])
     // NOTE unicycler and kraken not supported
     file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
     file ('software_versions/*') from software_versions_yaml.collect()
-    file workflow_summary from create_workflow_summary(summary)
+    file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
     output:
-    file "*multiqc_report.html" into multiqc_report
+    file "*multiqc_report.html" into ch_multiqc_report
     file "*_data"
     file "multiqc_plots"
 
     script:
     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
+    custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
     """
-    multiqc -f $rtitle $rfilename --config $multiqc_config .
+    multiqc -f $rtitle $rfilename $custom_config_file .
     """
 }
-
 
 /*
  * STEP 3 - Output Description HTML
  */
 process output_documentation {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
 
     input:
     file output_docs from ch_output_docs
+    file images from ch_output_docs_images
 
     output:
     file "results_description.html"
 
     script:
     """
-    markdown_to_html.r $output_docs results_description.html
+    markdown_to_html.py $output_docs -o results_description.html
     """
 }
-
 
 /*
  * Completion e-mail notification
@@ -743,8 +760,8 @@ workflow.onComplete {
 
     // Set up the e-mail variables
     def subject = "[nf-core/bacass] Successful: $workflow.runName"
-    if(!workflow.success){
-      subject = "[nf-core/bacass] FAILED: $workflow.runName"
+    if (!workflow.success) {
+        subject = "[nf-core/bacass] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
@@ -762,10 +779,9 @@ workflow.onComplete {
     email_fields['summary']['Date Completed'] = workflow.complete
     email_fields['summary']['Pipeline script file path'] = workflow.scriptFile
     email_fields['summary']['Pipeline script hash ID'] = workflow.scriptId
-    if(workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
-    if(workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
-    if(workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
-    if(workflow.container) email_fields['summary']['Docker image'] = workflow.container
+    if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
+    if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
+    if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
@@ -774,14 +790,20 @@ workflow.onComplete {
     def mqc_report = null
     try {
         if (workflow.success) {
-            mqc_report = multiqc_report.getVal()
-            if (mqc_report.getClass() == ArrayList){
+            mqc_report = ch_multiqc_report.getVal()
+            if (mqc_report.getClass() == ArrayList) {
                 log.warn "[nf-core/bacass] Found multiple reports from process 'multiqc', will use only one"
                 mqc_report = mqc_report[0]
             }
         }
     } catch (all) {
         log.warn "[nf-core/bacass] Could not attach MultiQC report to summary email"
+    }
+
+    // Check if we are only sending emails on failure
+    email_address = params.email
+    if (!params.email && params.email_on_fail && !workflow.success) {
+        email_address = params.email_on_fail
     }
 
     // Render the TXT template
@@ -802,61 +824,65 @@ workflow.onComplete {
     def sendmail_html = sendmail_template.toString()
 
     // Send the HTML e-mail
-    if (params.email) {
+    if (email_address) {
         try {
-          if( params.plaintext_email ){ throw GroovyException('Send plaintext e-mail, not HTML') }
-          // Try to send HTML e-mail using sendmail
-          [ 'sendmail', '-t' ].execute() << sendmail_html
-          log.info "[nf-core/bacass] Sent summary e-mail to $params.email (sendmail)"
+            if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
+            // Try to send HTML e-mail using sendmail
+            [ 'sendmail', '-t' ].execute() << sendmail_html
+            log.info "[nf-core/bacass] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
-          // Catch failures and try with plaintext
-          [ 'mail', '-s', subject, params.email ].execute() << email_txt
-          log.info "[nf-core/bacass] Sent summary e-mail to $params.email (mail)"
+            // Catch failures and try with plaintext
+            def mail_cmd = [ 'mail', '-s', subject, '--content-type=text/html', email_address ]
+            if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
+              mail_cmd += [ '-A', mqc_report ]
+            }
+            mail_cmd.execute() << email_html
+            log.info "[nf-core/bacass] Sent summary e-mail to $email_address (mail)"
         }
     }
 
     // Write summary e-mail HTML to a file
-    def output_d = new File( "${params.outdir}/pipeline_info/" )
-    if( !output_d.exists() ) {
-      output_d.mkdirs()
+    def output_d = new File("${params.outdir}/pipeline_info/")
+    if (!output_d.exists()) {
+        output_d.mkdirs()
     }
-    def output_hf = new File( output_d, "pipeline_report.html" )
+    def output_hf = new File(output_d, "pipeline_report.html")
     output_hf.withWriter { w -> w << email_html }
-    def output_tf = new File( output_d, "pipeline_report.txt" )
+    def output_tf = new File(output_d, "pipeline_report.txt")
     output_tf.withWriter { w -> w << email_txt }
 
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
 
     if (workflow.stats.ignoredCount > 0 && workflow.success) {
-      log.info "${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}"
-      log.info "${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}"
-      log.info "${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}"
+        log.info "-${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}-"
+        log.info "-${c_red}Number of ignored errored process(es) : ${workflow.stats.ignoredCount} ${c_reset}-"
+        log.info "-${c_green}Number of successfully ran process(es) : ${workflow.stats.succeedCount} ${c_reset}-"
     }
 
-    if(workflow.success){
-        log.info "${c_purple}[nf-core/bacass]${c_green} Pipeline completed successfully${c_reset}"
+    if (workflow.success) {
+        log.info "-${c_purple}[nf-core/bacass]${c_green} Pipeline completed successfully${c_reset}-"
     } else {
         checkHostname()
-        log.info "${c_purple}[nf-core/bacass]${c_red} Pipeline completed with errors${c_reset}"
+        log.info "-${c_purple}[nf-core/bacass]${c_red} Pipeline completed with errors${c_reset}-"
     }
 
 }
 
 
-def nfcoreHeader(){
+def nfcoreHeader() {
     // Log colors ANSI codes
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_dim = params.monochrome_logs ? '' : "\033[2m";
     c_black = params.monochrome_logs ? '' : "\033[0;30m";
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
     c_blue = params.monochrome_logs ? '' : "\033[0;34m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
+    c_dim = params.monochrome_logs ? '' : "\033[2m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
     c_white = params.monochrome_logs ? '' : "\033[0;37m";
+    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
 
     return """    -${c_dim}--------------------------------------------------${c_reset}-
                                             ${c_green},--.${c_black}/${c_green},-.${c_reset}
@@ -864,21 +890,21 @@ def nfcoreHeader(){
     ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
     ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
                                             ${c_green}`._,._,\'${c_reset}
-    ${c_purple} nf-core/bacass v${workflow.manifest.version}${c_reset}
+    ${c_purple}  nf-core/bacass v${workflow.manifest.version}${c_reset}
     -${c_dim}--------------------------------------------------${c_reset}-
     """.stripIndent()
 }
 
-def checkHostname(){
+def checkHostname() {
     def c_reset = params.monochrome_logs ? '' : "\033[0m"
     def c_white = params.monochrome_logs ? '' : "\033[0;37m"
     def c_red = params.monochrome_logs ? '' : "\033[1;91m"
     def c_yellow_bold = params.monochrome_logs ? '' : "\033[1;93m"
-    if(params.hostnames){
+    if (params.hostnames) {
         def hostname = "hostname".execute().text.trim()
         params.hostnames.each { prof, hnames ->
             hnames.each { hname ->
-                if(hostname.contains(hname) && !workflow.profile.contains(prof)){
+                if (hostname.contains(hname) && !workflow.profile.contains(prof)) {
                     log.error "====================================================\n" +
                             "  ${c_red}WARNING!${c_reset} You are running with `-profile $workflow.profile`\n" +
                             "  but your machine hostname is ${c_white}'$hostname'${c_reset}\n" +

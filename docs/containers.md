@@ -2,9 +2,4 @@
 
 ## `nfcore/bacass` container
 
-Our main container is designed using [Conda](https://conda.io/) to install all tools used in nf-core/bacass. All other dedicated containers contain individual tools that are not possible to be bundled with other software in the main container due to dependency collisions / incompatibilities. In this case, we use Biocontainers:
-
-* Porechop
-* QUAST
-* DFAST
-* Medaka
+Some of the tools we use in bacass are inherently relying on software dependencies that are not installable in the same environment due to dependency conflicts. In these cases we utilize biocontainers. With a potential switch to Nextflow DSLv2 and therefore nextflow modules, we intend to have separated containers for all processes. This subsequently also means, that we cannot provide a single conda environment for the entire pipeline - please use Singularity or Docker to run your analysis - there is _NO_ conda support with the pipeline.

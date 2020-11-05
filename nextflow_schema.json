@@ -1,0 +1,348 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/bacass/master/nextflow_schema.json",
+    "title": "nf-core/bacass pipeline parameters",
+    "description": "Simple bacterial assembly and annotation pipeline.",
+    "type": "object",
+    "definitions": {
+        "input_output_options": {
+            "title": "Input/output options",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Define where the pipeline should find input data and save output data.",
+            "required": [
+                "input"
+            ],
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "fa_icon": "fas fa-dna",
+                    "description": "The input design file for the pipeline.",
+                    "help_text": "\nUse this to specify the location of your input design file. For example:\n\n```\n--input 'design_hybrid.tsv'\n```\n\nAn example of properly formatted input files can be found at the [nf-core/testData](https://github.com/nf-core/test-datasets/tree/bacass). Exemplarily, this is the input used for a hybrid assembly in testing:\n\n```\nID R1 R2 LongFastQ Fast5 GenomeSize\nERR044595 https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_1.fastq.gz https://github.com/nf-core/test-datasets/raw/bacass/ERR044595_1M_2.fastq.gz https://github.com/nf-core/test-datasets/raw/bacass/nanopore/subset15000.fq.gz NA 2.8m\n```\n\n* `ID` The identifier to use for handling the dataset e.g. sample name\n* `R1` The forward reads in case of available short-read data\n* `R2` The reverse reads in case of available short-read data\n* `LongFastQ` The long*read FastQ file with reads in FASTQ format\n* `Fast5` The folder containing the basecalled FAST5 files\n* `GenomeSize` The expected genome size of the assembly. Only used by the canu assembler.\n\nMissing values (e.g. FAST5 folder in case of short reads) can be omitted by using a `NA` in the TSV file. The pipeline will handle such cases appropriately then."
+                },
+                "outdir": {
+                    "type": "string",
+                    "description": "The output directory where the results will be saved.",
+                    "default": "./results",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "email": {
+                    "type": "string",
+                    "description": "Email address for completion summary.",
+                    "fa_icon": "fas fa-envelope",
+                    "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
+                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                }
+            }
+        },
+        "generic_options": {
+            "title": "Generic options",
+            "type": "object",
+            "fa_icon": "fas fa-file-import",
+            "description": "Less common options for the pipeline, typically set in a config file.",
+            "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
+            "properties": {
+                "help": {
+                    "type": "boolean",
+                    "description": "Display help text.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-question-circle"
+                },
+                "publish_dir_mode": {
+                    "type": "string",
+                    "default": "copy",
+                    "hidden": true,
+                    "description": "Method used to save pipeline results to output directory.",
+                    "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
+                    "fa_icon": "fas fa-copy",
+                    "enum": [
+                        "symlink",
+                        "rellink",
+                        "link",
+                        "copy",
+                        "copyNoFollow",
+                        "move"
+                    ]
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Workflow name.",
+                    "fa_icon": "fas fa-fingerprint",
+                    "hidden": true,
+                    "help_text": "A custom name for the pipeline run. Unlike the core nextflow `-name` option with one hyphen this parameter can be reused multiple times, for example if using `-resume`. Passed through to steps such as MultiQC and used for things like report filenames and titles."
+                },
+                "plaintext_email": {
+                    "type": "boolean",
+                    "description": "Send plain-text email instead of HTML.",
+                    "fa_icon": "fas fa-remove-format",
+                    "hidden": true,
+                    "help_text": "Set to receive plain-text e-mails instead of HTML formatted."
+                },
+                "max_multiqc_email_size": {
+                    "type": "string",
+                    "description": "File size limit when attaching MultiQC reports to summary emails.",
+                    "default": "25.MB",
+                    "fa_icon": "fas fa-file-upload",
+                    "hidden": true,
+                    "help_text": "If file generated by pipeline exceeds the threshold, it will not be attached."
+                },
+                "monochrome_logs": {
+                    "type": "boolean",
+                    "description": "Do not use coloured log outputs.",
+                    "fa_icon": "fas fa-palette",
+                    "hidden": true,
+                    "help_text": "Set to disable colourful command line output and live life in monochrome."
+                },
+                "multiqc_config": {
+                    "type": "string",
+                    "description": "Custom config file to supply to MultiQC.",
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true
+                },
+                "tracedir": {
+                    "type": "string",
+                    "description": "Directory to keep pipeline Nextflow logs and reports.",
+                    "default": "${params.outdir}/pipeline_info",
+                    "fa_icon": "fas fa-cogs",
+                    "hidden": true
+                },
+                "igenomes_base": {
+                    "type": "string",
+                    "default": "s3://ngi-igenomes/igenomes/"
+                },
+                "igenomes_ignore": {
+                    "type": "string",
+                    "default": "true"
+                }
+            }
+        },
+        "max_job_request_options": {
+            "title": "Max job request options",
+            "type": "object",
+            "fa_icon": "fab fa-acquisitions-incorporated",
+            "description": "Set the top limit for requested resources for any single job.",
+            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details.",
+            "properties": {
+                "max_cpus": {
+                    "type": "integer",
+                    "description": "Maximum number of CPUs that can be requested    for any single job.",
+                    "default": 16,
+                    "fa_icon": "fas fa-microchip",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
+                },
+                "max_memory": {
+                    "type": "string",
+                    "description": "Maximum amount of memory that can be requested for any single job.",
+                    "default": "128.GB",
+                    "fa_icon": "fas fa-memory",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
+                },
+                "max_time": {
+                    "type": "string",
+                    "description": "Maximum amount of time that can be requested for any single job.",
+                    "default": "240.h",
+                    "fa_icon": "far fa-clock",
+                    "hidden": true,
+                    "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
+                }
+            }
+        },
+        "institutional_config_options": {
+            "title": "Institutional config options",
+            "type": "object",
+            "fa_icon": "fas fa-university",
+            "description": "Parameters used to describe centralised config profiles. These should not be edited.",
+            "help_text": "The centralised nf-core configuration profiles use a handful of pipeline parameters to describe themselves. This information is then printed to the Nextflow log when you run a pipeline. You should not need to change these values when you run a pipeline.",
+            "properties": {
+                "custom_config_version": {
+                    "type": "string",
+                    "description": "Git commit id for Institutional configs.",
+                    "default": "master",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog",
+                    "help_text": "Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default: `master`.\n\n```bash\n## Download and use config file with following git commit id\n--custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96\n```"
+                },
+                "custom_config_base": {
+                    "type": "string",
+                    "description": "Base directory for Institutional configs.",
+                    "default": "https://raw.githubusercontent.com/nf-core/configs/master",
+                    "hidden": true,
+                    "help_text": "If you're running offline, nextflow will not be able to fetch the institutional config files from the internet. If you don't need them, then this is not a problem. If you do need them, you should download the files from the repo and tell nextflow where to find them with the `custom_config_base` option. For example:\n\n```bash\n## Download and unzip the config files\ncd /path/to/my/configs\nwget https://github.com/nf-core/configs/archive/master.zip\nunzip master.zip\n\n## Run the pipeline\ncd /path/to/my/data\nnextflow run /path/to/pipeline/ --custom_config_base /path/to/my/configs/configs-master/\n```\n\n> Note that the nf-core/tools helper package has a `download` command to download all required pipeline files + singularity containers + institutional configs in one go for you, to make this process easier.",
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "hostnames": {
+                    "type": "string",
+                    "description": "Institutional configs hostname.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_description": {
+                    "type": "string",
+                    "description": "Institutional config description.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_contact": {
+                    "type": "string",
+                    "description": "Institutional config contact information.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                },
+                "config_profile_url": {
+                    "type": "string",
+                    "description": "Institutional config URL link.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-users-cog"
+                }
+            }
+        },
+        "contamination_screening": {
+            "title": "Contamination Screening",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-box",
+            "properties": {
+                "kraken2db": {
+                    "type": "string",
+                    "fa_icon": "fab fa-gitkraken",
+                    "help_text": "See [Kraken2 homepage](https://benlangmead.github.io/aws-indexes/k2) for download\nlinks. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for\nsample purity.",
+                    "description": "Path to Kraken2 database."
+                }
+            }
+        },
+        "assembly_parameters": {
+            "title": "Assembly parameters",
+            "type": "object",
+            "description": "Parameters for the assembly",
+            "default": "",
+            "fa_icon": "fas fa-puzzle-piece",
+            "properties": {
+                "assembler": {
+                    "type": "string",
+                    "default": "unicycler",
+                    "fa_icon": "fas fa-puzzle-piece",
+                    "description": "The assembler to use for assembly. Available options are `Unicycler`, `Canu`, `Miniasm`. The latter two are only available for long-read data, whereas Unicycler can be used for short or hybrid assembly projects."
+                },
+                "assembly_type": {
+                    "type": "string",
+                    "default": "short",
+                    "fa_icon": "fas fa-fingerprint",
+                    "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`. Short & Hybrid assembly will always run Unicycler, whereas long-read assembly can be configured separately using the `--assembler` parameter.",
+                    "description": "Which type of assembly to perform."
+                },
+                "unicycler_args": {
+                    "type": "string",
+                    "fa_icon": "fas fa-bicycle",
+                    "description": "Extra arguments for Unicycler",
+                    "help_text": "This advanced option allows you to pass extra arguments to Unicycler (e.g. `\"--mode conservative\"` or `\"--no_correct\"`). For this to work you need to quote the arguments and add at least one space."
+                },
+                "canu_args": {
+                    "type": "string",
+                    "fa_icon": "fas fa-ship",
+                    "description": "This can be used to supply [extra options](https://canu.readthedocs.io/en/latest/quick-start.html) to the Canu assembler. Will be ignored when other assemblers are used."
+                }
+            }
+        },
+        "annotation": {
+            "title": "Annotation",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-align-left",
+            "properties": {
+                "annotation_tool": {
+                    "type": "string",
+                    "default": "prokka",
+                    "description": "The annotation method to annotate the final assembly. Default choice is `prokka`, but the `dfast` tool is also available. For the latter, make sure to create your specific config if you're not happy with the default one provided. See [#dfast_config](#dfastconfig) to find out how."
+                },
+                "prokka_args": {
+                    "type": "string",
+                    "description": "Extra arguments for prokka annotation tool.",
+                    "help_text": "This advanced option allows you to pass extra arguments to Prokka (e.g. `\" --rfam\"` or `\" --genus name\"`). For this to work you need to quote the arguments and add at least one space between the arguments. Example:\n\n```bash\n--prokka_args `--rfam --genus Escherichia Coli`\n```\n"
+                },
+                "dfast_config": {
+                    "type": "string",
+                    "default": "/Users/alexanderpeltzer/IDEA/nf-core/bacass/assets/test_config_dfast.py",
+                    "description": "Specifies a configuration file for the [DFAST](https://github.com/nigyta/dfast_core) annotation method. This can be used instead of PROKKA if required to specify a specific config file for annotation. If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.  > The default config is just included for testing, so if you want to annotate using DFAST, you have to create a config!"
+                }
+            }
+        },
+        "assembly_polishing": {
+            "title": "Assembly Polishing",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-user-astronaut",
+            "properties": {
+                "polish_method": {
+                    "type": "string",
+                    "default": "medaka",
+                    "fa_icon": "fas fa-hotdog",
+                    "description": "Which assembly polishing method to use.",
+                    "help_text": "Can be used to define which polishing method is used by default for long reads. Default is `medaka`, available options are `nanopolish` or `medaka`."
+                }
+            }
+        },
+        "skipping_options": {
+            "title": "Skipping Options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-forward",
+            "properties": {
+                "skip_kraken2": {
+                    "type": "string",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip running Kraken2 classifier on reads."
+                },
+                "skip_annotation": {
+                    "type": "string",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip annotating the assembly with Prokka /DFAST."
+                },
+                "skip_pycoqc": {
+                    "type": "string",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip running `PycoQC` on long read input."
+                },
+                "skip_polish": {
+                    "type": "string",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip polishing the long-read assembly with FAST5 input. Will not affect short/hybrid assemblies."
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/input_output_options"
+        },
+        {
+            "$ref": "#/definitions/generic_options"
+        },
+        {
+            "$ref": "#/definitions/max_job_request_options"
+        },
+        {
+            "$ref": "#/definitions/institutional_config_options"
+        },
+        {
+            "$ref": "#/definitions/contamination_screening"
+        },
+        {
+            "$ref": "#/definitions/assembly_parameters"
+        },
+        {
+            "$ref": "#/definitions/annotation"
+        },
+        {
+            "$ref": "#/definitions/assembly_polishing"
+        },
+        {
+            "$ref": "#/definitions/skipping_options"
+        }
+    ]
+}

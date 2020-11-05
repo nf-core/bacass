@@ -1,26 +1,53 @@
 name: nf-core CI
-# This workflow is triggered on pushes and PRs to the repository.
-on: [push, pull_request]  
+# This workflow runs the pipeline with the minimal test dataset to check that it completes without any syntax errors
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+  release:
+    types: [published]
 
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    name: Run workflow tests
+    # Only run on push if this is the nf-core dev branch (merged PRs)
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/bacass') }}
+    runs-on: ubuntu-latest
+    env:
+      NXF_VER: ${{ matrix.nxf_ver }}
+      NXF_ANSI_LOG: false
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['19.10.0','']
-        options: ["test,docker", "test_long,docker --assembler canu", "test_long_miniasm,docker", "test_hybrid,docker", "test,docker --annotation_tool dfast" ]
+        nxf_ver: ['19.10.0', '']
+        options: ["test,docker", "test_long_miniasm,docker", "test_hybrid,docker", "test_long,docker --assembler canu"]
     steps:
-      - uses: actions/checkout@v1
-      - name: Install Nextflow
-        run: |
-          export NXF_VER=${{ matrix.nxf_ver }}
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
-      - name: Download and tag image
+      - name: Check out pipeline code
+        uses: actions/checkout@v2
+
+      - name: Check if Dockerfile or Conda environment changed
+        uses: technote-space/get-diff-action@v1
+        with:
+          PREFIX_FILTER: |
+            Dockerfile
+            environment.yml
+
+      - name: Build new docker image
+        if: env.GIT_DIFF
+        run: docker build --no-cache . -t nfcore/bacass:1.1.1
+
+      - name: Pull docker image
+        if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/bacass:dev
-          docker tag nfcore/bacass:dev nfcore/bacass:1.1.0
-      - name: Run tests
+          docker tag nfcore/bacass:dev nfcore/bacass:1.1.1
+
+      - name: Install Nextflow
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+
+      - name: Run pipeline with test data
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.options }}
