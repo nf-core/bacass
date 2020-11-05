@@ -547,6 +547,7 @@ process quast {
   """
   quast -t ${task.cpus} -o ${sample_id}_assembly_QC ${fasta}
   quast --version | sed -e "s/QUAST v//g" > quast.version.txt
+  mv ${sample_id}_assembly_QC/report.tsv ${sample_id}_assembly_QC/${sample_id}_report.tsv
   """
 }
 
