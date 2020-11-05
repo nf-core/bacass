@@ -709,8 +709,10 @@ process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: params.publish_dir_mode
 
     input:
-    file (multiqc_config) from ch_multiqc_config
-    file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
+
+    path (multiqc_config) from ch_multiqc_config
+    path (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
+    
     //file prokka_logs from prokka_logs_ch.collect().ifEmpty([])
     file ('quast_logs/*') from quast_logs_ch.collect().ifEmpty([])
     // NOTE unicycler and kraken not supported
