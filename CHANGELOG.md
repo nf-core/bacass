@@ -1,6 +1,6 @@
 # nf-core/bacass: Changelog
 
-## v1.1.1 nf-core/bacass: "Green Aluminium Shark" 2020/10/28
+## v1.1.1 nf-core/bacass: "Green Aluminium Shark" 2020/11/05
 
 This is basically a maintenance update that includes template updates, fixed environments and some minor bugfixes.
 
