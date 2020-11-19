@@ -20,34 +20,38 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['19.10.0', '']
-        options: ["test,docker", "test_long_miniasm,docker", "test_hybrid,docker", "test,docker --annotation_tool dfast", "test_long,docker --assembler canu", ]
+        nxf_ver: ['20.04.0', '']
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
 
       - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v1
+        uses: technote-space/get-diff-action@v4
         with:
-          PREFIX_FILTER: |
+          FILES: |
             Dockerfile
             environment.yml
 
       - name: Build new docker image
-        if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/bacass:1.1.1
+        if: env.MATCHED_FILES
+        run: docker build --no-cache . -t nfcore/bacass:dev
 
       - name: Pull docker image
-        if: ${{ !env.GIT_DIFF }}
+        if: ${{ !env.MATCHED_FILES }}
         run: |
           docker pull nfcore/bacass:dev
-          docker tag nfcore/bacass:dev nfcore/bacass:1.1.1
+          docker tag nfcore/bacass:dev nfcore/bacass:dev
 
       - name: Install Nextflow
+        env:
+          CAPSULE_LOG: none
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with test data
+        # TODO nf-core: You can customise CI pipeline run tests as required
+        # For example: adding multiple test runs with different parameters
+        # Remember that you can parallelise this by using strategy.matrix
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.options }}
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker
