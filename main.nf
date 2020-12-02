@@ -212,6 +212,35 @@ if(("${params.assembler}" == 'canu' || "${params.assembler}" == 'miniasm') && ("
 }
 
 
+/*
+ * PREPROCESSING: Uncompress Kraken2 database
+ */
+if (!params.skip_kraken2 && params.kraken2db) {
+    file(params.kraken2db, checkIfExists: true)
+    if (params.kraken2db.endsWith('.tar.gz')) {
+        process UNTAR_KRAKEN2_DB {
+            //if (params.save_reference) {
+            //    publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+            //}
+
+            input:
+            path db from params.kraken2db
+
+            output:
+            path "$untar" into ch_kraken2_db
+
+            script:
+            untar = db.toString() - '.tar.gz'
+            """
+            tar -xvf $db
+            """
+        }
+    } else {
+        ch_kraken2_db = file(params.kraken2db)
+    }
+}
+
+
 /* Trim and combine short read read-pairs per sample. Similar to nf-core vipr
  */
 process trim_and_combine {
@@ -265,7 +294,7 @@ process adapter_trimming {
 
 /*
  * STEP 1 - FastQC FOR SHORT READS
-*/
+ */
 process fastqc {
     label 'small'
     tag "$sample_id"
@@ -487,6 +516,7 @@ process kraken2 {
 
     input:
     set sample_id, file(fq1), file(fq2) from ch_short_for_kraken2
+    path db from ch_kraken2_db
 
     output:
     file("${sample_id}_kraken2.report")
@@ -494,12 +524,12 @@ process kraken2 {
     when: !params.skip_kraken2
 
     script:
-	"""
+    """
     # stdout reports per read which is not needed. kraken.report can be used with pavian
     # braken would be nice but requires readlength and correspondingly build db
-	kraken2 --threads ${task.cpus} --paired --db ${kraken2db} \
-		--report ${sample_id}_kraken2.report ${fq1} ${fq2} | gzip > kraken2.out.gz
-	"""
+    kraken2 --threads ${task.cpus} --paired --db ${db} \
+            --report ${sample_id}_kraken2.report ${fq1} ${fq2} | gzip > kraken2.out.gz
+    """
 }
 
 /* kraken classification: QC for sample purity, only short end reads for now
@@ -511,6 +541,7 @@ process kraken2_long {
 
     input:
     set sample_id, file(lr) from ch_long_trimmed_kraken
+    path db from ch_kraken2_db
 
     output:
     file("${sample_id}_kraken2.report")
@@ -518,12 +549,12 @@ process kraken2_long {
     when: !params.skip_kraken2
 
     script:
-	"""
+    """
     # stdout reports per read which is not needed. kraken.report can be used with pavian
     # braken would be nice but requires readlength and correspondingly build db
-	kraken2 --threads ${task.cpus} --db ${kraken2db} \
-		--report ${sample_id}_kraken2.report ${lr} | gzip > kraken2.out.gz
-	"""
+    kraken2 --threads ${task.cpus} --db ${db} \
+            --report ${sample_id}_kraken2.report ${lr} | gzip > kraken2.out.gz
+    """
 }
 
 /* assembly qc with quast
