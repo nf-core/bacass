@@ -209,7 +209,7 @@
                     "type": "string",
                     "fa_icon": "fab fa-gitkraken",
                     "help_text": "See [Kraken2 homepage](https://benlangmead.github.io/aws-indexes/k2) for download\nlinks. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for\nsample purity.",
-                    "description": "Path to Kraken2 database."
+                    "description": "Path to Kraken2 database folder or compressed file."
                 }
             }
         },
