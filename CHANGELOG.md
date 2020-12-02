@@ -1,5 +1,15 @@
 # nf-core/bacass: Changelog
 
+## [Unpublished Version / DEV]
+
+### `Added`
+
+* kraken2db can be provided as a `tar.gz` file
+
+### `Fixed`
+
+* Providing kraken2db path to folder when running with Singularity
+
 ## v1.1.1 nf-core/bacass: "Green Aluminium Shark" 2020/11/05
 
 This is basically a maintenance update that includes template updates, fixed environments and some minor bugfixes.
