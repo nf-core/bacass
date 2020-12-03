@@ -233,7 +233,7 @@ if (!params.skip_kraken2 && params.kraken2db) {
         }
     } else {
         ch_kraken2_db = file(params.kraken2db)
-        ch_kraken2_db_long = file(params.kraken2b)
+        ch_kraken2_db_long = file(params.kraken2db)
     }
 } else {   
     ch_kraken2_db = Channel.empty()
