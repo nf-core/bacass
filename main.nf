@@ -57,13 +57,6 @@ if (params.help) {
     exit 0
 }
 
-if(! params.skip_kraken2){
-    if(params.kraken2db){
-      kraken2db = file(params.kraken2db)
-    } else {
-      exit 1, "Missing Kraken2 DB arg"
-    }
-}
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
