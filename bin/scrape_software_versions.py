@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
-from collections import OrderedDict
-import re
+import os
 
 results = {}
 version_files = [x for x in os.listdir('.') if x.endswith('.version.txt')]
