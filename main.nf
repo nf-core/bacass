@@ -230,7 +230,7 @@ if (!params.skip_kraken2 && params.kraken2db) {
             path db from params.kraken2db
 
             output:
-            path "$untar" into ch_kraken2_db
+            path "$untar" into ch_kraken2_db, ch_kraken2_db_long
 
             script:
             untar = db.toString() - '.tar.gz'
@@ -240,7 +240,11 @@ if (!params.skip_kraken2 && params.kraken2db) {
         }
     } else {
         ch_kraken2_db = file(params.kraken2db)
+        ch_kraken2_db_long = file(params.kraken2b)
     }
+} else {   
+    ch_kraken2_db = Channel.empty()
+    ch_kraken2_db_long = Channel.empty()
 }
 
 
@@ -544,7 +548,7 @@ process kraken2_long {
 
     input:
     set sample_id, file(lr) from ch_long_trimmed_kraken
-    path db from ch_kraken2_db
+    path db from ch_kraken2_db_long
 
     output:
     file("${sample_id}_kraken2.report")
@@ -596,6 +600,7 @@ process prokka {
    output:
    file("${sample_id}_annotation/")
    file("prokka.version.txt") into ch_prokka_version
+   file("${sample_id}_annotation/*.txt") into ch_prokka_logs
 
    when: !params.skip_annotation && params.annotation_tool == 'prokka'
 
@@ -710,7 +715,7 @@ process get_software_versions {
     path medaka_version from ch_medaka_version.first().ifEmpty([])
 
     output:
-    file 'software_versions_mqc.yaml' into software_versions_yaml
+    file 'software_versions_mqc.yaml' into ch_software_versions_yaml
     file "software_versions.csv"
 
     script:
@@ -745,7 +750,7 @@ process multiqc {
     path (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
 
     
-    file prokka_logs from prokka_logs_ch.collect().ifEmpty([])
+    file prokka_logs from ch_prokka_logs.collect().ifEmpty([])
     file ('quast_logs/*') from quast_logs_ch.collect().ifEmpty([])
     // NOTE unicycler not supported
     file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
