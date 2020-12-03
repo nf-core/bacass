@@ -14,6 +14,7 @@
 
 * Providing kraken2db path to folder when running with Singularity
 * Fixes QUAST logs not being shown in MultiQC report [#35](https://github.com/nf-core/bacass/issues/35)
+* Added in proper CI tests for Kraken2 [#37](https://github.com/nf-core/bacass/issues/37)
 
 ## v1.1.1 nf-core/bacass: "Green Aluminium Shark" 2020/11/05
 
