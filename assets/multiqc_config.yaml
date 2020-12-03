@@ -10,5 +10,6 @@ report_section_order:
 
 export_plots: true
 
-quast_config:
-    fn: *_report.tsv
+sp:
+    quast_config:
+        fn: '*_report.tsv'

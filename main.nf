@@ -195,7 +195,7 @@ checkHostname()
 
 Channel.from(summary.collect{ [it.key, it.value] })
     .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
-    .reduce { a, b -> return [a, b].join("\n") }
+    .reduce { a, b -> return [a, b].join("\n            ") }
     .map { x -> """
     id: 'nf-core-bacass-summary'
     description: " - this information is collected when the pipeline is started."
@@ -745,12 +745,9 @@ process multiqc {
     publishDir "${params.outdir}/MultiQC", mode: params.publish_dir_mode
 
     input:
-
     path (multiqc_config) from ch_multiqc_config
     path (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
-
-    
-    file prokka_logs from ch_prokka_logs.collect().ifEmpty([])
+    file ('prokka_logs/*') from ch_prokka_logs.collect().ifEmpty([])
     file ('quast_logs/*') from quast_logs_ch.collect().ifEmpty([])
     // NOTE unicycler not supported
     file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
