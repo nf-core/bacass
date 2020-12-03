@@ -35,6 +35,15 @@ In addition, the pipeline creates various reports in the `results` directory spe
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple computing infrastructures in a portable manner. It comes with docker or singularity containers as well as conda environments, making installation trivial and results highly reproducible.
 
+## Pipeline Summary
+
+By default, the pipeline currently performs the following:
+
+<!-- TODO nf-core: Fill in short bullet-pointed list of default steps of pipeline -->
+
+* Sequencing quality control (`FastQC`)
+* Overall pipeline run summaries (`MultiQC`)
+
 ## Documentation
 
 The nf-core/bacass pipeline comes with documentation about the pipeline, found in the `docs/` directory:
@@ -45,13 +54,17 @@ The nf-core/bacass pipeline comes with documentation about the pipeline which yo
 
 nf-core/bacass was originally written by Andreas Wilm, Alexander Peltzer.
 
+We thank the following people for their extensive assistance in the development
+of this pipeline:
+
+* Santiago Revale
 ## Contributions and Support
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
 
 For further information or help, don't hesitate to get in touch on the [Slack `#bacass` channel](https://nfcore.slack.com/channels/bacass) (you can join with [this invite](https://nf-co.re/join/slack)).
 
-## Citation
+## Citations
 
 If you use nf-core/bacass for your analysis, please cite it using the following doi: [10.5281/zenodo.3574476](https://zenodo.org/badge/latestdoi/168486714)
 
