@@ -5,6 +5,7 @@
 ### `Added`
 
 * kraken2db can be provided as a `tar.gz` file
+* Sync with nf-core/tools template v1.12
 
 ### `Fixed`
 

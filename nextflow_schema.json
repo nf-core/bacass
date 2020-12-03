@@ -344,5 +344,10 @@
         {
             "$ref": "#/definitions/skipping_options"
         }
-    ]
+    ],
+    "properties": {
+        "email_on_fail": {
+            "type": "string"
+        }
+    }
 }
