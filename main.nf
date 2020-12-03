@@ -195,7 +195,7 @@ checkHostname()
 
 Channel.from(summary.collect{ [it.key, it.value] })
     .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
-    .reduce { a, b -> return [a, b].join("\n            ") }
+    .reduce { a, b -> return [a, b].join("\n") }
     .map { x -> """
     id: 'nf-core-bacass-summary'
     description: " - this information is collected when the pipeline is started."
@@ -208,8 +208,6 @@ Channel.from(summary.collect{ [it.key, it.value] })
         </dl>
     """.stripIndent() }
     .set { ch_workflow_summary }
-
-<<<<<<< HEAD
 
 //Check compatible parameters
 if(("${params.assembler}" == 'canu' || "${params.assembler}" == 'miniasm') && ("${params.assembly_type}" == 'short' || "${params.assembly_type}" == 'hybrid')){
