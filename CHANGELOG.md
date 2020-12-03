@@ -1,5 +1,21 @@
 # nf-core/bacass: Changelog
 
+## [Unpublished Version / DEV]
+
+### `Added`
+
+* kraken2db can be provided as a `tar.gz` file
+* Sync with nf-core/tools template v1.12
+* Updated containers
+  * Unicycler 0.4.4 -> 0.4.8
+  * Medaka 1.1.2 -> 1.2.1
+
+### `Fixed`
+
+* Providing kraken2db path to folder when running with Singularity
+* Fixes QUAST logs not being shown in MultiQC report [#35](https://github.com/nf-core/bacass/issues/35)
+* Added in proper CI tests for Kraken2 [#37](https://github.com/nf-core/bacass/issues/37)
+
 ## v1.1.1 nf-core/bacass: "Green Aluminium Shark" 2020/11/05
 
 This is basically a maintenance update that includes template updates, fixed environments and some minor bugfixes.
