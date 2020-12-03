@@ -6,6 +6,9 @@
 
 * kraken2db can be provided as a `tar.gz` file
 * Sync with nf-core/tools template v1.12
+* Updated containers
+  * Unicycler 0.4.4 -> 0.4.8
+  * Medaka 1.1.2 -> 1.2.1
 
 ### `Fixed`
 
