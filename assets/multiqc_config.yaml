@@ -9,3 +9,6 @@ report_section_order:
         order: -1001
 
 export_plots: true
+
+quast_config:
+    fn: *_report.tsv
