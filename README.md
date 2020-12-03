@@ -1,10 +1,10 @@
-# ![nf-core/bacass](docs/images/nfcore-bacass_logo.png)
+# ![nf-core/bacass](docs/images/nf-core-bacass_logo.png)
 
-A simple bacterial assembly and annotation pipeline
+**Simple bacterial assembly and annotation pipeline.**.
 
 [![GitHub Actions CI Status](https://github.com/nf-core/bacass/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/bacass/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/bacass/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/bacass/actions)
-[![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
+[![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A520.07.0-brightgreen.svg)](https://www.nextflow.io/)
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/bacass.svg)](https://hub.docker.com/r/nfcore/bacass)

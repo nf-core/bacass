@@ -12,6 +12,7 @@
 def helpMessage() {
     log.info nfcoreHeader()
     log.info"""
+
     Usage:
 
     The typical command for running the pipeline is as follows:
@@ -30,6 +31,7 @@ def helpMessage() {
       --prokka_args                 Advanced: Extra arguments to Prokka (quote and add leading space)
       --unicycler_args              Advanced: Extra arguments to Unicycler (quote and add leading space)
       --canu_args                   Advanced: Extra arguments for Canu assembly (quote and add leading space)
+
 
     Other options:
       --outdir                      The output directory where the results will be saved
@@ -82,10 +84,10 @@ if (workflow.profile.contains('awsbatch')) {
 }
 
 // Stage config files
-ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_config = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
-ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
-ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
+ch_output_docs = file("$projectDir/docs/output.md", checkIfExists: true)
+ch_output_docs_images = file("$projectDir/docs/images/", checkIfExists: true)
 
 //Check whether we have a design file as input set
 if(!params.input){
@@ -163,27 +165,29 @@ if (params.skip_polish) summary['Skip Polish'] = params.skip_polish
 if (!params.skip_polish) summary['Polish Method'] = params.polish_method
 if (params.skip_pycoqc) summary['Skip PycoQC'] = params.skip_pycoqc
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
-if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
+if (workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
+summary['Output dir']       = params.outdir
 summary['Launch dir']       = workflow.launchDir
-summary['Output dir'] = params.outdir
-summary['Working dir'] = workflow.workDir
-summary['Script dir'] = workflow.projectDir
-summary['User'] = workflow.userName
-if(workflow.profile == 'awsbatch'){
-   summary['AWS Region'] = params.awsregion
-   summary['AWS Queue'] = params.awsqueue
+summary['Working dir']      = workflow.workDir
+summary['Script dir']       = workflow.projectDir
+summary['User']             = workflow.userName
+if (workflow.profile.contains('awsbatch')) {
+    summary['AWS Region']   = params.awsregion
+    summary['AWS Queue']    = params.awsqueue
+    summary['AWS CLI']      = params.awscli
 }
 summary['Config Profile'] = workflow.profile
-
-if(params.config_profile_description) summary['Config Description'] = params.config_profile_description
-if(params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
-if(params.config_profile_url)         summary['Config URL']         = params.config_profile_url
-if(params.email) {
-  summary['E-mail Address']  = params.email
-  summary['MultiQC maxsize'] = params.max_multiqc_email_size
+if (params.config_profile_description) summary['Config Profile Description'] = params.config_profile_description
+if (params.config_profile_contact)     summary['Config Profile Contact']     = params.config_profile_contact
+if (params.config_profile_url)         summary['Config Profile URL']         = params.config_profile_url
+summary['Config Files'] = workflow.configFiles.join(', ')
+if (params.email || params.email_on_fail) {
+    summary['E-mail Address']    = params.email
+    summary['E-mail on failure'] = params.email_on_fail
+    summary['MultiQC maxsize']   = params.max_multiqc_email_size
 }
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
-log.info "----------------------------------------------------"
+log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 
 // Check the hostnames against configured profiles
@@ -205,6 +209,7 @@ Channel.from(summary.collect{ [it.key, it.value] })
     """.stripIndent() }
     .set { ch_workflow_summary }
 
+<<<<<<< HEAD
 
 //Check compatible parameters
 if(("${params.assembler}" == 'canu' || "${params.assembler}" == 'miniasm') && ("${params.assembly_type}" == 'short' || "${params.assembly_type}" == 'hybrid')){
@@ -582,9 +587,6 @@ process quast {
   """
 }
 
-/*
- * Annotation with prokka
- */
 process prokka {
    label 'large'
    tag "$sample_id"
@@ -743,12 +745,13 @@ process multiqc {
 
     path (multiqc_config) from ch_multiqc_config
     path (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
+
     
-    //file prokka_logs from prokka_logs_ch.collect().ifEmpty([])
+    file prokka_logs from prokka_logs_ch.collect().ifEmpty([])
     file ('quast_logs/*') from quast_logs_ch.collect().ifEmpty([])
-    // NOTE unicycler and kraken not supported
+    // NOTE unicycler not supported
     file ('fastqc/*') from ch_fastqc_results.collect().ifEmpty([])
-    file ('software_versions/*') from software_versions_yaml.collect()
+    file ('software_versions/*') from ch_software_versions_yaml.collect()
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
     output:
@@ -839,18 +842,18 @@ workflow.onComplete {
 
     // Render the TXT template
     def engine = new groovy.text.GStringTemplateEngine()
-    def tf = new File("$baseDir/assets/email_template.txt")
+    def tf = new File("$projectDir/assets/email_template.txt")
     def txt_template = engine.createTemplate(tf).make(email_fields)
     def email_txt = txt_template.toString()
 
     // Render the HTML template
-    def hf = new File("$baseDir/assets/email_template.html")
+    def hf = new File("$projectDir/assets/email_template.html")
     def html_template = engine.createTemplate(hf).make(email_fields)
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.max_multiqc_email_size.toBytes() ]
-    def sf = new File("$baseDir/assets/sendmail_template.txt")
+    def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$projectDir", mqcFile: mqc_report, mqcMaxSize: params.max_multiqc_email_size.toBytes() ]
+    def sf = new File("$projectDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
 
