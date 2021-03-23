@@ -39,7 +39,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 The nf-core/bacass pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
-The nf-core/bacass pipeline comes with documentation about the pipeline which you can read at [https://nf-core/bacass/docs](https://nf-core/bacass/docs) or find in the [`docs/` directory](docs).
+The nf-core/bacass pipeline comes with documentation about the pipeline which you can read at [https://nf-co.re/bacass/usage](https://nf-co.re/bacass/usage) or find in the [`docs/` directory](docs).
 
 ## Credits
 
