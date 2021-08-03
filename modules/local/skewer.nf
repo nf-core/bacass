@@ -32,7 +32,7 @@ process SKEWER {
     # loop over readunits in pairs per sample
     pairno=0
     echo "${reads[0]} ${reads[1]}" | xargs -n2 | while read fq1 fq2; do
-	    skewer $options.args -t ${task.cpus} \$fq1 \$fq2;
+        skewer $options.args -t ${task.cpus} \$fq1 \$fq2;
     done
 
     # gzip, because skewer's -z returns an error
