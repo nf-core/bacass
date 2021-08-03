@@ -39,6 +39,7 @@ def modules = params.modules.clone()
 // MODULE: Local to the pipeline
 //
 include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files : ['tsv':'']] )
+include { SKEWER      } from '../modules/local/skewer'      addParams( options: modules['skewer'] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -87,6 +88,14 @@ workflow BACASS {
         INPUT_CHECK.out.shortreads
     )
     ch_software_versions = ch_software_versions.mix(FASTQC.out.version.first().ifEmpty(null))
+
+    //
+    // MODULE: Run Skewer, trim and combine short read read-pairs per sample. Similar to nf-core vipr
+    //
+    SKEWER (
+        INPUT_CHECK.out.shortreads
+    )
+    //ch_software_versions = ch_software_versions.mix(SKEWER.out.version.first().ifEmpty(null)) //TODO
 
     //
     // MODULE: Pipeline reporting
