@@ -29,7 +29,7 @@ workflow INPUT_CHECK {
     emit:
     reads      // channel: [ val(meta), [ reads ], long_fastq, fast5 ]
     shortreads // channel: [ val(meta), [ reads ] ]
-    longreads  // channel: [ val(meta), long_fastq, fast5 ]  
+    longreads  // channel: [ val(meta), long_fastq, fast5 ]
 }
 
 // Function to get list of [ meta, [ fastq_1, fastq_2 ], long_fastq, fast5 ]
