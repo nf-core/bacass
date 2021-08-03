@@ -21,7 +21,7 @@
                     "pattern": "^\\S+\\.csv$",
                     "schema": "assets/schema_input.json",
                     "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 6 columns, and a header row. See [usage docs](https://nf-co.re/bacass/usage#samplesheet-input).\n\nFor example:\n\n`--input 'design_hybrid.csv'`\n\nAn example of properly formatted input files can be found at the [nf-core/testData](https://github.com/nf-core/test-datasets/tree/bacass). \n\nExemplarily, this is the input used for a hybrid assembly in testing:\nID,R1,R2,LongFastQ,Fast5,GenomeSize\nERR044595,ERR044595_1M_1.fastq.gz,ERR044595_1M_2.fastq.gz,subset15000.fq.gz,NA,2.8m\n\n* `ID`: The identifier to use for handling the dataset e.g. sample name\n* `R1`: The forward reads in case of available short-read data\n* `R2`: The reverse reads in case of available short-read data\n* `LongFastQ`: The long read FastQ file with reads in FASTQ format\n* `Fast5`: The folder containing the basecalled FAST5 files\n* `GenomeSize`: The expected genome size of the assembly. Only used by the canu assembler.\n\nMissing values (e.g. FAST5 folder in case of short reads) can be omitted by using a `NA` in the CSV file. The pipeline will handle such cases appropriately then.",
+                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 6 columns, and a header row. See [usage docs](https://nf-co.re/bacass/usage#samplesheet-input).\n\nFor example:\n\n`--input 'design_hybrid.csv'`\n\nAn example of properly formatted input files can be found at the [nf-core/testData](https://github.com/nf-core/test-datasets/tree/bacass). \n\nExemplarily, this is the input used for a hybrid assembly in testing:\nID,R1,R2,long_fastq,fast5,genome_size\nERR044595,ERR044595_1M_1.fastq.gz,ERR044595_1M_2.fastq.gz,subset15000.fq.gz,NA,2.8m\n\n* `ID`: The identifier to use for handling the dataset e.g. sample name\n* `R1`: The forward reads in case of available short-read data\n* `R2`: The reverse reads in case of available short-read data\n* `long_fastq`: The long read FastQ file with reads in FASTQ format\n* `fast5`: The folder containing the basecalled fast5 files\n* `genome_size`: The expected genome size of the assembly. Only used by the canu assembler.\n\nMissing values (e.g. fast5 folder in case of short reads) can be omitted by using a `NA` in the CSV file. The pipeline will handle such cases appropriately then.",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "outdir": {
@@ -140,24 +140,24 @@
             "fa_icon": "fas fa-forward",
             "properties": {
                 "skip_kraken2": {
-                    "type": "string",
+                    "type": "boolean",
                     "fa_icon": "fas fa-forward",
                     "description": "Skip running Kraken2 classifier on reads."
                 },
                 "skip_annotation": {
-                    "type": "string",
+                    "type": "boolean",
                     "fa_icon": "fas fa-forward",
                     "description": "Skip annotating the assembly with Prokka /DFAST."
                 },
                 "skip_pycoqc": {
-                    "type": "string",
+                    "type": "boolean",
                     "fa_icon": "fas fa-forward",
                     "description": "Skip running `PycoQC` on long read input."
                 },
                 "skip_polish": {
-                    "type": "string",
+                    "type": "boolean",
                     "fa_icon": "fas fa-forward",
-                    "description": "Skip polishing the long-read assembly with FAST5 input. Will not affect short/hybrid assemblies."
+                    "description": "Skip polishing the long-read assembly with fast5 input. Will not affect short/hybrid assemblies."
                 }
             }
         },

@@ -43,12 +43,12 @@ def check_samplesheet(file_in, file_out):
     """
     This function checks that the samplesheet follows the following structure:
 
-    sample,fastq_1,fastq_2
-    SAMPLE_PE,SAMPLE_PE_RUN1_1.fastq.gz,SAMPLE_PE_RUN1_2.fastq.gz
-    SAMPLE_PE,SAMPLE_PE_RUN2_1.fastq.gz,SAMPLE_PE_RUN2_2.fastq.gz
-    SAMPLE_SE,SAMPLE_SE_RUN1_1.fastq.gz,
+    sample,fastq_1,fastq_2,long_fastq,fast5,genome_size
+    SAMPLE_PE,SAMPLE_PE_1.fastq.gz,SAMPLE_PE_2.fastq.gz,SAMPLE_LONG.fastq.gz,SAMPLE_LONG.fast5,2.8m
+    SAMPLE_PE,SAMPLE_PE_1.fastq.gz,SAMPLE_PE_2.fastq.gz,NA,NA,2.8m
 
     For an example see:
+    TODO: link actual example
     https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
     """
 
@@ -56,9 +56,8 @@ def check_samplesheet(file_in, file_out):
     with open(file_in, "r") as fin:
 
         ## Check header
-        MIN_COLS = 2
-        # TODO nf-core: Update the column names for the input samplesheet
-        HEADER = ["sample", "fastq_1", "fastq_2"]
+        MIN_COLS = 6
+        HEADER = ["sample", "fastq_1", "fastq_2", "long_fastq", "fast5", "genome_size"]
         header = [x.strip('"') for x in fin.readline().strip().split(",")]
         if header[: len(HEADER)] != HEADER:
             print("ERROR: Please check samplesheet header -> {} != {}".format(",".join(header), ",".join(HEADER)))
@@ -84,7 +83,7 @@ def check_samplesheet(file_in, file_out):
                 )
 
             ## Check sample name entries
-            sample, fastq_1, fastq_2 = lspl[: len(HEADER)]
+            sample, fastq_1, fastq_2, long_fastq, fast5, genome_size = lspl[: len(HEADER)]
             sample = sample.replace(" ", "_")
             if not sample:
                 print_error("Sample entry has not been specified!", "Line", line)
@@ -124,7 +123,7 @@ def check_samplesheet(file_in, file_out):
         out_dir = os.path.dirname(file_out)
         make_dir(out_dir)
         with open(file_out, "w") as fout:
-            fout.write(",".join(["sample", "single_end", "fastq_1", "fastq_2"]) + "\n")
+            fout.write(",".join(["sample", "single_end", "fastq_1", "fastq_2", "long_fastq", "fast5", "genome_size"]) + "\n")
             for sample in sorted(sample_mapping_dict.keys()):
 
                 ## Check that multiple runs of the same sample are of the same datatype

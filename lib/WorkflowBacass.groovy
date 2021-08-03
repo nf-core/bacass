@@ -10,8 +10,8 @@ class WorkflowBacass {
     public static void initialise(params, log) {
         genomeExistsError(params, log)
 
-        if (!params.fasta) {
-            log.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
+        if(("${params.assembler}" == 'canu' || "${params.assembler}" == 'miniasm') && ("${params.assembly_type}" == 'short' || "${params.assembly_type}" == 'hybrid')){
+            log.error "Canu and Miniasm can only be used for long read assembly and neither for Hybrid nor Shortread assembly!"
             System.exit(1)
         }
     }
