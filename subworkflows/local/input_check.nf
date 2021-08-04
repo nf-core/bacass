@@ -22,14 +22,19 @@ workflow INPUT_CHECK {
         .filter{ meta, reads -> reads != 'NA' } // TODO: filter when PE and 'NA'
         .set { shortreads }
     reads
-        .map { meta, reads, long_fastq, fast5 -> [ meta, long_fastq, fast5 ] }
-        .filter{ meta, long_fastq, fast5 -> long_fastq != 'NA' && fast5 != 'NA' }
+        .map { meta, reads, long_fastq, fast5 -> [ meta, long_fastq ] }
+        .filter{ meta, long_fastq -> long_fastq != 'NA' }
         .set { longreads }
+    reads
+        .map { meta, reads, long_fastq, fast5 -> [ meta, fast5 ] }
+        .filter{ meta, fast5 -> fast5 != 'NA' }
+        .set { fast5 }
 
     emit:
     reads      // channel: [ val(meta), [ reads ], long_fastq, fast5 ]
     shortreads // channel: [ val(meta), [ reads ] ]
-    longreads  // channel: [ val(meta), long_fastq, fast5 ]
+    longreads  // channel: [ val(meta), long_fastq ]
+    fast5      // channel: [ val(meta), fast5 ]
 }
 
 // Function to get list of [ meta, [ fastq_1, fastq_2 ], long_fastq, fast5 ]
