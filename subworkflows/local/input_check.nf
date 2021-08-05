@@ -11,7 +11,9 @@ workflow INPUT_CHECK {
     samplesheet // file: /path/to/samplesheet.csv
 
     main:
-    SAMPLESHEET_CHECK ( samplesheet )
+    Channel
+        .fromPath( samplesheet )
+        .ifEmpty {exit 1, log.info "Cannot find path file ${tsvFile}"}
         .splitCsv ( header:true, sep:',' )
         .map { create_fastq_channels(it) }
         .set { reads }
@@ -19,7 +21,8 @@ workflow INPUT_CHECK {
     // reconfigure channels
     reads
         .map { meta, reads, long_fastq, fast5 -> [ meta, reads ] }
-        .filter{ meta, reads -> reads != 'NA' } // TODO: filter when PE and 'NA'
+        .filter{ meta, reads -> reads != 'NA' }
+        .filter{ meta, reads -> reads[0] != 'NA' && reads[1] != 'NA' }
         .set { shortreads }
     reads
         .map { meta, reads, long_fastq, fast5 -> [ meta, long_fastq ] }
@@ -41,38 +44,45 @@ workflow INPUT_CHECK {
 def create_fastq_channels(LinkedHashMap row) {
     def meta = [:]
     meta.id           = row.sample
-    meta.single_end   = row.single_end.toBoolean()
+    meta.single_end   = false
     meta.genome_size  = row.genome_size == null ? 'NA' : row.genome_size
 
     def array = []
-    if (!file(row.fastq_1).exists()) {
-        exit 1, "ERROR: Please check input samplesheet -> Read 1 FastQ file does not exist!\n${row.fastq_1}"
-    }
+    // check short reads
+    if ( !(row.fastq_1 == 'NA') ) {
+        if ( !file(row.fastq_1).exists() ) {
+            exit 1, "ERROR: Please check input samplesheet -> Read 1 FastQ file does not exist!\n${row.fastq_1}"
+        }
+        fastq_1 = file(row.fastq_1)
+    } else { fastq_1 = 'NA' }
+    if ( !(row.fastq_2 == 'NA') ) {
+        if ( !file(row.fastq_2).exists() ) {
+            exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${row.fastq_2}"
+        }
+        fastq_2 = file(row.fastq_2)
+    } else { fastq_2 = 'NA' }
 
     // check long_fastq
-    if (!row.long_fastq == 'NA') {
-        if (!file(row.long_fastq).exists()) {
+    if ( !(row.long_fastq == 'NA') ) {
+        if ( !file(row.long_fastq).exists() ) {
             exit 1, "ERROR: Please check input samplesheet -> Long FastQ file does not exist!\n${row.fastq_1}"
         }
         long_fastq = file(row.long_fastq)
     } else { long_fastq = 'NA' }
 
     // check long_fastq
-    if (!row.fast5 == 'NA') {
-        if (!file(row.fast5).exists()) {
+    if ( !(row.fast5 == 'NA') ) {
+        if ( !file(row.fast5).exists() ) {
             exit 1, "ERROR: Please check input samplesheet -> Fast5 file does not exist!\n${row.fastq_1}"
         }
         fast5 = file(row.fast5)
     } else { fast5 = 'NA' }
 
-    // prepare output
-    if (meta.single_end) {
-        array = [ meta, [ file(row.fastq_1) ], long_fastq, fast5 ]
+    // prepare output // currently does not allow single end data!
+    if ( meta.single_end ) {
+        array = [ meta, fastq_1 , long_fastq, fast5 ]
     } else {
-        if (!file(row.fastq_2).exists()) {
-            exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${row.fastq_2}"
-        }
-        array = [ meta, [ file(row.fastq_1), file(row.fastq_2) ], long_fastq, fast5 ]
+        array = [ meta, [ fastq_1, fastq_2 ], long_fastq, fast5 ]
     }
     return array
 }

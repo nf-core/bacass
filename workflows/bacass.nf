@@ -35,12 +35,17 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
 def modules = params.modules.clone()
 
+def unicycler_options = modules['unicycler']
+unicycler_options.args       += " $params.unicycler_args"
+
 //
 // MODULE: Local to the pipeline
 //
-include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files : ['tsv':'']] )
-include { SKEWER                } from '../modules/local/skewer'                addParams( options: modules['skewer']            )
-include { PORECHOP              } from '../modules/local/porechop'              addParams( options: modules['porechop']          )
+include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions'    addParams( options: [publish_files : ['tsv':'']] )
+include { SKEWER                } from '../modules/local/skewer'                   addParams( options: modules['skewer']            )
+include { NANOPLOT              } from '../modules/local/nanoplot'                 addParams( options: modules['nanoplot']          )
+include { PORECHOP              } from '../modules/local/porechop'                 addParams( options: modules['porechop']          )
+include { UNICYCLER             } from '../modules/local/unicycler'                addParams( options: unicycler_options            )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -60,10 +65,7 @@ multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"
 // MODULE: Installed directly from nf-core/modules
 //
 include { FASTQC    } from '../modules/nf-core/modules/fastqc/main'    addParams( options: modules['fastqc']    )
-include { NANOPLOT  } from '../modules/nf-core/modules/nanoplot/main'  addParams( options: modules['nanoplot']  )
 include { PYCOQC    } from '../modules/nf-core/modules/pycoqc/main'    addParams( options: modules['pycoqc']    )
-include { UNICYCLER } from '../modules/nf-core/modules/unicycler/main' addParams( options: modules['unicycler'] )
-include { SPADES    } from '../modules/nf-core/modules/spades/main'    addParams( options: modules['spades']    )
 include { MULTIQC   } from '../modules/nf-core/modules/multiqc/main'   addParams( options: multiqc_options      )
 
 /*
@@ -85,7 +87,7 @@ workflow BACASS {
     INPUT_CHECK (
         ch_input
     )
-
+    
     //
     // MODULE: Run FastQC
     //
@@ -98,7 +100,7 @@ workflow BACASS {
     // MODULE: Skewer, trim and combine short read read-pairs per sample. Similar to nf-core vipr
     //
     SKEWER (
-        INPUT_CHECK.out.shortreads
+        INPUT_CHECK.out.shortreads.dump(tag: 'shortreads')
     )
     //ch_software_versions = ch_software_versions.mix(SKEWER.out.version.first().ifEmpty(null)) //TODO
 
@@ -113,10 +115,12 @@ workflow BACASS {
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
     //
-    PYCOQC (
-        INPUT_CHECK.out.fast5
-    )
-    ch_software_versions = ch_software_versions.mix(PYCOQC.out.version.first().ifEmpty(null))
+    if ( !params.skip_pycoqc ) {
+        PYCOQC (
+            INPUT_CHECK.out.fast5.dump(tag: 'fast5')
+        )
+        ch_software_versions = ch_software_versions.mix(PYCOQC.out.version.first().ifEmpty(null))
+    }
 
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
@@ -124,54 +128,43 @@ workflow BACASS {
 
     // TODO: if ( params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type) )
     PORECHOP (
-        INPUT_CHECK.out.longreads
+        INPUT_CHECK.out.longreads.dump(tag: 'longreads')
     )
     ch_software_versions = ch_software_versions.mix(PORECHOP.out.version.first().ifEmpty(null))
 
     //
-    // MODULE: Unicycler, nf-core module allows only short assembly assembly
+    // Join channels for assemblers. As samples have the same meta data, we can simply use join() to merge the channels based on this. If we only have one of the channels we insert 'NAs' which are not used in the unicycler process then subsequently, in case of short or long read only assembly.
     //
-    // TODO: if ( params.assembler == 'unicycler' ) {
-
-    UNICYCLER (
-        SKEWER.out.reads
-    )
-    ch_software_versions = ch_software_versions.mix(UNICYCLER.out.version.first().ifEmpty(null))
-/*
-    //
-    // MODULE: SPAdes, nf-core module allows only short read assembly
-    //
-    // TODO: if ( params.assembler == 'spades' ) {
-    // TODO: error: java.lang.NullPointerException: Cannot get property 'id' on null object
-    // TODO: probabaly: params.spades_hmm = false?
-    params.spades_hmm = false
-    SPADES (
-        SKEWER.out.reads, params.spades_hmm
-    )
-    ch_software_versions = ch_software_versions.mix(SPADES.out.version.first().ifEmpty(null))
-*/
-
-    //
-    // Join channels for unicycler, as trimming the files happens in two separate processes for paralellization of individual steps. As samples have the same sampleID, we can simply use join() to merge the channels based on this. If we only have one of the channels we insert 'NAs' which are not used in the unicycler process then subsequently, in case of short or long read only assembly.
-    // TODO:
-/*
     if(params.assembly_type == 'hybrid'){
+        PORECHOP.out.reads.dump(tag: 'porechop')
         SKEWER.out.reads
+            .dump(tag: 'skewer')
             .join(PORECHOP.out.reads)
             .dump(tag: 'unicycler')
-            .set {ch_unicycler}
-    } else if(params.assembly_type == 'short'){
+            .set { ch_for_assembly }
+    } else if ( params.assembly_type == 'short' ) {
         SKEWER.out.reads
-            .map{ id,R1,R2 -> tuple(id,R1,R2,'NA') }
+            .dump(tag: 'skewer')
+            .map{ meta,reads -> tuple(meta,reads,'NA') }
             .dump(tag: 'unicycler')
-            .set {ch_unicycler}
-    } else if(params.assembly_type == 'long'){
-        ch_long_trimmed_unicycler
-            .map{ id,lr -> tuple(id,'NA','NA',lr) }
+            .set { ch_for_assembly }
+    } else if ( params.assembly_type == 'long' ) {
+        PORECHOP.out.reads
+            .dump(tag: 'porechop')
+            .map{ meta,lr -> tuple(meta,'NA',lr) }
             .dump(tag: 'unicycler')
-            .set {ch_unicycler} //old channel name: ch_short_long_joint_unicycler
+            .set { ch_for_assembly } //old channel name: ch_short_long_joint_unicycler
     }
-*/
+
+    //
+    // MODULE: Unicycler, nf-core module allows only short assembly assembly
+    //
+    if ( params.assembler == 'unicycler' ) {
+        UNICYCLER (
+            ch_for_assembly
+        )
+        ch_software_versions = ch_software_versions.mix(UNICYCLER.out.version.first().ifEmpty(null))
+    }
 
     //
     // MODULE: Pipeline reporting

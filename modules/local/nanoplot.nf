@@ -30,8 +30,7 @@ process NANOPLOT {
 
     script:
     def software = getSoftwareName(task.process)
-    def input_file = ("$ontfile".endsWith(".fastq.gz")) ? "--fastq ${ontfile}" :
-        ("$ontfile".endsWith(".txt")) ? "--summary ${ontfile}" : ''
+    def input_file = "--fastq ${ontfile}"
     """
     NanoPlot \\
         $options.args \\

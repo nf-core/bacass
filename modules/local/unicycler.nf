@@ -19,7 +19,7 @@ process UNICYCLER {
     }
 
     input:
-    tuple val(meta), path(reads)
+    tuple val(meta), file(reads), file(longreads)
 
     output:
     tuple val(meta), path('*.scaffolds.fa'), emit: scaffolds
@@ -30,7 +30,13 @@ process UNICYCLER {
     script:
     def software    = getSoftwareName(task.process)
     def prefix      = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-    def input_reads = meta.single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
+    if(params.assembly_type == 'long'){
+        input_reads = "-l $longreads"
+    } else if (params.assembly_type == 'short'){
+        input_reads = "-1 ${reads[0]} -2 ${reads[1]}"
+    } else if (params.assembly_type == 'hybrid'){
+        input_reads = "-1 ${reads[0]} -2 ${reads[1]} -l $longreads"
+    }
     """
     unicycler \\
         --threads $task.cpus \\
