@@ -17,6 +17,15 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
+// Check krakendb
+if(! params.skip_kraken2){
+    if(params.kraken2db){
+        kraken2db = file(params.kraken2db)
+    } else {
+        exit 1, "Missing Kraken2 DB arg"
+    }
+}
+
 /*
 ========================================================================================
     CONFIG FILES
@@ -38,6 +47,9 @@ def modules = params.modules.clone()
 def unicycler_options = modules['unicycler']
 unicycler_options.args       += " $params.unicycler_args"
 
+def prokka_options   = modules['prokka']
+prokka_options.args  += " $params.prokka_args"
+
 //
 // MODULE: Local to the pipeline
 //
@@ -46,6 +58,7 @@ include { SKEWER                } from '../modules/local/skewer'                
 include { NANOPLOT              } from '../modules/local/nanoplot'                 addParams( options: modules['nanoplot']          )
 include { PORECHOP              } from '../modules/local/porechop'                 addParams( options: modules['porechop']          )
 include { UNICYCLER             } from '../modules/local/unicycler'                addParams( options: unicycler_options            )
+include { PROKKA                } from '../modules/local/prokka'                   addParams( options: prokka_options               )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -64,9 +77,11 @@ multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC    } from '../modules/nf-core/modules/fastqc/main'    addParams( options: modules['fastqc']    )
-include { PYCOQC    } from '../modules/nf-core/modules/pycoqc/main'    addParams( options: modules['pycoqc']    )
-include { MULTIQC   } from '../modules/nf-core/modules/multiqc/main'   addParams( options: multiqc_options      )
+include { FASTQC    } from '../modules/nf-core/modules/fastqc/main'          addParams( options: modules['fastqc']    )
+include { PYCOQC    } from '../modules/nf-core/modules/pycoqc/main'          addParams( options: modules['pycoqc']    )
+include { KRAKEN2_KRAKEN2 as KRAKEN2 } from '../modules/nf-core/modules/kraken2/kraken2/main' addParams( options: modules['kraken2']   )
+include { QUAST     } from '../modules/nf-core/modules/quast/main'           addParams( options: modules['quast']     )
+include { MULTIQC   } from '../modules/nf-core/modules/multiqc/main'         addParams( options: multiqc_options      )
 
 /*
 ========================================================================================
@@ -157,13 +172,59 @@ workflow BACASS {
     }
 
     //
-    // MODULE: Unicycler, nf-core module allows only short assembly assembly
+    // MODULE: Unicycler, genome assembly, nf-core module allows only short assembly
     //
     if ( params.assembler == 'unicycler' ) {
         UNICYCLER (
             ch_for_assembly
         )
         ch_software_versions = ch_software_versions.mix(UNICYCLER.out.version.first().ifEmpty(null))
+    }
+
+    //
+    // MODULE: Kraken2, QC for sample purity
+    //
+    if ( !params.skip_kraken2 ) {
+        //prepare channel that specifies "meta.single_end = true" for long reads
+        PORECHOP.out.reads
+            .map { info, reads ->
+                    def meta = info
+                    meta.single_end = true
+                    [ meta, reads ] }
+            .mix(SKEWER.out.reads)
+            .set { ch_for_kraken2 }
+        KRAKEN2 (
+            ch_for_kraken2.dump(tag: 'kraken2'),
+            kraken2db
+        )
+        ch_software_versions = ch_software_versions.mix(KRAKEN2.out.version.first().ifEmpty(null))
+    }
+
+    //
+    // MODULE: QUAST, assembly QC
+    //
+    UNICYCLER.out.scaffolds
+        .dump(tag: 'unicycler')
+        .map { meta, fasta -> fasta }
+        .collect()
+        .set { ch_to_quast }
+    QUAST (
+        ch_to_quast,
+        file('fasta'),
+        file('gff'),
+        false,
+        false
+    )
+    ch_software_versions = ch_software_versions.mix(QUAST.out.version.ifEmpty(null))
+
+    //
+    // MODULE: PROKKA, gene annotation
+    //
+    if ( !params.skip_annotation && params.annotation_tool == 'prokka' ) {
+        PROKKA (
+            UNICYCLER.out.scaffolds
+        )
+        ch_software_versions = ch_software_versions.mix(PROKKA.out.version.first().ifEmpty(null))
     }
 
     //
