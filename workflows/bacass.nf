@@ -102,7 +102,7 @@ workflow BACASS {
     INPUT_CHECK (
         ch_input
     )
-    
+
     //
     // MODULE: Run FastQC
     //
