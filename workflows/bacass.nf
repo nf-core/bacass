@@ -55,6 +55,7 @@ include { SKEWER                } from '../modules/local/skewer'                
 include { NANOPLOT              } from '../modules/local/nanoplot'                 addParams( options: modules['nanoplot']          )
 include { PORECHOP              } from '../modules/local/porechop'                 addParams( options: modules['porechop']          )
 include { UNICYCLER             } from '../modules/local/unicycler'                addParams( options: unicycler_options            )
+include { DFAST                 } from '../modules/local/dfast'                    addParams( options: modules['dfast']             )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -227,6 +228,18 @@ workflow BACASS {
             []
         )
         ch_software_versions = ch_software_versions.mix(PROKKA.out.version.first().ifEmpty(null))
+    }
+
+    //
+    // MODULE: DFAST, gene annotation
+    //
+    // TODO: "dfast_file_downloader.py --protein dfast --dbroot ." could be used in a separate process and the db could be forwarded
+    if ( !params.skip_annotation && params.annotation_tool == 'dfast' ) {
+        DFAST (
+            UNICYCLER.out.scaffolds,
+            Channel.value(params.dfast_config ? file(params.dfast_config) : "")
+        )
+        ch_software_versions = ch_software_versions.mix(DFAST.out.version.first().ifEmpty(null))
     }
 
     //
