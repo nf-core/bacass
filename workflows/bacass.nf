@@ -47,9 +47,6 @@ def modules = params.modules.clone()
 def unicycler_options = modules['unicycler']
 unicycler_options.args       += " $params.unicycler_args"
 
-def prokka_options   = modules['prokka']
-prokka_options.args  += " $params.prokka_args"
-
 //
 // MODULE: Local to the pipeline
 //
@@ -58,7 +55,6 @@ include { SKEWER                } from '../modules/local/skewer'                
 include { NANOPLOT              } from '../modules/local/nanoplot'                 addParams( options: modules['nanoplot']          )
 include { PORECHOP              } from '../modules/local/porechop'                 addParams( options: modules['porechop']          )
 include { UNICYCLER             } from '../modules/local/unicycler'                addParams( options: unicycler_options            )
-include { PROKKA                } from '../modules/local/prokka'                   addParams( options: prokka_options               )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -74,6 +70,9 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check' addParams( opti
 def multiqc_options   = modules['multiqc']
 multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"$params.multiqc_title\""]) : ''
 
+def prokka_options   = modules['prokka']
+prokka_options.args  += " $params.prokka_args"
+
 //
 // MODULE: Installed directly from nf-core/modules
 //
@@ -81,6 +80,7 @@ include { FASTQC    } from '../modules/nf-core/modules/fastqc/main'          add
 include { PYCOQC    } from '../modules/nf-core/modules/pycoqc/main'          addParams( options: modules['pycoqc']    )
 include { KRAKEN2_KRAKEN2 as KRAKEN2 } from '../modules/nf-core/modules/kraken2/kraken2/main' addParams( options: modules['kraken2']   )
 include { QUAST     } from '../modules/nf-core/modules/quast/main'           addParams( options: modules['quast']     )
+include { PROKKA    } from '../modules/nf-core/modules/prokka/main'          addParams( options: prokka_options       )
 include { MULTIQC   } from '../modules/nf-core/modules/multiqc/main'         addParams( options: multiqc_options      )
 
 /*
@@ -222,7 +222,9 @@ workflow BACASS {
     //
     if ( !params.skip_annotation && params.annotation_tool == 'prokka' ) {
         PROKKA (
-            UNICYCLER.out.scaffolds
+            UNICYCLER.out.scaffolds,
+            [],
+            []
         )
         ch_software_versions = ch_software_versions.mix(PROKKA.out.version.first().ifEmpty(null))
     }

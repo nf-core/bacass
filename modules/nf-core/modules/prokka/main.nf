@@ -19,6 +19,8 @@ process PROKKA {
 
     input:
     tuple val(meta), path(fasta)
+    path proteins
+    path prodigal_tf
 
     output:
     tuple val(meta), path("${prefix}/*.gff"), emit: gff
@@ -38,11 +40,15 @@ process PROKKA {
     script:
     def software = getSoftwareName(task.process)
     prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+    def proteins_opt = proteins ? "--proteins ${proteins[0]}" : ""
+    def prodigal_opt = prodigal_tf ? "--prodigaltf ${prodigal_tf[0]}" : ""
     """
     prokka \\
         $options.args \\
         --cpus $task.cpus \\
         --prefix $prefix \\
+        $proteins_opt \\
+        $prodigal_tf \\
         $fasta
 
     echo \$(prokka --version 2>&1) | sed 's/^.*prokka //' > ${software}.version.txt
