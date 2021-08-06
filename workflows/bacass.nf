@@ -102,7 +102,7 @@ workflow BACASS {
     SKEWER (
         INPUT_CHECK.out.shortreads.dump(tag: 'shortreads')
     )
-    //ch_software_versions = ch_software_versions.mix(SKEWER.out.version.first().ifEmpty(null)) //TODO
+    ch_software_versions = ch_software_versions.mix(SKEWER.out.version.first().ifEmpty(null)) //TODO
 
     //
     // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots

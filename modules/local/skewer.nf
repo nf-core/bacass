@@ -22,9 +22,9 @@ process SKEWER {
     tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path("*_trm-cmb.R{1,2}.fastq.gz")   , emit: reads
-    path("*.log"), emit: log
-    //path "*.version.txt"                       , emit: version // TODO: output version!
+    tuple val(meta), path("*_trm-cmb.R{1,2}.fastq.gz"), emit: reads
+    path("*.log")                                     , emit: log
+    path "*.version.txt"                              , emit: version
 
     script:
     def software    = getSoftwareName(task.process)
@@ -41,6 +41,6 @@ process SKEWER {
     cat \$(ls *trimmed-pair1.fastq.gz | sort) >> ${meta.id}_trm-cmb.R1.fastq.gz
     cat \$(ls *trimmed-pair2.fastq.gz | sort) >> ${meta.id}_trm-cmb.R2.fastq.gz
 
-    #skewer --version
+    echo \$(skewer --version 2>&1) | sed 's/^.*skewer version: //; s/ .*//' > ${software}.version.txt
     """
 }
