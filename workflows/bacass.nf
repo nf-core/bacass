@@ -59,6 +59,8 @@ include { NANOPLOT              } from '../modules/local/nanoplot'              
 include { PORECHOP              } from '../modules/local/porechop'                 addParams( options: modules['porechop']          )
 include { UNICYCLER             } from '../modules/local/unicycler'                addParams( options: unicycler_options            )
 include { CANU                  } from '../modules/local/canu'                     addParams( options: canu_options                 )
+include { MINIMAP2_ALIGN        } from '../modules/local/minimap_align'           addParams( options: modules['minimap2_align']    )
+include { MINIASM               } from '../modules/local/miniasm'                  addParams( options: modules['miniasm']           )
 include { DFAST                 } from '../modules/local/dfast'                    addParams( options: modules['dfast']             )
 
 //
@@ -193,7 +195,7 @@ workflow BACASS {
     }
 
     //
-    // MODULE: Unicycler, genome assembly, nf-core module allows only short assembly
+    // MODULE: Canu, genome assembly, long reads
     //
     if ( params.assembler == 'canu' ) {
         CANU (
@@ -201,6 +203,21 @@ workflow BACASS {
         )
         //ch_assembly = CANU.out.assembly.dump(tag: 'canu') //needs to go into nanopolish & medaka first!
         ch_software_versions = ch_software_versions.mix(CANU.out.version.first().ifEmpty(null))
+    }
+
+    //
+    // MODULE: Miniasm, genome assembly, long reads
+    //
+    if ( params.assembler == 'miniasm' ) {
+        MINIMAP2_ALIGN (
+            ch_for_assembly.map{ meta,sr,lr -> tuple(meta,sr,lr,lr) }
+        )
+        ch_software_versions = ch_software_versions.mix(MINIMAP2_ALIGN.out.version.first().ifEmpty(null))
+        MINIASM (
+            MINIMAP2_ALIGN.out.paf.dump(tag: 'minimap2')
+        )
+        //ch_assembly = MINIASM.out.assembly.dump(tag: 'miniasm') //needs to go into consensus -> nanopolish & medaka first!
+        ch_software_versions = ch_software_versions.mix(MINIASM.out.version.first().ifEmpty(null))
     }
 
     //
