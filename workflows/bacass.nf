@@ -47,6 +47,9 @@ def modules = params.modules.clone()
 def unicycler_options = modules['unicycler']
 unicycler_options.args       += " $params.unicycler_args"
 
+def canu_options = modules['canu']
+canu_options.args       += " $params.canu_args"
+
 //
 // MODULE: Local to the pipeline
 //
@@ -55,6 +58,7 @@ include { SKEWER                } from '../modules/local/skewer'                
 include { NANOPLOT              } from '../modules/local/nanoplot'                 addParams( options: modules['nanoplot']          )
 include { PORECHOP              } from '../modules/local/porechop'                 addParams( options: modules['porechop']          )
 include { UNICYCLER             } from '../modules/local/unicycler'                addParams( options: unicycler_options            )
+include { CANU                  } from '../modules/local/canu'                     addParams( options: canu_options                 )
 include { DFAST                 } from '../modules/local/dfast'                    addParams( options: modules['dfast']             )
 
 //
@@ -186,6 +190,17 @@ workflow BACASS {
         )
         ch_assembly = UNICYCLER.out.scaffolds.dump(tag: 'unicycler')
         ch_software_versions = ch_software_versions.mix(UNICYCLER.out.version.first().ifEmpty(null))
+    }
+
+    //
+    // MODULE: Unicycler, genome assembly, nf-core module allows only short assembly
+    //
+    if ( params.assembler == 'canu' ) {
+        CANU (
+            ch_for_assembly
+        )
+        //ch_assembly = CANU.out.assembly.dump(tag: 'canu') //needs to go into nanopolish & medaka first!
+        ch_software_versions = ch_software_versions.mix(CANU.out.version.first().ifEmpty(null))
     }
 
     //
