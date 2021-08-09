@@ -50,6 +50,12 @@ unicycler_options.args       += " $params.unicycler_args"
 def canu_options = modules['canu']
 canu_options.args       += " $params.canu_args"
 
+def minimap_align_options = modules['minimap_align']
+minimap_align_options.args   += " -x ava-ont"
+
+def minimap_consensus_options = modules['minimap_align']
+minimap_consensus_options.args   += " -x map-ont"
+
 //
 // MODULE: Local to the pipeline
 //
@@ -59,8 +65,10 @@ include { NANOPLOT              } from '../modules/local/nanoplot'              
 include { PORECHOP              } from '../modules/local/porechop'                 addParams( options: modules['porechop']          )
 include { UNICYCLER             } from '../modules/local/unicycler'                addParams( options: unicycler_options            )
 include { CANU                  } from '../modules/local/canu'                     addParams( options: canu_options                 )
-include { MINIMAP2_ALIGN        } from '../modules/local/minimap_align'           addParams( options: modules['minimap2_align']    )
+include { MINIMAP2_ALIGN        } from '../modules/local/minimap_align'           addParams( options: minimap_align_options         )
+include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS } from '../modules/local/minimap_align' addParams( options: minimap_consensus_options)
 include { MINIASM               } from '../modules/local/miniasm'                  addParams( options: modules['miniasm']           )
+include { RACON                 } from '../modules/local/racon'                    addParams( options: modules['racon']             )
 include { DFAST                 } from '../modules/local/dfast'                    addParams( options: modules['dfast']             )
 
 //
@@ -218,7 +226,26 @@ workflow BACASS {
         )
         //ch_assembly = MINIASM.out.assembly.dump(tag: 'miniasm') //needs to go into consensus -> nanopolish & medaka first!
         ch_software_versions = ch_software_versions.mix(MINIASM.out.version.first().ifEmpty(null))
+        MINIMAP2_CONSENSUS (
+            MINIASM.out.all.dump(tag: 'miniasm')
+        )
+        RACON (
+            MINIMAP2_CONSENSUS.out.paf.dump(tag: 'minimap2_consensus')
+        )
+        ch_software_versions = ch_software_versions.mix(RACON.out.version.first().ifEmpty(null))
     }
+
+    //
+    // MODULE: Nanopolish, polishes assembly using FAST5 files - should take either miniasm, canu, or unicycler consensus sequence
+    //
+    //TODO
+    //when: !params.skip_polish && params.assembly_type == 'long' && params.polish_method != 'medaka'
+
+    //
+    // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
+    //
+    //TODO
+    //when: !params.skip_polish && params.assembly_type == 'long' && params.polish_method == 'medaka'
 
     //
     // MODULE: Kraken2, QC for sample purity

@@ -22,7 +22,7 @@ process MINIMAP2_ALIGN {
     tuple val(meta), val(reads), file(longreads), file('reference')
 
     output:
-    tuple val(meta), val(reads), file(longreads), path("*.paf"), emit: paf
+    tuple val(meta), val(reads), file(longreads), file('reference'), path("*.paf"), emit: paf
     path "*.version.txt", emit: version
 
     script:
