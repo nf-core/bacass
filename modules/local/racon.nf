@@ -31,6 +31,6 @@ process RACON {
     """
     racon -t "${task.cpus}" "${longreads}" "${paf}" "assembly.fasta" > ${prefix}_assembly_consensus.fasta
 
-    echo \$(racon -v 2>&1) > ${software}.version.txt
+    echo \$(racon --version 2>&1) | sed 's/^.*v//' > ${software}.version.txt
     """
 }
