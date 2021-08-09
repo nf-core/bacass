@@ -156,21 +156,26 @@ workflow BACASS {
         SKEWER.out.reads
             .dump(tag: 'skewer')
             .join(PORECHOP.out.reads)
-            .dump(tag: 'unicycler')
+            .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
     } else if ( params.assembly_type == 'short' ) {
         SKEWER.out.reads
             .dump(tag: 'skewer')
             .map{ meta,reads -> tuple(meta,reads,'NA') }
-            .dump(tag: 'unicycler')
+            .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
     } else if ( params.assembly_type == 'long' ) {
         PORECHOP.out.reads
             .dump(tag: 'porechop')
             .map{ meta,lr -> tuple(meta,'NA',lr) }
-            .dump(tag: 'unicycler')
+            .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly } //old channel name: ch_short_long_joint_unicycler
     }
+
+    //
+    // ASSEMBLY: Unicycler, Canu, Miniasm (TODO: convert into subworkflow)
+    //
+    ch_assembly = Channel.empty()
 
     //
     // MODULE: Unicycler, genome assembly, nf-core module allows only short assembly
@@ -179,6 +184,7 @@ workflow BACASS {
         UNICYCLER (
             ch_for_assembly
         )
+        ch_assembly = UNICYCLER.out.scaffolds.dump(tag: 'unicycler')
         ch_software_versions = ch_software_versions.mix(UNICYCLER.out.version.first().ifEmpty(null))
     }
 
@@ -204,8 +210,7 @@ workflow BACASS {
     //
     // MODULE: QUAST, assembly QC
     //
-    UNICYCLER.out.scaffolds
-        .dump(tag: 'unicycler')
+    ch_assembly
         .map { meta, fasta -> fasta }
         .collect()
         .set { ch_to_quast }
@@ -223,7 +228,7 @@ workflow BACASS {
     //
     if ( !params.skip_annotation && params.annotation_tool == 'prokka' ) {
         PROKKA (
-            UNICYCLER.out.scaffolds,
+            ch_assembly,
             [],
             []
         )
@@ -236,7 +241,7 @@ workflow BACASS {
     // TODO: "dfast_file_downloader.py --protein dfast --dbroot ." could be used in a separate process and the db could be forwarded
     if ( !params.skip_annotation && params.annotation_tool == 'dfast' ) {
         DFAST (
-            UNICYCLER.out.scaffolds,
+            ch_assembly,
             Channel.value(params.dfast_config ? file(params.dfast_config) : "")
         )
         ch_software_versions = ch_software_versions.mix(DFAST.out.version.first().ifEmpty(null))
