@@ -69,6 +69,7 @@ include { MINIMAP2_ALIGN        } from '../modules/local/minimap_align'         
 include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS } from '../modules/local/minimap_align' addParams( options: minimap_consensus_options)
 include { MINIASM               } from '../modules/local/miniasm'                  addParams( options: modules['miniasm']           )
 include { RACON                 } from '../modules/local/racon'                    addParams( options: modules['racon']             )
+include { MEDAKA                } from '../modules/local/medaka'                   addParams( options: modules['medaka']            )
 include { DFAST                 } from '../modules/local/dfast'                    addParams( options: modules['dfast']             )
 
 //
@@ -198,7 +199,7 @@ workflow BACASS {
         UNICYCLER (
             ch_for_assembly
         )
-        ch_assembly = UNICYCLER.out.scaffolds.dump(tag: 'unicycler')
+        ch_assembly = ch_assembly.mix( UNICYCLER.out.scaffolds.dump(tag: 'unicycler') )
         ch_software_versions = ch_software_versions.mix(UNICYCLER.out.version.first().ifEmpty(null))
     }
 
@@ -209,7 +210,7 @@ workflow BACASS {
         CANU (
             ch_for_assembly
         )
-        //ch_assembly = CANU.out.assembly.dump(tag: 'canu') //needs to go into nanopolish & medaka first!
+        ch_assembly = ch_assembly.mix( CANU.out.assembly.dump(tag: 'canu') )
         ch_software_versions = ch_software_versions.mix(CANU.out.version.first().ifEmpty(null))
     }
 
@@ -224,7 +225,6 @@ workflow BACASS {
         MINIASM (
             MINIMAP2_ALIGN.out.paf.dump(tag: 'minimap2')
         )
-        //ch_assembly = MINIASM.out.assembly.dump(tag: 'miniasm') //needs to go into consensus -> nanopolish & medaka first!
         ch_software_versions = ch_software_versions.mix(MINIASM.out.version.first().ifEmpty(null))
         MINIMAP2_CONSENSUS (
             MINIASM.out.all.dump(tag: 'miniasm')
@@ -232,6 +232,7 @@ workflow BACASS {
         RACON (
             MINIMAP2_CONSENSUS.out.paf.dump(tag: 'minimap2_consensus')
         )
+        ch_assembly = ch_assembly.mix( MINIASM.out.assembly.dump(tag: 'miniasm') )
         ch_software_versions = ch_software_versions.mix(RACON.out.version.first().ifEmpty(null))
     }
 
@@ -244,8 +245,13 @@ workflow BACASS {
     //
     // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
     //
-    //TODO
-    //when: !params.skip_polish && params.assembly_type == 'long' && params.polish_method == 'medaka'
+    if ( !params.skip_polish && params.assembly_type == 'long' && params.polish_method == 'medaka' ) {
+        ch_assembly
+            .join( ch_for_assembly )
+            .set { ch_for_medaka }
+        MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
+        ch_software_versions = ch_software_versions.mix(MEDAKA.out.version.first().ifEmpty(null))
+    }
 
     //
     // MODULE: Kraken2, QC for sample purity
