@@ -140,7 +140,7 @@ workflow BACASS {
     SKEWER (
         INPUT_CHECK.out.shortreads.dump(tag: 'shortreads')
     )
-    ch_software_versions = ch_software_versions.mix(SKEWER.out.version.first().ifEmpty(null)) //TODO
+    ch_software_versions = ch_software_versions.mix(SKEWER.out.version.first().ifEmpty(null))
 
     //
     // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots
@@ -163,12 +163,12 @@ workflow BACASS {
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
     //
-
-    // TODO: if ( params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type) )
-    PORECHOP (
-        INPUT_CHECK.out.longreads.dump(tag: 'longreads')
-    )
-    ch_software_versions = ch_software_versions.mix(PORECHOP.out.version.first().ifEmpty(null))
+    if ( params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type) ) {
+        PORECHOP (
+            INPUT_CHECK.out.longreads.dump(tag: 'longreads')
+        )
+        ch_software_versions = ch_software_versions.mix(PORECHOP.out.version.first().ifEmpty(null))
+    }
 
     //
     // Join channels for assemblers. As samples have the same meta data, we can simply use join() to merge the channels based on this. If we only have one of the channels we insert 'NAs' which are not used in the unicycler process then subsequently, in case of short or long read only assembly.
@@ -195,7 +195,7 @@ workflow BACASS {
     }
 
     //
-    // ASSEMBLY: Unicycler, Canu, Miniasm (TODO: convert into subworkflow)
+    // ASSEMBLY: Unicycler, Canu, Miniasm
     //
     ch_assembly = Channel.empty()
 
