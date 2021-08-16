@@ -56,6 +56,9 @@ minimap_align_options.args   += " -x ava-ont"
 def minimap_consensus_options = modules['minimap_align']
 minimap_consensus_options.args   += " -x map-ont"
 
+def minimap_polish_options = modules['minimap_align']
+minimap_polish_options.args   += " -ax map-ont"
+
 //
 // MODULE: Local to the pipeline
 //
@@ -67,9 +70,11 @@ include { UNICYCLER             } from '../modules/local/unicycler'             
 include { CANU                  } from '../modules/local/canu'                     addParams( options: canu_options                 )
 include { MINIMAP2_ALIGN        } from '../modules/local/minimap_align'           addParams( options: minimap_align_options         )
 include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS } from '../modules/local/minimap_align' addParams( options: minimap_consensus_options)
+include { MINIMAP2_ALIGN as MINIMAP2_POLISH    } from '../modules/local/minimap_align' addParams( options: minimap_polish_options   )
 include { MINIASM               } from '../modules/local/miniasm'                  addParams( options: modules['miniasm']           )
 include { RACON                 } from '../modules/local/racon'                    addParams( options: modules['racon']             )
 include { MEDAKA                } from '../modules/local/medaka'                   addParams( options: modules['medaka']            )
+include { NANOPOLISH            } from '../modules/local/nanopolish'               addParams( options: modules['nanopolish']        )
 include { DFAST                 } from '../modules/local/dfast'                    addParams( options: modules['dfast']             )
 
 //
@@ -94,7 +99,9 @@ prokka_options.args  += " $params.prokka_args"
 //
 include { FASTQC    } from '../modules/nf-core/modules/fastqc/main'          addParams( options: modules['fastqc']    )
 include { PYCOQC    } from '../modules/nf-core/modules/pycoqc/main'          addParams( options: modules['pycoqc']    )
-include { KRAKEN2_KRAKEN2 as KRAKEN2 } from '../modules/nf-core/modules/kraken2/kraken2/main' addParams( options: modules['kraken2']   )
+include { SAMTOOLS_SORT    } from '../modules/nf-core/modules/samtools/sort/main' addParams( [publish_files : false]  )
+include { SAMTOOLS_INDEX   } from '../modules/nf-core/modules/samtools/index/main' addParams( [publish_files : false] )
+include { KRAKEN2_KRAKEN2 as KRAKEN2 } from '../modules/nf-core/modules/kraken2/kraken2/main' addParams( options: modules['kraken2'] )
 include { QUAST     } from '../modules/nf-core/modules/quast/main'           addParams( options: modules['quast']     )
 include { PROKKA    } from '../modules/nf-core/modules/prokka/main'          addParams( options: prokka_options       )
 include { MULTIQC   } from '../modules/nf-core/modules/multiqc/main'         addParams( options: multiqc_options      )
@@ -239,8 +246,31 @@ workflow BACASS {
     //
     // MODULE: Nanopolish, polishes assembly using FAST5 files - should take either miniasm, canu, or unicycler consensus sequence
     //
-    //TODO
-    //when: !params.skip_polish && params.assembly_type == 'long' && params.polish_method != 'medaka'
+    if ( !params.skip_polish && params.assembly_type == 'long' && params.polish_method != 'medaka' ) {
+        ch_for_assembly
+            .join( ch_assembly )
+            .set { ch_for_polish }
+        MINIMAP2_POLISH (
+            ch_for_polish.dump(tag: 'into_minimap2_polish')
+        )
+        ch_software_versions = ch_software_versions.mix(MINIMAP2_POLISH.out.version.first().ifEmpty(null))
+        SAMTOOLS_SORT (
+            MINIMAP2_POLISH.out.paf.map{ meta,sr,lr,ref,paf -> tuple(meta,paf) }.dump(tag: 'minimap2_polish')
+        )
+        ch_software_versions = ch_software_versions.mix(SAMTOOLS_SORT.out.version.first().ifEmpty(null))
+        SAMTOOLS_INDEX (
+            SAMTOOLS_SORT.out.bam.dump(tag: 'samtools_sort')
+        )
+        ch_software_versions = ch_software_versions.mix(SAMTOOLS_INDEX.out.version.first().ifEmpty(null))
+        ch_for_polish //tuple val(meta), val(reads), file(longreads), file(assembly)
+            .join( SAMTOOLS_INDEX.out.bai ) //tuple  val(meta), file(bai)
+            .join( INPUT_CHECK.out.fast5 ) //tuple val(meta), file(fast5)
+            .set { ch_for_nanopolish } //tuple val(meta), val(reads), file(longreads), file(assembly), file(bai), file(fast5)
+        NANOPOLISH (
+            ch_for_nanopolish.dump(tag: 'into_nanopolish')
+        )
+        ch_software_versions = ch_software_versions.mix(NANOPOLISH.out.version.first().ifEmpty(null))
+    }
 
     //
     // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
