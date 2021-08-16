@@ -50,15 +50,6 @@ unicycler_options.args       += " $params.unicycler_args"
 def canu_options = modules['canu']
 canu_options.args       += " $params.canu_args"
 
-def minimap_align_options = modules['minimap_align']
-minimap_align_options.args   += " -x ava-ont"
-
-def minimap_consensus_options = modules['minimap_align']
-minimap_consensus_options.args   += " -x map-ont"
-
-def minimap_polish_options = modules['minimap_align']
-minimap_polish_options.args   += " -ax map-ont"
-
 //
 // MODULE: Local to the pipeline
 //
@@ -68,9 +59,9 @@ include { NANOPLOT              } from '../modules/local/nanoplot'              
 include { PORECHOP              } from '../modules/local/porechop'                 addParams( options: modules['porechop']          )
 include { UNICYCLER             } from '../modules/local/unicycler'                addParams( options: unicycler_options            )
 include { CANU                  } from '../modules/local/canu'                     addParams( options: canu_options                 )
-include { MINIMAP2_ALIGN        } from '../modules/local/minimap_align'           addParams( options: minimap_align_options         )
-include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS } from '../modules/local/minimap_align' addParams( options: minimap_consensus_options)
-include { MINIMAP2_ALIGN as MINIMAP2_POLISH    } from '../modules/local/minimap_align' addParams( options: minimap_polish_options   )
+include { MINIMAP2_ALIGN        } from '../modules/local/minimap_align'           addParams( options: modules['minimap_align']      )
+include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS } from '../modules/local/minimap_align' addParams( options: modules['minimap_consensus'])
+include { MINIMAP2_ALIGN as MINIMAP2_POLISH    } from '../modules/local/minimap_align' addParams( options: modules['minimap_polish'])
 include { MINIASM               } from '../modules/local/miniasm'                  addParams( options: modules['miniasm']           )
 include { RACON                 } from '../modules/local/racon'                    addParams( options: modules['racon']             )
 include { MEDAKA                } from '../modules/local/medaka'                   addParams( options: modules['medaka']            )
