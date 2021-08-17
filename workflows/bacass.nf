@@ -230,7 +230,7 @@ workflow BACASS {
         RACON (
             MINIMAP2_CONSENSUS.out.paf.dump(tag: 'minimap2_consensus')
         )
-        ch_assembly = ch_assembly.mix( MINIASM.out.assembly.dump(tag: 'miniasm') )
+        ch_assembly = ch_assembly.mix( RACON.out.assembly.dump(tag: 'miniasm') )
         ch_software_versions = ch_software_versions.mix(RACON.out.version.first().ifEmpty(null))
     }
 
