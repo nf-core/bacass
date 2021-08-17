@@ -66,6 +66,7 @@ include { MINIASM               } from '../modules/local/miniasm'               
 include { RACON                 } from '../modules/local/racon'                    addParams( options: modules['racon']             )
 include { MEDAKA                } from '../modules/local/medaka'                   addParams( options: modules['medaka']            )
 include { NANOPOLISH            } from '../modules/local/nanopolish'               addParams( options: modules['nanopolish']        )
+include { KRAKEN2_DB_PREPARATION} from '../modules/local/kraken2_db_preparation'
 include { DFAST                 } from '../modules/local/dfast'                    addParams( options: modules['dfast']             )
 
 //
@@ -286,9 +287,12 @@ workflow BACASS {
                     [ meta, reads ] }
             .mix(SKEWER.out.reads)
             .set { ch_for_kraken2 }
+        KRAKEN2_DB_PREPARATION (
+            kraken2db
+        )
         KRAKEN2 (
             ch_for_kraken2.dump(tag: 'kraken2'),
-            kraken2db
+            KRAKEN2_DB_PREPARATION.out.db.map { info, db -> db }.dump(tag: 'kraken2_db_preparation')
         )
         ch_software_versions = ch_software_versions.mix(KRAKEN2.out.version.first().ifEmpty(null))
     }

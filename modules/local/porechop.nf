@@ -22,13 +22,13 @@ process PORECHOP {
     tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path('trimmed.fastq'), emit: reads
+    tuple val(meta), path('trimmed.fastq.gz'), emit: reads
     path "*.version.txt"                  , emit: version
 
     script:
     def software    = getSoftwareName(task.process)
     """
-    porechop $options.args -i "${reads}" -t "${task.cpus}" -o trimmed.fastq
+    porechop $options.args -i "${reads}" -t "${task.cpus}" -o trimmed.fastq.gz
     porechop --version > "${software}.version.txt"
     """
 }
