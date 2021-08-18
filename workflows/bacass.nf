@@ -94,6 +94,7 @@ include { PYCOQC    } from '../modules/nf-core/modules/pycoqc/main'          add
 include { SAMTOOLS_SORT    } from '../modules/nf-core/modules/samtools/sort/main' addParams( [publish_files : false]  )
 include { SAMTOOLS_INDEX   } from '../modules/nf-core/modules/samtools/index/main' addParams( [publish_files : false] )
 include { KRAKEN2_KRAKEN2 as KRAKEN2 } from '../modules/nf-core/modules/kraken2/kraken2/main' addParams( options: modules['kraken2'] )
+include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG } from '../modules/nf-core/modules/kraken2/kraken2/main' addParams( options: modules['kraken2_long'] )
 include { QUAST     } from '../modules/nf-core/modules/quast/main'           addParams( options: modules['quast']     )
 include { PROKKA    } from '../modules/nf-core/modules/prokka/main'          addParams( options: prokka_options       )
 include { MULTIQC   } from '../modules/nf-core/modules/multiqc/main'         addParams( options: multiqc_options      )
@@ -167,39 +168,29 @@ workflow BACASS {
     // Prepare channel for Kraken2
     //
     if(params.assembly_type == 'hybrid'){
-        PORECHOP.out.reads.dump(tag: 'porechop')
+        ch_for_kraken2_short = SKEWER.out.reads
+        ch_for_kraken2_long = PORECHOP.out.reads.dump(tag: 'porechop')
         SKEWER.out.reads
             .dump(tag: 'skewer')
             .join(PORECHOP.out.reads)
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
-        PORECHOP.out.reads
-            .map { info, reads ->
-                    def meta = info
-                    meta.single_end = true
-                    [ meta, reads ] }
-            .mix(SKEWER.out.reads)
-            .set { ch_for_kraken2 }
     } else if ( params.assembly_type == 'short' ) {
+        ch_for_kraken2_short = SKEWER.out.reads
+        ch_for_kraken2_long = Channel.empty()
         SKEWER.out.reads
             .dump(tag: 'skewer')
             .map{ meta,reads -> tuple(meta,reads,'NA') }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
-        SKEWER.out.reads
-            .set { ch_for_kraken2 }
     } else if ( params.assembly_type == 'long' ) {
+        ch_for_kraken2_short = Channel.empty()
+        ch_for_kraken2_long = PORECHOP.out.reads
         PORECHOP.out.reads
             .dump(tag: 'porechop')
             .map{ meta,lr -> tuple(meta,'NA',lr) }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
-        PORECHOP.out.reads
-            .map { info, reads ->
-                    def meta = info
-                    meta.single_end = true
-                    [ meta, reads ] }
-            .set { ch_for_kraken2 }
     }
 
     //
@@ -299,10 +290,22 @@ workflow BACASS {
             kraken2db
         )
         KRAKEN2 (
-            ch_for_kraken2.dump(tag: 'kraken2'),
+            ch_for_kraken2_short.dump(tag: 'kraken2_short'),
             KRAKEN2_DB_PREPARATION.out.db.map { info, db -> db }.dump(tag: 'kraken2_db_preparation')
         )
         ch_software_versions = ch_software_versions.mix(KRAKEN2.out.version.first().ifEmpty(null))
+        KRAKEN2_LONG (
+            ch_for_kraken2_long
+                .map { meta, reads ->
+                    info = [:]
+                    info.id = meta.id
+                    info.single_end = true 
+                    [ info, reads ] 
+                }
+                .dump(tag: 'kraken2_long'),
+            KRAKEN2_DB_PREPARATION.out.db.map { info, db -> db }.dump(tag: 'kraken2_db_preparation')
+        )
+        ch_software_versions = ch_software_versions.mix(KRAKEN2_LONG.out.version.first().ifEmpty(null))
     }
 
     //
