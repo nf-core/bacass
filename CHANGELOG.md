@@ -5,13 +5,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v2.0.0dev - [date]
 
-Initial release of nf-core/bacass, created with the [nf-core](https://nf-co.re/) template.
+### `Changed`
+
+* [#56](https://github.com/nf-core/bacass/pull/56) - Switched to DSL2 & update to new nf-core 2.1 `TEMPLATE`
 
 ### `Added`
 
 ### `Fixed`
 
+* [#51](https://github.com/nf-core/bacass/issues/51) - Fixed Unicycler
+
 ### `Dependencies`
+
+* [#56](https://github.com/nf-core/bacass/pull/56) - Updated a bunch of dependencies (unchanged: FastQC, Miniasm, Prokka, Porechop, QUAST)
+    * Unicycler from 0.4.4 to 0.4.8
+    * Kraken2 from 2.0.9beta to 2.1.1
+    * MultiQC from 1.9 to 1.10.1
+    * PYCOQC from 2.5.0.23 to 2.5.2
+    * Samtools from 1.11 to 1.13
+    * Canu from 2.0 to 2.1.1-2
+    * dfast from 1.2.10 to 1.2.14
+    * Medaka from 1.1.2 to 1.4.3-0
+    * Minimap 2 from 2.17 to 2.21
+    * Nanoplot from 1.32.1 to 1.38.0
+    * Nanopolish from 0.13.2 to 0.13.2-5
+    * Racon from 1.4.13 to 1.4.20-1
+    * Skewer from 0.2.2 to 0.2.2-3
 
 ### `Deprecated`
 
