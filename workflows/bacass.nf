@@ -164,6 +164,7 @@ workflow BACASS {
 
     //
     // Join channels for assemblers. As samples have the same meta data, we can simply use join() to merge the channels based on this. If we only have one of the channels we insert 'NAs' which are not used in the unicycler process then subsequently, in case of short or long read only assembly.
+    // Prepare channel for Kraken2
     //
     if(params.assembly_type == 'hybrid'){
         PORECHOP.out.reads.dump(tag: 'porechop')
@@ -172,18 +173,33 @@ workflow BACASS {
             .join(PORECHOP.out.reads)
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
+        PORECHOP.out.reads
+            .map { info, reads ->
+                    def meta = info
+                    meta.single_end = true
+                    [ meta, reads ] }
+            .mix(SKEWER.out.reads)
+            .set { ch_for_kraken2 }
     } else if ( params.assembly_type == 'short' ) {
         SKEWER.out.reads
             .dump(tag: 'skewer')
             .map{ meta,reads -> tuple(meta,reads,'NA') }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
+        SKEWER.out.reads
+            .set { ch_for_kraken2 }
     } else if ( params.assembly_type == 'long' ) {
         PORECHOP.out.reads
             .dump(tag: 'porechop')
             .map{ meta,lr -> tuple(meta,'NA',lr) }
             .dump(tag: 'ch_for_assembly')
-            .set { ch_for_assembly } //old channel name: ch_short_long_joint_unicycler
+            .set { ch_for_assembly }
+        PORECHOP.out.reads
+            .map { info, reads ->
+                    def meta = info
+                    meta.single_end = true
+                    [ meta, reads ] }
+            .set { ch_for_kraken2 }
     }
 
     //
@@ -279,14 +295,6 @@ workflow BACASS {
     // MODULE: Kraken2, QC for sample purity
     //
     if ( !params.skip_kraken2 ) {
-        //prepare channel that specifies "meta.single_end = true" for long reads
-        PORECHOP.out.reads
-            .map { info, reads ->
-                    def meta = info
-                    meta.single_end = true
-                    [ meta, reads ] }
-            .mix(SKEWER.out.reads)
-            .set { ch_for_kraken2 }
         KRAKEN2_DB_PREPARATION (
             kraken2db
         )
