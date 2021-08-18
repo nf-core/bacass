@@ -299,8 +299,8 @@ workflow BACASS {
                 .map { meta, reads ->
                     info = [:]
                     info.id = meta.id
-                    info.single_end = true 
-                    [ info, reads ] 
+                    info.single_end = true
+                    [ info, reads ]
                 }
                 .dump(tag: 'kraken2_long'),
             KRAKEN2_DB_PREPARATION.out.db.map { info, db -> db }.dump(tag: 'kraken2_db_preparation')
