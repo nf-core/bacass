@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Changed`
 
 * [#56](https://github.com/nf-core/bacass/pull/56) - Switched to DSL2 & update to new nf-core 2.1 `TEMPLATE`
+* [#56](https://github.com/nf-core/bacass/pull/56) - `--krakendb` now expects a `.tar.gz`/`.tgz` (compressed tar archive) directly from `https://benlangmead.github.io/aws-indexes/k2` instead of an uncompressed folder.
 
 ### `Added`
 
