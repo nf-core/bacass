@@ -32,11 +32,15 @@ This pipeline is primarily for bacterial assembly of next-generation sequencing 
 ### Long Read Assembly
 
 For users that only have Nanopore data, the pipeline quality trims these using [PoreChop](https://github.com/rrwick/Porechop) and assesses basic sequencing QC utilizing [NanoPlot](https://github.com/wdecoster/NanoPlot) and [PycoQC](https://github.com/a-slide/pycoQC).
-The pipeline can then perform long read assembly utilizing [Unicycler](https://github.com/rrwick/Unicycler), [Miniasm](https://github.com/lh3/miniasm) in combination with [Racon](https://github.com/isovic/racon) or [Canu](https://github.com/marbl/canu). Long reads can be polished using specified Fast5 files with [NanoPolish](https://github.com/jts/nanopolish).
+The pipeline can then perform long read assembly utilizing [Unicycler](https://github.com/rrwick/Unicycler), [Miniasm](https://github.com/lh3/miniasm) in combination with [Racon](https://github.com/isovic/racon), or [Canu](https://github.com/marbl/canu). Long reads assembly can be polished using [Medaka](https://github.com/nanoporetech/medaka) or [NanoPolish](https://github.com/jts/nanopolish) with Fast5 files.
 
 ### Hybrid Assembly
 
 For users specifying both short read and long read (NanoPore) data, the pipeline can perform a hybrid assembly approach utilizing [Unicycler](https://github.com/rrwick/Unicycler), taking the full set of information from short reads and long reads into account.
+
+### Assembly QC and annotation
+
+In all cases, the assembly is assessed using [QUAST](http://bioinf.spbau.ru/quast). The resulting bacterial assembly is furthermore annotated using [Prokka](https://github.com/tseemann/prokka) or [DFAST](https://github.com/nigyta/dfast_core).
 
 ## Quick Start
 
@@ -56,10 +60,16 @@ For users specifying both short read and long read (NanoPore) data, the pipeline
 
 4. Start running your own analysis!
 
-    <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
+    Default: Short read assembly with Unicycler, `--kraken2db` can be any [compressed database (`.tar.gz`/`.tgz`)](https://benlangmead.github.io/aws-indexes/k2):
 
     ```console
-    nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.csv --genome GRCh37
+    nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.tsv --kraken2db "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20210517.tar.gz"
+    ```
+
+    Long read assembly with Miniasm:
+
+    ```console
+    nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.tsv --assembly_type 'long' --assembler 'miniasm' --kraken2db "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20210517.tar.gz"
     ```
 
 ## Documentation
@@ -72,7 +82,7 @@ nf-core/bacass was originally written by Andreas Wilm, Alexander Peltzer.
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
+* Daniel Straub ([@d4straub](https://github.com/d4straub))
 
 ## Contributions and Support
 
@@ -84,7 +94,6 @@ For further information or help, don't hesitate to get in touch on the [Slack `#
 
 If you use  nf-core/bacass for your analysis, please cite it using the following doi: [10.5281/zenodo.2669428](https://doi.org/10.5281/zenodo.2669428)
 
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
 You can cite the `nf-core` publication as follows:
