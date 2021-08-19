@@ -35,7 +35,7 @@ process PYCOQC {
     } else {
         run_summary =  "Fast5_to_seq_summary -f $fast5 -t ${task.cpus} -s './sequencing_summary.txt' --verbose_level 2"
     }
-    //Barcodes available? 
+    //Barcodes available?
     barcode_me = file("${fast5}/barcoding_sequencing.txt").exists() ? "-b ${fast5}/barcoding_sequencing.txt" : ''
     """
     $run_summary
@@ -44,8 +44,8 @@ process PYCOQC {
         $options.args \\
         -f "sequencing_summary.txt" \\
         $barcode_me
-        -o ${sample_id}_pycoqc.html \\
-        -j ${sample_id}_pycoqc.json
+        -o ${meta.id}_pycoqc.html \\
+        -j ${meta.id}_pycoqc.json
 
     echo \$(pycoQC --version 2>&1) | sed 's/^.*pycoQC v//; s/ .*\$//' > ${software}.version.txt
     """

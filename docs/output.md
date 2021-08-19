@@ -97,9 +97,9 @@ multiple species. If you like to visualize the report, try
 <summary>Output files</summary>
 
 * `{sample}/Kraken2`
-    * `{sample}.kraken2.report.txt`: Classification of short reads in the Kraken(1) report format. 
-    * `{sample}_longreads.kraken2.report.txt`: Classification of long reads in the Kraken(1) report format. 
-    
+    * `{sample}.kraken2.report.txt`: Classification of short reads in the Kraken(1) report format.
+    * `{sample}_longreads.kraken2.report.txt`: Classification of long reads in the Kraken(1) report format.
+
 See [webpage](http://ccb.jhu.edu/software/kraken/MANUAL.html#sample-reports) for more details.
 
 Exemplary Kraken2 report screenshot:
