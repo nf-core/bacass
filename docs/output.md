@@ -17,6 +17,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
     * [Long Read RAW QC](#long-read-raw-qc)
 * [Taxonomic classification](#taxonomic-classification)
 * [Assembly Output](#assembly-output)
+    * [Polished assemblies](#polished-assemblies)
 * [Assembly QC with QUAST](#assembly-qc-with-quast)
 * [Annotation with Prokka](#annotation-with-prokka)
 * [Annotation with DFAST](#annotation-with-dfast)
@@ -134,6 +135,25 @@ Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.h
     * `{sample}_assembly_consensus.fasta`: Consensus assembly in fasta format (polished by Racon)
 
 Check out the [Miniasm documentation](https://github.com/lh3/miniasm) for more information on Miniasm output.
+
+</details>
+
+### Polished assemblies
+
+Long reads assemblies can be polished using [Medaka](https://github.com/nanoporetech/medaka) or [NanoPolish](https://github.com/jts/nanopolish) with Fast5 files.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `{sample_id}/Medaka/{sample_id}_polished_genome.fa`
+    * `consensus.fasta`: Polished consensus assembly in fasta format
+    * `calls_to_draft.bam`: Alignment in bam format
+    * `calls_to_draft.bam.bai`: Index of alignment
+    * `consensus.fasta.gaps_in_draft_coords.bed`
+    * `consensus_probs.hdf`
+
+* `{sample_id}/Nanopolish`
+    * `polished_genome.fa`: Polished consensus assembly in fasta format
 
 </details>
 
