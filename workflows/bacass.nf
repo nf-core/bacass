@@ -56,6 +56,7 @@ canu_options.args       += " $params.canu_args"
 include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions'    addParams( options: [publish_files : ['tsv':'']] )
 include { SKEWER                } from '../modules/local/skewer'                   addParams( options: modules['skewer']            )
 include { NANOPLOT              } from '../modules/local/nanoplot'                 addParams( options: modules['nanoplot']          )
+include { PYCOQC                } from '../modules/local/pycoqc'                   addParams( options: modules['pycoqc']            )
 include { PORECHOP              } from '../modules/local/porechop'                 addParams( options: modules['porechop']          )
 include { UNICYCLER             } from '../modules/local/unicycler'                addParams( options: unicycler_options            )
 include { CANU                  } from '../modules/local/canu'                     addParams( options: canu_options                 )
@@ -90,7 +91,6 @@ prokka_options.args  += " $params.prokka_args"
 // MODULE: Installed directly from nf-core/modules
 //
 include { FASTQC    } from '../modules/nf-core/modules/fastqc/main'          addParams( options: modules['fastqc']    )
-include { PYCOQC    } from '../modules/nf-core/modules/pycoqc/main'          addParams( options: modules['pycoqc']    )
 include { SAMTOOLS_SORT    } from '../modules/nf-core/modules/samtools/sort/main' addParams( [publish_files : false]  )
 include { SAMTOOLS_INDEX   } from '../modules/nf-core/modules/samtools/index/main' addParams( [publish_files : false] )
 include { KRAKEN2_KRAKEN2 as KRAKEN2 } from '../modules/nf-core/modules/kraken2/kraken2/main' addParams( options: modules['kraken2'] )
