@@ -91,8 +91,8 @@ prokka_options.args  += " $params.prokka_args"
 // MODULE: Installed directly from nf-core/modules
 //
 include { FASTQC    } from '../modules/nf-core/modules/fastqc/main'          addParams( options: modules['fastqc']    )
-include { SAMTOOLS_SORT    } from '../modules/nf-core/modules/samtools/sort/main' addParams( [publish_files : false]  )
-include { SAMTOOLS_INDEX   } from '../modules/nf-core/modules/samtools/index/main' addParams( [publish_files : false] )
+include { SAMTOOLS_SORT    } from '../modules/nf-core/modules/samtools/sort/main' addParams( options: [publish_files : false] )
+include { SAMTOOLS_INDEX   } from '../modules/nf-core/modules/samtools/index/main' addParams( options: [publish_files : false] )
 include { KRAKEN2_KRAKEN2 as KRAKEN2 } from '../modules/nf-core/modules/kraken2/kraken2/main' addParams( options: modules['kraken2'] )
 include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG } from '../modules/nf-core/modules/kraken2/kraken2/main' addParams( options: modules['kraken2_long'] )
 include { QUAST     } from '../modules/nf-core/modules/quast/main'           addParams( options: modules['quast']     )
