@@ -262,9 +262,10 @@ workflow BACASS {
         )
         ch_software_versions = ch_software_versions.mix(SAMTOOLS_INDEX.out.version.first().ifEmpty(null))
         ch_for_polish //tuple val(meta), val(reads), file(longreads), file(assembly)
+            .join( SAMTOOLS_SORT.out.bam ) //tuple  val(meta), file(bam)
             .join( SAMTOOLS_INDEX.out.bai ) //tuple  val(meta), file(bai)
             .join( INPUT_CHECK.out.fast5 ) //tuple val(meta), file(fast5)
-            .set { ch_for_nanopolish } //tuple val(meta), val(reads), file(longreads), file(assembly), file(bai), file(fast5)
+            .set { ch_for_nanopolish } //tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
         NANOPOLISH (
             ch_for_nanopolish.dump(tag: 'into_nanopolish')
         )

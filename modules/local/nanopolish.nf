@@ -22,7 +22,7 @@ process NANOPOLISH {
     }
 
     input:
-    tuple val(meta), val(reads), file(longreads), file(assembly), file(bai), file(fast5)
+    tuple val(meta), val(reads), file(longreads), file(assembly), file(bai), file(bai), file(fast5)
 
     output:
     tuple val(meta), file('polished_genome.fa'), emit: assembly
@@ -38,7 +38,7 @@ process NANOPOLISH {
         --consensus \
         -o polished.vcf \
         -r "${longreads}" \
-        -b "${prefix}.bam" \
+        -b "${bam}" \
         -g "${assembly}" \
         -t "${task.cpus}" \
         --min-candidate-frequency 0.1
