@@ -22,7 +22,7 @@ process NANOPOLISH {
     }
 
     input:
-    tuple val(meta), val(reads), file(longreads), file(assembly), file(bai), file(bai), file(fast5)
+    tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
 
     output:
     tuple val(meta), file('polished_genome.fa'), emit: assembly
