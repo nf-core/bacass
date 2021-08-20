@@ -19,8 +19,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 * [Assembly Output](#assembly-output)
     * [Polished assemblies](#polished-assemblies)
 * [Assembly QC with QUAST](#assembly-qc-with-quast)
-* [Annotation with Prokka](#annotation-with-prokka)
-* [Annotation with DFAST](#annotation-with-dfast)
+* [Annotation](#annotation)
 * [Report](#report)
 * [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
@@ -77,9 +76,11 @@ Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/Nan
 <details markdown="1">
 <summary>Output files</summary>
 
-* `{sample_id}/QC_Longreads/`
-    * `NanoPlot`: Various plots in HTML and PNG format
-    * `PycoQC`
+* `{sample_id}/QC_Longreads/NanoPlot`: Various plots in HTML and PNG format
+
+* `{sample_id}/QC_Longreads/PycoQC`
+    * `{sample_id}_pycoqc.html`: QC report in HTML format
+    * `{sample_id}_pycoqc.json`: QC report in JSON format
 
 Example plot from Nanoplot:
 
@@ -177,9 +178,9 @@ The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast) fo
 
 </details>
 
-## Annotation with Prokka
+## Annotation
 
-By default, the assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend for several annotation tools and includes rRNA and ORF predictions.
+By default, the assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend for several annotation tools and includes rRNA and ORF predictions. Alternatively, on request, the assembly is annotated with [DFAST](https://github.com/nigyta/dfast_core).
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -192,15 +193,6 @@ By default, the assembly is annotated with [Prokka](https://github.com/tseemann/
 See [Prokka's documentation](https://github.com/tseemann/prokka#output-files) for a full description of all output files.
 
 ![Prokka annotation](images/prokka.png)
-
-</details>
-
-## Annotation with DFAST
-
-On request, the assembly is annotated with [DFAST](https://github.com/nigyta/dfast_core).
-
-<details markdown="1">
-<summary>Output files</summary>
 
 * `{sample_id}/DFAST/RESULT_{dfast_profile_name}`
     * `genome.gff`: Annotation in gff format
