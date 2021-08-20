@@ -34,21 +34,16 @@ process NANOPOLISH {
     """
     nanopolish index -d "${fast5}" "${longreads}"
 
-    nanopolish_makerange.py "${assembly}" | \
-        parallel \
-        --results nanopolish.results \
-        -P "${task.cpus}" \
-        nanopolish variants \
+    nanopolish variants \
         --consensus \
-        -o polished.{1}.vcf \
-        -w {1} \
+        -o polished.vcf \
         -r "${longreads}" \
         -b "${prefix}.bam" \
         -g "${assembly}" \
         -t "${task.cpus}" \
         --min-candidate-frequency 0.1
 
-    nanopolish vcf2fasta -g "${assembly}" polished.*.vcf > polished_genome.fa
+    nanopolish vcf2fasta -g "${assembly}" polished.vcf > polished_genome.fa
 
     nanopolish --version | sed -e "s/nanopolish version //g" | head -n 1 > ${software}.version.txt
     """
