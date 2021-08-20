@@ -5,7 +5,7 @@ params.options = [:]
 options        = initOptions(params.options)
 
 process PYCOQC {
-    tag "$summary"
+    tag "$meta.id"
     label 'process_medium'
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -43,7 +43,7 @@ process PYCOQC {
     pycoQC \\
         $options.args \\
         -f "sequencing_summary.txt" \\
-        $barcode_me
+        $barcode_me \\
         -o ${meta.id}_pycoqc.html \\
         -j ${meta.id}_pycoqc.json
 
