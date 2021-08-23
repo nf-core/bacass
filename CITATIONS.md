@@ -50,7 +50,12 @@
     > Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. doi: 10.1186/s13059-019-1891-0.
 
 * [MultiQC](https://www.ncbi.nlm.nih.gov/pubmed/27312411/)
-    > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+    > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924
+
+## Data
+
+* [Full-size test data](https://pubmed.ncbi.nlm.nih.gov/32561582/)
+    > Blackwell N, Bryce C, Straub D, Kappler A, Kleindienst S. Genomic Insights into Two Novel Fe(II)-Oxidizing Zetaproteobacteria Isolates Reveal Lifestyle Adaption to Coastal Marine Sediments. Appl Environ Microbiol. 2020 Aug 18;86(17):e01160-20. doi: 10.1128/AEM.01160-20. PMID: 32561582; PMCID: PMC7440796.
 
 ## Software packaging/containerisation tools
 

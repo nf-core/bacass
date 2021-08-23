@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+* [#56](https://github.com/nf-core/bacass/pull/56) - Added full size test dataset, two Zetaproteobacteria sequenced with Illumina MiSeq Reagent Kit V2, PE250, 3 to 4 million read pairs.
+
 ### `Fixed`
 
 * [#51](https://github.com/nf-core/bacass/issues/51) - Fixed Unicycler
