@@ -8,8 +8,6 @@ class WorkflowBacass {
     // Check and validate parameters
     //
     public static void initialise(params, log) {
-        genomeExistsError(params, log)
-
         if(("${params.assembler}" == 'canu' || "${params.assembler}" == 'miniasm') && ("${params.assembly_type}" == 'short' || "${params.assembly_type}" == 'hybrid')){
             log.error "Canu and Miniasm can only be used for long read assembly and neither for Hybrid nor Shortread assembly!"
             System.exit(1)
@@ -41,19 +39,5 @@ class WorkflowBacass {
         yaml_file_text        += "data: |\n"
         yaml_file_text        += "${summary_section}"
         return yaml_file_text
-    }
-
-    //
-    // Exit pipeline if incorrect --genome key provided
-    //
-    private static void genomeExistsError(params, log) {
-        if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-            log.error "=============================================================================\n" +
-                "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-                "  Currently, the available genome keys are:\n" +
-                "  ${params.genomes.keySet().join(", ")}\n" +
-                "==================================================================================="
-            System.exit(1)
-        }
     }
 }
