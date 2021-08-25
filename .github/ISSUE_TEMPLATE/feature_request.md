@@ -1,3 +1,9 @@
+---
+name: Feature request
+about: Suggest an idea for the nf-core/bacass pipeline
+labels: enhancement
+---
+
 <!--
 # nf-core/bacass feature request
 

@@ -204,7 +204,7 @@ class Config:
                 "scov_cutoff": 75,
                 "aligner": "ghostx",  # ghostz, ghostx or blastp
                 "aligner_options": {},  # Normally, leave this empty. (Current version does not use this option.)
-                "database": "@@APP_ROOT@@/db/protein/DFAST-default.ref",
+                "database": "./protein/DFAST-default.ref",
             },
         },
         {

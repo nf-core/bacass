@@ -1,33 +1,27 @@
 # nf-core/bacass: Output
 
-## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/bacass/output](https://nf-co.re/bacass/output)
-
-> _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
-
 ## Introduction
 
 This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
 
+The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
+
 ## Pipeline overview
 
-The pipeline is built using [Nextflow](https://www.nextflow.io/)
-and processes data using the following steps:
+The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
-* [nf-core/bacass: Output](#nf-corebacass-output)
-  * [Pipeline overview](#pipeline-overview)
-  * [Quality trimming and QC](#quality-trimming-and-qc)
+* [Quality trimming and QC](#quality-trimming-and-qc)
     * [Short Read Trimming](#short-read-trimming)
     * [Short Read RAW QC](#short-read-raw-qc)
     * [Long Read Trimming](#long-read-trimming)
     * [Long Read RAW QC](#long-read-raw-qc)
-  * [Taxonomic classification](#taxonomic-classification)
-    * [Kraken2 report screenshot](#kraken2-report-screenshot)
-  * [Assembly Output](#assembly-output)
-  * [Assembly Visualization with Bandage](#assembly-visualization-with-bandage)
-  * [Assembly QC with QUAST](#assembly-qc-with-quast)
-  * [Annotation with Prokka](#annotation-with-prokka)
-  * [Report](#report)
-  * [Pipeline information](#pipeline-information)
+* [Taxonomic classification](#taxonomic-classification)
+* [Assembly Output](#assembly-output)
+    * [Polished assemblies](#polished-assemblies)
+* [Assembly QC with QUAST](#assembly-qc-with-quast)
+* [Annotation](#annotation)
+* [Report](#report)
+* [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
 ## Quality trimming and QC
 
@@ -36,50 +30,63 @@ and processes data using the following steps:
 This step quality trims the end of reads, removes degenerate or too short reads and if needed,
 combines reads coming from multiple sequencing runs.
 
-**Output directory: `{sample_id}/trimming/shortreads/`**
+<details markdown="1">
+<summary>Output files</summary>
 
-* `*.fastq.gz`
-  * trimmed (and combined reads)
+* `{sample_id}/trimming/shortreads/`
+    * `*.fastq.gz`: Trimmed (and combined reads)
+
+</details>
 
 ### Short Read RAW QC
 
-This step runs FastQC which produces
-general quality metrics on your (trimmed) samples and plots them.
+[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
-**Output directory: `{sample_id}/trimming/shortreads/`**
+> **NB:** The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
 
-* `*_fastqc.html`
-  * FastQC report, containing quality metrics for your trimmed reads
-* `*_fastqc.zip`
-  * zip file containing the FastQC report, tab-delimited data file and plot images
+<details markdown="1">
+<summary>Output files</summary>
 
-For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
+* `{sample_id}/FastQC/`
+    * `*_fastqc.html`: FastQC report containing quality metrics.
+    * `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
 ![FastQC report](images/fastqc.png)
+
+</details>
 
 ### Long Read Trimming
 
 This step performs long read trimming on Nanopore input (if provided).
 
-**Output directory: `{sample_id}/trimming/longreads/`**
+<details markdown="1">
+<summary>Output files</summary>
 
-* `trimmed.fastq`
-  * The trimmed FASTQ file
+* `{sample_id}/trimming/longreads/`
+    * `trimmed.fastq.gz`: The trimmed FASTQ file
+
+</details>
 
 ### Long Read RAW QC
 
 These steps perform long read QC for input data (if provided).
 
-**Output directory: `{sample_id}/QC_Longreads/`**
-
-* `NanoPlot`
-* `PycoQC`
-
 Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/NanoPlot) and [PycoQC](https://a-slide.github.io/pycoQC/) if you want to know more about the plots created by these tools.
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `{sample_id}/QC_Longreads/NanoPlot`: Various plots in HTML and PNG format
+
+* `{sample_id}/QC_Longreads/PycoQC`
+    * `{sample_id}_pycoqc.html`: QC report in HTML format
+    * `{sample_id}_pycoqc.json`: QC report in JSON format
 
 Example plot from Nanoplot:
 
 ![Nanoplot](images/nanoplot.png)
+
+</details>
 
 ## Taxonomic classification
 
@@ -88,105 +95,142 @@ issues. Ideally you will not want to assemble reads from samples that are contam
 multiple species. If you like to visualize the report, try
 [Pavian](https://github.com/fbreitwieser/pavian) or [Krakey](http://krakey.info/).
 
-**Output directory: `{sample}/`**
+<details markdown="1">
+<summary>Output files</summary>
 
-* `*_kraken2.report`
-  * Classification in the Kraken(1) report format. See
-    [webpage](http://ccb.jhu.edu/software/kraken/MANUAL.html#sample-reports) for more details
+* `{sample}/Kraken2`
+    * `{sample}.kraken2.report.txt`: Classification of short reads in the Kraken(1) report format.
+    * `{sample}_longreads.kraken2.report.txt`: Classification of long reads in the Kraken(1) report format.
 
-### Kraken2 report screenshot
+See [webpage](http://ccb.jhu.edu/software/kraken/MANUAL.html#sample-reports) for more details.
+
+Exemplary Kraken2 report screenshot:
 
 ![Kraken2 report](images/kraken2.png)
+
+</details>
 
 ## Assembly Output
 
 Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler) in `short` or `hybrid` assembly modes. For long-read assembly, there are also `canu` and `miniasm` available.
 Unicycler is a pipeline on its own, which at least for Illumina reads mainly acts as a frontend to Spades with added polishing steps.
 
-**Output directory: `{sample_id}/unicycler`**
+<details markdown="1">
+<summary>Output files</summary>
 
-* `{sample}_assembly.fasta`
-  * Final assembly
-* `{sample}_assembly.gfa`
-  * Final assembly in Graphical Fragment Assembly (GFA) format
-* `{sample}_unicycler.log`
-  * Log file summarizing steps and intermediate results on the Unicycler execution
+* `{sample_id}/Unicycler`
+    * `{sample}.scaffolds.fa`: Final assembly in fasta format
+    * `{sample}.assembly.gfa`: Final assembly in Graphical Fragment Assembly (GFA) format
+    * `{sample}.unicycler.log`: Log file summarizing steps and intermediate results on the Unicycler execution
 
 Check out the [Unicycler documentation](https://github.com/rrwick/Unicycler) for more information on Unicycler output.
 
-**Output directory: `{sample_id}/canu`**
+* `{sample_id}/Canu`
+    * `{sample}_assembly.fasta`: Final assembly in fasta format
+    * `{sample}_assembly.report`: Log file
 
 Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.html) for more information on Canu output.
 
-**Output directory: `{sample_id}/miniasm`**
-
-* `consensus`
-  * The consensus sequence created by `miniasm`
+* `{sample_id}/Miniasm`
+    * `{sample}_assembly.fasta`: Assembly in fasta format
+    * `{sample}_assembly_consensus.fasta`: Consensus assembly in fasta format (polished by Racon)
 
 Check out the [Miniasm documentation](https://github.com/lh3/miniasm) for more information on Miniasm output.
 
-## Assembly Visualization with Bandage
+</details>
 
-The GFA file produced in the assembly step with Unicycler can be used to visualise the assembly graph, which is
-done here with [Bandage](https://rrwick.github.io/Bandage/). We highly recommend to run the Bandage GUI for more versatile visualisation options (annotations etc).
+### Polished assemblies
 
-**Output directory: `{sample_id}/unicycler`**
+Long reads assemblies can be polished using [Medaka](https://github.com/nanoporetech/medaka) or [NanoPolish](https://github.com/jts/nanopolish) with Fast5 files.
 
-* `{sample}_assembly.png`
-  * Bandage visualization of assembly
+<details markdown="1">
+<summary>Output files</summary>
 
-![Assembly visualization](images/bandage.png)
+* `{sample_id}/Medaka/{sample_id}_polished_genome.fa`
+    * `consensus.fasta`: Polished consensus assembly in fasta format
+    * `calls_to_draft.bam`: Alignment in bam format
+    * `calls_to_draft.bam.bai`: Index of alignment
+    * `consensus.fasta.gaps_in_draft_coords.bed`
+    * `consensus_probs.hdf`
+
+* `{sample_id}/Nanopolish`
+    * `polished_genome.fa`: Polished consensus assembly in fasta format
+
+</details>
 
 ## Assembly QC with QUAST
 
-The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast).
-It reports multiple metrics including number of contigs, N50, lengths etc in form of an html report.
-It further creates an HTML file with integrated contig viewer (Icarus).
+The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast) for all assemblies in one report. It reports multiple metrics including number of contigs, N50, lengths etc in form of an html report. It further creates an HTML file with integrated contig viewer (Icarus).
 
-**Output directory: `{sample_id}/QUAST`**
+<details markdown="1">
+<summary>Output files</summary>
 
-* `icarus.html`
-  * QUAST's contig browser as HTML
-* `report.html`
-  * QUAST assembly QC as HTML report
+* `QUAST`
+    * `report.tsv`: QUAST's report in text format
+* `QUAST/other_files`
+    * `icarus.html`: QUAST's contig browser as HTML
+    * `report.html`: QUAST assembly QC as HTML report
+    * `report.pdf`: QUAST assembly QC as pdf
 
 ![QUAST QC](images/quast.png)
 
 ![Icarus](images/icarus.png)
 
-## Annotation with Prokka
+</details>
 
-The assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend
-for several annotation tools and includes rRNA and ORF predictions. See [its documentation](https://github.com/tseemann/prokka#output-files) for a full description of all output files.
+## Annotation
 
-**Output directory: `{sample_id}/{sample_id}_annotation`**
+By default, the assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend for several annotation tools and includes rRNA and ORF predictions. Alternatively, on request, the assembly is annotated with [DFAST](https://github.com/nigyta/dfast_core).
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `{sample_id}/Prokka/{sample_id}`
+    * `{sample_id}.gff`: Annotation in gff format
+    * `{sample_id}.txt`: Annotation in text format
+    * `{sample_id}.faa`: Protein sequences in fasta format
+
+See [Prokka's documentation](https://github.com/tseemann/prokka#output-files) for a full description of all output files.
 
 ![Prokka annotation](images/prokka.png)
+
+* `{sample_id}/DFAST/RESULT_{dfast_profile_name}`
+    * `genome.gff`: Annotation in gff format
+    * `statistics.txt`: Annotation statistics in text format
+    * `protein.faa`: Protein sequences in fasta format
+
+</details>
 
 ## Report
 
 Some pipeline results are visualised by [MultiQC](http://multiqc.info), which is a visualisation tool that generates a single HTML report summarising all samples in your project. Further statistics are available in within the report data directory.
 
-[MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarizing all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in the report data directory.
+[MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in the report data directory.
 
 The pipeline has special steps which also allow the software versions to be reported in the MultiQC output for future traceability.
 
-For more information about how to use MultiQC reports, see [https://multiqc.info](https://multiqc.info).
+Results generated by MultiQC collate pipeline QC from supported tools e.g. FastQC. The pipeline has special steps which also allow the software versions to be reported in the MultiQC output for future traceability. For more information about how to use MultiQC reports, see <http://multiqc.info>.
 
-**Output files:**
+<details markdown="1">
+<summary>Output files</summary>
 
 * `multiqc/`
-  * `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
-  * `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
-  * `multiqc_plots/`: directory containing static images from the report in various formats.
+    * `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
+    * `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
+    * `multiqc_plots/`: directory containing static images from the report in various formats.
 
-## Pipeline information
+</details>
+
+### Pipeline information
 
 [Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
 
-**Output files:**
+<details markdown="1">
+<summary>Output files</summary>
 
 * `pipeline_info/`
-  * Reports generated by Nextflow: `execution_report.html`, `execution_timeline.html`, `execution_trace.txt` and `pipeline_dag.dot`/`pipeline_dag.svg`.
-  * Reports generated by the pipeline: `pipeline_report.html`, `pipeline_report.txt` and `software_versions.csv`.
-  * Documentation for interpretation of results in HTML format: `results_description.html`.
+    * Reports generated by Nextflow: `execution_report.html`, `execution_timeline.html`, `execution_trace.txt` and `pipeline_dag.dot`/`pipeline_dag.svg`.
+    * Reports generated by the pipeline: `pipeline_report.html`, `pipeline_report.txt` and `software_versions.tsv`.
+    * Reformatted samplesheet files used as input to the pipeline: `samplesheet.valid.csv`.
+
+</details>
