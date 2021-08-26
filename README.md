@@ -77,11 +77,7 @@ The nf-core/bacass pipeline comes with documentation about the pipeline [usage](
 
 ## Credits
 
-nf-core/bacass was originally written by Andreas Wilm, Alexander Peltzer.
-
-We thank the following people for their extensive assistance in the development of this pipeline:
-
-* Daniel Straub ([@d4straub](https://github.com/d4straub))
+nf-core/bacass was initiated by Andreas Wilm, written by Alex Peltzer (DSL1), rewritten by [Daniel Straub](https://github.com/d4straub) (DSL2).
 
 ## Contributions and Support
 
