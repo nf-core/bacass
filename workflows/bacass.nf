@@ -317,8 +317,8 @@ workflow BACASS {
         .set { ch_to_quast }
     QUAST (
         ch_to_quast,
-        file('fasta'),
-        file('gff'),
+        [],
+        [],
         false,
         false
     )
