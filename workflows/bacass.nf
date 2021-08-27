@@ -127,7 +127,7 @@ workflow BACASS {
     ch_software_versions = ch_software_versions.mix(FASTQC.out.version.first().ifEmpty(null))
 
     //
-    // MODULE: Skewer, trim and combine short read read-pairs per sample. Similar to nf-core vipr
+    // MODULE: Skewer, trim and combine short read read-pairs per sample.
     //
     SKEWER (
         INPUT_CHECK.out.shortreads.dump(tag: 'shortreads')
