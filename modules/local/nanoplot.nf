@@ -23,7 +23,6 @@ process NANOPLOT {
 
     output:
     tuple val(meta), path("*.html"), emit: html
-    tuple val(meta), path("*.png") , emit: png
     tuple val(meta), path("*.txt") , emit: txt
     tuple val(meta), path("*.log") , emit: log
     path  "*.version.txt"          , emit: version
