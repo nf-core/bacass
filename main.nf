@@ -4,7 +4,8 @@
     nf-core/bacass
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/bacass
-Website: https://nf-co.re/bacass
+
+    Website: https://nf-co.re/bacass
     Slack  : https://nfcore.slack.com/channels/bacass
 ----------------------------------------------------------------------------------------
 */
