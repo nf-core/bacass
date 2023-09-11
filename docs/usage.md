@@ -27,13 +27,13 @@ shortNlong    ./data/S1_R1.fastq.gz    ./data/S1_R2.fastq.gz    ./data/S1_long_f
 
 > **NB:** `./data/FAST5` points at a folder containing all (i.e. one or mutiple) fast5 files that correspond to the long reads. `NA` indicates that the file is missing.
 
-| Column | Description |
-|-|-|
-| `sample` | Custom sample name. May not contain spaces. |
-| `R1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing. |
-| `R2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing. |
-| `LongFastQ` | Full path to FastQ file for ONT long reads. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing. |
-| `Fast5` | Full path to a folder containing Fast5 file(s) for ONT long reads. `NA` indicates that there are no Fast5 files available. |
+| Column       | Description                                                                                                                                                                 |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sample`     | Custom sample name. May not contain spaces.                                                                                                                                 |
+| `R1`         | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.         |
+| `R2`         | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.         |
+| `LongFastQ`  | Full path to FastQ file for ONT long reads. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.                 |
+| `Fast5`      | Full path to a folder containing Fast5 file(s) for ONT long reads. `NA` indicates that there are no Fast5 files available.                                                  |
 | `GenomeSize` | Expected genome size. For example, `2.8m` means 2.8 million basepairs genome size expected. This is only used by Canu assembler. `NA` indicates that this value is unknown. |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.

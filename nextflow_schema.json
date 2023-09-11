@@ -52,14 +52,8 @@
                     "type": "boolean",
                     "description": "save all merged reads to the a file ending in `*.merged.fastq.gz`"
                 },
-                "skip_fastqc": {
-                    "type": "boolean",
-                    "description": "Skip FastQC"
-                },
-                "skip_fastp": {
-                    "type": "boolean",
-                    "description": "Skip FastP"
-                }
+                "skip_fastqc": { "type": "boolean", "description": "Skip FastQC" },
+                "skip_fastp": { "type": "boolean", "description": "Skip FastP" }
             }
         },
         "contamination_screening": {
@@ -183,10 +177,7 @@
                     "fa_icon": "fas fa-forward",
                     "description": "Skip polishing the long-read assembly with fast5 input. Will not affect short/hybrid assemblies."
                 },
-                "skip_multiqc": {
-                    "type": "boolean",
-                    "description": "Skip MultiQC"
-                }
+                "skip_multiqc": { "type": "boolean", "description": "Skip MultiQC" }
             }
         },
         "institutional_config_options": {
@@ -396,35 +387,15 @@
         }
     },
     "allOf": [
-        {
-            "$ref": "#/definitions/input_output_options"
-        },
-        {
-            "$ref": "#/definitions/qc_and_trim"
-        },
-        {
-            "$ref": "#/definitions/contamination_screening"
-        },
-        {
-            "$ref": "#/definitions/assembly_parameters"
-        },
-        {
-            "$ref": "#/definitions/assembly_polishing"
-        },
-        {
-            "$ref": "#/definitions/annotation"
-        },
-        {
-            "$ref": "#/definitions/skipping_options"
-        },
-        {
-            "$ref": "#/definitions/institutional_config_options"
-        },
-        {
-            "$ref": "#/definitions/max_job_request_options"
-        },
-        {
-            "$ref": "#/definitions/generic_options"
-        }
+        { "$ref": "#/definitions/input_output_options" },
+        { "$ref": "#/definitions/qc_and_trim" },
+        { "$ref": "#/definitions/contamination_screening" },
+        { "$ref": "#/definitions/assembly_parameters" },
+        { "$ref": "#/definitions/assembly_polishing" },
+        { "$ref": "#/definitions/annotation" },
+        { "$ref": "#/definitions/skipping_options" },
+        { "$ref": "#/definitions/institutional_config_options" },
+        { "$ref": "#/definitions/max_job_request_options" },
+        { "$ref": "#/definitions/generic_options" }
     ]
 }

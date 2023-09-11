@@ -18,17 +18,15 @@ class Config:
         # Otherwise, sequences will be renamed as 'Sequence001, Sequence002, ...'.
         # If 'sort_by_length' is set to True, sequences will be sorted so that longer sequences come first.
         # In a draft genome, sequences shorter than 'minimum_length' will be eliminated.
-
         "complete": False,
-        "use_original_name": False, # If set to True, the first word in the Fasta header line will be used as a sequence name.
+        "use_original_name": False,  # If set to True, the first word in the Fasta header line will be used as a sequence name.
         "sort_by_length": True,
-        "minimum_length": 200
+        "minimum_length": 200,
     }
 
     GENOME_SOURCE_INFORMATION = {
         # These attributes are reflected in the source feature,
         # and do not affect the annotation results.
-
         "organism": "",
         "strain": "",
         "seq_names": "",
@@ -40,17 +38,15 @@ class Config:
     LOCUS_TAG_SETTINGS = {
         "locus_tag_prefix": "LOCUS",
         "step": 10,
-        "use_separate_tags": True,  # If set to `True`, locus_tags are assigned separately according to feature type. 
+        "use_separate_tags": True,  # If set to `True`, locus_tags are assigned separately according to feature type.
         "symbols": {"CDS": "", "rRNA": "r", "tRNA": "t", "tmRNA": "tm"}
         # "symbols": {"CDS": "", "rRNA": "r", "tRNA": "t", "tmRNA": "tm", "nc_rna": "nc", "misc_rna": "misc"}
     }
 
     FEATURE_ADJUSTMENT = {
         "remove_partial_features": True,  # True: enabled, False: disabled
-
         "remove_overlapping_features": True,  # True: enabled, False: disabled
         "feature_type_priority": ["assembly_gap", "CRISPR", ("tmRNA", "tRNA", "rRNA"), "CDS"],
-
         "merge_cds": False,  # True: enabled, False: disabled
         "tool_type_priority": {"MGA": 0, "Prodigal": 1},
     }
@@ -60,18 +56,13 @@ class Config:
         "verbosity": 3  # 1: minimum, 2: standard, 3: rich
     }
 
-    DDBJ_SUBMISSION = {
-        "enabled": True,
-        "output_verbosity": 1,
-        "metadata_file": None
-    }
+    DDBJ_SUBMISSION = {"enabled": True, "output_verbosity": 1, "metadata_file": None}
 
     GENBANK_SUBMISSION = {
         "enabled": True,
         "center_name": "",  # Genome Center tag for GenBank submission
         "output_verbosity": 1,
     }
-
 
     STRUCTURAL_ANNOTATION = [
         {
@@ -81,7 +72,7 @@ class Config:
             "options": {
                 "len_cutoff": 5,  # Gaps shorter than len_cutoff are ignored.
                 "linkage_evidence": "paired-ends",  # You can change this as you like.
-                "gap_type": "within scaffold"  # You can change this as you like.
+                "gap_type": "within scaffold",  # You can change this as you like.
             },
         },
         {
@@ -104,30 +95,24 @@ class Config:
             # Please insall tRNAscan-SE and put it in your PATH to enable this.
             "tool_name": "tRNAscan",
             "enabled": False,
-            "options": {
-                "model": "--bact",  # --bact, --arch, --organ, --general
-                "cmd_options": ""
-            },
+            "options": {"model": "--bact", "cmd_options": ""},  # --bact, --arch, --organ, --general
         },
         {
             # Barrnap for rRNA prediction
             "tool_name": "Barrnap",
-             "enabled": False,
-             "options": {
-                 # Currently, Barrnap will run with default settings.
-                 # You can set parameters such as --reject and --lencutoff to cmd_options.
-                 # "cmd_options": "--reject 0.4 --lencutoff 0.6"
-             },
+            "enabled": False,
+            "options": {
+                # Currently, Barrnap will run with default settings.
+                # You can set parameters such as --reject and --lencutoff to cmd_options.
+                # "cmd_options": "--reject 0.4 --lencutoff 0.6"
+            },
         },
         {
             # RNAmmer for rRNA prediction. By default, this is disabled.
             # Please insall RNAmmer and put it in your PATH to enable this.
             "tool_name": "RNAmmer",
             "enabled": False,
-            "options": {
-                "model": "bac",  # arc/bac/euk
-                "cmd_options": ""
-            },
+            "options": {"model": "bac", "cmd_options": ""},  # arc/bac/euk
         },
         {
             # CRT for CRISPR detection
@@ -151,17 +136,16 @@ class Config:
                 "transl_table": 11,
                 "cmd_options": "",
             },
-         },
+        },
     ]
 
     FUNCTIONAL_ANNOTATION = [
         # Fucntional annotation steps will be conducted in the order specified in this list.
         # You can swithch enabled/disabled, change the order, or add new steps.
-
         {
             # OrthoSearch (All-vs-all pairwise alignment between each reference genome to assign orthologous genes)
             # Normally, this should be run before other annotation steps.
-            # In the default workflow, it is disabled. You can enable this by using the "--references" option. 
+            # In the default workflow, it is disabled. You can enable this by using the "--references" option.
             "component_name": "OrthoSearch",
             "enabled": False,
             "options": {
@@ -171,12 +155,11 @@ class Config:
                 "scov_cutoff": 75,
                 "aligner": "ghostx",  # ghostx, ghostz, or blastp
                 "aligner_options": {},  # Normally, leave this empty. (Current version does not use this option.)
-                "references": [
-                ]
+                "references": [],
             },
         },
         {
-            # By default, this is disabled. 
+            # By default, this is disabled.
             # If you want to add your original databases to be searched in prior to default DB,
             # set 'enabled' to True and specify 'database'
             # The database file must be in a DFAST reference format,
@@ -254,7 +237,7 @@ class Config:
                 "skipAnnotatedFeatures": False,
                 "evalue_cutoff": 1e-6,
                 "db_name": "",  # eg 'Pfam',
-                "database": ""  # eg '@@APP_ROOT@@/db/hmm/Pfam-A.hmm'
+                "database": "",  # eg '@@APP_ROOT@@/db/hmm/Pfam-A.hmm'
             },
         },
         {
@@ -280,5 +263,4 @@ class Config:
                 "rpsbproc_data": "@@APP_ROOT@@/bin/common/rpsbproc_data",  # Do not change this.
             },
         },
-
     ]
