@@ -47,7 +47,7 @@ jobs:
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/bacass') }}
     runs-on: ubuntu-latest
     env:
-      NXF_VER: '23.04.0'
+      NXF_VER: "23.04.0"
       NXF_ANSI_LOG: false
     strategy:
       matrix:
