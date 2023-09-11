@@ -3,17 +3,60 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.1.0dev
+## v2.0.1dev nf-core/bacass: "Navy Steel Swordfish" - 2023/09/11
+
+This version merges the nf-core template update v2.9. It also updates modules or dependencies to make them work with the new template. 
 
 ### `Changed`
+* [#84](https://github.com/nf-core/bacass/pull/84) & [#85](https://github.com/nf-core/bacass/issues/85)  - Update nf-core/bacass to the new nf-core 2.0 `TEMPLATE`.
+
+* [#61](https://github.com/nf-core/bacass/issues/61) - Update local/modules to nf-core/modules (detailed below).
 
 ### `Added`
 
+- nf-core subworkflow for trimming and QC of short-reads [nf-core/fastq_trim_fastp_fastqc](https://github.com/nf-core/modules/tree/master/subworkflows/nf-core/fastq_trim_fastp_fastqc).
+- Added parameters: canu_mode, skip_fastqc, skip_fastp
+
 ### `Fixed`
+
+* Fixed modules
+    - Medaka: Medaka last version (see version update below) doesn't allow gzip compressed files. Add bgzip compression instead.
+    - Dfast: fix overwriting issues detected when copying sample files from `work/` to `results/`
 
 ### `Dependencies`
 
+* [#61](https://github.com/nf-core/bacass/issues/61) - Update a bunch of local/modules to nf-core/modules plus version update.
+
+    - Canu (v2.1.1 → v2.2)
+    - Minimap2 (v2.21 → v2.24)
+    - Miniasm 
+    - Racon
+
+* [#84](https://github.com/nf-core/bacass/pull/84) Update already nf-core modules 
+    - Fastqc
+    - Samtools (v1.13 → v1.17)
+    - Kraken2 (v2.1.1 → v2.1.2)
+    - Quast (v5.0.2 → 5.2.0)
+    - Prokka
+    - Multiqc (v1.10.1 → v1.15)
+
+* Refactor `local/modules` making them follow nf-core v2.9 structure/fashion. 
+
+    - Dfast
+    - Medaka
+    - Nanoplot (v1.38.0 → v1.41.6)
+    - Nanopolish (v0.13.2-5 → 0.14.0)
+    - Pycoqc
+    - Unicycler
+
 ### `Deprecated`
+
+* [#61](https://github.com/nf-core/bacass/issues/61) - Replace depecated modules with nf-core/modules.
+
+    - Replace `local/get_software_versions.nf` with `nf-core/custom/dumpsoftwareversions.nf`
+    - Replace `local/skewer` by `nf-core/fastp`  and wrap fastqc plus fastp into `subworkflows/nf-core/fastq_trim_fastp_fastqc`
+    - Replace `local/nanoplot` by local/nanoplot_custom (using as template nf-core/nanoplot).
+
 
 ## v2.0.0 nf-core/bacass: "Navy Steel Swordfish" 2021/08/27
 

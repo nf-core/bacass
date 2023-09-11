@@ -33,8 +33,8 @@ combines reads coming from multiple sequencing runs.
 <details markdown="1">
 <summary>Output files</summary>
 
-* `{sample_id}/trimming/shortreads/`
-    * `*.fastq.gz`: Trimmed (and combined reads)
+* `trimming/shortreads/`
+    * `*.fastp.fastq.gz`: The trimmed/modified/unmerged fastq reads
 
 </details>
 
@@ -47,9 +47,9 @@ combines reads coming from multiple sequencing runs.
 <details markdown="1">
 <summary>Output files</summary>
 
-* `{sample_id}/FastQC/`
-    * `*_fastqc.html`: FastQC report containing quality metrics.
-    * `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
+* `FastQC/`
+    * `*.html`: FastQC report containing quality metrics.
+    * `*.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
 ![FastQC report](images/fastqc.png)
 
@@ -62,8 +62,9 @@ This step performs long read trimming on Nanopore input (if provided).
 <details markdown="1">
 <summary>Output files</summary>
 
-* `{sample_id}/trimming/longreads/`
-    * `trimmed.fastq.gz`: The trimmed FASTQ file
+* `trimming/longreads/`
+    * `*.fastq.gz`: The trimmed FASTQ file
+    * `*.log*`: Log file
 
 </details>
 
@@ -76,9 +77,9 @@ Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/Nan
 <details markdown="1">
 <summary>Output files</summary>
 
-* `{sample_id}/QC_Longreads/NanoPlot`: Various plots in HTML and PNG format
+* `QC_Longreads/NanoPlot`: Various plots in HTML and PNG format
 
-* `{sample_id}/QC_Longreads/PycoQC`
+* `QC_Longreads/PycoQC`
     * `{sample_id}_pycoqc.html`: QC report in HTML format
     * `{sample_id}_pycoqc.json`: QC report in JSON format
 
@@ -98,7 +99,7 @@ multiple species. If you like to visualize the report, try
 <details markdown="1">
 <summary>Output files</summary>
 
-* `{sample}/Kraken2`
+* `Kraken2/`
     * `{sample}.kraken2.report.txt`: Classification of short reads in the Kraken(1) report format.
     * `{sample}_longreads.kraken2.report.txt`: Classification of long reads in the Kraken(1) report format.
 
@@ -118,22 +119,22 @@ Unicycler is a pipeline on its own, which at least for Illumina reads mainly act
 <details markdown="1">
 <summary>Output files</summary>
 
-* `{sample_id}/Unicycler`
+* `Unicycler/`
     * `{sample}.scaffolds.fa`: Final assembly in fasta format
     * `{sample}.assembly.gfa`: Final assembly in Graphical Fragment Assembly (GFA) format
     * `{sample}.unicycler.log`: Log file summarizing steps and intermediate results on the Unicycler execution
 
 Check out the [Unicycler documentation](https://github.com/rrwick/Unicycler) for more information on Unicycler output.
 
-* `{sample_id}/Canu`
-    * `{sample}_assembly.fasta`: Final assembly in fasta format
-    * `{sample}_assembly.report`: Log file
+* `Canu/`
+    * `{sample}.contigs.fasta.gz`: Final assembly in fasta format
+    * `{sample}.report`: Log file summarizing steps and intermediate results
 
 Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.html) for more information on Canu output.
 
-* `{sample_id}/Miniasm`
-    * `{sample}_assembly.fasta`: Assembly in fasta format
-    * `{sample}_assembly_consensus.fasta`: Consensus assembly in fasta format (polished by Racon)
+* `Miniasm/`
+    * `{sample}.fasta.gz`: Assembly in Fasta format
+    * `{sample}_assembly_consensus.fasta.gz`: Consensus assembly in fasta format (polished by Racon)
 
 Check out the [Miniasm documentation](https://github.com/lh3/miniasm) for more information on Miniasm output.
 
@@ -146,14 +147,14 @@ Long reads assemblies can be polished using [Medaka](https://github.com/nanopore
 <details markdown="1">
 <summary>Output files</summary>
 
-* `{sample_id}/Medaka/{sample_id}_polished_genome.fa`
-    * `consensus.fasta`: Polished consensus assembly in fasta format
+* `Medaka/{sample_id}_polished_genome.fa`
+    * `*_polished_genome.fa`: Polished consensus assembly in fasta format
     * `calls_to_draft.bam`: Alignment in bam format
     * `calls_to_draft.bam.bai`: Index of alignment
     * `consensus.fasta.gaps_in_draft_coords.bed`
     * `consensus_probs.hdf`
 
-* `{sample_id}/Nanopolish`
+* `Nanopolish/`
     * `polished_genome.fa`: Polished consensus assembly in fasta format
 
 </details>
@@ -167,7 +168,7 @@ The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast) fo
 
 * `QUAST`
     * `report.tsv`: QUAST's report in text format
-* `QUAST/other_files`
+* `QUAST/report`
     * `icarus.html`: QUAST's contig browser as HTML
     * `report.html`: QUAST assembly QC as HTML report
     * `report.pdf`: QUAST assembly QC as pdf
@@ -185,7 +186,7 @@ By default, the assembly is annotated with [Prokka](https://github.com/tseemann/
 <details markdown="1">
 <summary>Output files</summary>
 
-* `{sample_id}/Prokka/{sample_id}`
+* `Prokka/{sample_id}/`
     * `{sample_id}.gff`: Annotation in gff format
     * `{sample_id}.txt`: Annotation in text format
     * `{sample_id}.faa`: Protein sequences in fasta format
@@ -194,7 +195,7 @@ See [Prokka's documentation](https://github.com/tseemann/prokka#output-files) fo
 
 ![Prokka annotation](images/prokka.png)
 
-* `{sample_id}/DFAST/RESULT_{dfast_profile_name}`
+* `DFAST/{sample_id}_results/`
     * `genome.gff`: Annotation in gff format
     * `statistics.txt`: Annotation statistics in text format
     * `protein.faa`: Protein sequences in fasta format
@@ -214,10 +215,10 @@ Results generated by MultiQC collate pipeline QC from supported tools e.g. FastQ
 <details markdown="1">
 <summary>Output files</summary>
 
-* `multiqc/`
-    * `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
-    * `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
-    * `multiqc_plots/`: directory containing static images from the report in various formats.
+- `multiqc/`
+  - `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
+  - `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
+  - `multiqc_plots/`: directory containing static images from the report in various formats.
 
 </details>
 
@@ -228,9 +229,9 @@ Results generated by MultiQC collate pipeline QC from supported tools e.g. FastQ
 <details markdown="1">
 <summary>Output files</summary>
 
-* `pipeline_info/`
-    * Reports generated by Nextflow: `execution_report.html`, `execution_timeline.html`, `execution_trace.txt` and `pipeline_dag.dot`/`pipeline_dag.svg`.
-    * Reports generated by the pipeline: `pipeline_report.html`, `pipeline_report.txt` and `software_versions.tsv`.
-    * Reformatted samplesheet files used as input to the pipeline: `samplesheet.valid.csv`.
+- `pipeline_info/`
+  - Reports generated by Nextflow: `execution_report.html`, `execution_timeline.html`, `execution_trace.txt` and `pipeline_dag.dot`/`pipeline_dag.svg`.
+  - Reports generated by the pipeline: `pipeline_report.html`, `pipeline_report.txt` and `software_versions.yml`. The `pipeline_report*` files will only be present if the `--email` / `--email_on_fail` parameter's are used when running the pipeline.
+  - Reformatted samplesheet files used as input to the pipeline: `samplesheet.valid.csv`.
 
 </details>
