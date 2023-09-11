@@ -35,7 +35,7 @@ process MEDAKA {
         -d ${ assembly_bgzip_out ?: assembly } \
         -o "${prefix}_polished_genome.fa" \
         -t $task.cpus
-    
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         medaka: \$( medaka --version 2>&1 | sed 's/medaka //g' )

@@ -22,7 +22,6 @@ process DFAST {
     def args    = task.ext.args ?: ''
     def args2   = task.ext.args2 ?: ''
     def prefix  = task.ext.prefix ?: "${meta.id}"
-    
     """
     dfast_file_downloader.py \\
         $args \\
