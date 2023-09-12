@@ -39,7 +39,7 @@ jobs:
         # For example: adding multiple test runs with different parameters
         # Remember that you can parallelise this by using strategy.matrix
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --outdir results
 
   profiles:
     name: Run workflow profile
@@ -65,4 +65,4 @@ jobs:
           sudo mv nextflow /usr/local/bin/
       - name: Run pipeline with ${{ matrix.profile }} test profile
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.profile }},docker
+          nextflow run ${GITHUB_WORKSPACE} -profile ${{ matrix.profile }},docker --outdir results
