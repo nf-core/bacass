@@ -5,7 +5,7 @@ process KRAKEN2_DB_PREPARATION {
     conda 'conda-forge::sed=4.7'
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://containers.biocontainers.pro/s3/SingImgsRepo/biocontainers/v1.2.0_cv1/biocontainers_v1.2.0_cv1.img' :
-        'biocontainers/biocontainers:v1.2.0_cv1' }"
+        'docker.io/biocontainers/biocontainers:v1.2.0_cv1' }"
 
     input:
     path db
