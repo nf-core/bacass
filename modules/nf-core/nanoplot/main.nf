@@ -1,5 +1,4 @@
-// Imported from nf-core/modules/nanoplot but allow it to work with *.fq.gz files too.
-process NANOPLOT_CUSTOM {
+process NANOPLOT {
     tag "$meta.id"
     label 'process_low'
 

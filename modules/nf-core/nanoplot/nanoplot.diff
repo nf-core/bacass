@@ -1,0 +1,15 @@
+Changes in module 'nf-core/nanoplot'
+--- modules/nf-core/nanoplot/main.nf
++++ modules/nf-core/nanoplot/main.nf
+@@ -22,8 +22,7 @@
+ 
+     script:
+     def args = task.ext.args ?: ''
+-    def input_file = ("$ontfile".endsWith(".fastq.gz")) ? "--fastq ${ontfile}" :
+-        ("$ontfile".endsWith(".txt")) ? "--summary ${ontfile}" : ''
++    def input_file = ("$ontfile".endsWith(".fastq.gz") || "$ontfile".endsWith(".fq.gz")) ? "--fastq ${ontfile}" :  ("$ontfile".endsWith(".txt")) ? "--summary ${ontfile}" : ''
+     """
+     NanoPlot \\
+         $args \\
+
+************************************************************

@@ -50,6 +50,12 @@
                         "git_sha": "a6e11ac655e744f7ebc724be669dd568ffdc0e80",
                         "installed_by": ["modules"]
                     },
+                    "nanoplot": {
+                        "branch": "master",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/nanoplot/nanoplot.diff"
+                    },
                     "porechop/porechop": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
