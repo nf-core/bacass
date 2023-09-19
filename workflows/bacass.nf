@@ -57,13 +57,12 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // MODULE: Local to the pipeline
 //
-include { NANOPLOT_CUSTOM           } from '../modules/local/nanoplot_custom'
 include { PYCOQC                    } from '../modules/local/pycoqc'
 include { UNICYCLER                 } from '../modules/local/unicycler'
 include { NANOPOLISH                } from '../modules/local/nanopolish'
 include { MEDAKA                    } from '../modules/local/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
-include { DFAST                     } from '../modules/local/dfast'                    
+include { DFAST                     } from '../modules/local/dfast'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -78,7 +77,8 @@ include { INPUT_CHECK               } from '../subworkflows/local/input_check'
 
 //
 // MODULE: Installed directly from nf-core/modules
-//                                                             
+//
+include { NANOPLOT                              } from '../modules/nf-core/nanoplot/main'
 include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop/main'
 include { CANU                                  } from '../modules/nf-core/canu/main'
 include { MINIMAP2_ALIGN                        } from '../modules/nf-core/minimap2/align/main'
@@ -122,7 +122,7 @@ workflow BACASS {
     )
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
-    // ! There is currently no tooling to help you write a sample sheet schema 
+    // ! There is currently no tooling to help you write a sample sheet schema
 
     //
     // SUBWORKFLOW: Short reads QC and trim adapters
@@ -140,10 +140,10 @@ workflow BACASS {
     //
     // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots
     //
-    NANOPLOT_CUSTOM (
+    NANOPLOT (
         INPUT_CHECK.out.longreads
     )
-    ch_versions = ch_versions.mix(NANOPLOT_CUSTOM.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(NANOPLOT.out.versions.first().ifEmpty(null))
 
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
@@ -253,7 +253,7 @@ workflow BACASS {
             MINIASM.out.assembly.map { meta, assembly -> assembly },
             false,
             false,
-            false 
+            false
         )
         ch_versions = ch_versions.mix(MINIMAP2_CONSENSUS.out.versions.first().ifEmpty(null))
 
@@ -277,13 +277,13 @@ workflow BACASS {
         ch_for_assembly
             .join( ch_assembly )
             .set { ch_for_polish }
-        
+
         MINIMAP2_POLISH (
             ch_for_polish.map { meta, sr, lr, fasta -> tuple(meta, lr)  },
             ch_for_polish.map { meta, sr, lr, fasta -> fasta  },
             true,
             false,
-            false 
+            false
         )
         ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions.first().ifEmpty(null))
 
@@ -313,11 +313,11 @@ workflow BACASS {
             .join( ch_assembly )
             .map { meta, sr, lr, assembly -> tuple(meta, lr, assembly) }
             .set { ch_for_medaka }
-        
+
         MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
         ch_versions = ch_versions.mix(MEDAKA.out.versions.first().ifEmpty(null))
     }
- 
+
     //
     // MODULE: Kraken2, QC for sample purity
     //

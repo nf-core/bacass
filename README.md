@@ -25,7 +25,7 @@ On release, automated continuous integration tests run the pipeline on a full-si
 
 ### Short Read Assembly
 
-This pipeline is primarily for bacterial assembly of next-generation sequencing reads. It can be used to quality trim your reads using [Skewer](https://github.com/relipmoc/skewer) and performs basic sequencing QC using [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/). Afterwards, the pipeline performs read assembly using [Unicycler](https://github.com/rrwick/Unicycler). Contamination of the assembly is checked using [Kraken2](https://ccb.jhu.edu/software/kraken2/) to verify sample purity.
+This pipeline is primarily for bacterial assembly of next-generation sequencing reads. It can be used to quality trim your reads using [FastP](https://github.com/OpenGene/fastp) and performs basic sequencing QC using [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/). Afterwards, the pipeline performs read assembly using [Unicycler](https://github.com/rrwick/Unicycler). Contamination of the assembly is checked using [Kraken2](https://ccb.jhu.edu/software/kraken2/) to verify sample purity.
 
 ### Long Read Assembly
 
@@ -52,16 +52,19 @@ In all cases, the assembly is assessed using [QUAST](http://bioinf.spbau.ru/quas
 
 First, prepare a samplesheet with your input data that looks as follows:
 
-`samplesheet.csv`:
+`samplesheet.tsv`:
 
-```csv
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+```tsv
+ID    R1                            R2                            LongFastQ                Fast5              GenomeSize
+shortreads    ./data/S1_R1.fastq.gz    ./data/S1_R2.fastq.gz    NA                    NA                    NA
+longreads      NA                        NA                        ./data/S1_long_fastq.gz    ./data/FAST5    2.8m
+shortNlong    ./data/S1_R1.fastq.gz    ./data/S1_R2.fastq.gz    ./data/S1_long_fastq.gz    ./data/FAST5    2.8m
+
 ```
 
 Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
 
-    Default: Short read assembly with Unicycler, `--kraken2db` can be any [compressed database (`.tar.gz`/`.tgz`)](https://benlangmead.github.io/aws-indexes/k2):
+Default: Short read assembly with Unicycler, `--kraken2db` can be any [compressed database (`.tar.gz`/`.tgz`)](https://benlangmead.github.io/aws-indexes/k2):
 
     ```console
     nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.tsv --kraken2db "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20210517.tar.gz"
@@ -78,7 +81,7 @@ Each row represents a fastq file (single-end) or a pair of fastq files (paired e
 ```bash
 nextflow run nf-core/bacass \
    -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
+   --input samplesheet.tsv \
    --outdir <OUTDIR>
 ```
 
@@ -97,7 +100,7 @@ For more details about the output files and reports, please refer to the
 
 ## Credits
 
-nf-core/bacass was initiated by [Andreas Wilm](https://github.com/andreas-wilm), originally written by [Alex Peltzer](https://github.com/apeltzer) (DSL1) and rewritten by [Daniel Straub](https://github.com/d4straub) (DSL2).
+nf-core/bacass was initiated by [Andreas Wilm](https://github.com/andreas-wilm), originally written by [Alex Peltzer](https://github.com/apeltzer) (DSL1), rewritten by [Daniel Straub](https://github.com/d4straub) (DSL2) and maintained by [Daniel Valle-Millares](https://github.com/Daniel-VM).
 
 ## Contributions and Support
 

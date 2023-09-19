@@ -36,14 +36,14 @@ shortNlong    ./data/S1_R1.fastq.gz    ./data/S1_R2.fastq.gz    ./data/S1_long_f
 | `Fast5`      | Full path to a folder containing Fast5 file(s) for ONT long reads. `NA` indicates that there are no Fast5 files available.                                                  |
 | `GenomeSize` | Expected genome size. For example, `2.8m` means 2.8 million basepairs genome size expected. This is only used by Canu assembler. `NA` indicates that this value is unknown. |
 
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+An [example samplesheet](../assets/samplesheet.tsv) has been provided with the pipeline.
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```console
-nextflow run nf-core/bacass --input samplesheet.csv -profile docker --skip_kraken2
+nextflow run nf-core/bacass --input samplesheet.tsv -profile docker --skip_kraken2
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -72,9 +72,8 @@ nextflow run nf-core/bacass -profile docker -params-file params.yaml
 with `params.yaml` containing:
 
 ```yaml
-input: './samplesheet.csv'
+input: './samplesheet.tsv'
 outdir: './results/'
-genome: 'GRCh37'
 <...>
 ```
 

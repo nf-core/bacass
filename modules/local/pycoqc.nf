@@ -1,5 +1,4 @@
 process PYCOQC {
-    tag "$fast5"
     label 'process_medium'
 
     conda "bioconda::pycoqc=2.5.2"
@@ -23,7 +22,7 @@ process PYCOQC {
     def prefix      = task.ext.prefix ?: "${meta.id}"
     def run_summary = file("${fast5}/sequencing_summary.txt").exists() ? "cp ${fast5}/sequencing_summary.txt ./sequencing_summary.txt" : "Fast5_to_seq_summary -f $fast5 -t ${task.cpus} -s './sequencing_summary.txt' --verbose_level 2"
     def barcode_me  = file("${fast5}/barcoding_sequencing.txt").exists() ? "-b ${fast5}/barcoding_sequencing.txt" : ''
-    
+
     """
     $run_summary
 
