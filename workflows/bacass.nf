@@ -143,7 +143,7 @@ workflow BACASS {
     NANOPLOT (
         INPUT_CHECK.out.longreads
     )
-    ch_versions = ch_versions.mix(NANOPLOT.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(NANOPLOT.out.versions.ifEmpty(null))
 
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
@@ -153,7 +153,7 @@ workflow BACASS {
         PYCOQC (
             INPUT_CHECK.out.fast5.dump(tag: 'fast5')
         )
-        versions = ch_versions.mix(PYCOQC.out.versions.first().ifEmpty(null))
+        versions = ch_versions.mix(PYCOQC.out.versions.ifEmpty(null))
     }
 
     //
@@ -163,7 +163,7 @@ workflow BACASS {
         PORECHOP_PORECHOP (
             INPUT_CHECK.out.longreads.dump(tag: 'longreads')
         )
-        ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions.first().ifEmpty(null) )
+        ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions.ifEmpty(null) )
     }
 
     //
@@ -223,7 +223,7 @@ workflow BACASS {
             ch_for_assembly.map { meta, reads, lr -> meta.genome_size }
         )
         ch_assembly = ch_assembly.mix( CANU.out.assembly.dump(tag: 'canu') )
-        ch_versions = ch_versions.mix(CANU.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(CANU.out.versions.ifEmpty(null))
     }
 
     //
@@ -236,7 +236,7 @@ workflow BACASS {
             false,
             false
         )
-        ch_versions = ch_versions.mix(MINIMAP2_ALIGN.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIMAP2_ALIGN.out.versions.ifEmpty(null))
 
         ch_for_assembly
             .join(MINIMAP2_ALIGN.out.paf)
@@ -246,7 +246,7 @@ workflow BACASS {
         MINIASM (
             ch_for_miniasm
         )
-        ch_versions = ch_versions.mix(MINIASM.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIASM.out.versions.ifEmpty(null))
 
         MINIMAP2_CONSENSUS (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
@@ -255,7 +255,7 @@ workflow BACASS {
             false,
             false
         )
-        ch_versions = ch_versions.mix(MINIMAP2_CONSENSUS.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIMAP2_CONSENSUS.out.versions.ifEmpty(null))
 
         ch_for_assembly
             .join(MINIASM.out.assembly)
@@ -267,7 +267,7 @@ workflow BACASS {
             ch_for_racon
         )
         ch_assembly = ch_assembly.mix( RACON.out.improved_assembly.dump(tag: 'miniasm') )
-        ch_versions = ch_versions.mix(RACON.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(RACON.out.versions.ifEmpty(null))
     }
 
     //
@@ -285,12 +285,12 @@ workflow BACASS {
             false,
             false
         )
-        ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions.ifEmpty(null))
 
         SAMTOOLS_INDEX (
             MINIMAP2_POLISH.out.bam.dump(tag: 'samtools_sort')
         )
-        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.ifEmpty(null))
 
         ch_for_polish    // tuple val(meta), val(reads), file(longreads), file(assembly)
             .join( MINIMAP2_POLISH.out.bam )    // tuple val(meta), file(bam)
@@ -302,7 +302,7 @@ workflow BACASS {
         NANOPOLISH (
             ch_for_nanopolish.dump(tag: 'into_nanopolish')
         )
-        ch_versions = ch_versions.mix(NANOPOLISH.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(NANOPOLISH.out.versions.ifEmpty(null))
     }
 
     //
@@ -315,7 +315,7 @@ workflow BACASS {
             .set { ch_for_medaka }
 
         MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
-        ch_versions = ch_versions.mix(MEDAKA.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(MEDAKA.out.versions.ifEmpty(null))
     }
 
     //
@@ -331,7 +331,7 @@ workflow BACASS {
             false,
             false
         )
-        ch_versions = ch_versions.mix(KRAKEN2.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(KRAKEN2.out.versions.ifEmpty(null))
         KRAKEN2_LONG (
             ch_for_kraken2_long
                 .map { meta, reads ->
@@ -345,7 +345,7 @@ workflow BACASS {
             false,
             false
         )
-        ch_versions = ch_versions.mix(KRAKEN2_LONG.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(KRAKEN2_LONG.out.versions.ifEmpty(null))
     }
 
     //
@@ -361,7 +361,7 @@ workflow BACASS {
         [[:],[]],
         [[:],[]]
     )
-    ch_versions = ch_versions.mix(QUAST.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
 
     //
     // MODULE: PROKKA, gene annotation
@@ -369,14 +369,14 @@ workflow BACASS {
     if ( !params.skip_annotation && params.annotation_tool == 'prokka' ) {
         GUNZIP ( ch_assembly )
         ch_to_prokka    = GUNZIP.out.gunzip
-        ch_versions     = ch_versions.mix(GUNZIP.out.versions.first().ifEmpty(null))
+        ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
 
         PROKKA (
             ch_to_prokka,
             [],
             []
         )
-        ch_versions = ch_versions.mix(PROKKA.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(PROKKA.out.versions.ifEmpty(null))
     }
 
     //
@@ -388,7 +388,7 @@ workflow BACASS {
             ch_assembly,
             Channel.value(params.dfast_config ? file(params.dfast_config) : "")
         )
-        ch_versions = ch_versions.mix(DFAST.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(DFAST.out.versions.ifEmpty(null))
     }
 
     //
