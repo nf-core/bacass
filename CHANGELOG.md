@@ -28,35 +28,34 @@ This version merges the nf-core template update v2.9. It also updates modules or
 
 - [#61](https://github.com/nf-core/bacass/issues/61) - Update local/modules to nf-core/modules plus version update.
 
-| Tool   | Previous version | New version |
-| ------ | ---------------- | ----------- |
-| Canu  | 2.1.1 | 2.2 |
-| Minimap2 | 2.21 | 2.2 |
-| Miniasm | 0.3 | - |
-| Racon | 1.4.20-1 | - |
+| Tool     | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| Canu     | 2.1.1            | 2.2         |
+| Minimap2 | 2.21             | 2.2         |
+| Miniasm  | 0.3              | -           |
+| Racon    | 1.4.20-1         | -           |
 
 - Update already nf-core modules
 
-| Tool   | Previous version | New version |
-| ------ | ---------------- | ----------- |
-| Fastqc | 0.11.9 | - |
-| Samtools | 1.13 | 2.1.2 |
-| Kraken2 | 2.1.1 | 2.1.2 |
-| Quast | 5.0.2 | 5.2.0 |
-| Prokka | 1.14.6 | - |
-| Multiqc | 1.10.1 | 1.15 |
+| Tool     | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| Fastqc   | 0.11.9           | -           |
+| Samtools | 1.13             | 2.1.2       |
+| Kraken2  | 2.1.1            | 2.1.2       |
+| Quast    | 5.0.2            | 5.2.0       |
+| Prokka   | 1.14.6           | -           |
+| Multiqc  | 1.10.1           | 1.15        |
 
 - Refactor `local/modules` making them follow nf-core v2.9 structure/fashion.
 
-| Tool   | Previous version | New version |
-| ------ | ---------------- | ----------- |
-| Dfast | 1.2.14 | - |
-| Medaka | 1.4.3-0 | - |
-| Nanoplot | 1.38.0 | 1.41.6 |
-  | Nanopolish | 0.13.2-5 | 0.14.0 |
-  | Pycoqc | 2.5.2 | - |
-  | Unicycler | 0.4.8 | - |
-
+| Tool       | Previous version | New version |
+| ---------- | ---------------- | ----------- |
+| Dfast      | 1.2.14           | -           |
+| Medaka     | 1.4.3-0          | -           |
+| Nanoplot   | 1.38.0           | 1.41.6      |
+| Nanopolish | 0.13.2-5         | 0.14.0      |
+| Pycoqc     | 2.5.2            | -           |
+| Unicycler  | 0.4.8            | -           |
 
 ### `Deprecated`
 
