@@ -52,9 +52,9 @@ In all cases, the assembly is assessed using [QUAST](http://bioinf.spbau.ru/quas
 
 First, prepare a samplesheet with your input data that looks as follows:
 
-`samplesheet.tsv`:
+`samplesheet.csv`:
 
-```tsv
+```csv
 ID    R1                            R2                            LongFastQ                Fast5              GenomeSize
 shortreads    ./data/S1_R1.fastq.gz    ./data/S1_R2.fastq.gz    NA                    NA                    NA
 longreads      NA                        NA                        ./data/S1_long_fastq.gz    ./data/FAST5    2.8m
@@ -67,13 +67,13 @@ Each row represents a fastq file (single-end) or a pair of fastq files (paired e
 Default: Short read assembly with Unicycler, `--kraken2db` can be any [compressed database (`.tar.gz`/`.tgz`)](https://benlangmead.github.io/aws-indexes/k2):
 
     ```console
-    nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.tsv --kraken2db "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20210517.tar.gz"
+    nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.csv --kraken2db "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20210517.tar.gz"
     ```
 
     Long read assembly with Miniasm:
 
     ```console
-    nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.tsv --assembly_type 'long' --assembler 'miniasm' --kraken2db "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20210517.tar.gz"
+    nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.csv --assembly_type 'long' --assembler 'miniasm' --kraken2db "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20210517.tar.gz"
     ```
 
 <!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
@@ -81,7 +81,7 @@ Default: Short read assembly with Unicycler, `--kraken2db` can be any [compresse
 ```bash
 nextflow run nf-core/bacass \
    -profile <docker/singularity/.../institute> \
-   --input samplesheet.tsv \
+   --input samplesheet.csv \
    --outdir <OUTDIR>
 ```
 
