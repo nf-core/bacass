@@ -113,36 +113,30 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
-    if (params.input) {
-       def criteria = multiMapCriteria {
-            meta, fastq_1, fastq_2, long_fastq, fast5, genome_size ->
-                shortreads: fastq_1 != 'NA' ? tuple(tuple(meta, [fastq_1, fastq_2])) : null
-                longreads: long_fastq != 'NA' ? tuple(meta, long_fastq) : null
-                fast5: fast5 != 'NA' ? tuple(meta, fast5) : null
-        }
-
-        // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
-        Channel
-            .fromSamplesheet('input')
-            .multiMap (criteria)
-            .set { ch_input }
-
-        // reconfigure channels
-        ch_input
-            .shortreads
-            .filter{ it != null }
-            .set { ch_shortreads }
-        ch_input
-            .longreads
-            .filter{ it != null }
-            .set { ch_longreads }
-        ch_input
-            .fast5
-            .filter{ it != null }
-            .set { ch_fast5 }
-    } else {
-        exit 1, 'Input samplesheet not specified!'
+    def criteria = multiMapCriteria {
+        meta, fastq_1, fastq_2, long_fastq, fast5, genome_size ->
+            shortreads: fastq_1 != 'NA' ? tuple(tuple(meta, [fastq_1, fastq_2])) : null
+            longreads: long_fastq != 'NA' ? tuple(meta, long_fastq) : null
+            fast5: fast5 != 'NA' ? tuple(meta, fast5) : null
     }
+    // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
+    Channel
+        .fromSamplesheet('input')
+        .multiMap (criteria)
+        .set { ch_input }
+    // reconfigure channels
+    ch_input
+        .shortreads
+        .filter{ it != null }
+        .set { ch_shortreads }
+    ch_input
+        .longreads
+        .filter{ it != null }
+        .set { ch_longreads }
+    ch_input
+        .fast5
+        .filter{ it != null }
+        .set { ch_fast5 }
 
     //
     // SUBWORKFLOW: Short reads QC and trim adapters
