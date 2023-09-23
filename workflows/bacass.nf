@@ -4,7 +4,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { paramsSummaryLog; paramsSummaryMap } from 'plugin/nf-validation'
+include { paramsSummaryLog; paramsSummaryMap; fromSamplesheet } from 'plugin/nf-validation'
 
 def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
 def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
@@ -24,9 +24,6 @@ WorkflowBacass.initialise(params, log)
 // Check input path parameters to see if they exist
 def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-// Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
 
 // Check krakendb
 if(! params.skip_kraken2){
@@ -67,7 +64,6 @@ include { DFAST                     } from '../modules/local/dfast'
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK               } from '../subworkflows/local/input_check'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,18 +113,36 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
-    INPUT_CHECK (
-        file(params.input)
-    )
-    // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
+    def criteria = multiMapCriteria {
+        meta, fastq_1, fastq_2, long_fastq, fast5, genome_size ->
+            shortreads: fastq_1 != 'NA' ? tuple(tuple(meta, [fastq_1, fastq_2])) : null
+            longreads: long_fastq != 'NA' ? tuple(meta, long_fastq) : null
+            fast5: fast5 != 'NA' ? tuple(meta, fast5) : null
+    }
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
-    // ! There is currently no tooling to help you write a sample sheet schema
+    Channel
+        .fromSamplesheet('input')
+        .multiMap (criteria)
+        .set { ch_input }
+    // reconfigure channels
+    ch_input
+        .shortreads
+        .filter{ it != null }
+        .set { ch_shortreads }
+    ch_input
+        .longreads
+        .filter{ it != null }
+        .set { ch_longreads }
+    ch_input
+        .fast5
+        .filter{ it != null }
+        .set { ch_fast5 }
 
     //
     // SUBWORKFLOW: Short reads QC and trim adapters
     //
     FASTQ_TRIM_FASTP_FASTQC (
-        INPUT_CHECK.out.shortreads,
+        ch_shortreads,
         [],
         params.save_trimmed_fail,
         params.save_merged,
@@ -141,7 +155,7 @@ workflow BACASS {
     // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots
     //
     NANOPLOT (
-        INPUT_CHECK.out.longreads
+        ch_longreads
     )
     ch_versions = ch_versions.mix(NANOPLOT.out.versions.ifEmpty(null))
 
@@ -151,7 +165,7 @@ workflow BACASS {
     // TODO: Couldn't be tested. No configuration test available (lack of fast5 file or params.skip_pycoqc=false).
     if ( !params.skip_pycoqc ) {
         PYCOQC (
-            INPUT_CHECK.out.fast5.dump(tag: 'fast5')
+            ch_fast5.dump(tag: 'fast5')
         )
         versions = ch_versions.mix(PYCOQC.out.versions.ifEmpty(null))
     }
@@ -161,7 +175,7 @@ workflow BACASS {
     //
     if ( params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type) ) {
         PORECHOP_PORECHOP (
-            INPUT_CHECK.out.longreads.dump(tag: 'longreads')
+            ch_longreads.dump(tag: 'longreads')
         )
         ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions.ifEmpty(null) )
     }
@@ -295,7 +309,7 @@ workflow BACASS {
         ch_for_polish    // tuple val(meta), val(reads), file(longreads), file(assembly)
             .join( MINIMAP2_POLISH.out.bam )    // tuple val(meta), file(bam)
             .join( SAMTOOLS_INDEX.out.bai )     // tuple  val(meta), file(bai)
-            .join( INPUT_CHECK.out.fast5 )      // tuple val(meta), file(fast5)
+            .join( ch_fast5 )             // tuple val(meta), file(fast5)
             .set { ch_for_nanopolish }          // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
 
         // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.

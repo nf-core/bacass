@@ -55,10 +55,10 @@ First, prepare a samplesheet with your input data that looks as follows:
 `samplesheet.tsv`:
 
 ```tsv
-ID    R1                            R2                            LongFastQ                Fast5              GenomeSize
-shortreads    ./data/S1_R1.fastq.gz    ./data/S1_R2.fastq.gz    NA                    NA                    NA
-longreads      NA                        NA                        ./data/S1_long_fastq.gz    ./data/FAST5    2.8m
-shortNlong    ./data/S1_R1.fastq.gz    ./data/S1_R2.fastq.gz    ./data/S1_long_fastq.gz    ./data/FAST5    2.8m
+ID      R1                            R2                            LongFastQ                    Fast5    GenomeSize
+shortreads      ./data/S1_R1.fastq.gz       ./data/S1_R2.fastq.gz       NA                            NA      NA
+longreads       NA                          NA                          ./data/S1_long_fastq.gz      ./data/FAST5  2.8m
+shortNlong      ./data/S1_R1.fastq.gz       ./data/S1_R2.fastq.gz       ./data/S1_long_fastq.gz      ./data/FAST5  2.8m
 
 ```
 
