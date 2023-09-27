@@ -141,6 +141,9 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Short reads QC and trim adapters
     //
+    ch_fastqc_raw_multiqc  = Channel.empty()
+    ch_fastqc_trim_multiqc = Channel.empty()
+    ch_trim_log_multiqc    = Channel.empty()
     FASTQ_TRIM_FASTP_FASTQC (
         ch_shortreads,
         [],
@@ -149,6 +152,9 @@ workflow BACASS {
         params.skip_fastp,
         params.skip_fastqc
     )
+    ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
+    ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
+    ch_trim_json_multiqc     = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
     ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions.ifEmpty(null))
 
     //
@@ -335,6 +341,8 @@ workflow BACASS {
     //
     // MODULE: Kraken2, QC for sample purity
     //
+    ch_kraken_short_multiqc = Channel.empty()
+    ch_kraken_long_multiqc  = Channel.empty()
     if ( !params.skip_kraken2 ) {
         KRAKEN2_DB_PREPARATION (
             kraken2db
@@ -345,7 +353,9 @@ workflow BACASS {
             false,
             false
         )
+        ch_kraken_short_multiqc = KRAKEN2.out.report
         ch_versions = ch_versions.mix(KRAKEN2.out.versions.ifEmpty(null))
+
         KRAKEN2_LONG (
             ch_for_kraken2_long
                 .map { meta, reads ->
@@ -359,6 +369,7 @@ workflow BACASS {
             false,
             false
         )
+        ch_kraken_long_multiqc = KRAKEN2_LONG.out.report
         ch_versions = ch_versions.mix(KRAKEN2_LONG.out.versions.ifEmpty(null))
     }
 
@@ -370,16 +381,19 @@ workflow BACASS {
         .map { consensus_collect -> tuple([id: "report"], consensus_collect) }
         .set { ch_to_quast }
 
+    ch_quast_multiqc = Channel.empty()
     QUAST (
         ch_to_quast,
         [[:],[]],
         [[:],[]]
     )
-    ch_versions = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
+    ch_quast_multiqc = QUAST.out.tsv
+    ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
 
     //
     // MODULE: PROKKA, gene annotation
     //
+    ch_prokka_multiqc = Channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'prokka' ) {
         GUNZIP ( ch_assembly )
         ch_to_prokka    = GUNZIP.out.gunzip
@@ -390,7 +404,9 @@ workflow BACASS {
             [],
             []
         )
-        ch_versions = ch_versions.mix(PROKKA.out.versions.ifEmpty(null))
+        ch_prokka_multiqc   = PROKKA.out.txt.collect()
+        ch_versions         = ch_versions.mix(PROKKA.out.versions.ifEmpty(null))
+        ch_prokka_multiqc.view()
     }
 
     //
@@ -425,14 +441,19 @@ workflow BACASS {
         ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
         ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
         ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-        ch_multiqc_files = ch_multiqc_files.mix(FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(FASTQ_TRIM_FASTP_FASTQC.out.trim_json.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_fastqc_trim_multiqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_quast_multiqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_prokka_multiqc.collect{it[1]}.ifEmpty([]))
 
         MULTIQC (
             ch_multiqc_files.collect(),
-            ch_multiqc_config.toList(),
-            ch_multiqc_custom_config.toList(),
-            ch_multiqc_logo.toList()
+            ch_multiqc_config,
+            ch_multiqc_custom_config.collect().ifEmpty([]),
+            ch_multiqc_logo.collect().ifEmpty([])
         )
         multiqc_report = MULTIQC.out.report.toList()
     }
