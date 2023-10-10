@@ -141,9 +141,6 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Short reads QC and trim adapters
     //
-    ch_fastqc_raw_multiqc  = Channel.empty()
-    ch_fastqc_trim_multiqc = Channel.empty()
-    ch_trim_log_multiqc    = Channel.empty()
     FASTQ_TRIM_FASTP_FASTQC (
         ch_shortreads,
         [],
@@ -160,7 +157,6 @@ workflow BACASS {
     //
     // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots
     //
-    ch_nanoplot_txt_multiqc = Channel.empty()
     NANOPLOT (
         ch_longreads
     )
@@ -241,7 +237,6 @@ workflow BACASS {
     //
     // MODULE: Canu, genome assembly, long reads
     //
-
     if ( params.assembler == 'canu' ) {
         CANU (
             ch_for_assembly.map { meta, reads, lr -> tuple( meta, lr ) },
@@ -387,7 +382,6 @@ workflow BACASS {
         .map { consensus_collect -> tuple([id: "report"], consensus_collect) }
         .set { ch_to_quast }
 
-    ch_quast_multiqc = Channel.empty()
     QUAST (
         ch_to_quast,
         [[:],[]],
