@@ -160,29 +160,36 @@ workflow BACASS {
     //
     // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots
     //
+    ch_nanoplot_txt_multiqc = Channel.empty()
     NANOPLOT (
         ch_longreads
     )
+    ch_nanoplot_txt_multiqc = NANOPLOT.out.txt
+    ch_nanoplot_txt_multiqc.view()
     ch_versions = ch_versions.mix(NANOPLOT.out.versions.ifEmpty(null))
 
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
     //
     // TODO: Couldn't be tested. No configuration test available (lack of fast5 file or params.skip_pycoqc=false).
+    ch_pycoqc_multiqc = Channel.empty()
     if ( !params.skip_pycoqc ) {
         PYCOQC (
             ch_fast5.dump(tag: 'fast5')
         )
-        versions = ch_versions.mix(PYCOQC.out.versions.ifEmpty(null))
+        ch_pycoqc_multiqc = PYCOQC.out.json
+        ch_versions       = ch_versions.mix(PYCOQC.out.versions.ifEmpty(null))
     }
 
     //
     // MODULE: PORECHOP, quality check for nanopore reads and Quality/Length Plots
     //
+    ch_porechop_log_multiqc = Channel.empty()
     if ( params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type) ) {
         PORECHOP_PORECHOP (
             ch_longreads.dump(tag: 'longreads')
         )
+        ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
         ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions.ifEmpty(null) )
     }
 
@@ -406,7 +413,6 @@ workflow BACASS {
         )
         ch_prokka_multiqc   = PROKKA.out.txt.collect()
         ch_versions         = ch_versions.mix(PROKKA.out.versions.ifEmpty(null))
-        ch_prokka_multiqc.view()
     }
 
     //
@@ -448,6 +454,9 @@ workflow BACASS {
         ch_multiqc_files = ch_multiqc_files.mix(ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(ch_quast_multiqc.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(ch_prokka_multiqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]))
 
         MULTIQC (
             ch_multiqc_files.collect(),
