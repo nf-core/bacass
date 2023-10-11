@@ -9,7 +9,7 @@ Enhancement of the MultiQC report.
 
 ### `Added`
 
-[#93](https://github.com/nf-core/bacass/pull/93) - Add missing modules output to MultiQC.
+- [#93](https://github.com/nf-core/bacass/pull/93) - Add missing modules output to MultiQC.
 
   - Fastp
   - PycoQC
