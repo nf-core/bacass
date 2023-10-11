@@ -92,7 +92,7 @@
                 "nf-core": {
                     "fastq_trim_fastp_fastqc": {
                         "branch": "master",
-                        "git_sha": "dedc0e31087f3306101c38835d051bf49789445a",
+                        "git_sha": "bd448d5c60454640610681515538be3ec66036e4",
                         "installed_by": ["subworkflows"]
                     }
                 }

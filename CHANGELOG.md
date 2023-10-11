@@ -3,6 +3,21 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.1.1dev nf-core/bacass: "Navy Steel Swordfish" - 2023/10/11
+
+Enhancement of the MultiQC report.
+
+### `Added`
+
+- [#93](https://github.com/nf-core/bacass/pull/93) - Add missing modules output to MultiQC.
+
+  - Fastp
+  - PycoQC
+  - Porechop
+  - Quast
+  - Kraken2
+  - Prokka
+
 ## v2.1.0dev nf-core/bacass: "Navy Steel Swordfish" - 2023/09/11
 
 This version merges the nf-core template update v2.9. It also updates modules or dependencies to make them work with the new template.
