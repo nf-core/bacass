@@ -96,6 +96,7 @@ include { MULTIQC                               } from '../modules/nf-core/multi
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
 //
 include { FASTQ_TRIM_FASTP_FASTQC               } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc/main'
+include { BAKTA_DBDOWNLOAD_RUN                  } from '../subworkflows/local/bakta_dbdownload_run'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -393,7 +394,7 @@ workflow BACASS {
     //
     // MODULE: PROKKA, gene annotation
     //
-    ch_prokka_multiqc = Channel.empty()
+    ch_prokka_txt_multiqc = Channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'prokka' ) {
         GUNZIP ( ch_assembly )
         ch_to_prokka    = GUNZIP.out.gunzip
@@ -404,10 +405,31 @@ workflow BACASS {
             [],
             []
         )
-        ch_prokka_multiqc   = PROKKA.out.txt.collect()
-        ch_versions         = ch_versions.mix(PROKKA.out.versions.ifEmpty(null))
+        ch_prokka_txt_multiqc   = PROKKA.out.txt.collect()
+        ch_versions             = ch_versions.mix(PROKKA.out.versions.ifEmpty(null))
     }
 
+    //
+    // MODULE: BAKTA, gene annotation
+    //
+
+    // TODO: update documentation
+    // TODO: update changelog
+    ch_bakta_txt_multiqc = Channel.empty()
+    if ( !params.skip_annotation && params.annotation_tool == 'bakta' ) {
+        GUNZIP ( ch_assembly )
+        ch_to_bakta     = GUNZIP.out.gunzip
+        ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
+
+        BAKTA_DBDOWNLOAD_RUN (
+            ch_to_bakta,
+            params.baktadb,
+            params.baktadb_download
+        )
+
+        ch_bakta_txt_multiqc    = BAKTA_DBDOWNLOAD_RUN.out.bakta_txt_multiqc.collect()
+        ch_versions             = ch_versions.mix(BAKTA_DBDOWNLOAD_RUN.out.versions)
+    }
     //
     // MODULE: DFAST, gene annotation
     //
@@ -446,7 +468,8 @@ workflow BACASS {
         ch_multiqc_files = ch_multiqc_files.mix(ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(ch_quast_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_prokka_multiqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]))

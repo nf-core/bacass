@@ -5,6 +5,16 @@
         "https://github.com/nf-core/modules.git": {
             "modules": {
                 "nf-core": {
+                    "bakta/bakta": {
+                        "branch": "master",
+                        "git_sha": "f05fa7c6753f92be861d606378860dcd5c828880",
+                        "installed_by": ["modules"]
+                    },
+                    "bakta/baktadbdownload": {
+                        "branch": "master",
+                        "git_sha": "f05fa7c6753f92be861d606378860dcd5c828880",
+                        "installed_by": ["modules"]
+                    },
                     "canu": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
@@ -84,6 +94,11 @@
                     "samtools/sort": {
                         "branch": "master",
                         "git_sha": "a0f7be95788366c1923171e358da7d049eb440f9",
+                        "installed_by": ["modules"]
+                    },
+                    "untar": {
+                        "branch": "master",
+                        "git_sha": "d0b4fc03af52a1cc8c6fb4493b921b57352b1dd8",
                         "installed_by": ["modules"]
                     }
                 }

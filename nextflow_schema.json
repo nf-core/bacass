@@ -147,6 +147,19 @@
                     "description": "Extra arguments for prokka annotation tool.",
                     "help_text": "This advanced option allows you to pass extra arguments to Prokka (e.g. `\" --rfam\"` or `\" --genus name\"`). For this to work you need to quote the arguments and add at least one space between the arguments. Example:\n\n```bash\n--prokka_args `--rfam --genus Escherichia Coli`\n```\n"
                 },
+                "baktadb": {
+                    "type": "string",
+                    "description": "Path to Bakta database"
+                },
+                "baktadb_download": {
+                    "type": "boolean",
+                    "description": "Download Bakta database"
+                },
+                "baktadb_download_args": {
+                    "type": "string",
+                    "default": "--type light",
+                    "description": "This can be used to supply [extra options](https://github.com/oschwengers/bakta#database-download) to the Bakta download module"
+                },
                 "dfast_config": {
                     "type": "string",
                     "default": "assets/test_config_dfast.py",
