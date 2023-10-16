@@ -38,7 +38,7 @@ For users specifying both short read and long read (NanoPore) data, the pipeline
 
 ### Assembly QC and annotation
 
-In all cases, the assembly is assessed using [QUAST](http://bioinf.spbau.ru/quast). The resulting bacterial assembly is furthermore annotated using [Prokka](https://github.com/tseemann/prokka) or [DFAST](https://github.com/nigyta/dfast_core).
+In all cases, the assembly is assessed using [QUAST](http://bioinf.spbau.ru/quast). The resulting bacterial assembly is furthermore annotated using [Prokka](https://github.com/tseemann/prokka), [Bakta](https://github.com/oschwengers/bakta) or [DFAST](https://github.com/nigyta/dfast_core).
 
 ## Usage
 
