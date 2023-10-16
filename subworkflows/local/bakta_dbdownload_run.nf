@@ -20,7 +20,7 @@ workflow BAKTA_DBDOWNLOAD_RUN {
     // SUBWORKFLOW: Parse, download and/or untar Bakta database
     //
     if( ch_path_baktadb ){
-        if (ch_path_baktadb.endsWith('tar.gz')){
+        if (ch_path_baktadb.endsWith('.tar.gz')){
             ch_baktadb_tar  = Channel.from(ch_path_baktadb).map{ db -> [ [id: 'baktadb'], db ]}
 
             // MODULE: untar database
@@ -28,20 +28,16 @@ workflow BAKTA_DBDOWNLOAD_RUN {
             ch_baktadb      = UNTAR.out.untar.map{ meta, db -> db }
             ch_versions     = ch_versions.mix(UNTAR.out.versions)
         } else {
-            ch_baktadb = Channel.from(ch_path_baktadb).map{ db -> db }
+            ch_baktadb      = Channel.from(ch_path_baktadb).map{ db -> db }
         }
     } else if (!ch_path_baktadb && val_baktadb_download){
         // MODULE: Downlado Bakta database from zenodo
         BAKTA_BAKTADBDOWNLOAD()
-        ch_baktadb_tar  = BAKTA_BAKTADBDOWNLOAD.out.db.map{ db -> [ [id: 'baktadb'], db ]}
-        ch_versions     = ch_versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
+        ch_baktadb  = BAKTA_BAKTADBDOWNLOAD.out.db
+        ch_versions = ch_versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
 
-        // MODULE: untar database
-        UNTAR( ch_baktadb_tar )
-        ch_baktadb      = UNTAR.out.untar.map{ meta, db -> db }
-        ch_versions     = ch_versions.mix(UNTAR.out.versions)
     } else if (!ch_path_baktadb && !val_baktadb_download ){
-        exit 1, "The Bakta database argument is missing. To enable the workflow to access the Bakta database, please include the path using '--baktadb' or use '--bakdtadb_download true'  to download the Bakta database." // TODO: test it
+        exit 1, "The Bakta database argument is missing. To enable the workflow to access the Bakta database, please include the path using '--baktadb' or use '--bakdtadb_download true'  to download the Bakta database."
     }
 
     //
