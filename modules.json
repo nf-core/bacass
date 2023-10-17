@@ -8,7 +8,8 @@
                     "bakta/bakta": {
                         "branch": "master",
                         "git_sha": "f05fa7c6753f92be861d606378860dcd5c828880",
-                        "installed_by": ["modules"]
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/bakta/bakta/bakta-bakta.diff"
                     },
                     "bakta/baktadbdownload": {
                         "branch": "master",

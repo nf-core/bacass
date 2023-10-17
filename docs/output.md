@@ -204,7 +204,7 @@ See [Prokka's documentation](https://github.com/tseemann/prokka#output-files) fo
 
 ![Prokka annotation](images/prokka.png)
 
-- `Bakta/`
+- `Bakta/{ID}/`
   - `*.gff3`: Annotations in gff3 format
   - `*.txt`:  Summary in txt format
   - `*.faa`:  CDS/sORF amino acid sequences in fasta format

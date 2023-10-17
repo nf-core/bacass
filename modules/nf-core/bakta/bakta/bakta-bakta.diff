@@ -1,0 +1,70 @@
+Changes in module 'nf-core/bakta/bakta'
+--- modules/nf-core/bakta/bakta/main.nf
++++ modules/nf-core/bakta/bakta/main.nf
+@@ -14,16 +14,16 @@
+     path prodigal_tf
+ 
+     output:
+-    tuple val(meta), path("${prefix}.embl")             , emit: embl
+-    tuple val(meta), path("${prefix}.faa")              , emit: faa
+-    tuple val(meta), path("${prefix}.ffn")              , emit: ffn
+-    tuple val(meta), path("${prefix}.fna")              , emit: fna
+-    tuple val(meta), path("${prefix}.gbff")             , emit: gbff
+-    tuple val(meta), path("${prefix}.gff3")             , emit: gff
+-    tuple val(meta), path("${prefix}.hypotheticals.tsv"), emit: hypotheticals_tsv
+-    tuple val(meta), path("${prefix}.hypotheticals.faa"), emit: hypotheticals_faa
+-    tuple val(meta), path("${prefix}.tsv")              , emit: tsv
+-    tuple val(meta), path("${prefix}.txt")              , emit: txt
++    tuple val(meta), path("${prefix}/*.embl")             , emit: embl
++    tuple val(meta), path("${prefix}/*.faa")              , emit: faa
++    tuple val(meta), path("${prefix}/*.ffn")              , emit: ffn
++    tuple val(meta), path("${prefix}/*.fna")              , emit: fna
++    tuple val(meta), path("${prefix}/*.gbff")             , emit: gbff
++    tuple val(meta), path("${prefix}/*.gff3")             , emit: gff
++    tuple val(meta), path("${prefix}/*.hypotheticals.tsv"), emit: hypotheticals_tsv
++    tuple val(meta), path("${prefix}/*.hypotheticals.faa"), emit: hypotheticals_faa
++    tuple val(meta), path("${prefix}/*.tsv")              , emit: tsv
++    tuple val(meta), path("${prefix}/*.txt")              , emit: txt
+     path "versions.yml"                                 , emit: versions
+ 
+     when:
+@@ -42,7 +42,8 @@
+         --prefix $prefix \\
+         $proteins_opt \\
+         $prodigal_tf \\
+-        --db $db
++        --db $db \\
++        --output ${prefix}
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+@@ -53,16 +54,17 @@
+     stub:
+     prefix = task.ext.prefix ?: "${meta.id}"
+     """
+-    touch ${prefix}.embl
+-    touch ${prefix}.faa
+-    touch ${prefix}.ffn
+-    touch ${prefix}.fna
+-    touch ${prefix}.gbff
+-    touch ${prefix}.gff3
+-    touch ${prefix}.hypotheticals.tsv
+-    touch ${prefix}.hypotheticals.faa
+-    touch ${prefix}.tsv
+-    touch ${prefix}.txt
++    mkdir ${prefix}
++    touch ${prefix}/${prefix}.embl
++    touch ${prefix}/${prefix}.faa
++    touch ${prefix}/${prefix}.ffn
++    touch ${prefix}/${prefix}.fna
++    touch ${prefix}/${prefix}.gbff
++    touch ${prefix}/${prefix}.gff3
++    touch ${prefix}/${prefix}.hypotheticals.tsv
++    touch ${prefix}/${prefix}.hypotheticals.faa
++    touch ${prefix}/${prefix}.tsv
++    touch ${prefix}/${prefix}.txt
+ 
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+
+************************************************************
