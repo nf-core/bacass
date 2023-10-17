@@ -413,8 +413,6 @@ workflow BACASS {
     // MODULE: BAKTA, gene annotation
     //
 
-    // TODO: update documentation
-    // TODO: update changelog
     ch_bakta_txt_multiqc = Channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'bakta' ) {
         GUNZIP ( ch_assembly )
