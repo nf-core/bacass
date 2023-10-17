@@ -206,8 +206,8 @@ See [Prokka's documentation](https://github.com/tseemann/prokka#output-files) fo
 
 - `Bakta/{ID}/`
   - `*.gff3`: Annotations in gff3 format
-  - `*.txt`:  Summary in txt format
-  - `*.faa`:  CDS/sORF amino acid sequences in fasta format
+  - `*.txt`: Summary in txt format
+  - `*.faa`: CDS/sORF amino acid sequences in fasta format
 
 See [Baktas's documentation](https://github.com/oschwengers/bakta#output) for a full description of all output files.
 
