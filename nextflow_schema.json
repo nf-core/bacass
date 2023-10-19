@@ -140,7 +140,8 @@
                 "annotation_tool": {
                     "type": "string",
                     "default": "prokka",
-                    "description": "The annotation method to annotate the final assembly. Default choice is `prokka`, but the `dfast` tool is also available. For the latter, make sure to create your specific config if you're not happy with the default one provided. See [#dfast_config](#dfastconfig) to find out how."
+                    "description": "The annotation method to annotate the final assembly. Default choice is `prokka`, but the `dfast` tool is also available. For the latter, make sure to create your specific config if you're not happy with the default one provided. See [#dfast_config](#dfastconfig) to find out how.",
+                    "enum": ["prokka", "bakta", "dfast"]
                 },
                 "prokka_args": {
                     "type": "string",
@@ -158,7 +159,8 @@
                 "baktadb_download_args": {
                     "type": "string",
                     "default": "--type light",
-                    "description": "This can be used to supply [extra options](https://github.com/oschwengers/bakta#database-download) to the Bakta download module"
+                    "description": "This can be used to supply [extra options](https://github.com/oschwengers/bakta#database-download) to the Bakta download module",
+                    "enum": ["--type light", "--type full"]
                 },
                 "dfast_config": {
                     "type": "string",
