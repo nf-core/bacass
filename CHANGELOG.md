@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.1.0dev nf-core/bacass: "Navy Steel Swordfish" - 2023/09/11
+## v2.1.0 nf-core/bacass: "Navy Steel Swordfish" - 2023/10/20
 
 This version merges the nf-core template updates of v2.9 and v2.10, and updates modules or dependencies to ensure compatibility with the new template. Additionally, new modules have been added to process short-reads and perform gene annotation with Bakta.
 
@@ -17,6 +17,7 @@ This version merges the nf-core template updates of v2.9 and v2.10, and updates 
 ### `Added`
 
 - [#86](https://github.com/nf-core/bacass/pull/86) - Added nf-core subworkflow for trimming and QC of short-reads [nf-core/fastq_trim_fastp_fastqc](https://github.com/nf-core/modules/tree/master/subworkflows/nf-core/fastq_trim_fastp_fastqc).
+- [#88](https://github.com/nf-core/bacass/pull/88) - Added nf-validation on samplesheet
 - [#93](https://github.com/nf-core/bacass/pull/93) - Added missing modules output to MultiQC. ( Fastp, PycoQC, Porechop, Quast, Kraken2, and Prokka).
 - [#95](https://github.com/nf-core/bacass/pull/95) - Added subworkflow for gene annotation with Bakta.
 
