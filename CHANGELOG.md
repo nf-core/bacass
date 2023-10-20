@@ -3,7 +3,16 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.1.1dev nf-core/bacass: "Navy Steel Swordfish" - 2023/10/11
+## v2.1.0dev nf-core/bacass: "Navy Steel Swordfish" - 2023/10/19
+
+This version implements Bakta for gene annotaton and updates the MultiQC module.
+
+### `Added`
+
+- [#95](https://github.com/nf-core/bacass/pull/95) - Subworkflow for gene annotation with Bakta
+- [#95](https://github.com/nf-core/bacass/pull/95) - Update MultiQC module to v1.17
+
+## v2.1.0dev nf-core/bacass: "Navy Steel Swordfish" - 2023/10/11
 
 Enhancement of the MultiQC report.
 

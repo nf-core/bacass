@@ -190,7 +190,7 @@ The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast) fo
 
 ## Annotation
 
-By default, the assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend for several annotation tools and includes rRNA and ORF predictions. Alternatively, on request, the assembly is annotated with [DFAST](https://github.com/nigyta/dfast_core).
+By default, the assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend for several annotation tools and includes rRNA and ORF predictions. Alternatively, on request, the assembly is annotated with [Bakta](https://github.com/oschwengers/bakta) or [DFAST](https://github.com/nigyta/dfast_core).
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -203,6 +203,13 @@ By default, the assembly is annotated with [Prokka](https://github.com/tseemann/
 See [Prokka's documentation](https://github.com/tseemann/prokka#output-files) for a full description of all output files.
 
 ![Prokka annotation](images/prokka.png)
+
+- `Bakta/{ID}/`
+  - `*.gff3`: Annotations in gff3 format
+  - `*.txt`: Summary in txt format
+  - `*.faa`: CDS/sORF amino acid sequences in fasta format
+
+See [Baktas's documentation](https://github.com/oschwengers/bakta#output) for a full description of all output files.
 
 - `DFAST/{ID}_results/`
   - `genome.gff`: Annotation in gff format
