@@ -3,6 +3,18 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.2.0dev nf-core/bacass: "Aqua Platinum Zebrafish"
+
+### `Changed`
+
+### `Added`
+
+### `Fixed`
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.1.0 nf-core/bacass: "Navy Steel Swordfish" - 2023/10/20
 
 This version merges the nf-core template updates of v2.9 and v2.10, and updates modules or dependencies to ensure compatibility with the new template. Additionally, new modules have been added to process short-reads and perform gene annotation with Bakta.
