@@ -37,7 +37,7 @@ workflow BAKTA_DBDOWNLOAD_RUN {
         ch_versions = ch_versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
 
     } else if (!ch_path_baktadb && !val_baktadb_download ){
-        exit 1, "The Bakta database argument is missing. To enable the workflow to access the Bakta database, please include the path using '--baktadb' or use '--bakdtadb_download true'  to download the Bakta database."
+        exit 1, "The Bakta database argument is missing. To enable the workflow to access the Bakta database, please include the path using '--baktadb' or use '--bakdtadb_download true' to download the Bakta database."
     }
 
     //
