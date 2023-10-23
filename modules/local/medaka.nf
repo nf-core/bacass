@@ -1,43 +1,44 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process MEDAKA {
     tag "$meta.id"
     label 'process_high'
-    label 'process_long'
-    label 'process_high_memory'
-    label 'error_retry'
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
-    conda (params.enable_conda ? 'medaka=1.4.3-0' : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/medaka:1.4.3--py38h130def0_0"
-    } else {
-        container "quay.io/biocontainers/medaka:1.4.3--py38h130def0_0"
-    }
+    conda 'medaka=1.4.3-0'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/medaka:1.4.3--py38h130def0_0' :
+        'biocontainers/medaka:1.4.3--py38h130def0_0' }"
 
     input:
-    tuple val(meta), file(assembly), val(reads), file(longreads)
+    tuple val(meta), file(longreads), file(assembly)
 
     output:
-    tuple val(meta), path('*_polished_genome.fa'), emit: assembly
-    path  '*.version.txt'                        , emit: version
+    tuple val(meta), path('*_polished_genome.fa')   , emit: assembly
+    path "versions.yml"                             , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
-    def software    = getSoftwareName(task.process)
-    def prefix      = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-    """
-    medaka_consensus ${options.args} \
-        -i ${longreads} \
-        -d ${assembly} \
-        -o "${prefix}_polished_genome.fa" \
-        -t ${task.cpus}
+    def args                    = task.ext.args ?: ''
+    def prefix                  = task.ext.prefix ?: "${meta.id}"
+    def reads_bgzip_command     = ("$longreads".endsWith('.gz')) ? "zcat $longreads | bgzip -c > ${prefix}.fastq.bgz" : ''
+    def assembly_bgzip_command  = ("$assembly".endsWith('.gz'))  ? "zcat $assembly  | bgzip -c > ${prefix}.fasta.bgz" : ''
+    if ("$longreads".endsWith('.gz')) { reads_bgzip_out     = "${prefix}.fastq.bgz"} else { reads_bgzip_out    = null }
+    if ("$assembly".endsWith('.gz'))  { assembly_bgzip_out  = "${prefix}.fasta.bgz"} else { assembly_bgzip_out = null }
 
-    echo \$(medaka --version 2>&1) | sed -e 's/medaka //g' > ${software}.version.txt
+    """
+    # Recompress with bgzip
+    $reads_bgzip_command
+    $assembly_bgzip_command
+
+    medaka_consensus $args \
+        -i ${ reads_bgzip_out ?: longreads } \
+        -d ${ assembly_bgzip_out ?: assembly } \
+        -o "${prefix}_polished_genome.fa" \
+        -t $task.cpus
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        medaka: \$( medaka --version 2>&1 | sed 's/medaka //g' )
+    END_VERSIONS
     """
 }

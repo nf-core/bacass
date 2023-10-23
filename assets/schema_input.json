@@ -7,22 +7,76 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
+            "ID": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "errorMessage": "Sample name must be provided and cannot contain spaces"
+                "unique": true,
+                "errorMessage": "Sample name must be provided and cannot contain spaces",
+                "meta": ["id"]
             },
-            "fastq_1": {
-                "type": "string",
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            "R1": {
+                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
+                "anyOf": [
+                    {
+                        "type": ["string", "null"],
+                        "exists": true,
+                        "pattern": "^(\\S+\\.f(ast)?q\\.gz|NA)$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ]
             },
-            "fastq_2": {
+            "R2": {
                 "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
                 "anyOf": [
                     {
+                        "type": ["string", "null"],
+                        "exists": true,
+                        "pattern": "^(\\S+\\.f(ast)?q\\.gz|NA)$"
+                    },
+                    {
                         "type": "string",
-                        "pattern": "^\\S+\\.f(ast)?q\\.gz$"
+                        "maxLength": 0
+                    }
+                ]
+            },
+            "LongFastQ": {
+                "errorMessage": "FastQ file for long reads cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
+                "anyOf": [
+                    {
+                        "type": ["string", "null"],
+                        "exists": true,
+                        "pattern": "^(\\S+\\.f(ast)?q\\.gz|NA)$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ]
+            },
+            "Fast5": {
+                "errorMessage": "A valid path to Fast5 files. Example: ./data/FAST5",
+                "anyOf": [
+                    {
+                        "type": ["string", "null"],
+                        "format": "directory-path",
+                        "exists": true,
+                        "pattern": "^(\\/[\\S\\s]*|NA)$"
+                    },
+                    {
+                        "type": "string",
+                        "maxLength": 0
+                    }
+                ]
+            },
+            "GenomeSize": {
+                "errorMessage": "A number (including decimals) ending with 'm', representing genome size. No spaces allowed.",
+                "anyOf": [
+                    {
+                        "type": ["string", "null"],
+                        "pattern": "(\\b\\d+\\.\\d+m\\b|NA)"
                     },
                     {
                         "type": "string",
@@ -31,9 +85,6 @@
                 ]
             }
         },
-        "required": [
-            "sample",
-            "fastq_1"
-        ]
+        "required": ["ID"]
     }
 }
