@@ -64,21 +64,21 @@ Each row represents a fastq file (single-end) or a pair of fastq files (paired e
 
 Default: Short read assembly with Unicycler, `--kraken2db` can be any [compressed database (`.tar.gz`/`.tgz`)](https://benlangmead.github.io/aws-indexes/k2):
 
-    ```console
-    nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.tsv --kraken2db "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20210517.tar.gz"
-    ```
+```console
+nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.tsv --kraken2db "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20210517.tar.gz"
+```
 
-    Long read assembly with Miniasm:
+Long read assembly with Miniasm:
 
-    ```console
-    nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.tsv --assembly_type 'long' --assembler 'miniasm' --kraken2db "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20210517.tar.gz"
-    ```
+```console
+nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.tsv --assembly_type 'long' --assembler 'miniasm' --kraken2db "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_8gb_20210517.tar.gz"
+```
 
 ```bash
 nextflow run nf-core/bacass \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.tsv \
-   --outdir <OUTDIR>
+  -profile <docker/singularity/.../institute> \
+  --input samplesheet.tsv \
+  --outdir <OUTDIR>
 ```
 
 :::warning
