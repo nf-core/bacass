@@ -26,6 +26,11 @@
                         "git_sha": "05c280924b6c768d484c7c443dad5e605c4ff4b4",
                         "installed_by": ["modules"]
                     },
+                    "dragonflye": {
+                        "branch": "master",
+                        "git_sha": "516189e968feb4ebdd9921806988b4c12b4ac2dc",
+                        "installed_by": ["modules"]
+                    },
                     "fastp": {
                         "branch": "master",
                         "git_sha": "d497a4868ace3302016ea8ed4b395072d5e833cd",

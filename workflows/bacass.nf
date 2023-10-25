@@ -81,6 +81,7 @@ include { MINIMAP2_ALIGN                        } from '../modules/nf-core/minim
 include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS  } from '../modules/nf-core/minimap2/align/main'
 include { MINIMAP2_ALIGN as MINIMAP2_POLISH     } from '../modules/nf-core/minimap2/align/main'
 include { MINIASM                               } from '../modules/nf-core/miniasm/main'
+include { DRAGONFLYE                            } from '../modules/nf-core/dragonflye/main'
 include { RACON                                 } from '../modules/nf-core/racon/main'
 include { SAMTOOLS_SORT                         } from '../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samtools/index/main'
@@ -220,7 +221,7 @@ workflow BACASS {
     }
 
     //
-    // ASSEMBLY: Unicycler, Canu, Miniasm
+    // ASSEMBLY: Unicycler, Canu, Miniasm, Dragonflye
     //
     ch_assembly = Channel.empty()
 
@@ -289,7 +290,18 @@ workflow BACASS {
             ch_for_racon
         )
         ch_assembly = ch_assembly.mix( RACON.out.improved_assembly.dump(tag: 'miniasm') )
-        ch_versions = ch_versions.mix(RACON.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix( RACON.out.versions.ifEmpty(null) )
+    }
+
+    //
+    // MODULE: Dragonflye, genome assembly, long reads
+    //
+    if( params.assembler == 'dragonflye' ){
+        DRAGONFLYE(
+            ch_for_assembly.map { meta, sr, lr -> tuple(meta, lr) }
+        )
+        ch_assembly = ch_assembly.mix( DRAGONFLYE.out.contigs.dump(tag: 'dragonflye') )
+        ch_versions = ch_versions.mix( DRAGONFLYE.out.versions.ifEmpty(null) )
     }
 
     //
@@ -390,6 +402,7 @@ workflow BACASS {
     )
     ch_quast_multiqc = QUAST.out.tsv
     ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
+    ch_to_quast.view()
 
     //
     // MODULE: PROKKA, gene annotation
