@@ -12,9 +12,8 @@
                     },
                     "bakta/baktadbdownload": {
                         "branch": "master",
-                        "git_sha": "f05fa7c6753f92be861d606378860dcd5c828880",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/bakta/baktadbdownload/bakta-baktadbdownload.diff"
+                        "git_sha": "516189e968feb4ebdd9921806988b4c12b4ac2dc",
+                        "installed_by": ["modules"]
                     },
                     "canu": {
                         "branch": "master",
