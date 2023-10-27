@@ -410,7 +410,7 @@ workflow BACASS {
     ch_prokka_txt_multiqc = Channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'prokka' ) {
         // Uncompress assembly for annotation if necessary
-        if( !ch_assembly.map{ it[1].endsWith('.gz') }.any() ){ // FIXME: This should't be ""!"".
+        if( !ch_assembly.map{ it[1].endsWith('.gz') }.any() ){ // FIXME: Not works with dragonflye output.
             GUNZIP ( ch_assembly )
             ch_to_prokka    = GUNZIP.out.gunzip
             ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
@@ -434,7 +434,7 @@ workflow BACASS {
     ch_bakta_txt_multiqc = Channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'bakta' ) {
         // Uncompress assembly for annotation if necessary
-        if( !ch_assembly.map{ it[1].endsWith('.gz')}.any() ){ // FIXME: This should't be ""!"".
+        if( ch_assembly.map{ it[1].endsWith('.gz')}.any() ){ // FIXME: Not works with dragonflye output.
             GUNZIP ( ch_assembly )
             ch_to_bakta     = GUNZIP.out.gunzip
             ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
