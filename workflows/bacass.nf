@@ -116,10 +116,10 @@ workflow BACASS {
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
     def criteria = multiMapCriteria {
-        meta, fastq_1, fastq_2, long_fastq, fast5, genome_size ->
-            shortreads: fastq_1 != 'NA' ? tuple(tuple(meta, [fastq_1, fastq_2])) : null
-            longreads: long_fastq != 'NA' ? tuple(meta, long_fastq) : null
-            fast5: fast5 != 'NA' ? tuple(meta, fast5) : null
+        meta, fastq_1, fastq_2, long_fastq, fast5 ->
+            shortreads: fastq_1     != 'NA' ? tuple(meta, [fastq_1, fastq_2]) : null
+            longreads: long_fastq   != 'NA' ? tuple(meta, long_fastq)         : null
+            fast5: fast5            != 'NA' ? tuple(meta, fast5)              : null
     }
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     Channel
