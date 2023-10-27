@@ -296,6 +296,7 @@ workflow BACASS {
     //
     // MODULE: Dragonflye, genome assembly, long reads
     //
+    // TODO: Allow pipeline to get the GenomeSize and input this as params.dragonflye_args = "--gsize $genomeSize"
     if( params.assembler == 'dragonflye' ){
         DRAGONFLYE(
             ch_for_assembly.map { meta, sr, lr -> tuple(meta, lr) }
@@ -402,16 +403,21 @@ workflow BACASS {
     )
     ch_quast_multiqc = QUAST.out.tsv
     ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
-    ch_to_quast.view()
 
     //
     // MODULE: PROKKA, gene annotation
     //
     ch_prokka_txt_multiqc = Channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'prokka' ) {
-        GUNZIP ( ch_assembly )
-        ch_to_prokka    = GUNZIP.out.gunzip
-        ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
+        // Uncompress assembly for annotation if necessary
+        if( !ch_assembly.map{ it[1].endsWith('.gz') }.any() ){ // FIXME: This should't be ""!"".
+            GUNZIP ( ch_assembly )
+            ch_to_prokka    = GUNZIP.out.gunzip
+            ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
+        } else {
+            ch_assembly
+                .set{ ch_to_prokka }
+        }
 
         PROKKA (
             ch_to_prokka,
@@ -425,12 +431,17 @@ workflow BACASS {
     //
     // MODULE: BAKTA, gene annotation
     //
-
     ch_bakta_txt_multiqc = Channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'bakta' ) {
-        GUNZIP ( ch_assembly )
-        ch_to_bakta     = GUNZIP.out.gunzip
-        ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
+        // Uncompress assembly for annotation if necessary
+        if( !ch_assembly.map{ it[1].endsWith('.gz')}.any() ){ // FIXME: This should't be ""!"".
+            GUNZIP ( ch_assembly )
+            ch_to_bakta     = GUNZIP.out.gunzip
+            ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
+        } else {
+            ch_assembly
+                .set{ ch_to_bakta }
+        }
 
         BAKTA_DBDOWNLOAD_RUN (
             ch_to_bakta,
