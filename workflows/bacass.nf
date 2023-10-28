@@ -404,20 +404,23 @@ workflow BACASS {
     ch_quast_multiqc = QUAST.out.tsv
     ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
 
+    // Check assemblies that require further processing for gene annotation
+    ch_assembly
+        .branch{ meta, fasta ->
+            gzip: fasta.name.endsWith('.gz')
+            skip: true
+        }
+        .set{ ch_assembly_for_gunzip }
+
     //
     // MODULE: PROKKA, gene annotation
     //
     ch_prokka_txt_multiqc = Channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'prokka' ) {
         // Uncompress assembly for annotation if necessary
-        if( !ch_assembly.map{ it[1].endsWith('.gz') }.any() ){ // FIXME: Not works with dragonflye output.
-            GUNZIP ( ch_assembly )
-            ch_to_prokka    = GUNZIP.out.gunzip
-            ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
-        } else {
-            ch_assembly
-                .set{ ch_to_prokka }
-        }
+        GUNZIP ( ch_assembly_for_gunzip.gzip )
+        ch_to_prokka    = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
+        ch_versions     = ch_versions.mix( GUNZIP.out.versions.ifEmpty(null) )
 
         PROKKA (
             ch_to_prokka,
@@ -434,21 +437,15 @@ workflow BACASS {
     ch_bakta_txt_multiqc = Channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'bakta' ) {
         // Uncompress assembly for annotation if necessary
-        if( ch_assembly.map{ it[1].endsWith('.gz')}.any() ){ // FIXME: Not works with dragonflye output.
-            GUNZIP ( ch_assembly )
-            ch_to_bakta     = GUNZIP.out.gunzip
-            ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
-        } else {
-            ch_assembly
-                .set{ ch_to_bakta }
-        }
+        GUNZIP ( ch_assembly_for_gunzip.gzip )
+        ch_to_bakta     = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
+        ch_versions     = ch_versions.mix( GUNZIP.out.versions.ifEmpty(null) )
 
         BAKTA_DBDOWNLOAD_RUN (
             ch_to_bakta,
             params.baktadb,
             params.baktadb_download
         )
-
         ch_bakta_txt_multiqc    = BAKTA_DBDOWNLOAD_RUN.out.bakta_txt_multiqc.collect()
         ch_versions             = ch_versions.mix(BAKTA_DBDOWNLOAD_RUN.out.versions)
     }
