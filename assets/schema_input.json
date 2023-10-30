@@ -73,6 +73,7 @@
             },
             "GenomeSize": {
                 "errorMessage": "A number (including decimals) ending with 'm', representing genome size. No spaces allowed.",
+                "meta": ["gsize"],
                 "anyOf": [
                     {
                         "type": ["string", "null"],
