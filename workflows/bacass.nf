@@ -296,7 +296,6 @@ workflow BACASS {
     //
     // MODULE: Dragonflye, genome assembly, long reads
     //
-    // TODO: Allow pipeline to get the GenomeSize and input this as params.dragonflye_args = "--gsize $genomeSize"
     if( params.assembler == 'dragonflye' ){
         DRAGONFLYE(
             ch_for_assembly.map { meta, sr, lr -> tuple(meta, lr) }
