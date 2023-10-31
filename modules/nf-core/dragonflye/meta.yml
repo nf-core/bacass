@@ -18,7 +18,7 @@ input:
         e.g. [ id:'test', single_end:false ]
   - reads:
       type: file
-      description: Input Nanopore FASTQ file
+      description: Input Nanopore FASTQ file. Optional, additional Illumina FASTQ files can be provided to perform short reads polishing.
       pattern: "*.fastq.gz"
 output:
   - meta:

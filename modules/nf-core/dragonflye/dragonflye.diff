@@ -1,0 +1,39 @@
+Changes in module 'nf-core/dragonflye'
+--- modules/nf-core/dragonflye/meta.yml
++++ modules/nf-core/dragonflye/meta.yml
+@@ -18,7 +18,7 @@
+         e.g. [ id:'test', single_end:false ]
+   - reads:
+       type: file
+-      description: Input Nanopore FASTQ file
++      description: Input Nanopore FASTQ file. Optional, additional Illumina FASTQ files can be provided to perform short reads polishing.
+       pattern: "*.fastq.gz"
+ output:
+   - meta:
+
+--- modules/nf-core/dragonflye/main.nf
++++ modules/nf-core/dragonflye/main.nf
+@@ -8,7 +8,7 @@
+         'biocontainers/dragonflye:1.0.11--hdfd78af_0' }"
+ 
+     input:
+-    tuple val(meta), path(reads)
++    tuple val(meta), path(shortreads), path(longreads)
+ 
+     output:
+     tuple val(meta), path("contigs.fa")                                        , emit: contigs
+@@ -24,9 +24,11 @@
+     script:
+     def args = task.ext.args ?: ''
+     def memory = task.memory.toGiga()
++    def short_polishing = shortreads ? "--R1 ${shortreads[0]} --R2 ${shortreads[1]}" : '' 
+     """
+     dragonflye \\
+-        --reads ${reads} \\
++        --reads ${longreads} \\
++        $short_polishing \\
+         $args \\
+         --cpus $task.cpus \\
+         --ram $memory \\
+
+************************************************************

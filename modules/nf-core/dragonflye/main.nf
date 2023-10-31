@@ -8,7 +8,7 @@ process DRAGONFLYE {
         'biocontainers/dragonflye:1.0.11--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(reads)
+    tuple val(meta), path(shortreads), path(longreads)
 
     output:
     tuple val(meta), path("contigs.fa")                                        , emit: contigs
@@ -24,9 +24,11 @@ process DRAGONFLYE {
     script:
     def args = task.ext.args ?: ''
     def memory = task.memory.toGiga()
+    def short_polishing = shortreads ? "--R1 ${shortreads[0]} --R2 ${shortreads[1]}" : '' 
     """
     dragonflye \\
-        --reads ${reads} \\
+        --reads ${longreads} \\
+        $short_polishing \\
         $args \\
         --cpus $task.cpus \\
         --ram $memory \\
