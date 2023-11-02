@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#104](https://github.com/nf-core/bacass/pull/104) - Added dragonflye module for long-reads assembly
+
 ### `Fixed`
 
 ### `Dependencies`

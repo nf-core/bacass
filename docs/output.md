@@ -146,6 +146,12 @@ Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.h
 
 Check out the [Miniasm documentation](https://github.com/lh3/miniasm) for more information on Miniasm output.
 
+- `Dragonflye/`
+  - `*.contigs.fa`: Assembly in Fasta format
+  - `*.dragonflye.log`: Log file containing the report of the dragonflye process
+
+Checkout the [Dragonflye](https://github.com/rpetit3/dragonflye) documentation for more information of the Dragonflye output.
+
 </details>
 
 ### Polished assemblies

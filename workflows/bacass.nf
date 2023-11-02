@@ -81,6 +81,7 @@ include { MINIMAP2_ALIGN                        } from '../modules/nf-core/minim
 include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS  } from '../modules/nf-core/minimap2/align/main'
 include { MINIMAP2_ALIGN as MINIMAP2_POLISH     } from '../modules/nf-core/minimap2/align/main'
 include { MINIASM                               } from '../modules/nf-core/miniasm/main'
+include { DRAGONFLYE                            } from '../modules/nf-core/dragonflye/main'
 include { RACON                                 } from '../modules/nf-core/racon/main'
 include { SAMTOOLS_SORT                         } from '../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samtools/index/main'
@@ -115,10 +116,10 @@ workflow BACASS {
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
     def criteria = multiMapCriteria {
-        meta, fastq_1, fastq_2, long_fastq, fast5, genome_size ->
-            shortreads: fastq_1 != 'NA' ? tuple(tuple(meta, [fastq_1, fastq_2])) : null
-            longreads: long_fastq != 'NA' ? tuple(meta, long_fastq) : null
-            fast5: fast5 != 'NA' ? tuple(meta, fast5) : null
+        meta, fastq_1, fastq_2, long_fastq, fast5 ->
+            shortreads: fastq_1     != 'NA' ? tuple(meta, [fastq_1, fastq_2]) : null
+            longreads: long_fastq   != 'NA' ? tuple(meta, long_fastq)         : null
+            fast5: fast5            != 'NA' ? tuple(meta, fast5)              : null
     }
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     Channel
@@ -220,7 +221,7 @@ workflow BACASS {
     }
 
     //
-    // ASSEMBLY: Unicycler, Canu, Miniasm
+    // ASSEMBLY: Unicycler, Canu, Miniasm, Dragonflye
     //
     ch_assembly = Channel.empty()
 
@@ -289,7 +290,18 @@ workflow BACASS {
             ch_for_racon
         )
         ch_assembly = ch_assembly.mix( RACON.out.improved_assembly.dump(tag: 'miniasm') )
-        ch_versions = ch_versions.mix(RACON.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix( RACON.out.versions.ifEmpty(null) )
+    }
+
+    //
+    // MODULE: Dragonflye, genome assembly, long reads
+    //
+    if( params.assembler == 'dragonflye' ){
+        DRAGONFLYE(
+            ch_for_assembly.map { meta, sr, lr -> tuple(meta, lr) }
+        )
+        ch_assembly = ch_assembly.mix( DRAGONFLYE.out.contigs.dump(tag: 'dragonflye') )
+        ch_versions = ch_versions.mix( DRAGONFLYE.out.versions.ifEmpty(null) )
     }
 
     //
@@ -391,14 +403,23 @@ workflow BACASS {
     ch_quast_multiqc = QUAST.out.tsv
     ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
 
+    // Check assemblies that require further processing for gene annotation
+    ch_assembly
+        .branch{ meta, fasta ->
+            gzip: fasta.name.endsWith('.gz')
+            skip: true
+        }
+        .set{ ch_assembly_for_gunzip }
+
     //
     // MODULE: PROKKA, gene annotation
     //
     ch_prokka_txt_multiqc = Channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'prokka' ) {
-        GUNZIP ( ch_assembly )
-        ch_to_prokka    = GUNZIP.out.gunzip
-        ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
+        // Uncompress assembly for annotation if necessary
+        GUNZIP ( ch_assembly_for_gunzip.gzip )
+        ch_to_prokka    = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
+        ch_versions     = ch_versions.mix( GUNZIP.out.versions.ifEmpty(null) )
 
         PROKKA (
             ch_to_prokka,
@@ -412,19 +433,18 @@ workflow BACASS {
     //
     // MODULE: BAKTA, gene annotation
     //
-
     ch_bakta_txt_multiqc = Channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'bakta' ) {
-        GUNZIP ( ch_assembly )
-        ch_to_bakta     = GUNZIP.out.gunzip
-        ch_versions     = ch_versions.mix(GUNZIP.out.versions.ifEmpty(null))
+        // Uncompress assembly for annotation if necessary
+        GUNZIP ( ch_assembly_for_gunzip.gzip )
+        ch_to_bakta     = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
+        ch_versions     = ch_versions.mix( GUNZIP.out.versions.ifEmpty(null) )
 
         BAKTA_DBDOWNLOAD_RUN (
             ch_to_bakta,
             params.baktadb,
             params.baktadb_download
         )
-
         ch_bakta_txt_multiqc    = BAKTA_DBDOWNLOAD_RUN.out.bakta_txt_multiqc.collect()
         ch_versions             = ch_versions.mix(BAKTA_DBDOWNLOAD_RUN.out.versions)
     }
