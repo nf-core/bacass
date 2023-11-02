@@ -1,0 +1,23 @@
+Changes in module 'nf-core/porechop/porechop'
+--- modules/nf-core/porechop/porechop/main.nf
++++ modules/nf-core/porechop/porechop/main.nf
+@@ -11,7 +11,7 @@
+     tuple val(meta), path(reads)
+ 
+     output:
+-    tuple val(meta), path("*.fastq.gz"), emit: reads
++    tuple val(meta), path("*.porechop.fastq.gz"), emit: reads
+     tuple val(meta), path("*.log")     , emit: log
+     path "versions.yml"                , emit: versions
+ 
+@@ -26,7 +26,7 @@
+         -i $reads \\
+         -t $task.cpus \\
+         $args \\
+-        -o ${prefix}.fastq.gz \\
++        -o ${prefix}.porechop.fastq.gz \\
+         > ${prefix}.log
+     cat <<-END_VERSIONS > versions.yml
+     "${task.process}":
+
+************************************************************
