@@ -36,7 +36,7 @@ The pipeline can then perform long read assembly utilizing [Unicycler](https://g
 
 ### Hybrid Assembly
 
-For users specifying both short read and long read (NanoPore) data, the pipeline can perform a hybrid assembly approach utilizing [Unicycler](https://github.com/rrwick/Unicycler), taking the full set of information from short reads and long reads into account.
+For users specifying both short read and long read (NanoPore) data, the pipeline can perform a hybrid assembly approach utilizing [Unicycler](https://github.com/rrwick/Unicycler) or [Dragonflye](https://github.com/rpetit3/dragonflye) (polishing of the assembled genome with short reads), taking the full set of information from short reads and long reads into account.
 
 ### Assembly QC and annotation
 

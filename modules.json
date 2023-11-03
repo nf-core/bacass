@@ -28,7 +28,8 @@
                     "dragonflye": {
                         "branch": "master",
                         "git_sha": "516189e968feb4ebdd9921806988b4c12b4ac2dc",
-                        "installed_by": ["modules"]
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/dragonflye/dragonflye.diff"
                     },
                     "fastp": {
                         "branch": "master",
@@ -74,7 +75,8 @@
                     "porechop/porechop": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
-                        "installed_by": ["modules"]
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/porechop/porechop/porechop-porechop.diff"
                     },
                     "prokka": {
                         "branch": "master",

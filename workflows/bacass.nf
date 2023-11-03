@@ -226,7 +226,7 @@ workflow BACASS {
     ch_assembly = Channel.empty()
 
     //
-    // MODULE: Unicycler, genome assembly, nf-core module allows only short assembly
+    // MODULE: Unicycler, genome assembly, nf-core module allows only short, long and hybrid assembly
     //
     if ( params.assembler == 'unicycler' ) {
         UNICYCLER (
@@ -235,6 +235,7 @@ workflow BACASS {
         ch_assembly = ch_assembly.mix( UNICYCLER.out.scaffolds.dump(tag: 'unicycler') )
         ch_versions = ch_versions.mix( UNICYCLER.out.versions.ifEmpty(null) )
     }
+
 
     //
     // MODULE: Canu, genome assembly, long reads
@@ -294,11 +295,11 @@ workflow BACASS {
     }
 
     //
-    // MODULE: Dragonflye, genome assembly, long reads
+    // MODULE: Dragonflye, genome assembly of long reads. Short reads polishing of the draft genome is available, when both short and long reads are present.
     //
     if( params.assembler == 'dragonflye' ){
         DRAGONFLYE(
-            ch_for_assembly.map { meta, sr, lr -> tuple(meta, lr) }
+            ch_for_assembly
         )
         ch_assembly = ch_assembly.mix( DRAGONFLYE.out.contigs.dump(tag: 'dragonflye') )
         ch_versions = ch_versions.mix( DRAGONFLYE.out.versions.ifEmpty(null) )
