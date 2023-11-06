@@ -295,7 +295,7 @@ workflow BACASS {
     }
 
     //
-    // MODULE: Dragonflye, genome assembly of long reads. Short reads polishing of the draft genome is available, when both short and long reads are present.
+    // MODULE: Dragonflye, genome assembly of long reads. Moreover, it provides the option for polishing the draft genome using short reads when both short and long reads are available.
     //
     if( params.assembler == 'dragonflye' ){
         DRAGONFLYE(
