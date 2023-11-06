@@ -59,6 +59,7 @@ include { UNICYCLER                 } from '../modules/local/unicycler'
 include { NANOPOLISH                } from '../modules/local/nanopolish'
 include { MEDAKA                    } from '../modules/local/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
+include { KMERFINDER                } from '../modules/local/kmerfinder'
 include { DFAST                     } from '../modules/local/dfast'
 
 //
@@ -219,7 +220,7 @@ workflow BACASS {
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
     }
-
+/*
     //
     // ASSEMBLY: Unicycler, Canu, Miniasm, Dragonflye
     //
@@ -352,7 +353,7 @@ workflow BACASS {
         MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
         ch_versions = ch_versions.mix(MEDAKA.out.versions.ifEmpty(null))
     }
-
+*/
     //
     // MODULE: Kraken2, QC for sample purity
     //
@@ -388,6 +389,23 @@ workflow BACASS {
         ch_versions = ch_versions.mix(KRAKEN2_LONG.out.versions.ifEmpty(null))
     }
 
+    //
+    // MODULE: Kmerfinder, QC for sample purity
+    //
+
+    // TODO: add check contamination module // CALLIT PARSE_KMERFINDER
+    // TODO: if not provided, download reference from kmerfinder results --> module FIND_DOWNLOAD_COMMON_REFFERENCE
+    // TODO: Create kmerfinder mode for short and longreads
+    // TODO: When no kmerfinder database is found, allow nf-core/bacass to download it
+    if ( !params.skip_kmerfinder && params.kmerfinderdb ) {
+        KMERFINDER (
+            ch_for_assembly.map{ meta, sr, lr -> tuple( meta, sr) },    // [meta, reads]
+            params.kmerfinderdb // path(kmerfinder database)
+        )
+        ch_kmerfinder_report  = KMERFINDER.out.report
+        ch_versions           = ch_versions.mix( KMERFINDER.out.versions.ifEmpty(null) )
+    }
+/*
     //
     // MODULE: QUAST, assembly QC
     //
@@ -501,6 +519,7 @@ workflow BACASS {
         )
         multiqc_report = MULTIQC.out.report.toList()
     }
+*/
 }
 
 /*
