@@ -60,6 +60,7 @@ include { NANOPOLISH                } from '../modules/local/nanopolish'
 include { MEDAKA                    } from '../modules/local/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
 include { KMERFINDER                } from '../modules/local/kmerfinder'
+include { KMERFINDER_SUMMARY        } from '../modules/local/kmerfinder_summary'
 include { DFAST                     } from '../modules/local/dfast'
 
 //
@@ -404,6 +405,11 @@ workflow BACASS {
         )
         ch_kmerfinder_report  = KMERFINDER.out.report
         ch_versions           = ch_versions.mix( KMERFINDER.out.versions.ifEmpty(null) )
+
+        KMERFINDER_SUMMARY (
+            ch_kmerfinder_report.map{meta, report -> report }.collect()
+        )
+        ch_versions = ch_versions.mix( KMERFINDER_SUMMARY.out.versions.ifEmpty(null) )
     }
 /*
     //
