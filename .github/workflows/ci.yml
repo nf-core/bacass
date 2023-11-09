@@ -52,7 +52,7 @@ jobs:
     strategy:
       matrix:
         # Run remaining test profiles with minimum nextflow version
-        profile: [test_long_miniasm, test_hybrid, test_long, test_dfast]
+        profile: [test_long_miniasm, test_hybrid, test_long, test_dfast, test_hybrid_dragonflye]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
