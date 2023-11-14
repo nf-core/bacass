@@ -61,6 +61,7 @@ include { MEDAKA                    } from '../modules/local/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
 include { KMERFINDER                } from '../modules/local/kmerfinder'
 include { KMERFINDER_SUMMARY        } from '../modules/local/kmerfinder_summary'
+include { FIND_DOWNLOAD_REFERENCE   } from '../modules/local/find_download_reference'
 include { DFAST                     } from '../modules/local/dfast'
 
 //
@@ -393,23 +394,32 @@ workflow BACASS {
     //
     // MODULE: Kmerfinder, QC for sample purity
     //
-
-    // TODO: add check contamination module // CALLIT PARSE_KMERFINDER
-    // TODO: if not provided, download reference from kmerfinder results --> module FIND_DOWNLOAD_COMMON_REFFERENCE
     // TODO: Create kmerfinder mode for short and longreads
     // TODO: When no kmerfinder database is found, allow nf-core/bacass to download it
+    // TODO: create a strategy to group the samples according to the reference found.
+    // TODO: I think that this kmerfinder step could be grouped into a subworkflow
     if ( !params.skip_kmerfinder && params.kmerfinderdb ) {
         KMERFINDER (
             ch_for_assembly.map{ meta, sr, lr -> tuple( meta, sr) },    // [meta, reads]
             params.kmerfinderdb // path(kmerfinder database)
         )
-        ch_kmerfinder_report  = KMERFINDER.out.report
-        ch_versions           = ch_versions.mix( KMERFINDER.out.versions.ifEmpty(null) )
+        KMERFINDER.out.report
+            .map { meta, report -> report }
+            .collect()
+            .set { ch_kmerfinder_reports }
+        ch_versions = ch_versions.mix( KMERFINDER.out.versions.ifEmpty(null) )
 
         KMERFINDER_SUMMARY (
-            ch_kmerfinder_report.map{meta, report -> report }.collect()
+            ch_kmerfinder_reports
         )
         ch_versions = ch_versions.mix( KMERFINDER_SUMMARY.out.versions.ifEmpty(null) )
+
+        if (!params.reference_fasta && !params.reference_gff) {
+            FIND_DOWNLOAD_REFERENCE (
+                ch_kmerfinder_reports,
+                params.reference_ncbi_bacteria
+            )
+        }
     }
 /*
     //
