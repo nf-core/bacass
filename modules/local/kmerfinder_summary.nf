@@ -16,7 +16,7 @@ process KMERFINDER_SUMMARY {
 
     script:
     """
-    kmerfinder_summary.py --path kmerfinder_reports/ --output_bn kmerfinder.bn --output_csv kmerfinder.csv
+    kmerfinder_summary.py --path reports/ --output_bn kmerfinder.bn --output_csv kmerfinder.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
