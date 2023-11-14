@@ -73,6 +73,23 @@
                     "fa_icon": "fab fa-gitkraken",
                     "help_text": "See [Kraken2 homepage](https://benlangmead.github.io/aws-indexes/k2) for download\nlinks. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for\nsample purity.",
                     "description": "Path to Kraken2 database."
+                },
+                "kmerfinderdb": {
+                    "type": "string",
+                    "description": "Database for Kmerfinder.",
+                    "help_text": ""
+                },
+                "reference_fasta": {
+                    "type": "string",
+                    "description": "Reference FASTA file."
+                },
+                "reference_gff": {
+                    "type": "string",
+                    "description": "Reference GFF file."
+                },
+                "reference_ncbi_bacteria": {
+                    "type": "string",
+                    "description": "NCBI Bacteria reference database"
                 }
             }
         },
@@ -188,6 +205,11 @@
                     "fa_icon": "fas fa-forward",
                     "description": "Skip running Kraken2 classifier on reads."
                 },
+                "skip_kmerfinder": {
+                    "type": "boolean",
+                    "description": "Skip contamination analysis with Kmerfinder",
+                    "fa_icon": "fas fa-forward"
+                },
                 "skip_annotation": {
                     "type": "boolean",
                     "fa_icon": "fas fa-forward",
@@ -205,7 +227,8 @@
                 },
                 "skip_multiqc": {
                     "type": "boolean",
-                    "description": "Skip MultiQC"
+                    "description": "Skip MultiQC",
+                    "fa_icon": "fas fa-forward"
                 }
             }
         },
