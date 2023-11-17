@@ -123,7 +123,7 @@ def download_references(file, reference, out_dir):
 
 
         url = str(url[0])
-        url_https = url.replace('ftp', 'https')
+        url_https = url.replace('ftp', 'https', 1)
 
     # get url and reference file
 
