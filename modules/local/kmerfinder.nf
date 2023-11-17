@@ -12,7 +12,8 @@ process KMERFINDER {
     path(kmerfinderDB)
 
     output:
-    tuple val(meta), path("*_results.txt")  , emit: report
+    tuple val(meta), path("*_results.txt")    , emit: report
+    tuple val(meta), path("*_data.json")      , emit: json
     path "versions.yml"                     , emit: versions
 
     script:
@@ -28,6 +29,7 @@ process KMERFINDER {
         -x
 
     mv results.txt ${prefix}_results.txt
+    mv data.json ${prefix}_data.json
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
