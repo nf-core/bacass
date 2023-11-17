@@ -92,6 +92,7 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/krake
 include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2/main'
 include { QUAST                                 } from '../modules/nf-core/quast/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip/main'
+include { GUNZIP_KMERFINDERDB                   } from '../modules/nf-core/gunzip/main'
 include { PROKKA                                } from '../modules/nf-core/prokka/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS           } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
@@ -394,20 +395,31 @@ workflow BACASS {
     //
     // MODULE: Kmerfinder, QC for sample purity
     //
-    // TODO: Create kmerfinder mode for short and longreads
-    // TODO: When no kmerfinder database is found, allow nf-core/bacass to download it
-    // TODO: create a strategy to group the samples according to the reference found.
+    // TODO: Create kmerfinder mode for longreads
+    // TODO: create a strategy to group the samples according to the reference found. [pending, fix splitjson path-key]
     // TODO: I think that this kmerfinder step could be grouped into a subworkflow
-    if ( !params.skip_kmerfinder && params.kmerfinderdb ) {
+    // TODO: Create a by refseq-id quast report && general.
+    // TODO: hack multiqc to group quast-entries by refseqid?
         KMERFINDER (
             ch_for_assembly.map{ meta, sr, lr -> tuple( meta, sr) },    // [meta, reads]
             params.kmerfinderdb // path(kmerfinder database)
         )
+        ch_versions = ch_versions.mix( KMERFINDER.out.versions.ifEmpty(null) )
+
+        KMERFINDER.out.json
+            .join(ch_for_assembly, by:0)
+            .map{
+                meta, json, sr, lr ->
+                    meta.refseq = json
+                                    .splitJson(path:"kmerfinder.results.species_hits").value.get(0)["Assembly"]
+                    return tuple(meta, sr, lr)
+            }
+            .set { ch_refseqid }
+
         KMERFINDER.out.report
             .map { meta, report -> report }
             .collect()
             .set { ch_kmerfinder_reports }
-        ch_versions = ch_versions.mix( KMERFINDER.out.versions.ifEmpty(null) )
 
         KMERFINDER_SUMMARY (
             ch_kmerfinder_reports
