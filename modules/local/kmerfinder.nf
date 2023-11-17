@@ -12,8 +12,8 @@ process KMERFINDER {
     path(kmerfinderDB)
 
     output:
-    tuple val(meta), path("*_results.txt")    , emit: report
-    tuple val(meta), path("*_data.json")      , emit: json
+    tuple val(meta), path("*_results.txt")  , emit: report
+    tuple val(meta), path("*_data.json")    , emit: json
     path "versions.yml"                     , emit: versions
 
     script:

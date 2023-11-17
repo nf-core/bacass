@@ -8,7 +8,7 @@ process KMERFINDER_SUMMARY {
         'biocontainers/python:3.10' }"
 
     input:
-    path(reports, stageAs: 'reports/*')
+    val(meta), path(report, stageAs: 'reports/*')
 
     output:
     path "kmerfinder.csv"   , emit: summary
