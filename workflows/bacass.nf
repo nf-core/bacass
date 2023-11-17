@@ -92,7 +92,7 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/krake
 include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2/main'
 include { QUAST                                 } from '../modules/nf-core/quast/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip/main'
-include { GUNZIP_KMERFINDERDB                   } from '../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_KMERFINDERDB         } from '../modules/nf-core/gunzip/main'
 include { PROKKA                                } from '../modules/nf-core/prokka/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS           } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
@@ -223,7 +223,7 @@ workflow BACASS {
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
     }
-/*
+
     //
     // ASSEMBLY: Unicycler, Canu, Miniasm, Dragonflye
     //
@@ -356,7 +356,7 @@ workflow BACASS {
         MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
         ch_versions = ch_versions.mix(MEDAKA.out.versions.ifEmpty(null))
     }
-*/
+
     //
     // MODULE: Kraken2, QC for sample purity
     //
@@ -400,38 +400,54 @@ workflow BACASS {
     // TODO: I think that this kmerfinder step could be grouped into a subworkflow
     // TODO: Create a by refseq-id quast report && general.
     // TODO: hack multiqc to group quast-entries by refseqid?
+    // TODO: corner casse >1 refseq_id
+    // TODO: PREPARE REFERENCES SUBWORKFLOW
+    if ( !params.skip_kmerfinder && params.kmerfinderdb ) {
+        if( params.kmerfinderdb.endsWith('.gz') ){
+            GUNZIP_KMERFINDERDB ( params.kmerfinderdb )
+            ch_kmerfinderdb = GUNZIP_KMERFINDERDB.out.gunzip
+        } else {
+            ch_kmerfinderdb = params.kmerfinderdb
+        }
+
         KMERFINDER (
             ch_for_assembly.map{ meta, sr, lr -> tuple( meta, sr) },    // [meta, reads]
-            params.kmerfinderdb // path(kmerfinder database)
+            ch_kmerfinderdb
         )
         ch_versions = ch_versions.mix( KMERFINDER.out.versions.ifEmpty(null) )
 
         KMERFINDER.out.json
-            .join(ch_for_assembly, by:0)
+            .join(KMERFINDER.out.report, by:0)
+            .join(ch_assembly, by:0)
             .map{
-                meta, json, sr, lr ->
-                    meta.refseq = json
+                meta, json, report, fasta ->
+                    def new_meta = [:]
+                    new_meta.refseq = json
                                     .splitJson(path:"kmerfinder.results.species_hits").value.get(0)["Assembly"]
-                    return tuple(meta, sr, lr)
+                    return tuple(meta, new_meta, report, fasta)
             }
-            .set { ch_refseqid }
+            .groupTuple(by:1)
+            .set { ch_refseqid_fasta }
 
-        KMERFINDER.out.report
-            .map { meta, report -> report }
-            .collect()
-            .set { ch_kmerfinder_reports }
+        ch_refseqid_fasta.map{ meta, new_meta, report, fasta -> tuple (meta, report)}.view()
+
+
+//        KMERFINDER.out.report
+//            .map { meta, report -> report }
+//            .collect()
+//            .set { ch_kmerfinder_reports }
 
         KMERFINDER_SUMMARY (
-            ch_kmerfinder_reports
+            ch_refseqid_fasta.map{ meta, report, fasta -> tuple (meta, report)}
         )
         ch_versions = ch_versions.mix( KMERFINDER_SUMMARY.out.versions.ifEmpty(null) )
 
-        if (!params.reference_fasta && !params.reference_gff) {
-            FIND_DOWNLOAD_REFERENCE (
-                ch_kmerfinder_reports,
-                params.reference_ncbi_bacteria
-            )
-        }
+//        if (!params.reference_fasta && !params.reference_gff) {
+//            FIND_DOWNLOAD_REFERENCE (
+//                ch_kmerfinder_reports,
+//                params.reference_ncbi_bacteria
+//            )
+//        }
     }
 /*
     //
@@ -449,7 +465,7 @@ workflow BACASS {
     )
     ch_quast_multiqc = QUAST.out.tsv
     ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
-
+/*
     // Check assemblies that require further processing for gene annotation
     ch_assembly
         .branch{ meta, fasta ->
