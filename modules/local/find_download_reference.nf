@@ -12,14 +12,13 @@ process FIND_DOWNLOAD_REFERENCE {
     path(ncbi_reference)
 
     output:
-    path "references_found.tsv" , emit: target_references_tsv
-    path "*.fna.gz"             , emit: fna
-    path "*.gff.gz"             , emit: gff
-    path "*.faa.gz"             , emit: faa
-    path "versions.yml"         , emit: versions
+    tuple val(meta), path( "references_found.tsv")  , emit: target_references_tsv
+    tuple val(meta), path( "*.fna.gz")              , emit: fna
+    tuple val(meta), path( "*.gff.gz")              , emit: gff
+    tuple val(meta), path( "*.faa.gz")              , emit: faa
+    path "versions.yml"                             , emit: versions
 
     script:
-    def prefix = task.ext.prefix ?: "${meta.refseq}"
     """
     find_common_reference.py \\
         -d reports/ \\
