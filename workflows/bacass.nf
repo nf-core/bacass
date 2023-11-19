@@ -424,30 +424,24 @@ workflow BACASS {
                     def new_meta = [:]
                     new_meta.refseq = json
                                     .splitJson(path:"kmerfinder.results.species_hits").value.get(0)["Assembly"]
-                    return tuple(meta, new_meta, report, fasta)
+                    return tuple(new_meta, meta, report, fasta)
             }
-            .groupTuple(by:1)
+            .groupTuple(by:0)
             .set { ch_refseqid_fasta }
 
-        ch_refseqid_fasta.map{ meta, new_meta, report, fasta -> tuple (meta, report)}.view()
-
-
-//        KMERFINDER.out.report
-//            .map { meta, report -> report }
-//            .collect()
-//            .set { ch_kmerfinder_reports }
-
+        ch_reports_Byrefseqid = ch_refseqid_fasta
+                                    .map{ new_meta, meta, report, fasta -> [new_meta, report] }
         KMERFINDER_SUMMARY (
-            ch_refseqid_fasta.map{ meta, report, fasta -> tuple (meta, report)}
+            KMERFINDER.out.report.map{meta, report -> report }collect()
         )
         ch_versions = ch_versions.mix( KMERFINDER_SUMMARY.out.versions.ifEmpty(null) )
 
-//        if (!params.reference_fasta && !params.reference_gff) {
-//            FIND_DOWNLOAD_REFERENCE (
-//                ch_kmerfinder_reports,
-//                params.reference_ncbi_bacteria
-//            )
-//        }
+        if (!params.reference_fasta && !params.reference_gff) {
+            FIND_DOWNLOAD_REFERENCE (
+                ch_reports_Byrefseqid,
+                params.reference_ncbi_bacteria
+            )
+        }
     }
 /*
     //
