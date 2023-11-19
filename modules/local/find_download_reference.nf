@@ -8,7 +8,7 @@ process FIND_DOWNLOAD_REFERENCE {
         'biocontainers/requests:2.26.0' }"
 
     input:
-    path(reports,  stageAs: 'reports/*')
+    tuple val(meta), path(reports,  stageAs: 'reports/*')
     path(ncbi_reference)
 
     output:
@@ -19,6 +19,7 @@ process FIND_DOWNLOAD_REFERENCE {
     path "versions.yml"         , emit: versions
 
     script:
+    def prefix = task.ext.prefix ?: "${meta.refseq}"
     """
     find_common_reference.py \\
         -d reports/ \\
