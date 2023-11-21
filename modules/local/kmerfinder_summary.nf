@@ -8,15 +8,15 @@ process KMERFINDER_SUMMARY {
         'biocontainers/python:3.10' }"
 
     input:
-    path(reports, stageAs: 'reports/*')
+    path(report, stageAs: 'reports/*')
 
     output:
-    path "kmerfinder.csv"   , emit: summary
-    path "versions.yml"     , emit: versions
+    path "*.csv"        , emit: summary
+    path "versions.yml" , emit: versions
 
     script:
     """
-    kmerfinder_summary.py --path reports/ --output_bn kmerfinder.bn --output_csv kmerfinder.csv
+    kmerfinder_summary.py --path reports/ --output_bn kmerfinder.bn --output_csv kmerfinder_summary.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

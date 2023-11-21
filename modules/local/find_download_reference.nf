@@ -8,15 +8,15 @@ process FIND_DOWNLOAD_REFERENCE {
         'biocontainers/requests:2.26.0' }"
 
     input:
-    path(reports,  stageAs: 'reports/*')
+    tuple val(meta), path(reports,  stageAs: 'reports/*')
     path(ncbi_reference)
 
     output:
-    path "references_found.tsv" , emit: target_references_tsv
-    path "*.fna.gz"             , emit: fna
-    path "*.gff.gz"             , emit: gff
-    path "*.faa.gz"             , emit: faa
-    path "versions.yml"         , emit: versions
+    tuple val(meta), path( "references_found.tsv")  , emit: target_references_tsv
+    tuple val(meta), path( "*.fna.gz")              , emit: fna
+    tuple val(meta), path( "*.gff.gz")              , emit: gff
+    tuple val(meta), path( "*.faa.gz")              , emit: faa
+    path "versions.yml"                             , emit: versions
 
     script:
     """

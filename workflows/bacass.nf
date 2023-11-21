@@ -59,9 +59,6 @@ include { UNICYCLER                 } from '../modules/local/unicycler'
 include { NANOPOLISH                } from '../modules/local/nanopolish'
 include { MEDAKA                    } from '../modules/local/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
-include { KMERFINDER                } from '../modules/local/kmerfinder'
-include { KMERFINDER_SUMMARY        } from '../modules/local/kmerfinder_summary'
-include { FIND_DOWNLOAD_REFERENCE   } from '../modules/local/find_download_reference'
 include { DFAST                     } from '../modules/local/dfast'
 
 //
@@ -91,8 +88,9 @@ include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samto
 include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/kraken2/kraken2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2/main'
 include { QUAST                                 } from '../modules/nf-core/quast/main'
+include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip/main'
-include { GUNZIP_KMERFINDERDB                   } from '../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_KMERFINDERDB         } from '../modules/nf-core/gunzip/main'
 include { PROKKA                                } from '../modules/nf-core/prokka/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS           } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
@@ -101,6 +99,7 @@ include { MULTIQC                               } from '../modules/nf-core/multi
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
 //
 include { FASTQ_TRIM_FASTP_FASTQC               } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc/main'
+include { KMERFINDER_SUBWORKFLOW                } from '../subworkflows/local/kmerfinder_subworkflow'
 include { BAKTA_DBDOWNLOAD_RUN                  } from '../subworkflows/local/bakta_dbdownload_run'
 
 /*
@@ -223,7 +222,7 @@ workflow BACASS {
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
     }
-/*
+
     //
     // ASSEMBLY: Unicycler, Canu, Miniasm, Dragonflye
     //
@@ -356,7 +355,7 @@ workflow BACASS {
         MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
         ch_versions = ch_versions.mix(MEDAKA.out.versions.ifEmpty(null))
     }
-*/
+
     //
     // MODULE: Kraken2, QC for sample purity
     //
@@ -395,60 +394,62 @@ workflow BACASS {
     //
     // MODULE: Kmerfinder, QC for sample purity
     //
+
     // TODO: Create kmerfinder mode for longreads
-    // TODO: create a strategy to group the samples according to the reference found. [pending, fix splitjson path-key]
-    // TODO: I think that this kmerfinder step could be grouped into a subworkflow
-    // TODO: Create a by refseq-id quast report && general.
     // TODO: hack multiqc to group quast-entries by refseqid?
-        KMERFINDER (
-            ch_for_assembly.map{ meta, sr, lr -> tuple( meta, sr) },    // [meta, reads]
-            params.kmerfinderdb // path(kmerfinder database)
-        )
-        ch_versions = ch_versions.mix( KMERFINDER.out.versions.ifEmpty(null) )
-
-        KMERFINDER.out.json
-            .join(ch_for_assembly, by:0)
-            .map{
-                meta, json, sr, lr ->
-                    meta.refseq = json
-                                    .splitJson(path:"kmerfinder.results.species_hits").value.get(0)["Assembly"]
-                    return tuple(meta, sr, lr)
-            }
-            .set { ch_refseqid }
-
-        KMERFINDER.out.report
-            .map { meta, report -> report }
-            .collect()
-            .set { ch_kmerfinder_reports }
-
-        KMERFINDER_SUMMARY (
-            ch_kmerfinder_reports
-        )
-        ch_versions = ch_versions.mix( KMERFINDER_SUMMARY.out.versions.ifEmpty(null) )
-
-        if (!params.reference_fasta && !params.reference_gff) {
-            FIND_DOWNLOAD_REFERENCE (
-                ch_kmerfinder_reports,
-                params.reference_ncbi_bacteria
-            )
+    // TODO: corner casse >1 refseq_id
+    // TODO: PREPARE REFERENCES SUBWORKFLOW
+    // TODO: PASS QUAST_BYREF TSV TO MULTIQC
+    if ( !params.skip_kmerfinder && params.kmerfinderdb ) {
+        if( params.kmerfinderdb.endsWith('.gz') ){
+            GUNZIP_KMERFINDERDB ( params.kmerfinderdb )
+            ch_kmerfinderdb = GUNZIP_KMERFINDERDB.out.gunzip
+        } else {
+            ch_kmerfinderdb = params.kmerfinderdb
         }
+
+        KMERFINDER_SUBWORKFLOW (
+            ch_kmerfinderdb,
+            params.reference_ncbi_bacteria,
+            ch_for_assembly.map{meta, sr, lr -> tuple( meta, sr)}, // [meta, reads]
+            ch_assembly // [meta, consensus]
+        )
+        ch_reference_fasta      = KMERFINDER_SUBWORKFLOW.out.reference_fasta
+        ch_reference_gff        = KMERFINDER_SUBWORKFLOW.out.reference_gff
+        ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
+        ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions.ifEmpty(null))
+
     }
-/*
+
     //
     // MODULE: QUAST, assembly QC
     //
     ch_assembly
-        .collect{ it[1] }
-        .map { consensus_collect -> tuple([id: "report"], consensus_collect) }
-        .set { ch_to_quast }
-
-    QUAST (
+            .collect{ it[1]}
+            .map{ consensus -> tuple([id:'report'], consensus)}
+            .set{ch_to_quast}
+    QUAST(
         ch_to_quast,
         [[:],[]],
         [[:],[]]
     )
     ch_quast_multiqc = QUAST.out.tsv
     ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
+
+    if (!params.skip_kmerfinder){
+        // Prepare input for quast
+        ch_consensus_byrefseq           // [ refseq, meta, report_txt, consensus ]
+            .join(ch_reference_fasta)   // [ refseq, meta, report_txt, consensus, ref_fasta ]
+            .join(ch_reference_gff)     // [ refseq, meta, report_txt, consensus, ref_fasta, ref_gff]
+            .groupTuple(by:0)
+            .set { ch_to_quast_byrefseq}// channel: [refseq, meta, report, consensus, ref_fasta, ref_gff]
+
+        QUAST_BYREFSEQID (
+            ch_to_quast_byrefseq.map{ refseqid, meta, report, consensus, ref_fasta, ref_gff -> tuple( refseqid, consensus.flatten())},
+            ch_to_quast_byrefseq.map{ refseqid, meta, report, consensus, ref_fasta, ref_gff -> tuple( refseqid, ref_fasta)},
+            ch_to_quast_byrefseq.map{ refseqid, meta, report, consensus, ref_fasta, ref_gff -> tuple( refseqid, ref_gff)}
+            )
+    }
 
     // Check assemblies that require further processing for gene annotation
     ch_assembly
@@ -547,7 +548,6 @@ workflow BACASS {
         )
         multiqc_report = MULTIQC.out.report.toList()
     }
-*/
 }
 
 /*
