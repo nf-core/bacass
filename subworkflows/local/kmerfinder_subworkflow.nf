@@ -56,9 +56,15 @@ workflow KMERFINDER_SUBWORKFLOW {
         ch_versions         = ch_versions.mix( FIND_DOWNLOAD_REFERENCE.out.versions.ifEmpty(null) )
     }
 
+    // Get reference sequence IDs
+    ch_consensus_byrefseq
+        .map{ refseq, meta, report_txt, fasta -> refseq }
+        .collect()
+        .set { ch_refseqid }
 
     emit:
     versions            = ch_versions.ifEmpty(null) // channel: [ path(versions.yml) ]
+    refseqids           = ch_refseqid
     reference_fasta     = ch_reference_fasta        // channel: [ meta,  path(*.fna) ]
     reference_gff       = ch_reference_gff          // channel: [ meta,  path(*.gff) ]
     consensus_byrefseq  = ch_consensus_byrefseq     // channel: [ refseq, meta, report_txt, fasta ]
