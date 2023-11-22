@@ -396,8 +396,7 @@ workflow BACASS {
     //
 
     // TODO: Create kmerfinder mode for longreads
-    // TODO: hack multiqc to group quast-entries by refseqid?
-    // TODO: PASS QUAST_BYREF TSV TO MULTIQC
+    // TODO: add new column to multiqc with refseq name
     if ( !params.skip_kmerfinder && params.kmerfinderdb ) {
         if( params.kmerfinderdb.endsWith('.gz') ){
             GUNZIP_KMERFINDERDB ( params.kmerfinderdb )
@@ -418,7 +417,7 @@ workflow BACASS {
         ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
         ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions.ifEmpty(null))
 
-        // Processing output:
+        // Processing output: group data according to their ref-genome and rename meta according to the number of identified references
         ch_consensus_byrefseq
             .join(ch_reference_fasta)   // [ refseq, meta, report_txt, consensus, ref_fasta ]
             .join(ch_reference_gff)     // [ refseq, meta, report_txt, consensus, ref_fasta, ref_gff]
@@ -450,6 +449,7 @@ workflow BACASS {
             params.reference_fasta ?: [[:],[]],
             params.reference_gff ?: [[:],[]]
         )
+        ch_quast_multiqc = QUAST.out.tsv
     } else if (ch_to_quast_byrefseq){
         QUAST(
             ch_to_quast,
@@ -462,7 +462,7 @@ workflow BACASS {
             ch_to_quast_byrefseq.map{ refseqid, consensus, ref_fasta, ref_gff -> tuple( refseqid, ref_gff)}
         )
     }
-    ch_quast_multiqc = QUAST.out.tsv
+    ch_quast_multiqc = QUAST_BYREFSEQID.out.tsv
     ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
 
     // Check assemblies that require further processing for gene annotation

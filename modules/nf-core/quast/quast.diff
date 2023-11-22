@@ -1,0 +1,23 @@
+Changes in module 'nf-core/quast'
+--- modules/nf-core/quast/main.nf
++++ modules/nf-core/quast/main.nf
+@@ -14,7 +14,7 @@
+ 
+     output:
+     tuple val(meta), path("${prefix}")                   , emit: results
+-    tuple val(meta), path("${prefix}.tsv")               , emit: tsv
++    tuple val(meta), path("report.tsv")                  , emit: tsv
+     tuple val(meta), path("${prefix}_transcriptome.tsv") , optional: true , emit: transcriptome
+     tuple val(meta), path("${prefix}_misassemblies.tsv") , optional: true , emit: misassemblies
+     tuple val(meta), path("${prefix}_unaligned.tsv")     , optional: true , emit: unaligned
+@@ -37,7 +37,7 @@
+         $args \\
+         ${consensus.join(' ')}
+ 
+-    ln -s ${prefix}/report.tsv ${prefix}.tsv
++    ln -s ${prefix}/report.tsv report.tsv
+     [ -f  ${prefix}/contigs_reports/all_alignments_transcriptome.tsv ] && ln -s ${prefix}/contigs_reports/all_alignments_transcriptome.tsv ${prefix}_transcriptome.tsv
+     [ -f  ${prefix}/contigs_reports/misassemblies_report.tsv         ] && ln -s ${prefix}/contigs_reports/misassemblies_report.tsv ${prefix}_misassemblies.tsv
+     [ -f  ${prefix}/contigs_reports/unaligned_report.tsv             ] && ln -s ${prefix}/contigs_reports/unaligned_report.tsv ${prefix}_unaligned.tsv
+
+************************************************************
