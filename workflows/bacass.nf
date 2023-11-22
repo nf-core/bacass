@@ -40,8 +40,8 @@ if(! params.skip_kraken2){
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
 ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
@@ -60,6 +60,8 @@ include { NANOPOLISH                } from '../modules/local/nanopolish'
 include { MEDAKA                    } from '../modules/local/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
 include { DFAST                     } from '../modules/local/dfast'
+include { CUSTOM_MQC_TABLES         } from '../modules/local/custom_mqc_tables'
+include { MULTIQC                   } from '../modules/local/multiqc_custom'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -93,7 +95,6 @@ include { GUNZIP                                } from '../modules/nf-core/gunzi
 include { GUNZIP as GUNZIP_KMERFINDERDB         } from '../modules/nf-core/gunzip/main'
 include { PROKKA                                } from '../modules/nf-core/prokka/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS           } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
 
 //
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
@@ -396,8 +397,7 @@ workflow BACASS {
     //
 
     // TODO: Create kmerfinder mode for longreads
-    // TODO: hack multiqc to group quast-entries by refseqid?
-    // TODO: PASS QUAST_BYREF TSV TO MULTIQC
+    // TODO: add new column to multiqc with refseq name
     if ( !params.skip_kmerfinder && params.kmerfinderdb ) {
         if( params.kmerfinderdb.endsWith('.gz') ){
             GUNZIP_KMERFINDERDB ( params.kmerfinderdb )
@@ -418,7 +418,7 @@ workflow BACASS {
         ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
         ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions.ifEmpty(null))
 
-        // Processing output:
+        // Processing output: group data according to their ref-genome and rename meta according to the number of identified references
         ch_consensus_byrefseq
             .join(ch_reference_fasta)   // [ refseq, meta, report_txt, consensus, ref_fasta ]
             .join(ch_reference_gff)     // [ refseq, meta, report_txt, consensus, ref_fasta, ref_gff]
@@ -439,6 +439,7 @@ workflow BACASS {
     //
     // MODULE: QUAST, assembly QC
     //
+    // FIXME: simplify it. I think choolsing anotherapproach will improve it
     ch_assembly
             .collect{ it[1]}
             .map{ consensus -> tuple([id:'report'], consensus)}
@@ -450,6 +451,7 @@ workflow BACASS {
             params.reference_fasta ?: [[:],[]],
             params.reference_gff ?: [[:],[]]
         )
+        ch_quast_multiqc = QUAST.out.results
     } else if (ch_to_quast_byrefseq){
         QUAST(
             ch_to_quast,
@@ -462,7 +464,7 @@ workflow BACASS {
             ch_to_quast_byrefseq.map{ refseqid, consensus, ref_fasta, ref_gff -> tuple( refseqid, ref_gff)}
         )
     }
-    ch_quast_multiqc = QUAST.out.tsv
+    ch_quast_multiqc = QUAST_BYREFSEQID.out.results
     ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
 
     // Check assemblies that require further processing for gene annotation
@@ -538,27 +540,38 @@ workflow BACASS {
         methods_description     = WorkflowBacass.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
         ch_methods_description  = Channel.value(methods_description)
 
-        ch_multiqc_files = Channel.empty()
-        ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-        ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-        ch_multiqc_files = ch_multiqc_files.mix(ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_fastqc_trim_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_quast_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]))
+        // TODO: Clean this. find a better place.
+        ch_to_quast_byrefseq
+            .map{
+                refseqid, consensus, ref_fasta, ref_gff -> tuple( refseqid, consensus)
+            }
+            .transpose()
+            .map {
+                [it[1].getSimpleName(), it[0]['id']]
+            }
+            .collectFile(name: 'multiqc_quast_extra.yaml') {
+                sample_name, refseqid ->
+                    "$sample_name:\n  RefGenome: $refseqid\n"
+            }
+            .set { ch_extra_multiqc }
 
         MULTIQC (
-            ch_multiqc_files.collect(),
             ch_multiqc_config,
-            ch_multiqc_custom_config.collect().ifEmpty([]),
-            ch_multiqc_logo.collect().ifEmpty([])
+            ch_multiqc_custom_config,
+            CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
+            //ch_workflow_summary, // FIXME: Cannot parse this file...
+            ch_multiqc_logo.collect().ifEmpty([]),
+            ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_quast_multiqc.collect{it[1]}.ifEmpty([]), // FIXME: input filename collision
+            ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_extra_multiqc.collect().ifEmpty([])
         )
         multiqc_report = MULTIQC.out.report.toList()
     }

@@ -85,7 +85,8 @@
                     "quast": {
                         "branch": "master",
                         "git_sha": "344638191a5d6b3526556410819dfcf24e98039e",
-                        "installed_by": ["modules"]
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/quast/quast.diff"
                     },
                     "racon": {
                         "branch": "master",
