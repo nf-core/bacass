@@ -19,7 +19,7 @@ process MULTIQC {
     path ('pycoqc/*')
     path ('kraken2_short/*')
     path ('kraken2_long/*')
-    path ('quast_unicycler/*')
+    path ('quast/*')
     path ('prokka/*')
     path ('bakta/*')
     path ('extra/*')
@@ -41,7 +41,7 @@ process MULTIQC {
     cp extra/* multiqc_data/
 
     ## Parse YAML files dumped by MultiQC to obtain metrics
-    multiqc_to_custom_csv.py
+    multiqc_to_custom_csv.py --assembly_type $params.assembly_type
 
     ## Run multiqc a second time
     multiqc -f $args -e general_stats $custom_config .
