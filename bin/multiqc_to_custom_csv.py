@@ -156,6 +156,13 @@ def main(args=None):
     ## File names for MultiQC YAML along with fields to fetch from each file
     illumina_assembly_files = [
         (
+            "multiqc_fastp.yaml",
+            [
+                ("# Input reads", ["before_filtering", "total_reads"]),
+                ("# Trimmed reads (fastp)", ["after_filtering", "total_reads"]),
+            ]
+        ),
+        (
             "multiqc_quast_quast_unicycler.yaml",
             [
                 ("# Contigs (Unicycler)", ["# contigs (>= 0 bp)"]),

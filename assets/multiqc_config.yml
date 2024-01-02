@@ -28,6 +28,8 @@ module_order:
   - fastp:
       name: "PREPROCESS: fastp (adapter trimming)"
       info: "This section of the report shows fastp results for reads after adapter and quality trimming."
+      path_filters:
+        - "./fastp/*.json"
   - nanostat:
       name: "PREPROCESS: Nanoplot"
       info: "This section of the report shows Nanoplot results for nanopore sequencing data."
@@ -70,7 +72,7 @@ report_section_order:
   fastqc:
     after: general_stats
   fastp:
-    after: fastqc
+    after: general_stats
   nanoplot:
     after: general_stats
   porechop:
@@ -98,6 +100,12 @@ custom_data:
     headers:
       "Sample":
         description: "Input sample names"
+        format: "{:,.0f}"
+      "# Input reads":
+        description: "Total number of input reads in raw fastq files"
+        format: "{:,.0f}"
+      "# Trimmed reads (fastp)":
+        description: "Total number of reads remaining after adapter/quality trimming with fastp"
         format: "{:,.0f}"
       "# Contigs (Unicycler)":
         description: "Total number of contigs calculated by QUAST"
