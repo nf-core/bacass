@@ -37,7 +37,7 @@ process MULTIQC {
     ## Run MultiQC once to parse tool logs
     multiqc -f $args $custom_config .
 
-    ## Collect extra fields to be included in the report
+    ## Collect additional files to be included in the report
     cp extra/* multiqc_data/
 
     ## Parse YAML files dumped by MultiQC to obtain metrics

@@ -172,9 +172,16 @@ def main(args=None):
             ],
         ),
         (
-            "multiqc_quast_extra.yaml",
+            "multiqc_kmerfinder.yaml",
             [
-                ("# Reference Genome (Kmerfinder)", ["RefGenome"]),
+                ("# Best hit (Kmerfinder)", ["07-kmerfinder_best_hit_Species"]),
+                ("# Best hit assembly ID (Kmerfinder)", ["07-kmerfinder_best_hit_# Assembly"]),
+                ("# Best hit query coverage (Kmerfinder)", ["07-kmerfinder_best_hit_Query_Coverage"]),
+                ("# Best hit depth (Kmerfinder)", ["07-kmerfinder_best_hit_Depth"]),
+                ("# Second hit (Kmerfinder)", ["07-kmerfinder_second_hit_Species"]),
+                ("# Second hit assembly ID (Kmerfinder)", ["07-kmerfinder_second_hit_# Assembly"]),
+                ("# Second hit query coverage (Kmerfinder)", ["07-kmerfinder_second_hit_Query_Coverage:"]),
+                ("# Second hit depth (Kmerfinder)", ["07-kmerfinder_second_hit_Depth"]),
             ]
         ),
     ]
