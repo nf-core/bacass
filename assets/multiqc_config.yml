@@ -119,8 +119,29 @@ custom_data:
       "# % Genome fraction":
         description: "% genome fraction calculated by QUAST"
         format: "{:,.2f}"
-      "# Reference Genome (Kmerfinder)":
-        description: "Reference genome calculated by Blast"
+      "# Best hit (Kmerfinder)":
+        description: "Specie name of the best hit from Kmerfinder"
+        format: "{:,.0f}"
+      "# Best hit assembly ID (Kmerfinder)":
+        description: "Assembly ID of the best hit from Kmerfinder"
+        format: "{:,.0f}"
+      "# Best hit query coverage (Kmerfinder)":
+        description: "Query coverage value of the best hit from Kmerfinder"
+        format: "{:,.0f}"
+      "# Best hit depth (Kmerfinder)":
+        description: "Depth of the best hit from Kmerfinder"
+        format: "{:,.0f}"
+      "# Second hit (Kmerfinder)":
+        description: "Specie name of the second hit from Kmerfinder"
+        format: "{:,.0f}"
+      "# Second hit assembly ID (Kmerfinder)":
+        description: "Assembly ID of the second hit from Kmerfinder"
+        format: "{:,.0f}"
+      "# Second hit query coverage (Kmerfinder)":
+        description: "Query coverage value of the second hit from Kmerfinder"
+        format: "{:,.0f}"
+      "# Second hit depth (Kmerfinder)":
+        description: "Depth of the second hit from Kmerfinder"
         format: "{:,.0f}"
 
 export_plots: true

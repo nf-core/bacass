@@ -29,17 +29,17 @@ workflow KMERFINDER_SUBWORKFLOW {
     KMERFINDER_SUMMARY (
         ch_kmerfinder_report.map{meta, report -> report }.collect()
     )
-    ch_versions = ch_versions.mix( KMERFINDER_SUMMARY.out.versions.ifEmpty(null) )
+    ch_summary_yaml     = KMERFINDER_SUMMARY.out.yaml
+    ch_versions         = ch_versions.mix( KMERFINDER_SUMMARY.out.versions.ifEmpty(null) )
 
-    // SUBWORKFLOW: Group sample assemblies by reference geneome
+    // SUBWORKFLOW: Group assemblies by reference geneome
     ch_kmerfinder_json
         .join(ch_kmerfinder_report, by:0)
         .join(consensus, by:0)
         .map{
-            meta, json, report_txt, fasta ->
+            meta, report_json, report_txt, fasta ->
                 def refseq = [:]
-                refseq.id = json
-                                .splitJson(path:"kmerfinder.results.species_hits").value.get(0)["Assembly"]
+                refseq.id = report_json.splitJson(path:"kmerfinder.results.species_hits").value.get(0)["Assembly"]
                 return tuple(refseq, meta, report_txt, fasta)
         }
         .groupTuple(by:0)
@@ -64,7 +64,8 @@ workflow KMERFINDER_SUBWORKFLOW {
 
     emit:
     versions            = ch_versions.ifEmpty(null) // channel: [ path(versions.yml) ]
-    refseqids           = ch_refseqid
+    summary_yaml        = ch_summary_yaml           // channel: [ path(kmerfinder_summary.yml) ]
+    refseqids           = ch_refseqid               // channel: [ val(refseq1), val(refseq1),...]
     reference_fasta     = ch_reference_fasta        // channel: [ meta,  path(*.fna) ]
     reference_gff       = ch_reference_gff          // channel: [ meta,  path(*.gff) ]
     consensus_byrefseq  = ch_consensus_byrefseq     // channel: [ refseq, meta, report_txt, fasta ]

@@ -12,7 +12,6 @@ process FIND_DOWNLOAD_REFERENCE {
     path(ncbi_reference)
 
     output:
-    tuple val(meta), path( "references_found.tsv")  , emit: target_references_tsv
     tuple val(meta), path( "*.fna.gz")              , emit: fna
     tuple val(meta), path( "*.gff.gz")              , emit: gff
     tuple val(meta), path( "*.faa.gz")              , emit: faa

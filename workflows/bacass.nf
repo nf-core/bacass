@@ -60,7 +60,6 @@ include { NANOPOLISH                } from '../modules/local/nanopolish'
 include { MEDAKA                    } from '../modules/local/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
 include { DFAST                     } from '../modules/local/dfast'
-include { CUSTOM_MQC_TABLES         } from '../modules/local/custom_mqc_tables'
 include { MULTIQC                   } from '../modules/local/multiqc_custom'
 
 //
@@ -394,10 +393,8 @@ workflow BACASS {
 
     //
     // MODULE: Kmerfinder, QC for sample purity
-    //
-
     // TODO: Create kmerfinder mode for longreads
-    // TODO: add new column to multiqc with refseq name
+
     if ( !params.skip_kmerfinder && params.kmerfinderdb ) {
         if( params.kmerfinderdb.endsWith('.gz') ){
             GUNZIP_KMERFINDERDB ( params.kmerfinderdb )
@@ -419,13 +416,12 @@ workflow BACASS {
         ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions.ifEmpty(null))
 
         // Processing output: group data according to their ref-genome and rename meta according to the number of identified references
-        ch_consensus_byrefseq
+        ch_consensus_byrefseq           // [ refseq, meta, report_txt, consensus ]
             .join(ch_reference_fasta)   // [ refseq, meta, report_txt, consensus, ref_fasta ]
             .join(ch_reference_gff)     // [ refseq, meta, report_txt, consensus, ref_fasta, ref_gff]
             .groupTuple(by:0)
             .map {
-                refseq, meta, report_txt, consensus, ref_fasta, ref_gff ->
-                    ch_refseqid.size()
+                refseq, meta, report_txt, consensus, ref_fasta, ref_gff -> ch_refseqid.size()
                     if (ch_refseqid.size().getVal() > 1 ){
                         return [refseq, consensus.flatten(), ref_fasta, ref_gff]
                     } else {
@@ -434,7 +430,6 @@ workflow BACASS {
             }
             .set { ch_to_quast_byrefseq }
     }
-
 
     //
     // MODULE: QUAST, assembly QC
@@ -540,21 +535,6 @@ workflow BACASS {
         methods_description     = WorkflowBacass.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
         ch_methods_description  = Channel.value(methods_description)
 
-        // TODO: Clean this. find a better place.
-        ch_to_quast_byrefseq
-            .map{
-                refseqid, consensus, ref_fasta, ref_gff -> tuple( refseqid, consensus)
-            }
-            .transpose()
-            .map {
-                [it[1].getSimpleName(), it[0]['id']]
-            }
-            .collectFile(name: 'multiqc_quast_extra.yaml') {
-                sample_name, refseqid ->
-                    "$sample_name:\n  RefGenome: $refseqid\n"
-            }
-            .set { ch_extra_multiqc }
-
         MULTIQC (
             ch_multiqc_config,
             ch_multiqc_custom_config,
@@ -571,7 +551,7 @@ workflow BACASS {
             ch_quast_multiqc.collect{it[1]}.ifEmpty([]), // FIXME: input filename collision
             ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_extra_multiqc.collect().ifEmpty([])
+            KMERFINDER_SUBWORKFLOW.out.summary_yaml.collectFile(name: 'multiqc_kmerfinder.yaml'),
         )
         multiqc_report = MULTIQC.out.report.toList()
     }
