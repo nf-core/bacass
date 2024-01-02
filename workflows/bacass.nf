@@ -39,8 +39,11 @@ if(! params.skip_kraken2){
     CONFIG FILES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+if(params.assembly_type){
+    ch_multiqc_config = file("$projectDir/assets/multiqc_config_${params.assembly_type}.yml", checkIfExists: true)
+} else {
+    ch_multiqc_config = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+}
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
 ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
@@ -392,8 +395,8 @@ workflow BACASS {
     }
 
     //
-    // MODULE: Kmerfinder, QC for sample purity
-    // TODO: Create kmerfinder mode for longreads
+    // MODULE: Kmerfinder, QC for sample purity. Available for short, long and hybrid assemblies
+    //
 
     if ( !params.skip_kmerfinder && params.kmerfinderdb ) {
         if( params.kmerfinderdb.endsWith('.gz') ){
@@ -403,11 +406,17 @@ workflow BACASS {
             ch_kmerfinderdb = params.kmerfinderdb
         }
 
+        if( params.assembly_type == 'short' || params.assembly_type == 'hybrid' ) {
+            ch_for_kmerfinder = FASTQ_TRIM_FASTP_FASTQC.out.reads
+        } else if ( params.assembly_type == 'long' ) {
+            ch_for_kmerfinder = PORECHOP_PORECHOP.out.reads
+        }
+
         KMERFINDER_SUBWORKFLOW (
             ch_kmerfinderdb,
             params.reference_ncbi_bacteria,
-            ch_for_assembly.map{meta, sr, lr -> tuple( meta, sr)}, // [meta, reads]
-            ch_assembly // [meta, consensus]
+            ch_for_kmerfinder,
+            ch_assembly
         )
         ch_refseqid             = KMERFINDER_SUBWORKFLOW.out.refseqids
         ch_reference_fasta      = KMERFINDER_SUBWORKFLOW.out.reference_fasta
@@ -415,7 +424,7 @@ workflow BACASS {
         ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
         ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions.ifEmpty(null))
 
-        // Processing output: group data according to their ref-genome and rename meta according to the number of identified references
+        // Group data based on ref-genome and rename meta according to the identified references count.
         ch_consensus_byrefseq           // [ refseq, meta, report_txt, consensus ]
             .join(ch_reference_fasta)   // [ refseq, meta, report_txt, consensus, ref_fasta ]
             .join(ch_reference_gff)     // [ refseq, meta, report_txt, consensus, ref_fasta, ref_gff]
@@ -548,7 +557,7 @@ workflow BACASS {
             ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),
             ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]),
             ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_quast_multiqc.collect{it[1]}.ifEmpty([]), // FIXME: input filename collision
+            ch_quast_multiqc.collect{it[1]}.ifEmpty([]), // TODO: Create a quast channel for each assembler
             ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]),
             KMERFINDER_SUBWORKFLOW.out.summary_yaml.collectFile(name: 'multiqc_kmerfinder.yaml'),

@@ -17,8 +17,8 @@ process KMERFINDER {
     path "versions.yml"                     , emit: versions
 
     script:
-    def prefix      = task.ext.prefix ?: "${meta.id}"
-    def in_reads    = reads.size() == 1 ? "${reads}" : "${reads[0]} ${reads[1]}"
+    def prefix   = task.ext.prefix ?: "${meta.id}"
+    def in_reads = reads[0] && reads[1] ? "${reads[0]} ${reads[1]}" : "${reads}"
 
     """
     kmerfinder.py \\
