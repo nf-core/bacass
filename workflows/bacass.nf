@@ -26,12 +26,17 @@ def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check krakendb
-if(! params.skip_kraken2){
-    if(params.kraken2db){
+if (!params.skip_kraken2) {
+    if (params.kraken2db) {
         kraken2db = file(params.kraken2db)
     } else {
         exit 1, "Missing Kraken2 DB arg"
     }
+}
+
+// Check kmerfinderdb
+if (!params.skip_kmerfinder && !params.kmerfinderdb){
+    exit 1, "Missing Kmerfinder DB arg: --kmerfinderdb <path/to/kmerfinder_database>"
 }
 
 /*
@@ -39,13 +44,16 @@ if(! params.skip_kraken2){
     CONFIG FILES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-if(params.assembly_type){
+
+
+// When invoking kmerfinder, utilize a custom MultiQC config file to generate a specialized report. This report will organize samples into groups based on their reference genome, w were previously calculated by kmerfinder.
+if (!params.skip_kmerfinder && params.assembly_type) {
     ch_multiqc_config = file("$projectDir/assets/multiqc_config_${params.assembly_type}.yml", checkIfExists: true)
 } else {
     ch_multiqc_config = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
 }
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
+ch_multiqc_logo             = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
 ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
 /*
@@ -258,6 +266,7 @@ workflow BACASS {
 
     //
     // MODULE: Miniasm, genome assembly, long reads
+    //
     if ( params.assembler == 'miniasm' ) {
         MINIMAP2_ALIGN (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
@@ -336,7 +345,7 @@ workflow BACASS {
         ch_for_polish    // tuple val(meta), val(reads), file(longreads), file(assembly)
             .join( MINIMAP2_POLISH.out.bam )    // tuple val(meta), file(bam)
             .join( SAMTOOLS_INDEX.out.bai )     // tuple  val(meta), file(bai)
-            .join( ch_fast5 )             // tuple val(meta), file(fast5)
+            .join( ch_fast5 )                   // tuple val(meta), file(fast5)
             .set { ch_for_nanopolish }          // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
 
         // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
@@ -395,10 +404,13 @@ workflow BACASS {
     }
 
     //
-    // MODULE: Kmerfinder, QC for sample purity. Available for short, long and hybrid assemblies
+    // MODULE: Kmerfinder, QC for sample purity.
     //
 
-    if ( !params.skip_kmerfinder && params.kmerfinderdb ) {
+    ch_kmerfinder_multiqc = Channel.empty()
+    if (!params.skip_kmerfinder) {
+
+        // Process kmerfinder database
         if( params.kmerfinderdb.endsWith('.gz') ){
             GUNZIP_KMERFINDERDB ( params.kmerfinderdb )
             ch_kmerfinderdb = GUNZIP_KMERFINDERDB.out.gunzip
@@ -406,6 +418,7 @@ workflow BACASS {
             ch_kmerfinderdb = params.kmerfinderdb
         }
 
+        // Set kmerfinder input based on assembly type
         if( params.assembly_type == 'short' || params.assembly_type == 'hybrid' ) {
             ch_for_kmerfinder = FASTQ_TRIM_FASTP_FASTQC.out.reads
         } else if ( params.assembly_type == 'long' ) {
@@ -422,12 +435,13 @@ workflow BACASS {
         ch_reference_fasta      = KMERFINDER_SUBWORKFLOW.out.reference_fasta
         ch_reference_gff        = KMERFINDER_SUBWORKFLOW.out.reference_gff
         ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
+        ch_kmerfinder_multiqc   = KMERFINDER_SUBWORKFLOW.out.summary_yaml
         ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions.ifEmpty(null))
 
         // Group data based on ref-genome and rename meta according to the identified references count.
         ch_consensus_byrefseq           // [ refseq, meta, report_txt, consensus ]
             .join(ch_reference_fasta)   // [ refseq, meta, report_txt, consensus, ref_fasta ]
-            .join(ch_reference_gff)     // [ refseq, meta, report_txt, consensus, ref_fasta, ref_gff]
+            .join(ch_reference_gff)     // [ refseq, meta, report_txt, consensus, ref_fasta, ref_gff ]
             .groupTuple(by:0)
             .map {
                 refseq, meta, report_txt, consensus, ref_fasta, ref_gff -> ch_refseqid.size()
@@ -445,9 +459,9 @@ workflow BACASS {
     //
     // FIXME: simplify it. I think choolsing anotherapproach will improve it
     ch_assembly
-            .collect{ it[1]}
-            .map{ consensus -> tuple([id:'report'], consensus)}
-            .set{ch_to_quast}
+            .collect{it[1]}
+            .map{ consensus -> tuple([id:'report'], consensus) }
+            .set{ ch_to_quast }
 
     if(params.skip_kmerfinder){
         QUAST(
@@ -456,7 +470,7 @@ workflow BACASS {
             params.reference_gff ?: [[:],[]]
         )
         ch_quast_multiqc = QUAST.out.results
-    } else if (ch_to_quast_byrefseq){
+    } else if (!params.skip_kmerfinder && ch_to_quast_byrefseq) {
         QUAST(
             ch_to_quast,
             [[:],[]],
@@ -467,9 +481,9 @@ workflow BACASS {
             ch_to_quast_byrefseq.map{ refseqid, consensus, ref_fasta, ref_gff -> tuple( refseqid, ref_fasta)},
             ch_to_quast_byrefseq.map{ refseqid, consensus, ref_fasta, ref_gff -> tuple( refseqid, ref_gff)}
         )
+        ch_quast_multiqc = QUAST_BYREFSEQID.out.results
     }
-    ch_quast_multiqc = QUAST_BYREFSEQID.out.results
-    ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
 
     // Check assemblies that require further processing for gene annotation
     ch_assembly
@@ -548,7 +562,7 @@ workflow BACASS {
             ch_multiqc_config,
             ch_multiqc_custom_config,
             CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
-            //ch_workflow_summary, // FIXME: Cannot parse this file...
+            ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             ch_multiqc_logo.collect().ifEmpty([]),
             ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]),
             ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]),
@@ -557,10 +571,10 @@ workflow BACASS {
             ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),
             ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]),
             ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_quast_multiqc.collect{it[1]}.ifEmpty([]), // TODO: Create a quast channel for each assembler
+            ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
             ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]),
-            KMERFINDER_SUBWORKFLOW.out.summary_yaml.collectFile(name: 'multiqc_kmerfinder.yaml'),
+            ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
         )
         multiqc_report = MULTIQC.out.report.toList()
     }

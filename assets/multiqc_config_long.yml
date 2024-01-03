@@ -17,6 +17,9 @@ run_modules:
   - prokka
   - bakta
 
+exclude_modules:
+  - general_stats
+
 module_order:
   - nanostat:
       name: "PREPROCESS: Nanoplot"
