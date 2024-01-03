@@ -16,6 +16,9 @@ run_modules:
   - prokka
   - bakta
 
+exclude_modules:
+  - general_stats
+
 module_order:
   - fastqc:
       name: "PREPROCESS: FastQC (raw reads)"

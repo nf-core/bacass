@@ -10,7 +10,7 @@ process MULTIQC {
     path 'multiqc_config.yaml'
     path multiqc_custom_config
     path software_versions
-   //path workflow_summary
+    path workflow_summary
     path multiqc_logo
     path ('fastqc/*')
     path ('fastp/*')
@@ -25,10 +25,11 @@ process MULTIQC {
     path ('extra/*')
 
     output:
-    path "*multiqc_report.html"     , emit: report
-    path "*_data"                   , emit: data
-    path "*_plots"                  , optional:true, emit: plots
-    path "versions.yml"             , emit: versions
+    path "*multiqc_report.html"         , emit: report
+    path "*_data"                       , emit: data
+    path "*_assembly_metrics_mqc.csv"   , optional:true, emit: csv_assembly
+    path "*_plots"                      , optional:true, emit: plots
+    path "versions.yml"                 , emit: versions
 
     script:
     def args = task.ext.args ?: ''
@@ -38,13 +39,20 @@ process MULTIQC {
     multiqc -f $args $custom_config .
 
     ## Collect additional files to be included in the report
-    cp extra/* multiqc_data/
+    if [ -d extra/ ]; then
+        cp extra/* multiqc_data/
+    fi
 
-    ## Parse YAML files dumped by MultiQC to obtain metrics
+    ## Create multiqc custom data
     multiqc_to_custom_csv.py --assembly_type $params.assembly_type
 
+    ## Avoid the custom Multiqc table when the kmerfinder process is not invoked.
+    if grep ">skip_kmerfinder<" workflow_summary_mqc.yaml; then
+        rm *_assembly_metrics_mqc.csv
+    fi
+
     ## Run multiqc a second time
-    multiqc -f $args -e general_stats $custom_config .
+    multiqc -f $args $custom_config .
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
