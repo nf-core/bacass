@@ -67,7 +67,7 @@ def yaml_fields_to_dict(yaml_file, append_dict={}, field_mapping_list=[], valid_
         "number_of_SNPs",
         "number_of_indels",
         "MISSENSE",
-        "# contigs (>= 0 bp)",
+        "# contigs",
         "# contigs (>= 5000 bp)",
         "Largest contig",
     ]
@@ -173,7 +173,7 @@ def main(args=None):
         (
             "multiqc_quast.yaml",
             [
-                ("# Contigs", ["# contigs (>= 0 bp)"]),
+                ("# Contigs", ["# contigs"]),
                 ("# Largest contig", ["Largest contig"]),
                 ("# N50", ["N50"]),
                 ("# % Genome fraction", ["Genome fraction (%)"]),
@@ -204,12 +204,52 @@ def main(args=None):
             ]
         ),
         (
-            "multiqc_quast.yaml", # TODO: "multiqc_quast_quast_{assemblertool}.yaml"
+            "multiqc_quast.yaml",
             [
-                ("# Contigs", ["# contigs (>= 0 bp)"]),
+                ("# Contigs", ["# contigs"]),
                 ("# Largest contig", ["Largest contig"]),
                 ("# N50", ["N50"]),
                 ("# % Genome fraction", ["Genome fraction (%)"]),
+            ],
+        ),
+        (
+            "multiqc_kmerfinder.yaml",
+            [
+                ("# Best hit (Kmerfinder)", ["07-kmerfinder_best_hit_Species"]),
+                ("# Best hit assembly ID (Kmerfinder)", ["07-kmerfinder_best_hit_# Assembly"]),
+                ("# Best hit query coverage (Kmerfinder)", ["07-kmerfinder_best_hit_Query_Coverage"]),
+                ("# Best hit depth (Kmerfinder)", ["07-kmerfinder_best_hit_Depth"]),
+                ("# Second hit (Kmerfinder)", ["07-kmerfinder_second_hit_Species"]),
+                ("# Second hit assembly ID (Kmerfinder)", ["07-kmerfinder_second_hit_# Assembly"]),
+                ("# Second hit query coverage (Kmerfinder)", ["07-kmerfinder_second_hit_Query_Coverage"]),
+                ("# Second hit depth (Kmerfinder)", ["07-kmerfinder_second_hit_Depth"]),
+            ]
+        ),
+    ]
+
+    hybrid_assembly_files = [
+        (
+            "multiqc_fastp.yaml",
+            [
+                ("# Input short reads", ["before_filtering", "total_reads"]),
+                ("# Trimmed short reads (fastp)", ["after_filtering", "total_reads"]),
+            ]
+        ),
+        (
+            "multiqc_nanostat.yaml",
+            [
+                ("# Input long reads", ["Number of reads_fastq"]),
+                ("# Median long reads lenght", ["Median read length_fastq"]),
+                ("# Median long reads quality", ["Median read quality_fastq"]),
+            ]
+        ),
+        (
+            "multiqc_quast.yaml",
+            [
+                ("# Contigs (hybrid assembly)", ["# contigs"]),
+                ("# Largest contig (hybrid assembly)", ["Largest contig"]),
+                ("# N50 (hybrid assembly)", ["N50"]),
+                ("# % Genome fraction (hybrid assembly)", ["Genome fraction (%)"]),
             ],
         ),
         (
@@ -238,6 +278,13 @@ def main(args=None):
     elif args.ASSEMBLY_TYPE == 'long':
         metrics_dict_to_file(
             file_field_list=nanopore_assembly_files,
+            multiqc_data_dir=args.MULTIQC_DATA_DIR,
+            out_file=args.OUT_PREFIX + "_assembly_metrics_mqc.csv",
+            valid_sample_list=[],
+        )
+    elif args.ASSEMBLY_TYPE == 'hybrid':
+        metrics_dict_to_file(
+            file_field_list=hybrid_assembly_files,
             multiqc_data_dir=args.MULTIQC_DATA_DIR,
             out_file=args.OUT_PREFIX + "_assembly_metrics_mqc.csv",
             valid_sample_list=[],
