@@ -76,7 +76,7 @@
                 },
                 "kmerfinderdb": {
                     "type": "string",
-                    "description": "Database for Kmerfinder.",
+                    "description": "Path to the Kmerfinder bacteria database.",
                     "help_text": ""
                 },
                 "reference_fasta": {
@@ -87,9 +87,9 @@
                     "type": "string",
                     "description": "Reference GFF file."
                 },
-                "reference_ncbi_bacteria": {
+                "ncbi_assembly_metadata": {
                     "type": "string",
-                    "description": "NCBI Bacteria reference database"
+                    "description": "Master file (*.txt) containing a summary of asseblies available in GeneBank or RefSeq. See: https://ftp.ncbi.nlm.nih.gov/genomes/README_assembly_summary.txt"
                 }
             }
         },

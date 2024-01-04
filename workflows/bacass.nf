@@ -28,17 +28,21 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Check krakendb
 if (!params.skip_kraken2) {
     if (params.kraken2db) {
-        kraken2db = file(params.kraken2db)
+        kraken2db = file(params.kraken2db, checkIfExists: true)
     } else {
         exit 1, "Missing Kraken2 DB arg"
     }
 }
 
-// Check kmerfinderdb
-if (!params.skip_kmerfinder && !params.kmerfinderdb){
-    exit 1, "Missing Kmerfinder DB arg: --kmerfinderdb <path/to/kmerfinder_database>"
+// Check kmerfinder dependencies
+if (!params.skip_kmerfinder) {
+    if (!params.kmerfinderdb || !params.ncbi_assembly_metadata) {
+        exit 1, "[KMERFINDER]: Missing --kmerfinder_db and/or --ncbi_assembly_metadata arguments. Both are required to run KMERFINDER."
+    } else {
+        file(params.kmerfinderdb, checkIfExists: true)
+        file(params.ncbi_assembly_metadata, checkIfExists: true)
+    }
 }
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CONFIG FILES
@@ -404,8 +408,9 @@ workflow BACASS {
     }
 
     //
-    // MODULE: Kmerfinder, QC for sample purity.
+    // SUBWORKFLOW: Kmerfinder, QC for sample purity.
     //
+    // TODO: Executes both kmerfinder and organizes samples by the reference genome (all this through the kmerfinder_subworkflow()). Ideally, users can also utilize kmerfinder independently without the need to download reference genome and grouping data —simply running kmerfinder alone-.
 
     ch_kmerfinder_multiqc = Channel.empty()
     if (!params.skip_kmerfinder) {
@@ -427,7 +432,7 @@ workflow BACASS {
 
         KMERFINDER_SUBWORKFLOW (
             ch_kmerfinderdb,
-            params.reference_ncbi_bacteria,
+            params.ncbi_assembly_metadata,
             ch_for_kmerfinder,
             ch_assembly
         )
