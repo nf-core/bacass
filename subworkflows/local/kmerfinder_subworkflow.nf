@@ -9,7 +9,7 @@ include { QUAST                     } from '../../modules/nf-core/quast/main'
 workflow KMERFINDER_SUBWORKFLOW {
     take:
     kmerfinder_db       // channel: [ path ]
-    ncbi_bacteria_db    // channel: [ path ]
+    ncbi_assembly_metadata    // channel: [ path ]
     reads               // channel: [ meta, reads ]
     consensus           // channel: [ meta, consensus ]
 
@@ -49,7 +49,7 @@ workflow KMERFINDER_SUBWORKFLOW {
     if (!params.reference_fasta && !params.reference_gff) {
         FIND_DOWNLOAD_REFERENCE (
             ch_consensus_byrefseq.map{ refseq, meta, report_txt, fasta -> tuple(refseq, report_txt)},
-            ncbi_bacteria_db
+            ncbi_assembly_metadata
         )
         ch_reference_fasta  = FIND_DOWNLOAD_REFERENCE.out.fna
         ch_reference_gff    = FIND_DOWNLOAD_REFERENCE.out.gff

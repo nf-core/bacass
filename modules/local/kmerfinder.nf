@@ -9,7 +9,7 @@ process KMERFINDER {
 
     input:
     tuple val(meta), path(reads)
-    path(kmerfinderDB)
+    path(kmerfinder_db)
 
     output:
     tuple val(meta), path("*_results.txt")  , emit: report
@@ -24,8 +24,8 @@ process KMERFINDER {
     kmerfinder.py \\
         --infile $in_reads \\
         --output_folder . \\
-        --db_path ${kmerfinderDB}/bacteria.ATG \\
-        -tax ${kmerfinderDB}/bacteria.name \\
+        --db_path ${kmerfinder_db}/bacteria.ATG \\
+        -tax ${kmerfinder_db}/bacteria.name \\
         -x
 
     mv results.txt ${prefix}_results.txt

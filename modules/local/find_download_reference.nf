@@ -9,7 +9,7 @@ process FIND_DOWNLOAD_REFERENCE {
 
     input:
     tuple val(meta), path(reports,  stageAs: 'reports/*')
-    path(ncbi_reference)
+    path(ncbi_metadata_db)
 
     output:
     tuple val(meta), path( "*.fna.gz")              , emit: fna
@@ -19,13 +19,15 @@ process FIND_DOWNLOAD_REFERENCE {
 
     script:
     """
+    ## Find the common reference genome
     find_common_reference.py \\
         -d reports/ \\
         -o references_found.tsv
 
+    ## Download the winner reference genome from the ncbi database
     download_reference.py \\
         -file references_found.tsv \\
-        -reference $ncbi_reference \\
+        -reference $ncbi_metadata_db \\
         -out_dir .
 
     cat <<-END_VERSIONS > versions.yml

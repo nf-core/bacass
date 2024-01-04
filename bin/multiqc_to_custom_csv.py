@@ -63,10 +63,6 @@ def find_tag(d, tag):
 
 def yaml_fields_to_dict(yaml_file, append_dict={}, field_mapping_list=[], valid_sample_list=[]):
     integer_fields = [
-        "mapped_passed",
-        "number_of_SNPs",
-        "number_of_indels",
-        "MISSENSE",
         "# contigs",
         "# contigs (>= 5000 bp)",
         "Largest contig",
