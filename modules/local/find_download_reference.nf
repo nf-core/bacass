@@ -12,10 +12,11 @@ process FIND_DOWNLOAD_REFERENCE {
     path(ncbi_metadata_db)
 
     output:
-    tuple val(meta), path( "*.fna.gz")              , emit: fna
-    tuple val(meta), path( "*.gff.gz")              , emit: gff
-    tuple val(meta), path( "*.faa.gz")              , emit: faa
-    path "versions.yml"                             , emit: versions
+    tuple val(meta), path("*.fna.gz")              , emit: fna
+    tuple val(meta), path("*.gff.gz")              , emit: gff
+    tuple val(meta), path("*.faa.gz")              , emit: faa
+    tuple val(meta), path("references_found.tsv")  , emit: references_tsv
+    path "versions.yml"                            , emit: versions
 
     script:
     """
