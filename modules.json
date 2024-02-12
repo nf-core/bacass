@@ -17,7 +17,7 @@
                     },
                     "canu": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "8ec825f465b9c17f9d83000022995b4f7de6fe93",
                         "installed_by": ["modules"]
                     },
                     "custom/dumpsoftwareversions": {
@@ -38,6 +38,7 @@
                     },
                     "fastqc": {
                         "branch": "master",
+<<<<<<< HEAD
                         "git_sha": "9a4517e720bc812e95b56d23d15a1653b6db4f53",
                         "installed_by": ["modules", "fastq_trim_fastp_fastqc"]
                     },
@@ -59,10 +60,14 @@
                     "minimap2/align": {
                         "branch": "master",
                         "git_sha": "603ecbd9f45300c9788f197d2a15a005685b4220",
+=======
+                        "git_sha": "c9488585ce7bd35ccd2a30faa2371454c8112fb9",
+>>>>>>> TEMPLATE
                         "installed_by": ["modules"]
                     },
                     "multiqc": {
                         "branch": "master",
+<<<<<<< HEAD
                         "git_sha": "c4e79dd48ab2cedea2d7d525582bea061c241e0f",
                         "installed_by": ["modules"]
                     },
@@ -75,6 +80,9 @@
                     "porechop/porechop": {
                         "branch": "master",
                         "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+=======
+                        "git_sha": "8ec825f465b9c17f9d83000022995b4f7de6fe93",
+>>>>>>> TEMPLATE
                         "installed_by": ["modules"]
                     },
                     "prokka": {
