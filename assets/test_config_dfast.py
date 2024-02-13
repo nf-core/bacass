@@ -39,14 +39,19 @@ class Config:
         "locus_tag_prefix": "LOCUS",
         "step": 10,
         "use_separate_tags": True,  # If set to `True`, locus_tags are assigned separately according to feature type.
-        "symbols": {"CDS": "", "rRNA": "r", "tRNA": "t", "tmRNA": "tm"}
+        "symbols": {"CDS": "", "rRNA": "r", "tRNA": "t", "tmRNA": "tm"},
         # "symbols": {"CDS": "", "rRNA": "r", "tRNA": "t", "tmRNA": "tm", "nc_rna": "nc", "misc_rna": "misc"}
     }
 
     FEATURE_ADJUSTMENT = {
         "remove_partial_features": True,  # True: enabled, False: disabled
         "remove_overlapping_features": True,  # True: enabled, False: disabled
-        "feature_type_priority": ["assembly_gap", "CRISPR", ("tmRNA", "tRNA", "rRNA"), "CDS"],
+        "feature_type_priority": [
+            "assembly_gap",
+            "CRISPR",
+            ("tmRNA", "tRNA", "rRNA"),
+            "CDS",
+        ],
         "merge_cds": False,  # True: enabled, False: disabled
         "tool_type_priority": {"MGA": 0, "Prodigal": 1},
     }
@@ -79,7 +84,9 @@ class Config:
             # MetaGeneAnnotator for CDS prediction
             "tool_name": "MGA",
             "enabled": True,
-            "options": {"cmd_options": "-s"},  # -s for single species, -m for multiple species
+            "options": {
+                "cmd_options": "-s"
+            },  # -s for single species, -m for multiple species
         },
         {
             # Aragorn for tRNA and tmRNA prediction
@@ -95,7 +102,10 @@ class Config:
             # Please insall tRNAscan-SE and put it in your PATH to enable this.
             "tool_name": "tRNAscan",
             "enabled": False,
-            "options": {"model": "--bact", "cmd_options": ""},  # --bact, --arch, --organ, --general
+            "options": {
+                "model": "--bact",
+                "cmd_options": "",
+            },  # --bact, --arch, --organ, --general
         },
         {
             # Barrnap for rRNA prediction
