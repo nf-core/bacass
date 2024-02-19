@@ -17,12 +17,12 @@
                     },
                     "canu": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
                     "custom/dumpsoftwareversions": {
                         "branch": "master",
-                        "git_sha": "05c280924b6c768d484c7c443dad5e605c4ff4b4",
+                        "git_sha": "8ec825f465b9c17f9d83000022995b4f7de6fe93",
                         "installed_by": ["modules"]
                     },
                     "dragonflye": {
@@ -33,13 +33,13 @@
                     },
                     "fastp": {
                         "branch": "master",
-                        "git_sha": "d497a4868ace3302016ea8ed4b395072d5e833cd",
-                        "installed_by": ["fastq_trim_fastp_fastqc", "modules"]
+                        "git_sha": "003920c7f9a8ae19b69a97171922880220bedf56",
+                        "installed_by": ["fastq_trim_fastp_fastqc"]
                     },
                     "fastqc": {
                         "branch": "master",
-                        "git_sha": "9a4517e720bc812e95b56d23d15a1653b6db4f53",
-                        "installed_by": ["modules", "fastq_trim_fastp_fastqc"]
+                        "git_sha": "f4ae1d942bd50c5c0b9bd2de1393ce38315ba57c",
+                        "installed_by": ["fastq_trim_fastp_fastqc"]
                     },
                     "gunzip": {
                         "branch": "master",
@@ -63,12 +63,12 @@
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "c4e79dd48ab2cedea2d7d525582bea061c241e0f",
+                        "git_sha": "8ec825f465b9c17f9d83000022995b4f7de6fe93",
                         "installed_by": ["modules"]
                     },
                     "nanoplot": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/nanoplot/nanoplot.diff"
                     },
@@ -113,7 +113,7 @@
                 "nf-core": {
                     "fastq_trim_fastp_fastqc": {
                         "branch": "master",
-                        "git_sha": "bd448d5c60454640610681515538be3ec66036e4",
+                        "git_sha": "cfd937a668919d948f6fcbf4218e79de50c2f36f",
                         "installed_by": ["subworkflows"]
                     }
                 }

@@ -1,7 +1,7 @@
 Changes in module 'nf-core/nanoplot'
 --- modules/nf-core/nanoplot/main.nf
 +++ modules/nf-core/nanoplot/main.nf
-@@ -22,13 +22,16 @@
+@@ -22,13 +22,15 @@
  
      script:
      def args = task.ext.args ?: ''
@@ -16,9 +16,8 @@ Changes in module 'nf-core/nanoplot'
          $input_file
 +
 +    mv NanoStats.txt ${prefix}.txt
-+    
+ 
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
-         nanoplot: \$(echo \$(NanoPlot --version 2>&1) | sed 's/^.*NanoPlot //; s/ .*\$//')
 
 ************************************************************
