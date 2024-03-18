@@ -38,6 +38,10 @@
 
   > Koren S, Walenz BP, Berlin K, Miller JR, Bergman NH, Phillippy AM. Canu: scalable and accurate long-read assembly via adaptive k-mer weighting and repeat separation. Genome Res. 2017 May;27(5):722-736. doi: 10.1101/gr.215087.116. Epub 2017 Mar 15. PMID: 28298431; PMCID: PMC5411767.
 
+- [Flye](https://pubmed.ncbi.nlm.nih.gov/30936562/)
+
+  > Kolmogorov M, Yuan J, Lin Y, Pevzner PA. Assembly of long, error-prone reads using repeat graphs. Nat Biotechnol. 2019 May;37(5):540-546. doi: 10.1038/s41587-019-0072-8. Epub 2019 Apr 1. PMID: 30936562.
+
 - [QUAST](https://pubmed.ncbi.nlm.nih.gov/23422339/)
 
   > Gurevich A, Saveliev V, Vyahhi N, Tesler G. QUAST: quality assessment tool for genome assemblies. Bioinformatics. 2013 Apr 15;29(8):1072-5. doi: 10.1093/bioinformatics/btt086. Epub 2013 Feb 19. PMID: 23422339; PMCID: PMC3624806.

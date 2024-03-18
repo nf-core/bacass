@@ -105,7 +105,8 @@
                 "canu_mode": {
                     "type": "string",
                     "enum": ["-pacbio", "-nanopore", "-pacbio-hifi", "null"],
-                    "description": "Allowed technologies for long read assembly : [\"-pacbio\", \"-nanopore\", \"-pacbio-hifi\"]"
+                    "description": "Allowed technologies for long read assembly : [\"-pacbio\", \"-nanopore\", \"-pacbio-hifi\"]",
+                    "default": "-nanopore"
                 },
                 "canu_args": {
                     "type": "string",
@@ -164,7 +165,7 @@
                 },
                 "dfast_config": {
                     "type": "string",
-                    "default": "assets/test_config_dfast.py",
+                    "default": "/storage/tmp/scratch_lb21z855/nf-core-hackathon24/bacass/assets/test_config_dfast.py",
                     "description": "Specifies a configuration file for the [DFAST](https://github.com/nigyta/dfast_core) annotation method.",
                     "help_text": "This can be used instead of PROKKA if required to specify a specific config file for annotation. If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.  The default config (`assets/test_config_dfast.py`) is just included for testing, so if you want to annotate using DFAST, you have to create a config!"
                 }
@@ -440,5 +441,16 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "flye_mode": {
+            "type": "string",
+            "default": "--nano-raw",
+            "description": "Allowed read types for long reads technologies [\"--pacbio-raw\", \"--pacbio-corr\", \"--pacbio-hifi\", \"--nano-raw\", \"--nano-corr\", \"--nano-hq\"]"
+        },
+        "flye_args": {
+            "type": "string",
+            "description": "This can be used to supply [extra options](https://github.com/fenderglass/Flye/blob/flye/docs/USAGE.md) to the Flye assembler. Will be ignored when other assemblers are used."
+        }
+    }
 }
