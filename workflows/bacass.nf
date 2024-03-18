@@ -134,7 +134,7 @@ workflow BACASS {
     ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
     ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
     ch_trim_json_multiqc    = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
-    ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions)
 
     //
     // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots
@@ -143,7 +143,7 @@ workflow BACASS {
         ch_longreads
     )
     ch_nanoplot_txt_multiqc = NANOPLOT.out.txt
-    ch_versions = ch_versions.mix(NANOPLOT.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(NANOPLOT.out.versions)
 
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
@@ -155,7 +155,7 @@ workflow BACASS {
             ch_fast5.dump(tag: 'fast5')
         )
         ch_pycoqc_multiqc = PYCOQC.out.json
-        ch_versions       = ch_versions.mix(PYCOQC.out.versions.ifEmpty(null))
+        ch_versions       = ch_versions.mix(PYCOQC.out.versions)
     }
 
     //
@@ -167,7 +167,7 @@ workflow BACASS {
             ch_longreads.dump(tag: 'longreads')
         )
         ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
-        ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions.ifEmpty(null) )
+        ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
     }
 
     //
@@ -213,7 +213,7 @@ workflow BACASS {
             ch_for_assembly
         )
         ch_assembly = ch_assembly.mix( UNICYCLER.out.scaffolds.dump(tag: 'unicycler') )
-        ch_versions = ch_versions.mix( UNICYCLER.out.versions.ifEmpty(null) )
+        ch_versions = ch_versions.mix( UNICYCLER.out.versions )
     }
 
 
@@ -227,7 +227,7 @@ workflow BACASS {
             ch_for_assembly.map { meta, reads, lr -> meta.genome_size }
         )
         ch_assembly = ch_assembly.mix( CANU.out.assembly.dump(tag: 'canu') )
-        ch_versions = ch_versions.mix(CANU.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(CANU.out.versions)
     }
 
     //
@@ -240,7 +240,7 @@ workflow BACASS {
             false,
             false
         )
-        ch_versions = ch_versions.mix(MINIMAP2_ALIGN.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIMAP2_ALIGN.out.versions)
 
         ch_for_assembly
             .join(MINIMAP2_ALIGN.out.paf)
@@ -250,7 +250,7 @@ workflow BACASS {
         MINIASM (
             ch_for_miniasm
         )
-        ch_versions = ch_versions.mix(MINIASM.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIASM.out.versions)
 
         MINIMAP2_CONSENSUS (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
@@ -259,7 +259,7 @@ workflow BACASS {
             false,
             false
         )
-        ch_versions = ch_versions.mix(MINIMAP2_CONSENSUS.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIMAP2_CONSENSUS.out.versions)
 
         ch_for_assembly
             .join(MINIASM.out.assembly)
@@ -271,7 +271,7 @@ workflow BACASS {
             ch_for_racon
         )
         ch_assembly = ch_assembly.mix( RACON.out.improved_assembly.dump(tag: 'miniasm') )
-        ch_versions = ch_versions.mix( RACON.out.versions.ifEmpty(null) )
+        ch_versions = ch_versions.mix( RACON.out.versions )
     }
 
     //
@@ -282,7 +282,7 @@ workflow BACASS {
             ch_for_assembly
         )
         ch_assembly = ch_assembly.mix( DRAGONFLYE.out.contigs.dump(tag: 'dragonflye') )
-        ch_versions = ch_versions.mix( DRAGONFLYE.out.versions.ifEmpty(null) )
+        ch_versions = ch_versions.mix( DRAGONFLYE.out.versions )
     }
 
     //
@@ -300,12 +300,12 @@ workflow BACASS {
             false,
             false
         )
-        ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions)
 
         SAMTOOLS_INDEX (
             MINIMAP2_POLISH.out.bam.dump(tag: 'samtools_sort')
         )
-        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
 
         ch_for_polish    // tuple val(meta), val(reads), file(longreads), file(assembly)
             .join( MINIMAP2_POLISH.out.bam )    // tuple val(meta), file(bam)
@@ -317,7 +317,7 @@ workflow BACASS {
         NANOPOLISH (
             ch_for_nanopolish.dump(tag: 'into_nanopolish')
         )
-        ch_versions = ch_versions.mix(NANOPOLISH.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(NANOPOLISH.out.versions)
     }
 
     //
@@ -330,7 +330,7 @@ workflow BACASS {
             .set { ch_for_medaka }
 
         MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
-        ch_versions = ch_versions.mix(MEDAKA.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(MEDAKA.out.versions)
     }
 
     //
@@ -349,7 +349,7 @@ workflow BACASS {
             false
         )
         ch_kraken_short_multiqc = KRAKEN2.out.report
-        ch_versions = ch_versions.mix(KRAKEN2.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(KRAKEN2.out.versions)
 
         KRAKEN2_LONG (
             ch_for_kraken2_long
@@ -365,7 +365,7 @@ workflow BACASS {
             false
         )
         ch_kraken_long_multiqc = KRAKEN2_LONG.out.report
-        ch_versions = ch_versions.mix(KRAKEN2_LONG.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(KRAKEN2_LONG.out.versions)
     }
 
     //
@@ -382,7 +382,7 @@ workflow BACASS {
         [[:],[]]
     )
     ch_quast_multiqc = QUAST.out.tsv
-    ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
+    ch_versions      = ch_versions.mix(QUAST.out.versions)
 
     // Check assemblies that require further processing for gene annotation
     ch_assembly
@@ -400,7 +400,7 @@ workflow BACASS {
         // Uncompress assembly for annotation if necessary
         GUNZIP ( ch_assembly_for_gunzip.gzip )
         ch_to_prokka    = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
-        ch_versions     = ch_versions.mix( GUNZIP.out.versions.ifEmpty(null) )
+        ch_versions     = ch_versions.mix( GUNZIP.out.versions )
 
         PROKKA (
             ch_to_prokka,
@@ -408,7 +408,7 @@ workflow BACASS {
             []
         )
         ch_prokka_txt_multiqc   = PROKKA.out.txt.collect()
-        ch_versions             = ch_versions.mix(PROKKA.out.versions.ifEmpty(null))
+        ch_versions             = ch_versions.mix(PROKKA.out.versions)
     }
 
     //
@@ -419,7 +419,7 @@ workflow BACASS {
         // Uncompress assembly for annotation if necessary
         GUNZIP ( ch_assembly_for_gunzip.gzip )
         ch_to_bakta     = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
-        ch_versions     = ch_versions.mix( GUNZIP.out.versions.ifEmpty(null) )
+        ch_versions     = ch_versions.mix( GUNZIP.out.versions )
 
         BAKTA_DBDOWNLOAD_RUN (
             ch_to_bakta,
@@ -438,7 +438,7 @@ workflow BACASS {
             ch_assembly,
             Channel.value(params.dfast_config ? file(params.dfast_config) : "")
         )
-        ch_versions = ch_versions.mix(DFAST.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(DFAST.out.versions)
     }
 
     //
