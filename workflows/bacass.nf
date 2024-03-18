@@ -82,6 +82,7 @@ include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS  } from '../modules/nf-core/minim
 include { MINIMAP2_ALIGN as MINIMAP2_POLISH     } from '../modules/nf-core/minimap2/align/main'
 include { MINIASM                               } from '../modules/nf-core/miniasm/main'
 include { RACON                                 } from '../modules/nf-core/racon/main'
+include { FLYE                                  } from '../modules/nf-core/flye/main'   
 include { SAMTOOLS_SORT                         } from '../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samtools/index/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/kraken2/kraken2/main'
