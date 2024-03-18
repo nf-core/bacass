@@ -93,22 +93,26 @@ workflow BACASS {
     //
     def criteria = multiMapCriteria {
         meta, fastq_1, fastq_2, long_fastq, fast5 ->
-            shortreads: fastq_1     != 'NA' ? tuple(meta, [file(fastq_1), file(fastq_2)]) : null
-            longreads: long_fastq   != 'NA' ? tuple(meta, file(long_fastq))         : null
-            fast5: fast5            != 'NA' ? tuple(meta, fast5)              : null
+            shortreads: fastq_1     != 'NA' ? tuple(meta, [fastq_1, fastq_2]) : null
+            longreads: long_fastq   != 'NA' ? tuple(meta, long_fastq) : null
+            fast5: fast5            != 'NA' ? tuple(meta, fast5) : null
     }
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
-    Channel
-        .fromSamplesheet('input')
+    ch_samplesheet
+        .map {
+            meta, fastqs, long_fastq, fast5 ->
+            return [meta, fastqs[0], fastqs[1], long_fastq[0], fast5[0]]
+        }
         .multiMap (criteria)
         .set { ch_input }
+
     // reconfigure channels
     ch_input
         .shortreads
         .filter{ it != null }
         .set { ch_shortreads }
     ch_input
-        .longreads
+        .longreads.view()
         .filter{ it != null }
         .set { ch_longreads }
     ch_input
