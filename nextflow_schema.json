@@ -106,7 +106,8 @@
                 "canu_mode": {
                     "type": "string",
                     "enum": ["-pacbio", "-nanopore", "-pacbio-hifi", "null"],
-                    "description": "Allowed technologies for long read assembly : [\"-pacbio\", \"-nanopore\", \"-pacbio-hifi\"]"
+                    "description": "Allowed technologies for long read assembly : [\"-pacbio\", \"-nanopore\", \"-pacbio-hifi\"]",
+                    "default": "-nanopore"
                 },
                 "canu_args": {
                     "type": "string",
@@ -446,5 +447,16 @@
         {
             "$ref": "#/definitions/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "flye_mode": {
+            "type": "string",
+            "default": "--nano-raw",
+            "description": "Allowed read types for long reads technologies [\"--pacbio-raw\", \"--pacbio-corr\", \"--pacbio-hifi\", \"--nano-raw\", \"--nano-corr\", \"--nano-hq\"]"
+        },
+        "flye_args": {
+            "type": "string",
+            "description": "This can be used to supply [extra options](https://github.com/fenderglass/Flye/blob/flye/docs/USAGE.md) to the Flye assembler. Will be ignored when other assemblers are used."
+        }
+    }
 }

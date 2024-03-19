@@ -10,18 +10,21 @@ The directories listed below will be created in the results directory after the 
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
-- [Quality trimming and QC](#quality-trimming-and-qc)
-  - [Short Read Trimming](#short-read-trimming)
-  - [Short Read RAW QC](#short-read-raw-qc)
-  - [Long Read Trimming](#long-read-trimming)
-  - [Long Read RAW QC](#long-read-raw-qc)
-- [Taxonomic classification](#taxonomic-classification)
-- [Assembly Output](#assembly-output)
-  - [Polished assemblies](#polished-assemblies)
-- [Assembly QC with QUAST](#assembly-qc-with-quast)
-- [Annotation](#annotation)
-- [Report](#report)
-- [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
+- [nf-core/bacass: Output](#nf-corebacass-output)
+  - [Introduction](#introduction)
+  - [Pipeline overview](#pipeline-overview)
+  - [Quality trimming and QC](#quality-trimming-and-qc)
+    - [Short Read Trimming](#short-read-trimming)
+    - [Short Read RAW QC](#short-read-raw-qc)
+    - [Long Read Trimming](#long-read-trimming)
+    - [Long Read RAW QC](#long-read-raw-qc)
+  - [Taxonomic classification](#taxonomic-classification)
+  - [Assembly Output](#assembly-output)
+    - [Polished assemblies](#polished-assemblies)
+  - [Assembly QC with QUAST](#assembly-qc-with-quast)
+  - [Annotation](#annotation)
+  - [Report](#report)
+    - [Pipeline information](#pipeline-information)
 
 ## Quality trimming and QC
 
@@ -121,7 +124,7 @@ Exemplary Kraken2 report screenshot:
 
 ## Assembly Output
 
-Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler) in `short` or `hybrid` assembly modes. For long-read assembly, there are also `canu` and `miniasm` available.
+Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler) in `short` or `hybrid` assembly modes. For long-read assembly, there are also `canu`, `flye`, `miniasm` available.
 Unicycler is a pipeline on its own, which at least for Illumina reads mainly acts as a frontend to Spades with added polishing steps.
 
 <details markdown="1">
@@ -139,6 +142,12 @@ Check out the [Unicycler documentation](https://github.com/rrwick/Unicycler) for
   - `*.report`: Log file summarizing steps and intermediate results
 
 Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.html) for more information on Canu output.
+
+- `Flye/`
+  - `*.fasta.gz`: Final assembly in fasta format
+  - `*.log`: Log file summarizing steps and intermediate results
+
+Check out the [Flye documentation](https://github.com/fenderglass/Flye/blob/flye/docs/USAGE.md) for more information on Flye output.
 
 - `Miniasm/`
   - `*.fasta.gz`: Assembly in Fasta format

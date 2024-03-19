@@ -83,6 +83,7 @@ include { MINIMAP2_ALIGN as MINIMAP2_POLISH     } from '../modules/nf-core/minim
 include { MINIASM                               } from '../modules/nf-core/miniasm/main'
 include { DRAGONFLYE                            } from '../modules/nf-core/dragonflye/main'
 include { RACON                                 } from '../modules/nf-core/racon/main'
+include { FLYE                                  } from '../modules/nf-core/flye/main'   
 include { SAMTOOLS_SORT                         } from '../modules/nf-core/samtools/sort/main'
 include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samtools/index/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/kraken2/kraken2/main'
@@ -221,7 +222,11 @@ workflow BACASS {
     }
 
     //
+<<<<<<< HEAD
     // ASSEMBLY: Unicycler, Canu, Miniasm, Dragonflye
+=======
+    // ASSEMBLY: Unicycler, Canu, Miniasm, Flye 
+>>>>>>> 115-add-flye-to-nf-corebacass
     //
     ch_assembly = Channel.empty()
 
@@ -248,6 +253,18 @@ workflow BACASS {
         )
         ch_assembly = ch_assembly.mix( CANU.out.assembly.dump(tag: 'canu') )
         ch_versions = ch_versions.mix(CANU.out.versions.ifEmpty(null))
+    }
+    //
+    // MODULE: Flye, genome assembly, long reads
+    //
+    if ( params.assembler == 'flye' ) {
+        FLYE (
+            ch_for_assembly.map { meta, reads, lr -> tuple( meta, lr ) }.view(),
+            params.flye_mode
+            // ch_for_assembly.map { meta, reads, lr -> meta.genome_size }  // Flye needs genome size?
+        )
+        ch_assembly = ch_assembly.mix( FLYE.out.fasta.dump(tag: 'flye') )
+        ch_versions = ch_versions.mix(FLYE.out.versions.ifEmpty(null))
     }
 
     //
