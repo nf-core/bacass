@@ -430,31 +430,22 @@ workflow BACASS {
             ch_for_kmerfinder = PORECHOP_PORECHOP.out.reads
         }
 
+        // TODO: Future versions are intended to operate seamlessly without the need for *.fasta assembly files to be included in the subworkflow (by using sample name [meta] only). This enhancement aims to optimize efficiency.
         KMERFINDER_SUBWORKFLOW (
             ch_kmerfinderdb,
             params.ncbi_assembly_metadata,
             ch_for_kmerfinder,
             ch_assembly
         )
-        ch_refseqid             = KMERFINDER_SUBWORKFLOW.out.refseqids
-        ch_reference_fasta      = KMERFINDER_SUBWORKFLOW.out.reference_fasta
-        ch_reference_gff        = KMERFINDER_SUBWORKFLOW.out.reference_gff
-        ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
         ch_kmerfinder_multiqc   = KMERFINDER_SUBWORKFLOW.out.summary_yaml
+        ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
         ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions.ifEmpty(null))
 
-        // Group data based on ref-genome and rename meta according to the identified references count.
-        ch_consensus_byrefseq           // [ refseq, meta, report_txt, consensus ]
-            .join(ch_reference_fasta)   // [ refseq, meta, report_txt, consensus, ref_fasta ]
-            .join(ch_reference_gff)     // [ refseq, meta, report_txt, consensus, ref_fasta, ref_gff ]
-            .groupTuple(by:0)
+        // Parsing channel to set up QUAST_BYREFSEQ input.
+        ch_consensus_byrefseq           // [ refseq, meta, fasta, ref_fna, ref_gff ]
             .map {
-                refseq, meta, report_txt, consensus, ref_fasta, ref_gff -> ch_refseqid.size()
-                    if (ch_refseqid.size().getVal() > 1 ){
-                        return [refseq, consensus.flatten(), ref_fasta, ref_gff]
-                    } else {
-                        return [[id:'report'], consensus.flatten(), ref_fasta, ref_gff]
-                    }
+                refmeta, meta, consensus, ref_fna, ref_gff ->
+                        return tuple(refmeta, consensus.flatten(), ref_fna, ref_gff)
             }
             .set { ch_to_quast_byrefseq }
     }
@@ -475,16 +466,16 @@ workflow BACASS {
             params.reference_gff ?: [[:],[]]
         )
         ch_quast_multiqc = QUAST.out.results
-    } else if (!params.skip_kmerfinder && ch_to_quast_byrefseq) {
+    } else if (!params.skip_kmerfinder) {
         QUAST(
             ch_to_quast,
             [[:],[]],
             [[:],[]]
         )
         QUAST_BYREFSEQID(
-            ch_to_quast_byrefseq.map{ refseqid, consensus, ref_fasta, ref_gff -> tuple( refseqid, consensus)},
-            ch_to_quast_byrefseq.map{ refseqid, consensus, ref_fasta, ref_gff -> tuple( refseqid, ref_fasta)},
-            ch_to_quast_byrefseq.map{ refseqid, consensus, ref_fasta, ref_gff -> tuple( refseqid, ref_gff)}
+            ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, consensus)},
+            ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_fasta)},
+            ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_gff)}
         )
         ch_quast_multiqc = QUAST_BYREFSEQID.out.results
     }
@@ -599,6 +590,13 @@ workflow.onComplete {
     NfcoreTemplate.summary(workflow, params, log)
     if (params.hook_url) {
         NfcoreTemplate.IM_notification(workflow, params, summary_params, projectDir, log)
+    }
+}
+
+workflow.onError {
+    if (workflow.errorReport.contains("Process requirement exceeds available memory")) {
+        println("🛑 Default resources exceed availability 🛑 ")
+        println("💡 See here on how to configure pipeline: https://nf-co.re/docs/usage/configuration#tuning-workflow-resources 💡")
     }
 }
 

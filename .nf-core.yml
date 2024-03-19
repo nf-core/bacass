@@ -2,3 +2,6 @@ repository_type: pipeline
 lint:
   files_exist:
     - conf/igenomes.config
+  nextflow_config:
+    - config_defaults:
+        - params.dfast_config

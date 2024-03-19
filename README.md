@@ -1,4 +1,9 @@
-# ![nf-core/bacass](docs/images/nf-core-bacass_logo_light.png#gh-light-mode-only) ![nf-core/bacass](docs/images/nf-core-bacass_logo_dark.png#gh-dark-mode-only)
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/nf-core-bacass_logo_dark.png">
+    <img alt="nf-core/bacass" src="docs/images/nf-core-bacass_logo_light.png">
+  </picture>
+</h1>
 
 [![GitHub Actions CI Status](https://github.com/nf-core/bacass/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/bacass/actions?query=workflow%3A%22nf-core+CI%22)
 [![GitHub Actions Linting Status](https://github.com/nf-core/bacass/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/bacass/actions?query=workflow%3A%22nf-core+linting%22)
@@ -33,11 +38,12 @@ For users that only have Nanopore data, the pipeline quality trims these using [
 
 The pipeline can then perform long read assembly utilizing [Unicycler](https://github.com/rrwick/Unicycler), [Miniasm](https://github.com/lh3/miniasm) in combination with [Racon](https://github.com/isovic/racon), [Canu](https://github.com/marbl/canu) or [Flye](https://github.com/fenderglass/Flye) by using the [Dragonflye](https://github.com/rpetit3/dragonflye)(\*) pipeline. Long reads assembly can be polished using [Medaka](https://github.com/nanoporetech/medaka) or [NanoPolish](https://github.com/jts/nanopolish) with Fast5 files.
 
-> **\*Note**: Dragonflye is a comprehensive pipeline designed for genome assembly of Oxford Nanopore Reads. It facilitates the utilization of Flye (default), Miniasm, and Raven assemblers, along with Racon(default) and Medaka polishers. For more information, visit the [Dragonflye GitHub](https://github.com/rpetit3/dragonflye) repository.
+> [!NOTE]
+> Dragonflye is a comprehensive pipeline designed for genome assembly of Oxford Nanopore Reads. It facilitates the utilization of Flye (default), Miniasm, and Raven assemblers, along with Racon(default) and Medaka polishers. For more information, visit the [Dragonflye GitHub](https://github.com/rpetit3/dragonflye) repository.
 
 ### Hybrid Assembly
 
-For users specifying both short read and long read (NanoPore) data, the pipeline can perform a hybrid assembly approach utilizing [Unicycler](https://github.com/rrwick/Unicycler) or [Dragonflye](https://github.com/rpetit3/dragonflye) (polishing of the assembled genome with short reads), taking the full set of information from short reads and long reads into account.
+For users specifying both short read and long read (NanoPore) data, the pipeline can perform a hybrid assembly approach utilizing [Unicycler](https://github.com/rrwick/Unicycler) (short read assembly followed by gap closing with long reads) or [Dragonflye](https://github.com/rpetit3/dragonflye) (long read assembly followed by polishing with short reads), taking the full set of information from short reads and long reads into account.
 
 ### Assembly QC and annotation
 
@@ -51,11 +57,8 @@ In specific cases where samples recorded in the input samplesheet belong to more
 In cases where input samplesheet has files where , the pipeline will group samples in batches according to their reference genomes and will provide a general QUAST containing all the input samples and a by reference genome QUAST report, that is, a quast report for each reference genome.
 ## Usage
 
-:::note
-If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how
-to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline)
-with `-profile test` before running the workflow on actual data.
-:::
+> [!NOTE]
+> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
 First, prepare a samplesheet with your input data that looks as follows:
 
@@ -90,11 +93,9 @@ nextflow run nf-core/bacass \
   --outdir <OUTDIR>
 ```
 
-:::warning
-Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those
-provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
-see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
-:::
+> [!WARNING]
+> Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
+> see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
 For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/bacass/usage) and the [parameter documentation](https://nf-co.re/bacass/parameters).
 

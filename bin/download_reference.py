@@ -98,7 +98,9 @@ def download_references(file, reference, out_dir):
         ]
         top_reference = infile[0][0]
 
-    print(top_reference)
+    with open(str(top_reference) + ".winner", 'w') as topref:
+        topref.write(top_reference)
+
 
     # create the outdir (do nothing if already there)
     try:
