@@ -222,11 +222,7 @@ workflow BACASS {
     }
 
     //
-<<<<<<< HEAD
-    // ASSEMBLY: Unicycler, Canu, Miniasm, Dragonflye
-=======
-    // ASSEMBLY: Unicycler, Canu, Miniasm, Flye 
->>>>>>> 115-add-flye-to-nf-corebacass
+    // ASSEMBLY: Unicycler, Canu, Miniasm, Flye. Dragonflye 
     //
     ch_assembly = Channel.empty()
 
