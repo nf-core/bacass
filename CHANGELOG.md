@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 
 - [#104](https://github.com/nf-core/bacass/pull/104), [#106](https://github.com/nf-core/bacass/pull/106) - Added dragonflye module and enbled draft genome polishing with short-reads.
-- [#111](https://github.com/nf-core/bacass/pull/111) - Update nf-core/bacass to the new nf-core 2.12 `TEMPLATE`.
+- [#111](https://github.com/nf-core/bacass/pull/111) - Update nf-core/bacass to 2.12, and [#117](https://github.com/nf-core/bacass/pull/117) to 2.13.1 `TEMPLATE`.
 
 ### `Fixed`
 
