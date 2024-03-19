@@ -112,7 +112,7 @@ workflow BACASS {
         .filter{ it != null }
         .set { ch_shortreads }
     ch_input
-        .longreads.view()
+        .longreads
         .filter{ it != null }
         .set { ch_longreads }
     ch_input
@@ -123,18 +123,23 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Short reads QC and trim adapters
     //
-    FASTQ_TRIM_FASTP_FASTQC (
+    ch_fastqc_raw_multiqc = Channel.empty()
+    ch_fastqc_trim_multiqc = Channel.empty()
+    ch_trim_json_multiqc = Channel.empty()
+    if (params.assembly_type != 'long'){
+        FASTQ_TRIM_FASTP_FASTQC (
         ch_shortreads,
         [],
         params.save_trimmed_fail,
         params.save_merged,
         params.skip_fastp,
         params.skip_fastqc
-    )
-    ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
-    ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
-    ch_trim_json_multiqc    = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
-    ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions)
+        )
+        ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
+        ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
+        ch_trim_json_multiqc    = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
+        ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions)
+    }
 
     //
     // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots
