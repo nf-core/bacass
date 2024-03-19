@@ -1,25 +1,8 @@
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PRINT PARAMS SUMMARY
+    IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-
-include { paramsSummaryLog; paramsSummaryMap; fromSamplesheet } from 'plugin/nf-validation'
-
-def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
-def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
-def summary_params = paramsSummaryMap(workflow)
-
-// Print parameter summary log to screen
-log.info logo + paramsSummaryLog(workflow) + citation
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE INPUTS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-WorkflowBacass.initialise(params, log)
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config ]
@@ -33,17 +16,6 @@ if(! params.skip_kraken2){
         exit 1, "Missing Kraken2 DB arg"
     }
 }
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CONFIG FILES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-ch_multiqc_config          = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-ch_multiqc_custom_config   = params.multiqc_config ? Channel.fromPath( params.multiqc_config, checkIfExists: true ) : Channel.empty()
-ch_multiqc_logo            = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,7 +62,6 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/krake
 include { QUAST                                 } from '../modules/nf-core/quast/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip/main'
 include { PROKKA                                } from '../modules/nf-core/prokka/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS           } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
 
 //
@@ -98,6 +69,10 @@ include { MULTIQC                               } from '../modules/nf-core/multi
 //
 include { FASTQ_TRIM_FASTP_FASTQC               } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc/main'
 include { BAKTA_DBDOWNLOAD_RUN                  } from '../subworkflows/local/bakta_dbdownload_run'
+include { paramsSummaryMap                      } from 'plugin/nf-validation'
+include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -105,27 +80,32 @@ include { BAKTA_DBDOWNLOAD_RUN                  } from '../subworkflows/local/ba
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Info required for completion email and summary
-def multiqc_report = []
-
 workflow BACASS {
 
-    ch_versions = Channel.empty()
+    take:
+    ch_samplesheet // channel: samplesheet read in from --input
 
+    main:
+    ch_versions = Channel.empty()
+    ch_multiqc_files = Channel.empty()
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
     def criteria = multiMapCriteria {
         meta, fastq_1, fastq_2, long_fastq, fast5 ->
-            shortreads: fastq_1     != 'NA' ? tuple(meta, [file(fastq_1), file(fastq_2)]) : null
-            longreads: long_fastq   != 'NA' ? tuple(meta, file(long_fastq))         : null
-            fast5: fast5            != 'NA' ? tuple(meta, fast5)              : null
+            shortreads: fastq_1     != 'NA' ? tuple(meta, [fastq_1, fastq_2]) : null
+            longreads: long_fastq   != 'NA' ? tuple(meta, long_fastq) : null
+            fast5: fast5            != 'NA' ? tuple(meta, fast5) : null
     }
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
-    Channel
-        .fromSamplesheet('input')
+    ch_samplesheet
+        .map {
+            meta, fastqs, long_fastq, fast5 ->
+            return [meta, fastqs[0], fastqs[1], long_fastq[0], fast5[0]]
+        }
         .multiMap (criteria)
         .set { ch_input }
+
     // reconfigure channels
     ch_input
         .shortreads
@@ -143,18 +123,23 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Short reads QC and trim adapters
     //
-    FASTQ_TRIM_FASTP_FASTQC (
+    ch_fastqc_raw_multiqc = Channel.empty()
+    ch_fastqc_trim_multiqc = Channel.empty()
+    ch_trim_json_multiqc = Channel.empty()
+    if (params.assembly_type != 'long'){
+        FASTQ_TRIM_FASTP_FASTQC (
         ch_shortreads,
         [],
         params.save_trimmed_fail,
         params.save_merged,
         params.skip_fastp,
         params.skip_fastqc
-    )
-    ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
-    ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
-    ch_trim_json_multiqc    = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
-    ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions.ifEmpty(null))
+        )
+        ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
+        ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
+        ch_trim_json_multiqc    = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
+        ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions)
+    }
 
     //
     // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots
@@ -163,7 +148,7 @@ workflow BACASS {
         ch_longreads
     )
     ch_nanoplot_txt_multiqc = NANOPLOT.out.txt
-    ch_versions = ch_versions.mix(NANOPLOT.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(NANOPLOT.out.versions)
 
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
@@ -175,7 +160,7 @@ workflow BACASS {
             ch_fast5.dump(tag: 'fast5')
         )
         ch_pycoqc_multiqc = PYCOQC.out.json
-        ch_versions       = ch_versions.mix(PYCOQC.out.versions.ifEmpty(null))
+        ch_versions       = ch_versions.mix(PYCOQC.out.versions)
     }
 
     //
@@ -187,7 +172,7 @@ workflow BACASS {
             ch_longreads.dump(tag: 'longreads')
         )
         ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
-        ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions.ifEmpty(null) )
+        ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
     }
 
     //
@@ -233,7 +218,7 @@ workflow BACASS {
             ch_for_assembly
         )
         ch_assembly = ch_assembly.mix( UNICYCLER.out.scaffolds.dump(tag: 'unicycler') )
-        ch_versions = ch_versions.mix( UNICYCLER.out.versions.ifEmpty(null) )
+        ch_versions = ch_versions.mix( UNICYCLER.out.versions )
     }
 
 
@@ -247,7 +232,7 @@ workflow BACASS {
             ch_for_assembly.map { meta, reads, lr -> meta.genome_size }
         )
         ch_assembly = ch_assembly.mix( CANU.out.assembly.dump(tag: 'canu') )
-        ch_versions = ch_versions.mix(CANU.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(CANU.out.versions)
     }
 
     //
@@ -260,7 +245,7 @@ workflow BACASS {
             false,
             false
         )
-        ch_versions = ch_versions.mix(MINIMAP2_ALIGN.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIMAP2_ALIGN.out.versions)
 
         ch_for_assembly
             .join(MINIMAP2_ALIGN.out.paf)
@@ -270,7 +255,7 @@ workflow BACASS {
         MINIASM (
             ch_for_miniasm
         )
-        ch_versions = ch_versions.mix(MINIASM.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIASM.out.versions)
 
         MINIMAP2_CONSENSUS (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
@@ -279,7 +264,7 @@ workflow BACASS {
             false,
             false
         )
-        ch_versions = ch_versions.mix(MINIMAP2_CONSENSUS.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIMAP2_CONSENSUS.out.versions)
 
         ch_for_assembly
             .join(MINIASM.out.assembly)
@@ -291,7 +276,7 @@ workflow BACASS {
             ch_for_racon
         )
         ch_assembly = ch_assembly.mix( RACON.out.improved_assembly.dump(tag: 'miniasm') )
-        ch_versions = ch_versions.mix( RACON.out.versions.ifEmpty(null) )
+        ch_versions = ch_versions.mix( RACON.out.versions )
     }
 
     //
@@ -302,7 +287,7 @@ workflow BACASS {
             ch_for_assembly
         )
         ch_assembly = ch_assembly.mix( DRAGONFLYE.out.contigs.dump(tag: 'dragonflye') )
-        ch_versions = ch_versions.mix( DRAGONFLYE.out.versions.ifEmpty(null) )
+        ch_versions = ch_versions.mix( DRAGONFLYE.out.versions )
     }
 
     //
@@ -320,12 +305,12 @@ workflow BACASS {
             false,
             false
         )
-        ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions)
 
         SAMTOOLS_INDEX (
             MINIMAP2_POLISH.out.bam.dump(tag: 'samtools_sort')
         )
-        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
 
         ch_for_polish    // tuple val(meta), val(reads), file(longreads), file(assembly)
             .join( MINIMAP2_POLISH.out.bam )    // tuple val(meta), file(bam)
@@ -337,7 +322,7 @@ workflow BACASS {
         NANOPOLISH (
             ch_for_nanopolish.dump(tag: 'into_nanopolish')
         )
-        ch_versions = ch_versions.mix(NANOPOLISH.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(NANOPOLISH.out.versions)
     }
 
     //
@@ -350,7 +335,7 @@ workflow BACASS {
             .set { ch_for_medaka }
 
         MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
-        ch_versions = ch_versions.mix(MEDAKA.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(MEDAKA.out.versions)
     }
 
     //
@@ -369,7 +354,7 @@ workflow BACASS {
             false
         )
         ch_kraken_short_multiqc = KRAKEN2.out.report
-        ch_versions = ch_versions.mix(KRAKEN2.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(KRAKEN2.out.versions)
 
         KRAKEN2_LONG (
             ch_for_kraken2_long
@@ -385,7 +370,7 @@ workflow BACASS {
             false
         )
         ch_kraken_long_multiqc = KRAKEN2_LONG.out.report
-        ch_versions = ch_versions.mix(KRAKEN2_LONG.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(KRAKEN2_LONG.out.versions)
     }
 
     //
@@ -402,7 +387,7 @@ workflow BACASS {
         [[:],[]]
     )
     ch_quast_multiqc = QUAST.out.tsv
-    ch_versions      = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
+    ch_versions      = ch_versions.mix(QUAST.out.versions)
 
     // Check assemblies that require further processing for gene annotation
     ch_assembly
@@ -420,7 +405,7 @@ workflow BACASS {
         // Uncompress assembly for annotation if necessary
         GUNZIP ( ch_assembly_for_gunzip.gzip )
         ch_to_prokka    = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
-        ch_versions     = ch_versions.mix( GUNZIP.out.versions.ifEmpty(null) )
+        ch_versions     = ch_versions.mix( GUNZIP.out.versions )
 
         PROKKA (
             ch_to_prokka,
@@ -428,7 +413,7 @@ workflow BACASS {
             []
         )
         ch_prokka_txt_multiqc   = PROKKA.out.txt.collect()
-        ch_versions             = ch_versions.mix(PROKKA.out.versions.ifEmpty(null))
+        ch_versions             = ch_versions.mix(PROKKA.out.versions)
     }
 
     //
@@ -439,7 +424,7 @@ workflow BACASS {
         // Uncompress assembly for annotation if necessary
         GUNZIP ( ch_assembly_for_gunzip.gzip )
         ch_to_bakta     = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
-        ch_versions     = ch_versions.mix( GUNZIP.out.versions.ifEmpty(null) )
+        ch_versions     = ch_versions.mix( GUNZIP.out.versions )
 
         BAKTA_DBDOWNLOAD_RUN (
             ch_to_bakta,
@@ -458,73 +443,53 @@ workflow BACASS {
             ch_assembly,
             Channel.value(params.dfast_config ? file(params.dfast_config) : "")
         )
-        ch_versions = ch_versions.mix(DFAST.out.versions.ifEmpty(null))
+        ch_versions = ch_versions.mix(DFAST.out.versions)
     }
 
     //
-    // MODULE: Pipeline reporting
+    // Collate and save software versions
     //
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_pipeline_software_mqc_versions.yml', sort: true, newLine: true)
+        .set { ch_collated_versions }
 
     //
     // MODULE: MultiQC
     //
-    if (!params.skip_multiqc){
-        workflow_summary        = WorkflowBacass.paramsSummaryMultiqc(workflow, summary_params)
-        ch_workflow_summary     = Channel.value(workflow_summary)
-        methods_description     = WorkflowBacass.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description, params)
-        ch_methods_description  = Channel.value(methods_description)
+    ch_multiqc_config                     = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    ch_multiqc_custom_config              = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
+    ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
+    summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
+    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
-        ch_multiqc_files = Channel.empty()
-        ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-        ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-        ch_multiqc_files = ch_multiqc_files.mix(ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_fastqc_trim_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_quast_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_fastqc_trim_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_quast_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]))
 
-        MULTIQC (
-            ch_multiqc_files.collect(),
-            ch_multiqc_config,
-            ch_multiqc_custom_config.collect().ifEmpty([]),
-            ch_multiqc_logo.collect().ifEmpty([])
-        )
-        multiqc_report = MULTIQC.out.report.toList()
-    }
-}
+    MULTIQC (
+        ch_multiqc_files.collect(),
+        ch_multiqc_config,
+        ch_multiqc_custom_config.collect().ifEmpty([]),
+        ch_multiqc_logo.collect().ifEmpty([])
+    )
+    multiqc_report = MULTIQC.out.report.toList()
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    COMPLETION EMAIL AND SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-workflow.onComplete {
-    if (params.email || params.email_on_fail) {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
-    }
-    NfcoreTemplate.dump_parameters(workflow, params)
-    NfcoreTemplate.summary(workflow, params, log)
-    if (params.hook_url) {
-        NfcoreTemplate.IM_notification(workflow, params, summary_params, projectDir, log)
-    }
-}
-
-workflow.onError {
-    if (workflow.errorReport.contains("Process requirement exceeds available memory")) {
-        println("🛑 Default resources exceed availability 🛑 ")
-        println("💡 See here on how to configure pipeline: https://nf-co.re/docs/usage/configuration#tuning-workflow-resources 💡")
-    }
+    emit:
+    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    versions       = ch_versions                 // channel: [ path(versions.yml) ]
 }
 
 /*
