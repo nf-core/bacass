@@ -48,9 +48,9 @@ combines reads coming from multiple sequencing runs.
 
 ![MultiQC - FastQC adapter content plot](images/mqc_fastqc_adapter.png)
 
-:::note
+> [!NOTE]
 The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
-:::
+
 
 <details markdown="1">
 <summary>Output files</summary>
