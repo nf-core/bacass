@@ -347,6 +347,7 @@ workflow BACASS {
         KRAKEN2_DB_PREPARATION (
             kraken2db
         )
+        ch_versions = ch_versions.mix(KRAKEN2_DB_PREPARATION.out.versions)
         KRAKEN2 (
             ch_for_kraken2_short.dump(tag: 'kraken2_short'),
             KRAKEN2_DB_PREPARATION.out.db.map { info, db -> db }.dump(tag: 'kraken2_db_preparation'),
