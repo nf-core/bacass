@@ -2,10 +2,10 @@ process DFAST {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "bioconda::dfast=1.2.20"
+    conda "bioconda::dfast=1.2.21"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/dfast:1.2.20--h43eeafb_0' :
-        'biocontainers/dfast:1.2.20--h43eeafb_0' }"
+        'https://depot.galaxyproject.org/singularity/dfast:1.2.21--h43eeafb_0' :
+        'biocontainers/dfast:1.2.21--h43eeafb_0' }"
 
     input:
     tuple val(meta), path(fasta)
