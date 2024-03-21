@@ -2,7 +2,7 @@ process DRAGONFLYE {
     tag "$meta.id"
     label 'process_medium'
 
-    conda 'modules/nf-core/dragonflye/environment.yml'
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/dragonflye:1.1.2--hdfd78af_0' :
         'biocontainers/dragonflye:1.1.2--hdfd78af_0' }"
@@ -11,27 +11,27 @@ process DRAGONFLYE {
     tuple val(meta), path(shortreads), path(longreads)
 
     output:
-    tuple val(meta), path("*.contigs.fa")                                      , emit: contigs
-    tuple val(meta), path("dragonflye.log")                                    , emit: log
-    tuple val(meta), path("{flye,miniasm,raven}.fasta")                        , emit: raw_contigs
-    tuple val(meta), path("{flye,miniasm,raven}-unpolished.gfa"), optional:true, emit: gfa
-    tuple val(meta), path("flye-info.txt"), optional:true                      , emit: txt
-    path "versions.yml"                                                        , emit: versions
+    tuple val(meta), path("*.fa")                                               , emit: contigs
+    tuple val(meta), path("dragonflye.log")                                     , emit: log
+    tuple val(meta), path("{flye,miniasm,raven}.fasta")                         , emit: raw_contigs
+    tuple val(meta), path("{flye,miniasm,raven}-unpolished.gfa"), optional:true , emit: gfa
+    tuple val(meta), path("flye-info.txt")                      , optional:true , emit: txt
+    path "versions.yml"                                                         , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
-    def memory = task.memory.toGiga()
-    def short_polishing = shortreads ? "--R1 ${shortreads[0]} --R2 ${shortreads[1]}" : '' 
+    def args    = task.ext.args ?: ''
+    def prefix  = task.ext.prefix ?: "${meta.id}"
+    def memory  = task.memory.toGiga()
+    def shortreads_polishing = shortreads ? "--R1 ${shortreads[0]} --R2 ${shortreads[1]}" : ''
     """
     dragonflye \\
         --reads ${longreads} \\
-        $short_polishing \\
+        $shortreads_polishing \\
         $args \\
-        --prefix ${prefix}.contigs \\
+        --prefix ${prefix} \\
         --cpus $task.cpus \\
         --ram $memory \\
         --outdir ./ \\

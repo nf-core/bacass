@@ -7,12 +7,12 @@
                 "nf-core": {
                     "bakta/bakta": {
                         "branch": "master",
-                        "git_sha": "f05fa7c6753f92be861d606378860dcd5c828880",
+                        "git_sha": "9d0f89b445e1f5b2fb30476f4be9a8b519c07846",
                         "installed_by": ["modules"]
                     },
                     "bakta/baktadbdownload": {
                         "branch": "master",
-                        "git_sha": "516189e968feb4ebdd9921806988b4c12b4ac2dc",
+                        "git_sha": "7c06e6820fa3918bc28a040e794f8a2b39fabadb",
                         "installed_by": ["modules"]
                     },
                     "canu": {
@@ -22,13 +22,13 @@
                     },
                     "dragonflye": {
                         "branch": "master",
-                        "git_sha": "516189e968feb4ebdd9921806988b4c12b4ac2dc",
+                        "git_sha": "a3ae45e99f68e513b0feb8d5f27e2fdd0d0f083d",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/dragonflye/dragonflye.diff"
                     },
                     "fastp": {
                         "branch": "master",
-                        "git_sha": "003920c7f9a8ae19b69a97171922880220bedf56",
+                        "git_sha": "95cf5fe0194c7bf5cb0e3027a2eb7e7c89385080",
                         "installed_by": ["fastq_trim_fastp_fastqc"]
                     },
                     "fastqc": {
@@ -38,22 +38,22 @@
                     },
                     "gunzip": {
                         "branch": "master",
-                        "git_sha": "e06548bfa36ee31869b81041879dd6b3a83b1d57",
+                        "git_sha": "3a5fef109d113b4997c9822198664ca5f2716208",
                         "installed_by": ["modules"]
                     },
                     "kraken2/kraken2": {
                         "branch": "master",
-                        "git_sha": "603ecbd9f45300c9788f197d2a15a005685b4220",
+                        "git_sha": "653218e79ffa76fde20319e9062f8b8da5cf7555",
                         "installed_by": ["modules"]
                     },
                     "miniasm": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
                     "minimap2/align": {
                         "branch": "master",
-                        "git_sha": "603ecbd9f45300c9788f197d2a15a005685b4220",
+                        "git_sha": "2c2d1cf80866dbd6dd0ea5d61ddd59533a72d41e",
                         "installed_by": ["modules"]
                     },
                     "multiqc": {
@@ -63,43 +63,43 @@
                     },
                     "nanoplot": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "a31407dfaf0cb0d04768d5cb439fc6f4523a6981",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/nanoplot/nanoplot.diff"
                     },
                     "porechop/porechop": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "1d68c7f248d1a480c5959548a9234602b771199e",
                         "installed_by": ["modules"]
                     },
                     "prokka": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "49ebda931c36c2b282f7958d00e1236b751f1031",
                         "installed_by": ["modules"]
                     },
                     "quast": {
                         "branch": "master",
-                        "git_sha": "344638191a5d6b3526556410819dfcf24e98039e",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
                     "racon": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
                     "samtools/index": {
                         "branch": "master",
-                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
+                        "git_sha": "f4596fe0bdc096cf53ec4497e83defdb3a94ff62",
                         "installed_by": ["modules"]
                     },
                     "samtools/sort": {
                         "branch": "master",
-                        "git_sha": "a0f7be95788366c1923171e358da7d049eb440f9",
+                        "git_sha": "4352dbdb09ec40db71e9b172b97a01dcf5622c26",
                         "installed_by": ["modules"]
                     },
                     "untar": {
                         "branch": "master",
-                        "git_sha": "d0b4fc03af52a1cc8c6fb4493b921b57352b1dd8",
+                        "git_sha": "5caf7640a9ef1d18d765d55339be751bb0969dfa",
                         "installed_by": ["modules"]
                     }
                 }
