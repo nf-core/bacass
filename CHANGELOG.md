@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#116](https://github.com/nf-core/bacass/pull/116) - Added Flye as an alternative assembler for long reads
 - [#104](https://github.com/nf-core/bacass/pull/104), [#106](https://github.com/nf-core/bacass/pull/106) - Added dragonflye module and enbled draft genome polishing with short-reads.
 - [#111](https://github.com/nf-core/bacass/pull/111) - Update nf-core/bacass to the new nf-core 2.12 `TEMPLATE`.
 
@@ -31,7 +32,6 @@ This version merges the nf-core template updates of v2.9 and v2.10, and updates 
 
 ### `Added`
 
-- [#116](https://github.com/nf-core/bacass/pull/116) - Added Flye as an alternative assembler for long reads
 - [#86](https://github.com/nf-core/bacass/pull/86) - Added nf-core subworkflow for trimming and QC of short-reads [nf-core/fastq_trim_fastp_fastqc](https://github.com/nf-core/modules/tree/master/subworkflows/nf-core/fastq_trim_fastp_fastqc).
 - [#88](https://github.com/nf-core/bacass/pull/88) - Added nf-validation on samplesheet
 - [#93](https://github.com/nf-core/bacass/pull/93) - Added missing modules output to MultiQC. ( Fastp, PycoQC, Porechop, Quast, Kraken2, and Prokka).
