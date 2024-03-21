@@ -26,12 +26,12 @@ if(! params.skip_kraken2){
 //
 // MODULE: Local to the pipeline
 //
-include { PYCOQC                    } from '../modules/local/pycoqc'
-include { UNICYCLER                 } from '../modules/local/unicycler'
-include { NANOPOLISH                } from '../modules/local/nanopolish'
-include { MEDAKA                    } from '../modules/local/medaka'
-include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
-include { DFAST                     } from '../modules/local/dfast'
+include { PYCOQC                    } from '../modules/local/pycoqc/main'
+include { UNICYCLER                 } from '../modules/local/unicycler/main'
+include { NANOPOLISH                } from '../modules/local/nanopolish/main'
+include { MEDAKA                    } from '../modules/local/medaka/main'
+include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation/main'
+include { DFAST                     } from '../modules/local/dfast/main'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules

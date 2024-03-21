@@ -2,7 +2,7 @@ process NANOPOLISH {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::nanopolish=0.14.0"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/nanopolish:0.14.0--h773013f_3' :
         'biocontainers/nanopolish:0.14.0--h773013f_3' }"

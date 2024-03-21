@@ -2,7 +2,7 @@ process DFAST {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "bioconda::dfast=1.2.20"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/dfast:1.2.20--h43eeafb_0' :
         'biocontainers/dfast:1.2.20--h43eeafb_0' }"
