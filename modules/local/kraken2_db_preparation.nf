@@ -4,14 +4,15 @@ process KRAKEN2_DB_PREPARATION {
 
     conda 'conda-forge::sed=4.7'
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://containers.biocontainers.pro/s3/SingImgsRepo/biocontainers/v1.2.0_cv1/biocontainers_v1.2.0_cv1.img' :
-        'docker.io/biocontainers/biocontainers:v1.2.0_cv1' }"
+        'https://depot.galaxyproject.org/singularity/ubuntu:20.04' :
+        'nf-core/ubuntu:20.04' }"
 
     input:
     path db
 
     output:
     tuple val("${db.simpleName}"), path("database"), emit: db
+    path "versions.yml"                            , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,5 +23,10 @@ process KRAKEN2_DB_PREPARATION {
     tar -xf "${db}" -C db_tmp
     mkdir database
     mv `find db_tmp/ -name "*.k2d"` database/
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        tar: \$(tar --version | sed -n 's/^tar (GNU tar) \$([0-9.]*\$).*/\$1/p')
+    END_VERSIONS
     """
 }
