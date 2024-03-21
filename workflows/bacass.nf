@@ -222,7 +222,7 @@ workflow BACASS {
     }
 
     //
-    // ASSEMBLY: Unicycler, Canu, Miniasm, Flye. Dragonflye 
+    // ASSEMBLY: Unicycler, Canu, Miniasm, Flye, Dragonflye 
     //
     ch_assembly = Channel.empty()
 
@@ -255,9 +255,8 @@ workflow BACASS {
     //
     if ( params.assembler == 'flye' ) {
         FLYE (
-            ch_for_assembly.map { meta, reads, lr -> tuple( meta, lr ) }.view(),
+            ch_for_assembly.map { meta, reads, lr -> tuple( meta, lr ) },
             params.flye_mode
-            // ch_for_assembly.map { meta, reads, lr -> meta.genome_size }  // Flye needs genome size?
         )
         ch_assembly = ch_assembly.mix( FLYE.out.fasta.dump(tag: 'flye') )
         ch_versions = ch_versions.mix(FLYE.out.versions.ifEmpty(null))
