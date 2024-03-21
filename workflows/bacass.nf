@@ -240,7 +240,7 @@ workflow BACASS {
     if ( params.assembler == 'miniasm' ) {
         MINIMAP2_ALIGN (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
-            [],
+            [[:],[]],
             false,
             false,
             false
@@ -259,7 +259,7 @@ workflow BACASS {
 
         MINIMAP2_CONSENSUS (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
-            MINIASM.out.assembly.map { meta, assembly -> assembly },
+            MINIASM.out.assembly,
             false,
             false,
             false
