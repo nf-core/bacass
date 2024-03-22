@@ -26,12 +26,12 @@ if(! params.skip_kraken2){
 //
 // MODULE: Local to the pipeline
 //
-include { PYCOQC                    } from '../modules/local/pycoqc'
-include { UNICYCLER                 } from '../modules/local/unicycler'
-include { NANOPOLISH                } from '../modules/local/nanopolish'
-include { MEDAKA                    } from '../modules/local/medaka'
-include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
-include { DFAST                     } from '../modules/local/dfast'
+include { PYCOQC                    } from '../modules/local/pycoqc/main'
+include { UNICYCLER                 } from '../modules/local/unicycler/main'
+include { NANOPOLISH                } from '../modules/local/nanopolish/main'
+include { MEDAKA                    } from '../modules/local/medaka/main'
+include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation/main'
+include { DFAST                     } from '../modules/local/dfast/main'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -240,7 +240,7 @@ workflow BACASS {
     if ( params.assembler == 'miniasm' ) {
         MINIMAP2_ALIGN (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
-            [],
+            [[:],[]],
             false,
             false,
             false
@@ -259,7 +259,7 @@ workflow BACASS {
 
         MINIMAP2_CONSENSUS (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
-            MINIASM.out.assembly.map { meta, assembly -> assembly },
+            MINIASM.out.assembly,
             false,
             false,
             false
@@ -347,6 +347,7 @@ workflow BACASS {
         KRAKEN2_DB_PREPARATION (
             kraken2db
         )
+        ch_versions = ch_versions.mix(KRAKEN2_DB_PREPARATION.out.versions)
         KRAKEN2 (
             ch_for_kraken2_short.dump(tag: 'kraken2_short'),
             KRAKEN2_DB_PREPARATION.out.db.map { info, db -> db }.dump(tag: 'kraken2_db_preparation'),
