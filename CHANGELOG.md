@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#123](https://github.com/nf-core/bacass/pull/123) - Add fallback to `download_pipeline.yml` when the pipeline does not support stub runs ([#2846](https://github.com/nf-core/tools/pull/2846))
+
 ### `Dependencies`
 
 ### `Deprecated`
