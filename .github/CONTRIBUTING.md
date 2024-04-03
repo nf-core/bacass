@@ -26,11 +26,7 @@ If you're not used to this workflow with git, you can start with some [docs from
 
 ## Tests
 
-You have the option to test your changes locally by running the pipeline. For receiving warnings about process selectors and other `debug` information, it is recommended to use the debug profile. Execute all the tests with the following command:
-
-```bash
-nf-test test --profile debug,test,docker --verbose
-```
+You have the option to test your changes locally by running the pipeline.
 
 When you create a pull request with changes, [GitHub Actions](https://github.com/features/actions) will run automatic tests.
 Typically, pull-requests are only fully reviewed when these tests are passing, though of course we can help out before then.
@@ -50,6 +46,14 @@ Each `nf-core` pipeline should be set up with a minimal set of test-data.
 `GitHub Actions` then runs the pipeline on this data to ensure that it exits successfully.
 If there are any failures then the automated tests fail.
 These tests are run both with the latest available version of `Nextflow` and also the minimum required version that is stated in the pipeline code.
+
+You can run pipeline tests with the following command:
+
+```bash
+nextflow run nf-core/bacass \
+  -profile <test,test_long,test_hybrid,...>,<docker/singularity/.../institute> \
+  --outdir <OUTDIR>
+```
 
 ## Patch
 
