@@ -48,9 +48,8 @@ combines reads coming from multiple sequencing runs.
 
 ![MultiQC - FastQC adapter content plot](images/mqc_fastqc_adapter.png)
 
-:::note
-The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
-:::
+> [!NOTE]
+> The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -145,6 +144,12 @@ Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.h
   - `*_assembly_consensus.fasta.gz`: Consensus assembly in fasta format (polished by Racon)
 
 Check out the [Miniasm documentation](https://github.com/lh3/miniasm) for more information on Miniasm output.
+
+- `Dragonflye/`
+  - `*.contigs.fa`: Assembly in Fasta format
+  - `*.dragonflye.log`: Log file containing the report of the dragonflye process
+
+Checkout the [Dragonflye](https://github.com/rpetit3/dragonflye) documentation for more information of the Dragonflye output.
 
 </details>
 
