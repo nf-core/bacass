@@ -26,7 +26,7 @@ If you're not used to this workflow with git, you can start with some [docs from
 
 ## Tests
 
-You have the option to test your changes locally by running the pipeline.
+You have the option to test your changes locally by running the pipeline. For receiving warnings about process selectors and other `debug` information, it is recommended to use the debug profile.
 
 When you create a pull request with changes, [GitHub Actions](https://github.com/features/actions) will run automatic tests.
 Typically, pull-requests are only fully reviewed when these tests are passing, though of course we can help out before then.
