@@ -87,15 +87,16 @@
                     "type": "string",
                     "default": "unicycler",
                     "fa_icon": "fas fa-puzzle-piece",
-                    "description": "The assembler to use for assembly. Available options are `Unicycler`, `Canu`, `Miniasm`, or `Dragonflye`. The latter trhee are only available for long-read data, whereas Unicycler can be used for short or hybrid assembly projects.",
+                    "description": "The assembler to use for assembly. Use the appropriate assembler according to the chosen assembly_type. Refer to the README.md for further clarification.",
                     "enum": ["unicycler", "canu", "miniasm", "dragonflye"]
                 },
                 "assembly_type": {
                     "type": "string",
                     "default": "short",
                     "fa_icon": "fas fa-fingerprint",
-                    "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`. Short & Hybrid assembly will always run Unicycler, whereas long-read assembly can be configured separately using the `--assembler` parameter.",
-                    "description": "Which type of assembly to perform."
+                    "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`.",
+                    "description": "Which type of assembly to perform.",
+                    "enum": ["short", "long", "hybrid"]
                 },
                 "unicycler_args": {
                     "type": "string",
@@ -106,7 +107,7 @@
                 "canu_mode": {
                     "type": "string",
                     "enum": ["-pacbio", "-nanopore", "-pacbio-hifi", "null"],
-                    "description": "Allowed technologies for long read assembly : [\"-pacbio\", \"-nanopore\", \"-pacbio-hifi\"]"
+                    "description": "Allowed technologies for long read assembly."
                 },
                 "canu_args": {
                     "type": "string",
@@ -116,7 +117,7 @@
                 "dragonflye_args": {
                     "type": "string",
                     "description": "Extra arguments for [Dragonflye](https://github.com/rpetit3/dragonflye#usage)",
-                    "help_text": "This advanced option allows you to add extra arguments to Dragonflye (e.g.: `\"--gsize 2.4m\"`). For those arguments with no values/options associated (e.g.: `\"--nopolish\"` or `\"--nofilter\"`...) you need to add an extra space at the begining of the input string to params.dragonflye_args. Example: --params.dragonflye_args ' --nopolish'"
+                    "help_text": "This advanced option allows you to add extra arguments to Dragonflye (e.g.: `\"--gsize 2.4m\"`). For those arguments with no values/options associated (e.g.: `\"--nopolish\"` or `\"--nofilter\"`...) you need to add an extra space at the begining of the input string to params.dragonflye_args. Example: `--params.dragonflye_args ' --nopolish'`"
                 }
             }
         },
@@ -132,7 +133,8 @@
                     "default": "medaka",
                     "fa_icon": "fas fa-hotdog",
                     "description": "Which assembly polishing method to use.",
-                    "help_text": "Can be used to define which polishing method is used by default for long reads. Default is `medaka`, available options are `nanopolish` or `medaka`."
+                    "help_text": "Can be used to define which polishing method is used by default for long reads.",
+                    "enum": ["medaka", "nanopolish"]
                 }
             }
         },
@@ -146,7 +148,7 @@
                 "annotation_tool": {
                     "type": "string",
                     "default": "prokka",
-                    "description": "The annotation method to annotate the final assembly. Default choice is `prokka`, but the `dfast` tool is also available. For the latter, make sure to create your specific config if you're not happy with the default one provided. See [#dfast_config](#dfastconfig) to find out how.",
+                    "description": "The annotation method to annotate the final assembly.",
                     "enum": ["prokka", "bakta", "dfast"]
                 },
                 "prokka_args": {
@@ -172,7 +174,7 @@
                     "type": "string",
                     "default": "assets/test_config_dfast.py",
                     "description": "Specifies a configuration file for the [DFAST](https://github.com/nigyta/dfast_core) annotation method.",
-                    "help_text": "This can be used instead of PROKKA if required to specify a specific config file for annotation. If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.  The default config (`assets/test_config_dfast.py`) is just included for testing, so if you want to annotate using DFAST, you have to create a config!"
+                    "help_text": "If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.  The default config (`assets/test_config_dfast.py`) is just included for testing, so if you want to annotate using DFAST, you have to create a config!"
                 }
             }
         },

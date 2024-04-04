@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Changed`
 
 - [#111](https://github.com/nf-core/bacass/pull/111) - Update nf-core/bacass to 2.12, and [#117](https://github.com/nf-core/bacass/pull/117) to 2.13.1 `TEMPLATE`.
-- [#120](https://github.com/nf-core/bacass/pull/120) - Update local and nf-core modules (version update an minnor code changes).
 
 ### `Added`
 
@@ -19,6 +18,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#123](https://github.com/nf-core/bacass/pull/123) - Add fallback to `download_pipeline.yml` when the pipeline does not support stub runs ([#2846](https://github.com/nf-core/tools/pull/2846))
 
 ### `Dependencies`
+
+- [#120](https://github.com/nf-core/bacass/pull/120) - Update local and nf-core modules (version update an minnor code changes).
+
+| Tool       | Previous version | New version |
+| ---------- | ---------------- | ----------- |
+| Bakta      | 1.8.2            | 1.9.3       |
+| Canu       | 2.2              | -           |
+| Dragonflye | 1.1.2            | -           |
+| Fastp      | 0.23.4           | -           |
+| Kraken2    | 2.1.2            | -           |
+| Miniasm    | 0.3_r179         | -           |
+| Minimap2   | 2.2              | 2.24        |
+| Nanoplot   | 1.41.6           | -           |
+| Porechop   | 0.2.4            | -           |
+| Prokka     | 1.14.6           | -           |
+| Quast      | 5.2.0            | -           |
+| Racon      | 1.4.20           | -           |
+| Samtools   | 1.17             | 1.19.2      |
+| Untar      | 1.34             | -           |
+| Dfast      | 1.2.20           | -           |
+| Medaka     | 1.4.3-0          | -           |
+| Nanopolish | 0.14.0           | -           |
+| PycoQC     | 2.5.2            | -           |
+| Unicycler  | 0.4.8            | -           |
 
 ### `Deprecated`
 
