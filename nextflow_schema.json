@@ -44,7 +44,6 @@
             "properties": {
                 "save_trimmed_fail": {
                     "type": "boolean",
-                    "enum": ["true", "false"],
                     "description": "save files that failed to pass trimming thresholds ending in `*.fail.fastq.gz`"
                 },
                 "save_merged": {
