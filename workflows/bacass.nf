@@ -413,7 +413,7 @@ workflow BACASS {
             [],
             []
         )
-        ch_prokka_txt_multiqc   = PROKKA.out.txt.collect()
+        ch_prokka_txt_multiqc   = PROKKA.out.txt.map{ meta, prokka_txt -> [ prokka_txt ]}
         ch_versions             = ch_versions.mix(PROKKA.out.versions)
     }
 
@@ -432,7 +432,7 @@ workflow BACASS {
             params.baktadb,
             params.baktadb_download
         )
-        ch_bakta_txt_multiqc    = BAKTA_DBDOWNLOAD_RUN.out.bakta_txt_multiqc.collect()
+        ch_bakta_txt_multiqc    = BAKTA_DBDOWNLOAD_RUN.out.bakta_txt_multiqc.map{ meta, bakta_txt -> [ bakta_txt ]}
         ch_versions             = ch_versions.mix(BAKTA_DBDOWNLOAD_RUN.out.versions)
     }
     //
@@ -478,8 +478,8 @@ workflow BACASS {
     ch_multiqc_files                      = ch_multiqc_files.mix(ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files                      = ch_multiqc_files.mix(ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files                      = ch_multiqc_files.mix(ch_quast_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_prokka_txt_multiqc.collect().ifEmpty([]))
+    ch_multiqc_files                      = ch_multiqc_files.mix(ch_bakta_txt_multiqc.collect().ifEmpty([]))
     ch_multiqc_files                      = ch_multiqc_files.mix(ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files                      = ch_multiqc_files.mix(ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files                      = ch_multiqc_files.mix(ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]))
