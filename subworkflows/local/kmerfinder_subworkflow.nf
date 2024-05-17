@@ -15,7 +15,6 @@ workflow KMERFINDER_SUBWORKFLOW {
 
     main:
     ch_versions = Channel.empty()
-
     // MODULE: Kmerfinder, QC for sample purity. Identifies reference specie and reference genome assembly for each sample.
     KMERFINDER (
         reads,

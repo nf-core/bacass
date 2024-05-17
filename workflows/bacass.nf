@@ -106,7 +106,7 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/krake
 include { QUAST                                 } from '../modules/nf-core/quast/main'
 include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip/main'
-include { GUNZIP as GUNZIP_KMERFINDERDB         } from '../modules/nf-core/gunzip/main'
+include { UNTAR                                 } from '../modules/nf-core/untar/main'
 include { PROKKA                                } from '../modules/nf-core/prokka/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS           } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
@@ -410,15 +410,18 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Kmerfinder, QC for sample purity.
     //
-    // TODO: Executes both kmerfinder and organizes samples by the reference genome (all this through the kmerfinder_subworkflow()). Ideally, users can also utilize kmerfinder independently without the need to download reference genome and grouping data —simply running kmerfinder alone-.
+    // TODO: Executes both kmerfinder and classifies samples by their reference genome (all this through the kmerfinder_subworkflow()).
+    //       Ideally, users can also utilize kmerfinder independently without the need to download reference genome and grouping data —simply running kmerfinder alone-.
 
     ch_kmerfinder_multiqc = Channel.empty()
     if (!params.skip_kmerfinder) {
-
+        // TODO: mv this to subworkflow
         // Process kmerfinder database
-        if( params.kmerfinderdb.endsWith('.gz') ){
-            GUNZIP_KMERFINDERDB ( params.kmerfinderdb )
-            ch_kmerfinderdb = GUNZIP_KMERFINDERDB.out.gunzip
+        ch_kmerfinderdb = file(params.kmerfinderdb, checkIfExists: true)
+        if ( params.kmerfinderdb.endsWith('.gz') ) {
+            UNTAR ( [[id: ch_kmerfinderdb.getSimpleName()], ch_kmerfinderdb] )
+            ch_kmerfinderdb = UNTAR_KMERFINDERDB.out.untar.map{ meta, file -> file }
+
         } else {
             ch_kmerfinderdb = params.kmerfinderdb
         }
@@ -445,7 +448,7 @@ workflow BACASS {
         ch_consensus_byrefseq           // [ refseq, meta, fasta, ref_fna, ref_gff ]
             .map {
                 refmeta, meta, consensus, ref_fna, ref_gff ->
-                        return tuple(refmeta, consensus.flatten(), ref_fna, ref_gff)
+                    return tuple(refmeta, consensus.flatten(), ref_fna, ref_gff)
             }
             .set { ch_to_quast_byrefseq }
     }
@@ -453,11 +456,10 @@ workflow BACASS {
     //
     // MODULE: QUAST, assembly QC
     //
-    // FIXME: simplify it. I think choolsing anotherapproach will improve it
     ch_assembly
-            .collect{it[1]}
-            .map{ consensus -> tuple([id:'report'], consensus) }
-            .set{ ch_to_quast }
+        .collect{it[1]}
+        .map{ consensus -> tuple([id:'report'], consensus) }
+        .set{ ch_to_quast }
 
     if(params.skip_kmerfinder){
         QUAST(
@@ -467,6 +469,8 @@ workflow BACASS {
         )
         ch_quast_multiqc = QUAST.out.results
     } else if (!params.skip_kmerfinder) {
+        // Quast runs twice if kmerfinder is allowed.
+        // This approach allow Quast to calculate relevant parameters such as genome fraction based on a reference genome.
         QUAST(
             ch_to_quast,
             [[:],[]],
