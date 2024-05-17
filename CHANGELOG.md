@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#133](https://github.com/nf-core/bacass/pull/133) Update nf-core/bacass to the new nf-core 2.14.1 `TEMPLATE`.
+
 ### `Fixed`
 
 - [#125](https://github.com/nf-core/bacass/pull/125) - Fixed conflicting settings in save_trimmed_fail parameter.
