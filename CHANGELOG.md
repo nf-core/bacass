@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#134](https://github.com/nf-core/bacass/pull/134) - Fixed samples reported of prokka/bakta in multiqc report.
+
 - [#125](https://github.com/nf-core/bacass/pull/125) - Fixed conflicting settings in save_trimmed_fail parameter.
 
 ### `Dependencies`
