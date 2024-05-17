@@ -52,7 +52,7 @@ import os
 #import wget
 import requests
 
-
+# TODO: Generate report
 def parse_args(args=None):
     Description = (
         "download the reference files \
@@ -117,24 +117,33 @@ def download_references(file, reference, out_dir):
             if not item.startswith("#")
         ]
 
-        url = [row[19] for row in inref if row[0] in top_reference]
+        # Initialize an empty list to store the URLs
+        dir_url = []
 
-        if len(url) == 0:
+        # Iterate over each row in the inref
+        for row in inref:
+            # Construct the ref_query using assembly_accession and asm_name
+            assembly_accession = row[0]
+            asm_name = row[15]
+            ref_query = f"{assembly_accession}_{asm_name}"
+
+            # Check if ref_query matches the search value
+            if ref_query == top_reference:
+                # make url  # Append the 20th element of the row to the URL list:
+                assembly_url = row[19] + "/" + ref_query
+                dir_url.append(assembly_url)
+
+        if len(dir_url) == 0:
             print("No assemblies responding to the top reference: ", top_reference, " were found")
             sys.exit(1)
 
-
-        url = str(url[0])
-        url_https = url.replace('ftp', 'https', 1)
+        dir_url = str(dir_url[0])
 
     # get url and reference file
 
     for r_end in reference_ends:
-
         out_file = out_dir + "/" + top_reference + r_end
-        file_url = url_https + "/" + top_reference + r_end
-
-        print(out_file)
+        file_url = dir_url + r_end
         print(file_url)
 
         #wget.download(file_url, out_file)

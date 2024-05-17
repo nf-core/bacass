@@ -420,7 +420,7 @@ workflow BACASS {
         ch_kmerfinderdb = file(params.kmerfinderdb, checkIfExists: true)
         if ( params.kmerfinderdb.endsWith('.gz') ) {
             UNTAR ( [[id: ch_kmerfinderdb.getSimpleName()], ch_kmerfinderdb] )
-            ch_kmerfinderdb = UNTAR_KMERFINDERDB.out.untar.map{ meta, file -> file }
+            ch_kmerfinderdb = UNTAR.out.untar.map{ meta, file -> file }
 
         } else {
             ch_kmerfinderdb = params.kmerfinderdb

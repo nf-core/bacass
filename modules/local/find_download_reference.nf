@@ -1,6 +1,6 @@
 process FIND_DOWNLOAD_REFERENCE {
     tag "${task.process}"
-    label 'process_low'
+    label 'process_medium'
 
     conda "conda-forge::requests=2.26.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
