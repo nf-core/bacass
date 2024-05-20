@@ -9,13 +9,39 @@ def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check krakendb
-if(! params.skip_kraken2){
-    if(params.kraken2db){
-        kraken2db = file(params.kraken2db)
+if (!params.skip_kraken2) {
+    if (params.kraken2db) {
+        kraken2db = file(params.kraken2db, checkIfExists: true)
     } else {
         exit 1, "Missing Kraken2 DB arg"
     }
 }
+
+// Check kmerfinder dependencies
+if (!params.skip_kmerfinder) {
+    if (!params.kmerfinderdb || !params.ncbi_assembly_metadata) {
+        exit 1, "[KMERFINDER]: Missing --kmerfinder_db and/or --ncbi_assembly_metadata arguments. Both are required to run KMERFINDER."
+    } else {
+        kmerfinderdb = file(params.kmerfinderdb, checkIfExists: true)
+        ncbi_assembly_metadata = file(params.ncbi_assembly_metadata, checkIfExists: true)
+    }
+}
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    CONFIG FILES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+
+// When invoking kmerfinder, utilize a custom MultiQC config file to generate a specialized report. This report will organize samples into groups based on their reference genome, w were previously calculated by kmerfinder.
+if (!params.skip_kmerfinder && params.assembly_type) {
+    ch_multiqc_config = file("$projectDir/assets/multiqc_config_${params.assembly_type}.yml", checkIfExists: true)
+} else {
+    ch_multiqc_config = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+}
+ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
+ch_multiqc_logo             = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
+ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,12 +52,13 @@ if(! params.skip_kraken2){
 //
 // MODULE: Local to the pipeline
 //
-include { PYCOQC                    } from '../modules/local/pycoqc/main'
-include { UNICYCLER                 } from '../modules/local/unicycler/main'
-include { NANOPOLISH                } from '../modules/local/nanopolish/main'
-include { MEDAKA                    } from '../modules/local/medaka/main'
-include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation/main'
-include { DFAST                     } from '../modules/local/dfast/main'
+include { PYCOQC                    } from '../modules/local/pycoqc'
+include { UNICYCLER                 } from '../modules/local/unicycler'
+include { NANOPOLISH                } from '../modules/local/nanopolish'
+include { MEDAKA                    } from '../modules/local/medaka'
+include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
+include { DFAST                     } from '../modules/local/dfast'
+include { MULTIQC_CUSTOM            } from '../modules/local/multiqc_custom'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -60,14 +87,16 @@ include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samto
 include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/kraken2/kraken2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2/main'
 include { QUAST                                 } from '../modules/nf-core/quast/main'
+include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip/main'
+include { UNTAR                                 } from '../modules/nf-core/untar/main'
 include { PROKKA                                } from '../modules/nf-core/prokka/main'
-include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
 
 //
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
 //
 include { FASTQ_TRIM_FASTP_FASTQC               } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc/main'
+include { KMERFINDER_SUBWORKFLOW                } from '../subworkflows/local/kmerfinder_subworkflow'
 include { BAKTA_DBDOWNLOAD_RUN                  } from '../subworkflows/local/bakta_dbdownload_run'
 include { paramsSummaryMap                      } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -237,6 +266,7 @@ workflow BACASS {
 
     //
     // MODULE: Miniasm, genome assembly, long reads
+    //
     if ( params.assembler == 'miniasm' ) {
         MINIMAP2_ALIGN (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
@@ -315,7 +345,7 @@ workflow BACASS {
         ch_for_polish    // tuple val(meta), val(reads), file(longreads), file(assembly)
             .join( MINIMAP2_POLISH.out.bam )    // tuple val(meta), file(bam)
             .join( SAMTOOLS_INDEX.out.bai )     // tuple  val(meta), file(bai)
-            .join( ch_fast5 )             // tuple val(meta), file(fast5)
+            .join( ch_fast5 )                   // tuple val(meta), file(fast5)
             .set { ch_for_nanopolish }          // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
 
         // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
@@ -375,20 +405,78 @@ workflow BACASS {
     }
 
     //
+    // SUBWORKFLOW: Kmerfinder, QC for sample purity.
+    //
+    // Executes both kmerfinder and classifies samples by their reference genome (all this through the kmerfinder_subworkflow()).
+
+    ch_kmerfinder_multiqc = Channel.empty()
+    if (!params.skip_kmerfinder) {
+        // Prepare kmerfinder database
+        if ( kmerfinderdb.name.endsWith('.gz') ) {
+            UNTAR ( [[ id: kmerfinderdb.getSimpleName() ], kmerfinderdb] )
+            ch_kmerfinderdb_untar = UNTAR.out.untar.map{ meta, file -> file }
+        } else {
+            ch_kmerfinderdb_untar = Channel.from(kmerfinder_db)
+        }
+
+        // Set kmerfinder input based on assembly type
+        if( params.assembly_type == 'short' || params.assembly_type == 'hybrid' ) {
+            ch_for_kmerfinder = FASTQ_TRIM_FASTP_FASTQC.out.reads
+        } else if ( params.assembly_type == 'long' ) {
+            ch_for_kmerfinder = PORECHOP_PORECHOP.out.reads
+        }
+
+        // RUN kmerfinder subworkflow
+        KMERFINDER_SUBWORKFLOW (
+            ch_kmerfinderdb_untar,
+            ncbi_assembly_metadata,
+            ch_for_kmerfinder,
+            ch_assembly
+        )
+        ch_kmerfinder_multiqc   = KMERFINDER_SUBWORKFLOW.out.summary_yaml
+        ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
+        ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions.ifEmpty(null))
+
+        // Set channel to perform by refseq QUAST based on reference genome identified with KMERFINDER.
+        ch_consensus_byrefseq
+            .map {
+                refmeta, meta, consensus, ref_fna, ref_gff ->
+                    return tuple(refmeta, consensus.flatten(), ref_fna, ref_gff)
+            }
+            .set { ch_to_quast_byrefseq }
+    }
+
+    //
     // MODULE: QUAST, assembly QC
     //
     ch_assembly
-        .collect{ it[1] }
-        .map { consensus_collect -> tuple([id: "report"], consensus_collect) }
-        .set { ch_to_quast }
+        .collect{it[1]}
+        .map{ consensus -> tuple([id:'report'], consensus) }
+        .set{ ch_to_quast }
 
-    QUAST (
-        ch_to_quast,
-        [[:],[]],
-        [[:],[]]
-    )
-    ch_quast_multiqc = QUAST.out.tsv
-    ch_versions      = ch_versions.mix(QUAST.out.versions)
+    if(params.skip_kmerfinder){
+        QUAST(
+            ch_to_quast,
+            params.reference_fasta ?: [[:],[]],
+            params.reference_gff ?: [[:],[]]
+        )
+        ch_quast_multiqc = QUAST.out.results
+    } else if (!params.skip_kmerfinder) {
+        // Quast runs twice if kmerfinder is allowed.
+        // This approach allow Quast to calculate relevant parameters such as genome fraction based on a reference genome.
+        QUAST(
+            ch_to_quast,
+            [[:],[]],
+            [[:],[]]
+        )
+        QUAST_BYREFSEQID(
+            ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, consensus)},
+            ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_fasta)},
+            ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_gff)}
+        )
+        ch_quast_multiqc = QUAST_BYREFSEQID.out.results
+    }
+    ch_versions = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
 
     // Check assemblies that require further processing for gene annotation
     ch_assembly
@@ -468,27 +556,24 @@ workflow BACASS {
     ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
     ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
-    ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_fastqc_trim_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_quast_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_prokka_txt_multiqc.collect().ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_bakta_txt_multiqc.collect().ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]))
-
-    MULTIQC (
-        ch_multiqc_files.collect(),
+    MULTIQC_CUSTOM (
         ch_multiqc_config,
-        ch_multiqc_custom_config.collect().ifEmpty([]),
-        ch_multiqc_logo.collect().ifEmpty([])
+        ch_multiqc_custom_config,
+        ch_multiqc_logo.collect().ifEmpty([]),
+        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+        ch_multiqc_custom_methods_description,
+        ch_collated_versions,
+        ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
     )
     multiqc_report = MULTIQC.out.report.toList()
 

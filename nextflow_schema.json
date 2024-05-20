@@ -42,6 +42,14 @@
             "description": "Parameters for QC and trim short-reads",
             "default": "",
             "properties": {
+                "fastp_args": {
+                    "type": "string",
+                    "description": "This can be used to pass arguments to [Fastp](https://github.com/OpenGene/fastp)"
+                },
+                "save_trimmed": {
+                    "type": "boolean",
+                    "description": "save trimmed files"
+                },
                 "save_trimmed_fail": {
                     "type": "boolean",
                     "description": "save files that failed to pass trimming thresholds ending in `*.fail.fastq.gz`"
@@ -72,6 +80,22 @@
                     "fa_icon": "fab fa-gitkraken",
                     "help_text": "See [Kraken2 homepage](https://benlangmead.github.io/aws-indexes/k2) for download\nlinks. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for\nsample purity.",
                     "description": "Path to Kraken2 database."
+                },
+                "kmerfinderdb": {
+                    "type": "string",
+                    "description": "Path to the Kmerfinder bacteria database."
+                },
+                "reference_fasta": {
+                    "type": "string",
+                    "description": "Reference FASTA file."
+                },
+                "reference_gff": {
+                    "type": "string",
+                    "description": "Reference GFF file."
+                },
+                "ncbi_assembly_metadata": {
+                    "type": "string",
+                    "description": "Master file (*.txt) containing a summary of asseblies available in GeneBank or RefSeq. See: https://ftp.ncbi.nlm.nih.gov/genomes/README_assembly_summary.txt"
                 }
             }
         },
@@ -189,6 +213,11 @@
                     "fa_icon": "fas fa-forward",
                     "description": "Skip running Kraken2 classifier on reads."
                 },
+                "skip_kmerfinder": {
+                    "type": "boolean",
+                    "description": "Skip contamination analysis with Kmerfinder",
+                    "fa_icon": "fas fa-forward"
+                },
                 "skip_annotation": {
                     "type": "boolean",
                     "fa_icon": "fas fa-forward",
@@ -206,7 +235,8 @@
                 },
                 "skip_multiqc": {
                     "type": "boolean",
-                    "description": "Skip MultiQC"
+                    "description": "Skip MultiQC",
+                    "fa_icon": "fas fa-forward"
                 }
             }
         },
