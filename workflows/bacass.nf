@@ -39,8 +39,8 @@ if (!params.skip_kmerfinder) {
     if (!params.kmerfinderdb || !params.ncbi_assembly_metadata) {
         exit 1, "[KMERFINDER]: Missing --kmerfinder_db and/or --ncbi_assembly_metadata arguments. Both are required to run KMERFINDER."
     } else {
-        file(params.kmerfinderdb, checkIfExists: true)
-        file(params.ncbi_assembly_metadata, checkIfExists: true)
+        kmerfinderdb = file(params.kmerfinderdb, checkIfExists: true)
+        ncbi_assembly_metadata = file(params.ncbi_assembly_metadata, checkIfExists: true)
     }
 }
 /*
@@ -415,15 +415,12 @@ workflow BACASS {
 
     ch_kmerfinder_multiqc = Channel.empty()
     if (!params.skip_kmerfinder) {
-        // TODO: mv this to subworkflow
-        // Process kmerfinder database
-        ch_kmerfinderdb = file(params.kmerfinderdb, checkIfExists: true)
-        if ( params.kmerfinderdb.endsWith('.gz') ) {
-            UNTAR ( [[id: ch_kmerfinderdb.getSimpleName()], ch_kmerfinderdb] )
-            ch_kmerfinderdb = UNTAR.out.untar.map{ meta, file -> file }
-
+        // Prepare kmerfinder database
+        if ( kmerfinderdb.name.endsWith('.gz') ) {
+            UNTAR ( [[ id: kmerfinderdb.getSimpleName() ], kmerfinderdb] )
+            ch_kmerfinderdb_untar = UNTAR.out.untar.map{ meta, file -> file }
         } else {
-            ch_kmerfinderdb = params.kmerfinderdb
+            ch_kmerfinderdb_untar = Channel.from(kmerfinder_db)
         }
 
         // Set kmerfinder input based on assembly type
@@ -433,10 +430,10 @@ workflow BACASS {
             ch_for_kmerfinder = PORECHOP_PORECHOP.out.reads
         }
 
-        // TODO: Future versions are intended to operate seamlessly without the need for *.fasta assembly files to be included in the subworkflow (by using sample name [meta] only). This enhancement aims to optimize efficiency.
+        // RUN kmerfinder subworkflow
         KMERFINDER_SUBWORKFLOW (
-            ch_kmerfinderdb,
-            params.ncbi_assembly_metadata,
+            ch_kmerfinderdb_untar,
+            ncbi_assembly_metadata,
             ch_for_kmerfinder,
             ch_assembly
         )
@@ -444,8 +441,8 @@ workflow BACASS {
         ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
         ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions.ifEmpty(null))
 
-        // Parsing channel to set up QUAST_BYREFSEQ input.
-        ch_consensus_byrefseq           // [ refseq, meta, fasta, ref_fna, ref_gff ]
+        // Set channel to perform by refseq QUAST based on reference genome identified with KMERFINDER.
+        ch_consensus_byrefseq
             .map {
                 refmeta, meta, consensus, ref_fna, ref_gff ->
                     return tuple(refmeta, consensus.flatten(), ref_fna, ref_gff)
