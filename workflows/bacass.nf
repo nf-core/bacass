@@ -575,10 +575,10 @@ workflow BACASS {
         ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]),
         ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
     )
-    multiqc_report = MULTIQC.out.report.toList()
+    multiqc_report = MULTIQC_CUSTOM.out.report.toList()
 
     emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report = MULTIQC_CUSTOM.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 }
 
