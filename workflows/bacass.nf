@@ -410,8 +410,7 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Kmerfinder, QC for sample purity.
     //
-    // TODO: Executes both kmerfinder and classifies samples by their reference genome (all this through the kmerfinder_subworkflow()).
-    //       Ideally, users can also utilize kmerfinder independently without the need to download reference genome and grouping data —simply running kmerfinder alone-.
+    // Executes both kmerfinder and classifies samples by their reference genome (all this through the kmerfinder_subworkflow()).
 
     ch_kmerfinder_multiqc = Channel.empty()
     if (!params.skip_kmerfinder) {

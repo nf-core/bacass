@@ -5,12 +5,12 @@ HEADER
 =============================================================
 INSTITUTION: BU-ISCIII
 AUTHOR: Guillermo J. Gorines Cordero
-MAIL: guillermo.gorines@urjc.es
+EDITED BY: Daniel VM
 VERSION: 0.1
 CREATED: Early 2022
 REVISED: 18-2-2022
 EDITED: 14-11-2023
-DESCRIPTION:
+DESCRIPTION: 20-05-2024
     Given a file with the kmerfinder results and frequencies (probably
     created by find_common_reference.py), and the NCBI assembly sheet,
     download the top-reference genome, gff and protein files from
@@ -71,7 +71,7 @@ def parse_args(args=None):
     )
     parser.add_argument(
         "-reference",
-        help="File containing the paths to bacterial references."
+        help="File containing the paths to bacterial references. See example in: https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_refseq.txt"
     )
     parser.add_argument(
         "-out_dir",
@@ -140,7 +140,6 @@ def download_references(file, reference, out_dir):
         dir_url = str(dir_url[0])
 
     # get url and reference file
-
     for r_end in reference_ends:
         out_file = out_dir + "/" + top_reference + r_end
         file_url = dir_url + r_end

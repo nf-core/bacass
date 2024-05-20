@@ -15,6 +15,7 @@ workflow KMERFINDER_SUBWORKFLOW {
 
     main:
     ch_versions = Channel.empty()
+
     // MODULE: Kmerfinder, QC for sample purity. Identifies reference specie and reference genome assembly for each sample.
     KMERFINDER (
         reads,
@@ -24,14 +25,14 @@ workflow KMERFINDER_SUBWORKFLOW {
     ch_kmerfinder_json      = KMERFINDER.out.json
     ch_versions             = ch_versions.mix( KMERFINDER.out.versions.ifEmpty(null) )
 
-    // MODULE: Kmerfinder summary report. Generates a csv summary file collecting all sample reports.
+    // MODULE: Kmerfinder summary report. Generates a csv report file collecting all sample references.
     KMERFINDER_SUMMARY (
-        ch_kmerfinder_report.map{meta, report -> report }.collect()
+        ch_kmerfinder_report.map{ meta, report -> report }.collect()
     )
     ch_summary_yaml     = KMERFINDER_SUMMARY.out.yaml
     ch_versions         = ch_versions.mix( KMERFINDER_SUMMARY.out.versions.ifEmpty(null) )
 
-    // SUBWORKFLOW: Grouping reports by identified reference species.
+    // SUBWORKFLOW:  Create a channel to organize assemblies and reports based on the identified Kmerfinder reference.
     ch_kmerfinder_json
         .join(ch_kmerfinder_report, by:0)
         .join(consensus, by:0)
@@ -43,37 +44,23 @@ workflow KMERFINDER_SUBWORKFLOW {
         .groupTuple(by:0) // Group by the "Species" field
         .set { ch_reports_byreference }
 
-    // SUBWORKFLOW: For each specie target, this subworkflow collects the reference genomes assemblies ('GCF*'), and subsequently, downloads the winning reference assembly.
-    if (!params.reference_fasta && !params.reference_gff) {
-        FIND_DOWNLOAD_REFERENCE (
-            ch_reports_byreference.map{ specie, meta, report_txt, fasta-> tuple(specie, report_txt) },
-            ncbi_assembly_metadata
-        )
-        ch_versions         = ch_versions.mix( FIND_DOWNLOAD_REFERENCE.out.versions.ifEmpty(null) )
+    // SUBWORKFLOW: For each species target, this subworkflow collects reference genome assemblies ('GCF*') and subsequently downloads the best matching reference assembly.
+    FIND_DOWNLOAD_REFERENCE (
+        ch_reports_byreference.map{ specie, meta, report_txt, fasta-> tuple(specie, report_txt) },
+        ncbi_assembly_metadata
+    )
+    ch_versions = ch_versions.mix( FIND_DOWNLOAD_REFERENCE.out.versions.ifEmpty(null) )
 
-        // Arrange sample's assemblyes into channels with their corresponding reference files.
-        ch_reports_byreference
-            .join(FIND_DOWNLOAD_REFERENCE.out.fna)
-            .join(FIND_DOWNLOAD_REFERENCE.out.gff)
-            .join(FIND_DOWNLOAD_REFERENCE.out.winner)
-            .map {
-                specie, meta, report_txt, fasta, fna, gff, winner_id ->
-                    return tuple([id: winner_id.getBaseName()], meta, fasta, fna, gff)
-            }
-            .set { ch_consensus_byrefseq }
-
-    } else if (params.reference_fasta && params.reference_gff) {
-        // TODO: Haven't tested so far
-        //ch_reports_byreference
-        //    .join(params.reference_fasta)
-        //    .join(params.reference_gff)
-        //    .map {
-        //        refmeta, meta, report_txt, fasta ->
-        //            refmeta.id = params.reference_fasta.getBaseName()
-        //            return tuple(refmeta, meta, fasta, fna, gff)
-        //    }
-        //    .set { ch_consensus_byrefseq  }
-    }
+    // Organize sample assemblies into channels based on their corresponding reference files.
+    ch_reports_byreference
+        .join(FIND_DOWNLOAD_REFERENCE.out.fna)
+        .join(FIND_DOWNLOAD_REFERENCE.out.gff)
+        .join(FIND_DOWNLOAD_REFERENCE.out.winner)
+        .map {
+            specie, meta, report_txt, fasta, fna, gff, winner_id ->
+                return tuple([id: winner_id.getBaseName()], meta, fasta, fna, gff)
+        }
+        .set { ch_consensus_byrefseq }
 
     emit:
     versions            = ch_versions.ifEmpty(null) // channel: [ path(versions.yml) ]
