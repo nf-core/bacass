@@ -51,7 +51,6 @@ module_order:
       path_filters:
         - "./bakta/*.txt"
 
-
 report_section_order:
   fastqc:
     after: general_stats

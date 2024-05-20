@@ -15,7 +15,6 @@ import os
 
 
 def check_arg(args=None):
-
     """
     Description:
         Function collect arguments from command line using argparse
@@ -32,14 +31,14 @@ def check_arg(args=None):
     parser = argparse.ArgumentParser(
         prog="07-kmerfinder.py",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description="07-kmerfinder.py creates a csv file from results.txt file", # FIXME
+        description="07-kmerfinder.py creates a csv file from results.txt file",  # FIXME
     )
 
     parser.add_argument(
         "--path",
         "-p",
         required=True,
-        help="Insert path of results.txt file like /home/user/Service_folder/ANALYSIS/07-kmerfinder", # FIXME
+        help="Insert path of results.txt file like /home/user/Service_folder/ANALYSIS/07-kmerfinder",  # FIXME
     )
 
     parser.add_argument(
@@ -61,7 +60,6 @@ def check_arg(args=None):
 
 
 def kmerfinder_dictionary(file_txt):
-
     """
     Description:
         Function to extract the relevant part of result.txt file
@@ -71,7 +69,7 @@ def kmerfinder_dictionary(file_txt):
         dictionary
     """
 
-    step = "07-kmerfinder_" # FIXME
+    step = "07-kmerfinder_"  # FIXME
 
     num_lines = sum(1 for line in open(file_txt))
     hits = num_lines - 1  # to count the total number of hits
@@ -110,7 +108,6 @@ def kmerfinder_dictionary(file_txt):
 
 
 def dictionary2bn(dictionary, binary_file):
-
     """
 
     Description:
@@ -134,7 +131,6 @@ def dictionary2bn(dictionary, binary_file):
 
 
 def dictionary2csv(dictionary, csv_file):
-
     """
 
     Description:
@@ -185,7 +181,7 @@ if __name__ == "__main__":
     kmer_all = {}
 
     for sample in sample_list:
-        file_name = os.path.join(path, sample + "_results.txt" )
+        file_name = os.path.join(path, sample + "_results.txt")
         kmer_all[sample] = kmerfinder_dictionary(file_name)
 
     print("kmerfinder_dictionary done")

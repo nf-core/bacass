@@ -57,7 +57,6 @@ module_order:
       path_filters:
         - "./bakta/*.txt"
 
-
 report_section_order:
   nanostat:
     after: general_stats
@@ -134,7 +133,6 @@ custom_data:
         format: "{:,.0f}"
 
 export_plots: true
-
 # # Customise the module search patterns to speed up execution time
 # #  - Skip module sub-tools that we are not interested in
 # #  - Replace file-content searching with filename pattern searching

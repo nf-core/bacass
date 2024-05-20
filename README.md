@@ -52,8 +52,8 @@ In specific cases where samples recorded in the input samplesheet belong to more
 
 > NOTE: This scenario is supported when [Kmerfinder](https://bitbucket.org/genomicepidemiology/kmerfinder/src/master/) analysis is performed only.
 
-
 In cases where input samplesheet has files where , the pipeline will group samples in batches according to their reference genomes and will provide a general QUAST containing all the input samples and a by reference genome QUAST report, that is, a quast report for each reference genome.
+
 ## Usage
 
 > [!NOTE]

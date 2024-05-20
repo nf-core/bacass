@@ -126,6 +126,7 @@ The pipeline includes a dedicated step for short and long reads QC as well as co
 <summary>Output files</summary>
 
 - `Kmerfinder/{ID}/`
+
   - `*_results.txt`: Kmerfinder report table containing reads QC results and taxonomic information.
 
 - `Kmerfinder/`:
@@ -196,6 +197,7 @@ The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast) fo
 <summary>Output files</summary>
 
 - `QUAST/report/`
+
   - `icarus.html`: QUAST's contig browser as HTML
   - `report.html`: QUAST assembly QC as HTML report
   - `report.pdf`: QUAST assembly QC as pdf

@@ -49,15 +49,14 @@ import sys
 import argparse
 import os
 
-#import wget
+# import wget
 import requests
+
 
 # TODO: Generate report
 def parse_args(args=None):
-    Description = (
-        "download the reference files \
+    Description = "download the reference files \
         (fna, faa, gff)from the reference NCBI file."
-    )
     Epilog = """Usage example: \
         python download_reference.py \
         -file <file with the references created by find_common_reference> \
@@ -66,17 +65,13 @@ def parse_args(args=None):
 
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
     parser.add_argument(
-        "-file",
-        help="File containing the ranking of references from kmerfinder."
+        "-file", help="File containing the ranking of references from kmerfinder."
     )
     parser.add_argument(
         "-reference",
-        help="File containing the paths to bacterial references. See example in: https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_refseq.txt"
+        help="File containing the paths to bacterial references. See example in: https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_refseq.txt",
     )
-    parser.add_argument(
-        "-out_dir",
-        help="Output directory."
-    )
+    parser.add_argument("-out_dir", help="Output directory.")
 
     return parser.parse_args(args)
 
@@ -98,9 +93,8 @@ def download_references(file, reference, out_dir):
         ]
         top_reference = infile[0][0]
 
-    with open(str(top_reference) + ".winner", 'w') as topref:
+    with open(str(top_reference) + ".winner", "w") as topref:
         topref.write(top_reference)
-
 
     # create the outdir (do nothing if already there)
     try:
@@ -134,7 +128,11 @@ def download_references(file, reference, out_dir):
                 dir_url.append(assembly_url)
 
         if len(dir_url) == 0:
-            print("No assemblies responding to the top reference: ", top_reference, " were found")
+            print(
+                "No assemblies responding to the top reference: ",
+                top_reference,
+                " were found",
+            )
             sys.exit(1)
 
         dir_url = str(dir_url[0])
@@ -145,9 +143,9 @@ def download_references(file, reference, out_dir):
         file_url = dir_url + r_end
         print(file_url)
 
-        #wget.download(file_url, out_file)
+        # wget.download(file_url, out_file)
         response = requests.get(file_url, stream=True)
-        with open(out_file, 'wb') as out:
+        with open(out_file, "wb") as out:
             for chunk in response.iter_content(chunk_size=8192):
                 out.write(chunk)
 
