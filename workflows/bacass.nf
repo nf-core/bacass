@@ -348,7 +348,7 @@ workflow BACASS {
     ch_kraken_long_multiqc  = Channel.empty()
     if ( !params.skip_kraken2 ) {
         KRAKEN2_DB_PREPARATION (
-            kraken2db
+            params.kraken2db
         )
         ch_versions = ch_versions.mix(KRAKEN2_DB_PREPARATION.out.versions)
         KRAKEN2 (
