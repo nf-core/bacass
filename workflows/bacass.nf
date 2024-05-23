@@ -8,24 +8,6 @@
 def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-// Check krakendb
-if (!params.skip_kraken2) {
-    if (params.kraken2db) {
-        kraken2db = file(params.kraken2db, checkIfExists: true)
-    } else {
-        exit 1, "Missing Kraken2 DB arg"
-    }
-}
-
-// Check kmerfinder dependencies
-if (!params.skip_kmerfinder) {
-    if (!params.kmerfinderdb || !params.ncbi_assembly_metadata) {
-        exit 1, "[KMERFINDER]: Missing --kmerfinder_db and/or --ncbi_assembly_metadata arguments. Both are required to run KMERFINDER."
-    } else {
-        kmerfinderdb = file(params.kmerfinderdb, checkIfExists: true)
-        ncbi_assembly_metadata = file(params.ncbi_assembly_metadata, checkIfExists: true)
-    }
-}
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CONFIG FILES
@@ -89,7 +71,6 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/krake
 include { QUAST                                 } from '../modules/nf-core/quast/main'
 include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip/main'
-include { UNTAR                                 } from '../modules/nf-core/untar/main'
 include { PROKKA                                } from '../modules/nf-core/prokka/main'
 
 //
@@ -411,31 +392,20 @@ workflow BACASS {
 
     ch_kmerfinder_multiqc = Channel.empty()
     if (!params.skip_kmerfinder) {
-        // Prepare kmerfinder database
-        if ( kmerfinderdb.name.endsWith('.gz') ) {
-            UNTAR ( [[ id: kmerfinderdb.getSimpleName() ], kmerfinderdb] )
-            ch_kmerfinderdb_untar = UNTAR.out.untar.map{ meta, file -> file }
-        } else {
-            ch_kmerfinderdb_untar = Channel.from(kmerfinder_db)
-        }
-
-        // Set kmerfinder input based on assembly type
+        // Set kmerfinder channel based on assembly type
         if( params.assembly_type == 'short' || params.assembly_type == 'hybrid' ) {
             ch_for_kmerfinder = FASTQ_TRIM_FASTP_FASTQC.out.reads
         } else if ( params.assembly_type == 'long' ) {
             ch_for_kmerfinder = PORECHOP_PORECHOP.out.reads
         }
-
         // RUN kmerfinder subworkflow
         KMERFINDER_SUBWORKFLOW (
-            ch_kmerfinderdb_untar,
-            ncbi_assembly_metadata,
             ch_for_kmerfinder,
             ch_assembly
         )
         ch_kmerfinder_multiqc   = KMERFINDER_SUBWORKFLOW.out.summary_yaml
         ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
-        ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions.ifEmpty(null))
+        ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions)
 
         // Set channel to perform by refseq QUAST based on reference genome identified with KMERFINDER.
         ch_consensus_byrefseq
@@ -476,7 +446,7 @@ workflow BACASS {
         )
         ch_quast_multiqc = QUAST_BYREFSEQID.out.results
     }
-    ch_versions = ch_versions.mix(QUAST.out.versions.ifEmpty(null))
+    ch_versions = ch_versions.mix(QUAST.out.versions)
 
     // Check assemblies that require further processing for gene annotation
     ch_assembly
@@ -571,15 +541,15 @@ workflow BACASS {
         ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]),
         ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]),
         ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
-        ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]),
-        ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_prokka_txt_multiqc.collect().ifEmpty([]),
+        ch_bakta_txt_multiqc.collect().ifEmpty([]),
         ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
     )
     multiqc_report = MULTIQC_CUSTOM.out.report.toList()
 
     emit:
     multiqc_report = MULTIQC_CUSTOM.out.report.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
+    versions       = ch_versions                        // channel: [ path(versions.yml) ]
 }
 
 /*

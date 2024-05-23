@@ -48,11 +48,9 @@ For users specifying both short read and long read (NanoPore) data, the pipeline
 
 In all cases, the assembly is assessed using [QUAST](http://bioinf.spbau.ru/quast). The resulting bacterial assembly is furthermore annotated using [Prokka](https://github.com/tseemann/prokka), [Bakta](https://github.com/oschwengers/bakta) or [DFAST](https://github.com/nigyta/dfast_core).
 
-In specific cases where samples recorded in the input samplesheet belong to more than one species, the pipeline finds and downloads their respectve reference genomes (this also works with single specie input samplesheet). It then groups the samples into batches and collects assembly QC results based on their corresponding reference genomes.
+If Kmerfinder is invoked, the pipeline will group samples according to the [Kmerfinder](https://bitbucket.org/genomicepidemiology/kmerfinder/src/master/)-estimated reference genomes. Afterwards, two QUAST steps will be carried out: an initial ('general') [QUAST](http://bioinf.spbau.ru/quast) of all samples without reference genomes, and subsequently, a 'by reference genome' [QUAST](http://bioinf.spbau.ru/quast) to aggregate samples with their reference genomes.
 
 > NOTE: This scenario is supported when [Kmerfinder](https://bitbucket.org/genomicepidemiology/kmerfinder/src/master/) analysis is performed only.
-
-In cases where input samplesheet has files where , the pipeline will group samples in batches according to their reference genomes and will provide a general QUAST containing all the input samples and a by reference genome QUAST report, that is, a quast report for each reference genome.
 
 ## Usage
 

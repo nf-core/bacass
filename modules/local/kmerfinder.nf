@@ -8,8 +8,7 @@ process KMERFINDER {
         'biocontainers/kmerfinder:3.0.2--hdfd78af_0' }"
 
     input:
-    tuple val(meta), path(reads)
-    path(kmerfinder_db)
+    tuple val(meta), path(reads), path(kmerfinder_db)
 
     output:
     tuple val(meta), path("*_results.txt")  , emit: report
@@ -19,7 +18,8 @@ process KMERFINDER {
     script:
     def prefix   = task.ext.prefix ?: "${meta.id}"
     def in_reads = reads[0] && reads[1] ? "${reads[0]} ${reads[1]}" : "${reads}"
-
+    // WARNING: Ensure to update software version in this line if you modify the container/environment.
+    def kmerfinder_version = "3.0.2"
     """
     kmerfinder.py \\
         --infile $in_reads \\
@@ -33,7 +33,7 @@ process KMERFINDER {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        kmerfinder: \$(echo "3.0.2")
+        kmerfinder: \$(echo "${kmerfinder_version}")
     END_VERSIONS
     """
 }
