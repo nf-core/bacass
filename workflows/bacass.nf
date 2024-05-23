@@ -14,16 +14,8 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+// Place config files here
 
-// When invoking kmerfinder, utilize a custom MultiQC config file to generate a specialized report. This report will organize samples into groups based on their reference genome, w were previously calculated by kmerfinder.
-if (!params.skip_kmerfinder && params.assembly_type) {
-    ch_multiqc_config = file("$projectDir/assets/multiqc_config_${params.assembly_type}.yml", checkIfExists: true)
-} else {
-    ch_multiqc_config = file("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-}
-ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
-ch_multiqc_logo             = params.multiqc_logo   ? Channel.fromPath( params.multiqc_logo, checkIfExists: true ) : Channel.empty()
-ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -519,20 +511,20 @@ workflow BACASS {
     //
     // MODULE: MultiQC
     //
-    ch_multiqc_config                     = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    ch_multiqc_config                     = !params.skip_kmerfinder && params.assembly_type ? Channel.fromPath("$projectDir/assets/multiqc_config_${params.assembly_type}.yml", checkIfExists: true) : Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
     ch_multiqc_custom_config              = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
     ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
     summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
     ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? Channel.fromPath(params.multiqc_methods_description, checkIfExists: true) : Channel.fromPath("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
     MULTIQC_CUSTOM (
-        ch_multiqc_config,
-        ch_multiqc_custom_config,
-        ch_multiqc_logo.collect().ifEmpty([]),
+        ch_multiqc_config.ifEmpty([]),
+        ch_multiqc_custom_config.ifEmpty([]),
+        ch_multiqc_logo.ifEmpty([]),
         ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
-        ch_multiqc_custom_methods_description,
-        ch_collated_versions,
+        ch_multiqc_custom_methods_description.ifEmpty([]),
+        ch_collated_versions.ifEmpty([]),
         ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]),
         ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]),
         ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]),
