@@ -56,11 +56,6 @@
                         "git_sha": "2c2d1cf80866dbd6dd0ea5d61ddd59533a72d41e",
                         "installed_by": ["modules"]
                     },
-                    "multiqc": {
-                        "branch": "master",
-                        "git_sha": "b7ebe95761cd389603f9cc0e0dc384c0f663815a",
-                        "installed_by": ["modules"]
-                    },
                     "nanoplot": {
                         "branch": "master",
                         "git_sha": "a31407dfaf0cb0d04768d5cb439fc6f4523a6981",

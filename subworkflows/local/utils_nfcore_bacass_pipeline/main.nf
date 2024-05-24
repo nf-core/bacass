@@ -75,7 +75,7 @@ workflow PIPELINE_INITIALISATION {
     //
     // Custom validation for pipeline parameters
     //
-    //validateInputParameters()
+    validateInputParameters()
 
     //
     // Create channel from input file provided through params.input
@@ -156,6 +156,26 @@ workflow PIPELINE_COMPLETION {
 //
 def validateInputParameters() {
     // Add functions here for parameters validation
+    // Check Kraken2 dependencies
+    if (!params.skip_kraken2 && !params.kraken2db) {
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Kraken2 database not provided.\n" +
+            "  Please specify the '--kraken2db' parameter to provide the necessary database.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
+    }
+
+    // Check kmerfinder dependencies
+    if (!params.skip_kmerfinder) {
+        if (!params.kmerfinderdb || !params.ncbi_assembly_metadata) {
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Kmerfinder database and NCBI assembly metadata not provided.\n" +
+                "  Please specify the '--kmerfinderdb' and '--ncbi_assembly_metadata' parameters.\n" +
+                "  Both are required to run Kmerfinder.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string)
+        }
+    }
 }
 
 //
@@ -184,7 +204,8 @@ def toolCitationText() {
             "ProeChop (Wick RR et al. 2017)",
             "Nanoplot (Wouter De Coster and Rosa Rademakers 2023)",
             "PycoQC (Adrien Leger & Tommaso Leonardi 2019)",
-            "Kreken2 (Derrick E. Wood et al. 2019)",
+            "Kraken2 (Derrick E. Wood et al. 2019)",
+            "Kmerfinder (Larsen et al. 2014)",
             "Unicycler (Ryan R Wick et al. 2017)",
             "Minimap & Miniasm (Heng Li 2016)",
             "Dragonflye (Robert A Petit III )",
@@ -212,6 +233,7 @@ def toolBibliographyText() {
             "<li>Wouter De Coster, Rosa Rademakers, NanoPack2: population-scale evaluation of long-read sequencing data, Bioinformatics, Volume 39, Issue 5, May 2023, btad311, https://doi.org/10.1093/bioinformatics/btad311</li>",
             "<li>Leger et al., (2019). pycoQC, interactive quality control for Oxford Nanopore Sequencing. Journal of Open Source Software, 4(34), 1236, https://doi.org/10.21105/joss.01236</li>",
             "<li>Wood, D.E., Lu, J. & Langmead, B. Improved metagenomic analysis with Kraken 2. Genome Biol 20, 257 (2019). https://doi.org/10.1186/s13059-019-1891-0</li>",
+            "<li>RBenchmarking of Methods for Genomic Taxonomy. Larsen MV, Cosentino S, Lukjancenko O, Saputra D, Rasmussen S, Hasman H, Sicheritz-Pontén T, Aarestrup FM, Ussery DW, Lund O. J Clin Microbiol. 2014 Feb 26.</li>",
             "<li>Wick RR, Judd LM, Gorrie CL, Holt KE. Unicycler: Resolving bacterial genome assemblies from short and long sequencing reads. PLoS Comput Biol. 2017 Jun 8;13(6):e1005595. doi: 10.1371/journal.pcbi.1005595.</li>",
             "<li>Heng Li, Minimap and miniasm: fast mapping and de novo assembly for noisy long sequences, Bioinformatics, Volume 32, Issue 14, July 2016, Pages 2103–2110, https://doi.org/10.1093/bioinformatics/btw152</li>",
             "<li>Petit III, R. A. dragonflye: assemble bacterial isolate genomes from Nanopore reads (Version 1.1.2). https://github.com/rpetit3/dragonflye</li>",
