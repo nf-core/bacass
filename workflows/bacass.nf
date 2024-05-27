@@ -437,6 +437,7 @@ workflow BACASS {
             ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_gff)}
         )
         ch_quast_multiqc = QUAST_BYREFSEQID.out.results
+        ch_versions      = ch_versions.mix(QUAST_BYREFSEQID.out.versions)
     }
     ch_versions = ch_versions.mix(QUAST.out.versions)
 
