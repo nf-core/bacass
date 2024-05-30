@@ -50,7 +50,8 @@ In all cases, the assembly is assessed using [QUAST](http://bioinf.spbau.ru/quas
 
 If Kmerfinder is invoked, the pipeline will group samples according to the [Kmerfinder](https://bitbucket.org/genomicepidemiology/kmerfinder/src/master/)-estimated reference genomes. Afterwards, two QUAST steps will be carried out: an initial ('general') [QUAST](http://bioinf.spbau.ru/quast) of all samples without reference genomes, and subsequently, a 'by reference genome' [QUAST](http://bioinf.spbau.ru/quast) to aggregate samples with their reference genomes.
 
-> NOTE: This scenario is supported when [Kmerfinder](https://bitbucket.org/genomicepidemiology/kmerfinder/src/master/) analysis is performed only.
+> [!NOTE]
+> This scenario is supported when [Kmerfinder](https://bitbucket.org/genomicepidemiology/kmerfinder/src/master/) analysis is performed only.
 
 ## Usage
 
