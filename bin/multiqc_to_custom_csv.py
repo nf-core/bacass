@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Sourced and Edited from nf-core/viralrecon:
-# https://github.com/nf-core/viralrecon/blob/master/bin/multiqc_to_custom_csv.py
+# https://github.com/nf-core/viralrecon/blob/3731dd3a32a67a2648ea22c2bd980c224abdaee2/bin/multiqc_to_custom_csv.py
 import os
 import sys
 import errno
