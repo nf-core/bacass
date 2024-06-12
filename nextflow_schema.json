@@ -42,9 +42,16 @@
             "description": "Parameters for QC and trim short-reads",
             "default": "",
             "properties": {
+                "fastp_args": {
+                    "type": "string",
+                    "description": "This can be used to pass arguments to [Fastp](https://github.com/OpenGene/fastp)"
+                },
+                "save_trimmed": {
+                    "type": "boolean",
+                    "description": "save trimmed files"
+                },
                 "save_trimmed_fail": {
                     "type": "boolean",
-                    "enum": ["true", "false"],
                     "description": "save files that failed to pass trimming thresholds ending in `*.fail.fastq.gz`"
                 },
                 "save_merged": {
@@ -73,6 +80,22 @@
                     "fa_icon": "fab fa-gitkraken",
                     "help_text": "See [Kraken2 homepage](https://benlangmead.github.io/aws-indexes/k2) for download\nlinks. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for\nsample purity.",
                     "description": "Path to Kraken2 database."
+                },
+                "kmerfinderdb": {
+                    "type": "string",
+                    "description": "Path to the Kmerfinder bacteria database. For more details, see [Kmerfinder Databases](https://bitbucket.org/genomicepidemiology/kmerfinder_db/src/master/). You can also download precomputed Kmerfinder database (dated 2019/01/08) from https://zenodo.org/records/10458361/files/20190108_kmerfinder_stable_dirs.tar.gz "
+                },
+                "reference_fasta": {
+                    "type": "string",
+                    "description": "Reference FASTA file."
+                },
+                "reference_gff": {
+                    "type": "string",
+                    "description": "Reference GFF file."
+                },
+                "ncbi_assembly_metadata": {
+                    "type": "string",
+                    "description": "Master file (*.txt) containing a summary of assemblies available in GeneBank or RefSeq. See: https://ftp.ncbi.nlm.nih.gov/genomes/README_assembly_summary.txt"
                 }
             }
         },
@@ -190,6 +213,11 @@
                     "fa_icon": "fas fa-forward",
                     "description": "Skip running Kraken2 classifier on reads."
                 },
+                "skip_kmerfinder": {
+                    "type": "boolean",
+                    "description": "Skip contamination analysis with [Kmerfinder](https://bitbucket.org/genomicepidemiology/kmerfinder/src/master/)",
+                    "fa_icon": "fas fa-forward"
+                },
                 "skip_annotation": {
                     "type": "boolean",
                     "fa_icon": "fas fa-forward",
@@ -207,7 +235,8 @@
                 },
                 "skip_multiqc": {
                     "type": "boolean",
-                    "description": "Skip MultiQC"
+                    "description": "Skip MultiQC",
+                    "fa_icon": "fas fa-forward"
                 }
             }
         },
@@ -413,6 +442,13 @@
                     "default": "modules,igenomes_base",
                     "hidden": true,
                     "description": "A comma separated string of inputs the schema validation should ignore"
+                },
+                "pipelines_testdata_base_path": {
+                    "type": "string",
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Base URL or local path to location of pipeline test dataset files",
+                    "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "hidden": true
                 }
             }
         }

@@ -3,7 +3,34 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.2.0 nf-core/bacass: "Aqua Platinum Zebrafish" 2024/03/27
+## v2.3.0 nf-core/bacass: "Navy Iron Oyster" 2024/06/12
+
+### `Changed`
+
+- [#135](https://github.com/nf-core/bacass/pull/135) Replaced nf-core MultiQC module with a custom MultiQC module.
+
+### `Added`
+
+- [#135](https://github.com/nf-core/bacass/pull/135) Implementation of KmerFinder subworkflow Custom Quast, and Custom MultiQC Reports:
+
+  - Added KmerFinder subworkflow for read quality control, purity assessment, and sample grouping based on reference genome estimation.
+  - Enhanced Quast Assembly QC to run both general and reference genome-based analyses when KmerFinder is invoked.
+  - Implemented custom MultiQC module with multiqc_config.yml files for different assembly modes (short, long, hybrid).
+  - Generated custom MultiQC HTML report consolidating metrics from KmerFinder, Quast, and other relevant sources.
+
+- [#133](https://github.com/nf-core/bacass/pull/133) Update nf-core/bacass to the new nf-core 2.14.1 `TEMPLATE`.
+
+### `Fixed`
+
+- [#134](https://github.com/nf-core/bacass/pull/134) - Fixed samples reported of prokka/bakta in multiqc report.
+
+- [#125](https://github.com/nf-core/bacass/pull/125) - Fixed conflicting settings in save_trimmed_fail parameter.
+
+### `Dependencies`
+
+### `Deprecated`
+
+## v2.2.0 nf-core/bacass: "Aqua Platinum Zebrafish" 2024/03/30
 
 ### `Changed`
 

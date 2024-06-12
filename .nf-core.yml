@@ -8,3 +8,4 @@ lint:
   nextflow_config:
     - config_defaults:
         - params.dfast_config
+nf_core_version: "2.14.1"

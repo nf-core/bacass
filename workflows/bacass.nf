@@ -8,14 +8,14 @@
 def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-// Check krakendb
-if(! params.skip_kraken2){
-    if(params.kraken2db){
-        kraken2db = file(params.kraken2db)
-    } else {
-        exit 1, "Missing Kraken2 DB arg"
-    }
-}
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    CONFIG FILES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+// Place config files here
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -26,12 +26,13 @@ if(! params.skip_kraken2){
 //
 // MODULE: Local to the pipeline
 //
-include { PYCOQC                    } from '../modules/local/pycoqc/main'
-include { UNICYCLER                 } from '../modules/local/unicycler/main'
-include { NANOPOLISH                } from '../modules/local/nanopolish/main'
-include { MEDAKA                    } from '../modules/local/medaka/main'
-include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation/main'
-include { DFAST                     } from '../modules/local/dfast/main'
+include { PYCOQC                    } from '../modules/local/pycoqc'
+include { UNICYCLER                 } from '../modules/local/unicycler'
+include { NANOPOLISH                } from '../modules/local/nanopolish'
+include { MEDAKA                    } from '../modules/local/medaka'
+include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
+include { DFAST                     } from '../modules/local/dfast'
+include { MULTIQC_CUSTOM            } from '../modules/local/multiqc_custom'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -60,14 +61,15 @@ include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samto
 include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/kraken2/kraken2/main'
 include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2/main'
 include { QUAST                                 } from '../modules/nf-core/quast/main'
+include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip/main'
 include { PROKKA                                } from '../modules/nf-core/prokka/main'
-include { MULTIQC                               } from '../modules/nf-core/multiqc/main'
 
 //
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
 //
 include { FASTQ_TRIM_FASTP_FASTQC               } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc/main'
+include { KMERFINDER_SUBWORKFLOW                } from '../subworkflows/local/kmerfinder_subworkflow'
 include { BAKTA_DBDOWNLOAD_RUN                  } from '../subworkflows/local/bakta_dbdownload_run'
 include { paramsSummaryMap                      } from 'plugin/nf-validation'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -237,6 +239,7 @@ workflow BACASS {
 
     //
     // MODULE: Miniasm, genome assembly, long reads
+    //
     if ( params.assembler == 'miniasm' ) {
         MINIMAP2_ALIGN (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
@@ -315,7 +318,7 @@ workflow BACASS {
         ch_for_polish    // tuple val(meta), val(reads), file(longreads), file(assembly)
             .join( MINIMAP2_POLISH.out.bam )    // tuple val(meta), file(bam)
             .join( SAMTOOLS_INDEX.out.bai )     // tuple  val(meta), file(bai)
-            .join( ch_fast5 )             // tuple val(meta), file(fast5)
+            .join( ch_fast5 )                   // tuple val(meta), file(fast5)
             .set { ch_for_nanopolish }          // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
 
         // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
@@ -345,7 +348,7 @@ workflow BACASS {
     ch_kraken_long_multiqc  = Channel.empty()
     if ( !params.skip_kraken2 ) {
         KRAKEN2_DB_PREPARATION (
-            kraken2db
+            params.kraken2db
         )
         ch_versions = ch_versions.mix(KRAKEN2_DB_PREPARATION.out.versions)
         KRAKEN2 (
@@ -375,20 +378,68 @@ workflow BACASS {
     }
 
     //
+    // SUBWORKFLOW: Kmerfinder, QC for sample purity.
+    //
+    // Executes both kmerfinder and classifies samples by their reference genome (all this through the kmerfinder_subworkflow()).
+
+    ch_kmerfinder_multiqc = Channel.empty()
+    if (!params.skip_kmerfinder) {
+        // Set kmerfinder channel based on assembly type
+        if( params.assembly_type == 'short' || params.assembly_type == 'hybrid' ) {
+            ch_for_kmerfinder = FASTQ_TRIM_FASTP_FASTQC.out.reads
+        } else if ( params.assembly_type == 'long' ) {
+            ch_for_kmerfinder = PORECHOP_PORECHOP.out.reads
+        }
+        // RUN kmerfinder subworkflow
+        KMERFINDER_SUBWORKFLOW (
+            ch_for_kmerfinder,
+            ch_assembly
+        )
+        ch_kmerfinder_multiqc   = KMERFINDER_SUBWORKFLOW.out.summary_yaml
+        ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
+        ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions)
+
+        // Set channel to perform by refseq QUAST based on reference genome identified with KMERFINDER.
+        ch_consensus_byrefseq
+            .map {
+                refmeta, meta, consensus, ref_fna, ref_gff ->
+                    return tuple(refmeta, consensus.flatten(), ref_fna, ref_gff)
+            }
+            .set { ch_to_quast_byrefseq }
+    }
+
+    //
     // MODULE: QUAST, assembly QC
     //
     ch_assembly
-        .collect{ it[1] }
-        .map { consensus_collect -> tuple([id: "report"], consensus_collect) }
-        .set { ch_to_quast }
+        .collect{it[1]}
+        .map{ consensus -> tuple([id:'report'], consensus) }
+        .set{ ch_to_quast }
 
-    QUAST (
-        ch_to_quast,
-        [[:],[]],
-        [[:],[]]
-    )
-    ch_quast_multiqc = QUAST.out.tsv
-    ch_versions      = ch_versions.mix(QUAST.out.versions)
+    if(params.skip_kmerfinder){
+        QUAST(
+            ch_to_quast,
+            params.reference_fasta ?: [[:],[]],
+            params.reference_gff ?: [[:],[]]
+        )
+        ch_quast_multiqc = QUAST.out.results
+    } else if (!params.skip_kmerfinder) {
+        // Quast runs twice if kmerfinder is allowed.
+        // This approach allow Quast to calculate relevant parameters such as genome fraction based on a reference genome.
+        QUAST(
+            ch_to_quast,
+            [[:],[]],
+            [[:],[]]
+        )
+        QUAST_BYREFSEQID(
+            ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, consensus)},
+            ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_fasta)},
+            ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_gff)}
+        )
+        ch_quast_multiqc = QUAST_BYREFSEQID.out.results
+        ch_versions      = ch_versions.mix(QUAST_BYREFSEQID.out.versions)
+    }
+    ch_versions = ch_versions.mix(QUAST.out.versions)
 
     // Check assemblies that require further processing for gene annotation
     ch_assembly
@@ -413,7 +464,7 @@ workflow BACASS {
             [],
             []
         )
-        ch_prokka_txt_multiqc   = PROKKA.out.txt.collect()
+        ch_prokka_txt_multiqc   = PROKKA.out.txt.map{ meta, prokka_txt -> [ prokka_txt ]}
         ch_versions             = ch_versions.mix(PROKKA.out.versions)
     }
 
@@ -432,7 +483,7 @@ workflow BACASS {
             params.baktadb,
             params.baktadb_download
         )
-        ch_bakta_txt_multiqc    = BAKTA_DBDOWNLOAD_RUN.out.bakta_txt_multiqc.collect()
+        ch_bakta_txt_multiqc    = BAKTA_DBDOWNLOAD_RUN.out.bakta_txt_multiqc.map{ meta, bakta_txt -> [ bakta_txt ]}
         ch_versions             = ch_versions.mix(BAKTA_DBDOWNLOAD_RUN.out.versions)
     }
     //
@@ -451,46 +502,47 @@ workflow BACASS {
     // Collate and save software versions
     //
     softwareVersionsToYAML(ch_versions)
-        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_pipeline_software_mqc_versions.yml', sort: true, newLine: true)
-        .set { ch_collated_versions }
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'nf_core_pipeline_software_mqc_versions.yml',
+            sort: true,
+            newLine: true
+        ).set { ch_collated_versions }
 
     //
     // MODULE: MultiQC
     //
-    ch_multiqc_config                     = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+    ch_multiqc_config                     = !params.skip_kmerfinder && params.assembly_type ? Channel.fromPath("$projectDir/assets/multiqc_config_${params.assembly_type}.yml", checkIfExists: true) : Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
     ch_multiqc_custom_config              = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
     ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
     summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
     ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? Channel.fromPath(params.multiqc_methods_description, checkIfExists: true) : Channel.fromPath("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
-    ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_fastqc_trim_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_quast_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_prokka_txt_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_bakta_txt_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]))
-
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config,
-        ch_multiqc_custom_config.collect().ifEmpty([]),
-        ch_multiqc_logo.collect().ifEmpty([])
+    MULTIQC_CUSTOM (
+        ch_multiqc_config.ifEmpty([]),
+        ch_multiqc_custom_config.ifEmpty([]),
+        ch_multiqc_logo.ifEmpty([]),
+        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+        ch_multiqc_custom_methods_description.ifEmpty([]),
+        ch_collated_versions.ifEmpty([]),
+        ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_prokka_txt_multiqc.collect().ifEmpty([]),
+        ch_bakta_txt_multiqc.collect().ifEmpty([]),
+        ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
     )
-    multiqc_report = MULTIQC.out.report.toList()
+    multiqc_report = MULTIQC_CUSTOM.out.report.toList()
 
     emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
+    multiqc_report = MULTIQC_CUSTOM.out.report.toList() // channel: /path/to/multiqc_report.html
+    versions       = ch_versions                        // channel: [ path(versions.yml) ]
 }
 
 /*
