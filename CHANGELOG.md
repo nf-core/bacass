@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#147](https://github.com/nf-core/bacass/pull/147) Fixed input file errors related to samplesheets containing relative paths to symbolic links, addressing the 'not a valid path' error.
+
 ### `Dependencies`
 
 ### `Deprecated`
