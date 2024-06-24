@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.3.1 nf-core/bacass: "Navy Iron Oyster" 2024/06/24
+
+### `Changed`
+
+### `Added`
+
+### `Fixed`
+
+- [#147](https://github.com/nf-core/bacass/pull/147) Fixed input file errors related to samplesheets containing relative paths to symbolic links, addressing the 'not a valid path' error.
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.3.0 nf-core/bacass: "Navy Iron Oyster" 2024/06/12
 
 ### `Changed`
