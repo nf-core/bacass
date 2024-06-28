@@ -27,7 +27,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // MODULE: Local to the pipeline
 //
 include { PYCOQC                    } from '../modules/local/pycoqc'
-include { UNICYCLER                 } from '../modules/local/unicycler'
+include { UNICYCLER                 } from '../modules/nf-core/unicycler/main'
 include { NANOPOLISH                } from '../modules/local/nanopolish'
 include { MEDAKA                    } from '../modules/local/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'

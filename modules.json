@@ -92,6 +92,11 @@
                         "git_sha": "4352dbdb09ec40db71e9b172b97a01dcf5622c26",
                         "installed_by": ["modules"]
                     },
+                    "unicycler": {
+                        "branch": "master",
+                        "git_sha": "5f65b5398f3fe4b8d51d77ed90b0a8cd8c89bba7",
+                        "installed_by": ["modules"]
+                    },
                     "untar": {
                         "branch": "master",
                         "git_sha": "5caf7640a9ef1d18d765d55339be751bb0969dfa",
