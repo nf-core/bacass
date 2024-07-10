@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#153](https://github.com/nf-core/bacass/pull/153) Update `.nf-core.yml` to fix files_unchanged section for accurate linting checks.
+
 ### `Dependencies`
 
 ### `Deprecated`
