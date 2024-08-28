@@ -122,7 +122,7 @@ def download_references(file, reference, out_dir):
             ref_query = f"{assembly_accession}_{asm_name}"
 
             # Check if ref_query matches the search value
-            if ref_query == top_reference:
+            if top_reference in ref_query:
                 # make url  # Append the 20th element of the row to the URL list:
                 assembly_url = row[19] + "/" + ref_query
                 dir_url.append(assembly_url)
