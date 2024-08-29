@@ -96,7 +96,7 @@ workflow BACASS {
     ch_input
         .shortreads
         .filter{ it != null }
-        .set { ch_shortreads_cat }
+        .set { ch_shortreads }
     ch_input
         .longreads
         .filter{ it != null }
