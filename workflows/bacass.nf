@@ -113,19 +113,19 @@ workflow BACASS {
         .branch{
             meta, fastqs ->
                 single: fastqs.size() == 1
-                    return [meta, fastqs.flatten() ]
+                    return [ meta, fastqs.flatten() ]
                 multiple: fastqs.size() > 1
-                    return [meta, fastqs.flatten() ]
+                    return [ meta, fastqs.flatten() ]
         }
-        .set { ch_shortreads_cat }
+        .set { ch_shortreads_fastqs }
 
-    CAT_FASTQ (
-        ch_shortreads_cat.multiple
-    )
-    .reads
-    .mix( ch_shortreads_cat.single )
-    .set { ch_shortreads }
-    ch_versions = ch_versions.mix(CAT_FASTQ.out.versions.first().ifEmpty(null))
+        CAT_FASTQ (
+            ch_shortreads_fastqs.multiple
+        )
+        .reads
+        .mix( ch_shortreads_fastqs.single )
+        .set { ch_shortreads_concat }
+        ch_versions = ch_versions.mix(CAT_FASTQ.out.versions)
 
     //
     // SUBWORKFLOW: Short reads QC and trim adapters
@@ -135,7 +135,7 @@ workflow BACASS {
     ch_fastp_json_multiqc = Channel.empty()
     if (params.assembly_type != 'long'){
         FASTQ_TRIM_FASTP_FASTQC (
-        ch_shortreads,
+        ch_shortreads_concat,
         [],
         params.save_trimmed_fail,
         [],
