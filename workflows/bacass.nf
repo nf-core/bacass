@@ -20,7 +20,7 @@ include { MULTIQC_CUSTOM            } from '../modules/local/multiqc_custom'
 // MODULE: Installed directly from nf-core/modules
 //
 include { FASTQC                 } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
+include { CAT_FASTQ                             } from '../modules/nf-core/cat/fastq'
 include { NANOPLOT                              } from '../modules/nf-core/nanoplot/main'
 include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop/main'
 include { CANU                                  } from '../modules/nf-core/canu/main'
@@ -77,21 +77,18 @@ workflow BACASS {
     main:
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
+
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
     def criteria = multiMapCriteria {
-        meta, fastq_1, fastq_2, long_fastq, fast5 ->
-            shortreads: fastq_1     != 'NA' ? tuple(meta, [file(fastq_1, checkIfExists: true), file(fastq_2, checkIfExists: true)]) : null
-            longreads: long_fastq   != 'NA' ? tuple(meta, file(long_fastq, checkIfExists: true)) : null
-            fast5: fast5            != 'NA' ? tuple(meta, file(fast5, checkIfExists: true)) : null
+        meta, fastqs, long_fastq, fast5 ->
+            shortreads: meta.single_end != 'NA' ? tuple(meta, fastqs) : null
+            longreads: long_fastq       != 'NA' ? tuple(meta,long_fastq) : null
+            fast5: fast5                != 'NA' ? tuple(meta, fast5) : null
     }
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     ch_samplesheet
-        .map {
-            meta, fastqs, long_fastq, fast5 ->
-            return [meta, fastqs[0], fastqs[1], long_fastq[0], fast5[0]]
-        }
         .multiMap (criteria)
         .set { ch_input }
 
@@ -99,7 +96,7 @@ workflow BACASS {
     ch_input
         .shortreads
         .filter{ it != null }
-        .set { ch_shortreads }
+        .set { ch_shortreads_cat }
     ch_input
         .longreads
         .filter{ it != null }
@@ -108,6 +105,27 @@ workflow BACASS {
         .fast5
         .filter{ it != null }
         .set { ch_fast5 }
+
+    //
+    // MODULE: Concatenate FastQ files from same sample if required (shortreads)
+    //
+    ch_shortreads
+        .branch{
+            meta, fastqs ->
+                single: fastqs.size() == 1
+                    return [meta, fastqs.flatten() ]
+                multiple: fastqs.size() > 1
+                    return [meta, fastqs.flatten() ]
+        }
+        .set { ch_shortreads_cat }
+
+    CAT_FASTQ (
+        ch_shortreads_cat.multiple
+    )
+    .reads
+    .mix( ch_shortreads_cat.single )
+    .set { ch_shortreads }
+    ch_versions = ch_versions.mix(CAT_FASTQ.out.versions.first().ifEmpty(null))
 
     //
     // SUBWORKFLOW: Short reads QC and trim adapters

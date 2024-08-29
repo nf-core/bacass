@@ -20,6 +20,11 @@
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
+                    "cat/fastq": {
+                        "branch": "master",
+                        "git_sha": "1ceaa8ba4d0fd886dbca0e545815d905b7407de7",
+                        "installed_by": ["modules"]
+                    },
                     "dragonflye": {
                         "branch": "master",
                         "git_sha": "a3ae45e99f68e513b0feb8d5f27e2fdd0d0f083d",

@@ -10,7 +10,7 @@
             "ID": {
                 "type": "string",
                 "pattern": "^\\S+$",
-                "unique": true,
+                "unique": false,
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
                 "meta": ["id"]
             },
