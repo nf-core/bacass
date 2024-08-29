@@ -83,7 +83,7 @@
                 },
                 "kmerfinderdb": {
                     "type": "string",
-                    "description": "Path to the Kmerfinder bacteria database. For more details, see [Kmerfinder Databases](https://bitbucket.org/genomicepidemiology/kmerfinder_db/src/master/). You can also download precomputed Kmerfinder database (dated 2019/01/08) from https://zenodo.org/records/10458361/files/20190108_kmerfinder_stable_dirs.tar.gz "
+                    "description": "Path to the Kmerfinder bacteria database. For more details, see [Kmerfinder Databases](https://bitbucket.org/genomicepidemiology/kmerfinder_db/src/master/). You can also download precomputed Kmerfinder database (dated 2019/01/08) from https://zenodo.org/records/13447056/files/20190108_kmerfinder_stable_dirs.tar.gz"
                 },
                 "reference_fasta": {
                     "type": "string",
@@ -95,7 +95,7 @@
                 },
                 "ncbi_assembly_metadata": {
                     "type": "string",
-                    "description": "Master file (*.txt) containing a summary of assemblies available in GeneBank or RefSeq. See: https://ftp.ncbi.nlm.nih.gov/genomes/README_assembly_summary.txt"
+                    "description": "Master file (*.txt) containing a summary of assemblies available in GeneBank or RefSeq. See: https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_refseq.txt"
                 }
             }
         },
