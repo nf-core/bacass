@@ -33,7 +33,8 @@ workflow KMERFINDER_SUBWORKFLOW {
         .set{ ch_to_kmerfinder }
 
     KMERFINDER (
-        ch_to_kmerfinder
+        ch_to_kmerfinder,    // Channel: [ meta, reads, path_to_kmerfinderdb ]
+        'bacteria'           // Val: 'tax_group'
     )
     ch_kmerfinder_report    = KMERFINDER.out.report
     ch_kmerfinder_json      = KMERFINDER.out.json
