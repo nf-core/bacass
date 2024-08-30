@@ -19,17 +19,16 @@ process KMERFINDER {
     script:
     def prefix   = task.ext.prefix ?: "${meta.id}"
     def in_reads = reads[0] && reads[1] ? "${reads[0]} ${reads[1]}" : "${reads}"
-    def dbpath_file = file("${kmerfinder_db}/bacteria/bacteria.ATG").exists() ?: "${kmerfinder_db}/bacteria/bacteria.ATG"
-    def tax_file = file("${kmerfinder_db}/bacteria/bacteria.name").exists() ? "${kmerfinder_db}/bacteria/bacteria.name" : "${kmerfinder_db}/bacteria/bacteria.tax"
+    def db_atg = "${kmerfinderdb_path}/${tax_group}.ATG"
+    def db_tax = file("${kmerfinderdb_path}/${tax_group}.name").exists() ? "${kmerfinderdb_path}/${tax_group}.name" : "${kmerfinderdb_path}/${tax_group}.tax"
     // WARNING: Ensure to update software version in this line if you modify the container/environment.
     def kmerfinder_version = "3.0.2"
-    def kmerfinderdb_version = "20190108"
     """
     kmerfinder.py \\
         --infile $in_reads \\
         --output_folder . \\
-        --db_path $dbpath_file \\
-        -tax $tax_file \\
+        --db_path $db_atg \\
+        -tax $db_tax \\
         -x
 
     mv results.txt ${prefix}_results.txt
@@ -38,7 +37,6 @@ process KMERFINDER {
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         kmerfinder: \$(echo "${kmerfinder_version}")
-        kmerfinderdb: \$(echo "${kmerfinderdb_version}")
     END_VERSIONS
     """
 }
