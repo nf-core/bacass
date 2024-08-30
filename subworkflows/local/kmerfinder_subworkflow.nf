@@ -2,8 +2,8 @@
 // Kmerfinder subworkflow for species identification & QC
 //
 include { UNTAR                     } from '../../modules/nf-core/untar/main'
-include { KMERFINDER                } from '../../modules/local/kmerfinder'
-include { KMERFINDER_SUMMARY        } from '../../modules/local/kmerfinder_summary'
+include { KMERFINDER                } from '../../modules/local/kmerfinder/main'
+include { KMERFINDER_SUMMARY        } from '../../modules/local/kmerfinder_summary/main'
 include { FIND_DOWNLOAD_REFERENCE   } from '../../modules/local/find_download_reference'
 
 workflow KMERFINDER_SUBWORKFLOW {

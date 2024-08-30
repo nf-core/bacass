@@ -1,6 +1,6 @@
 process KMERFINDER {
     tag "$meta.id"
-    label 'process_high'
+    label 'process_medium'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/kmerfinder:3.0.2--hdfd78af_0' :

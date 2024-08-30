@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- [#159](https://github.com/nf-core/bacass/pull/159) Updated Kmerfinder module and increased memory.
 - [#150](https://github.com/nf-core/bacass/pull/150) Replace local unicycler module with nf-core module + bump version
 
 ### `Added`
