@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#160](https://github.com/nf-core/bacass/pull/160) Fixed memory issues in KmerFinder, fixed handling of no species detected, and fixed handling of empty fasta files in the prokka/bakkta channel.
 - [#157](https://github.com/nf-core/bacass/pull/157) Fixed corrupted zenodo URL of Kmerfinder database.
 - [#154](https://github.com/nf-core/bacass/pull/154) Fixed kmerfinder script and increase resources to prevent memory issues.
 - [#153](https://github.com/nf-core/bacass/pull/153) Update `.nf-core.yml` to fix files_unchanged section for accurate linting checks.
