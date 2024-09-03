@@ -53,7 +53,9 @@ workflow KMERFINDER_SUBWORKFLOW {
         .join(consensus, by:0)
         .map{
             meta, report_json, report_txt, fasta ->
-                specie = report_json.splitJson(path:"kmerfinder.results.species_hits").value.get(0)["Species"]
+                species_hits = report_json.splitJson(path:"kmerfinder.results.species_hits").value
+                def specie = species_hits.size() > 0 ? species_hits.get(0)["Species"] : "Unknown Species"
+
                 return tuple(specie, meta, report_txt, fasta)
         }
         .groupTuple(by:0) // Group by the "Species" field
@@ -61,7 +63,9 @@ workflow KMERFINDER_SUBWORKFLOW {
 
     // SUBWORKFLOW: For each species target, this subworkflow collects reference genome assemblies ('GCF*') and subsequently downloads the best matching reference assembly.
     FIND_DOWNLOAD_REFERENCE (
-        ch_reports_byreference.map{ specie, meta, report_txt, fasta-> tuple(specie, report_txt) },
+        ch_reports_byreference
+            .map{ specie, meta, report_txt, fasta-> tuple(specie, report_txt) }
+            .filter{ specie, report_txt -> specie != "Unknown Species" },
         ch_ncbi_assembly_metadata
     )
     ch_versions = ch_versions.mix(FIND_DOWNLOAD_REFERENCE.out.versions)
