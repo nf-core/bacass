@@ -460,7 +460,7 @@ workflow BACASS {
         ch_versions     = ch_versions.mix( GUNZIP.out.versions )
 
         PROKKA (
-            ch_to_prokka,
+            ch_to_prokka.filter{ meta, fasta -> !fasta.isEmpty() },
             [],
             []
         )
@@ -479,7 +479,7 @@ workflow BACASS {
         ch_versions     = ch_versions.mix( GUNZIP.out.versions )
 
         BAKTA_DBDOWNLOAD_RUN (
-            ch_to_bakta,
+            ch_to_bakta.filter{ meta, fasta -> !fasta.isEmpty() },
             params.baktadb,
             params.baktadb_download
         )
