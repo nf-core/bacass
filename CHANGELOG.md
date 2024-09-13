@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#166](https://github.com/nf-core/bacass/pull/166) Added FastQC after-trimming section to MultiQC report.
+
 ### `Fixed`
 
 - [#163](https://github.com/nf-core/bacass/pull/163) Fixed `params.save_merged` to properly save merged files.
