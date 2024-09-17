@@ -133,7 +133,7 @@ workflow BACASS {
         ch_shortreads,
         [],
         params.save_trimmed_fail,
-        params.save_merged,
+        [],
         params.skip_fastp,
         params.skip_fastqc
         )

@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- [#167](https://github.com/nf-core/bacass/pull/167) Remove params.save_merged as merged reads are not used in downstream analysis.
 - [#159](https://github.com/nf-core/bacass/pull/159) Updated Kmerfinder module and increased memory.
-- [#150](https://github.com/nf-core/bacass/pull/150) Replace local unicycler module with nf-core module + bump version
+- [#150](https://github.com/nf-core/bacass/pull/150) Replace local unicycler module with nf-core module + bump version.
 
 ### `Added`
 

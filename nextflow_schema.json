@@ -54,10 +54,6 @@
                     "type": "boolean",
                     "description": "save files that failed to pass trimming thresholds ending in `*.fail.fastq.gz`"
                 },
-                "save_merged": {
-                    "type": "boolean",
-                    "description": "save all merged reads to the a file ending in `*.merged.fastq.gz`. This option enables read merging and saves all merged reads to a file ending in `*.merged.fastq.gz`; these reads will be won't be  passed to the assembly process."
-                },
                 "skip_fastqc": {
                     "type": "boolean",
                     "description": "Skip FastQC"
