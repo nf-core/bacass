@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#168](https://github.com/nf-core/bacass/pull/168) Fix wrong metadata in canu input channel.
 - [#163](https://github.com/nf-core/bacass/pull/163) Fixed `params.save_merged` to properly save merged files.
 - [#160](https://github.com/nf-core/bacass/pull/160) Fixed memory issues in KmerFinder, fixed handling of no species detected, and fixed handling of empty fasta files in the prokka/bakkta channel.
 - [#157](https://github.com/nf-core/bacass/pull/157) Fixed corrupted zenodo URL of Kmerfinder database.
