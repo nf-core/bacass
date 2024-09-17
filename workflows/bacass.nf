@@ -231,7 +231,7 @@ workflow BACASS {
         CANU (
             ch_for_assembly.map { meta, reads, lr -> tuple( meta, lr ) },
             params.canu_mode,
-            ch_for_assembly.map { meta, reads, lr -> meta.genome_size }
+            ch_for_assembly.map { meta, reads, lr -> meta.gsize }
         )
         ch_assembly = ch_assembly.mix( CANU.out.assembly.dump(tag: 'canu') )
         ch_versions = ch_versions.mix(CANU.out.versions)
