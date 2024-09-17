@@ -302,8 +302,8 @@ workflow BACASS {
             .set { ch_for_polish }
 
         MINIMAP2_POLISH (
-            ch_for_polish.map { meta, sr, lr, fasta -> tuple(meta, lr)  },
-            ch_for_polish.map { meta, sr, lr, fasta -> fasta  },
+            ch_for_polish.map { meta, sr, lr, fasta -> tuple(meta, lr) },
+            ch_for_polish.map { meta, sr, lr, fasta -> tuple(meta, fasta) },
             true,
             false,
             false
