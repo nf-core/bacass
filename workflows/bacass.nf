@@ -127,7 +127,7 @@ workflow BACASS {
     //
     ch_fastqc_raw_multiqc = Channel.empty()
     ch_fastqc_trim_multiqc = Channel.empty()
-    ch_trim_json_multiqc = Channel.empty()
+    ch_fastp_json_multiqc = Channel.empty()
     if (params.assembly_type != 'long'){
         FASTQ_TRIM_FASTP_FASTQC (
         ch_shortreads,
@@ -139,7 +139,7 @@ workflow BACASS {
         )
         ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
         ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
-        ch_trim_json_multiqc    = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
+        ch_fastp_json_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
         ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions)
     }
 
@@ -527,7 +527,8 @@ workflow BACASS {
         ch_multiqc_custom_methods_description.ifEmpty([]),
         ch_collated_versions.ifEmpty([]),
         ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]),
-        ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_fastqc_trim_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_fastp_json_multiqc.collect{it[1]}.ifEmpty([]),
         ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]),
         ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]),
         ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),

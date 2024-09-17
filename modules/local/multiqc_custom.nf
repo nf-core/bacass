@@ -14,6 +14,7 @@ process MULTIQC_CUSTOM {
     path methods_description
     path software_versions
     path ('fastqc/*')
+    path ('fastqc_trim/*')
     path ('fastp/*')
     path ('nanoplot/*')
     path ('porechop/*')
