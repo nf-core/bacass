@@ -240,7 +240,7 @@ workflow BACASS {
     //
     // MODULE: Miniasm, genome assembly, long reads
     //
-    if ( params.assembler == 'miniasm' ) {
+    if ( params.assembly_type != 'short' && params.assembler == 'miniasm' ) {
         MINIMAP2_ALIGN (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
             [[:],[]],
@@ -280,6 +280,8 @@ workflow BACASS {
         )
         ch_assembly = ch_assembly.mix( RACON.out.improved_assembly.dump(tag: 'miniasm') )
         ch_versions = ch_versions.mix( RACON.out.versions )
+    } else if (params.assembly_type == 'short' && params.assembler == 'miniasm') {
+        exit("Selected assembler ${params.assembler} cannot run on short reads")
     }
 
     //
