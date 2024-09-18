@@ -294,51 +294,64 @@ workflow BACASS {
     }
 
     //
-    // MODULE: Nanopolish, polishes assembly using FAST5 files - should take either miniasm, canu, or unicycler consensus sequence
+    // SUBWORKFLOW: Long reads polishing. Uses medaka or Nanopolish (this last requires Fast5 files available in input samplesheet).
     //
-    if ( !params.skip_polish && params.assembly_type == 'long' && params.polish_method != 'medaka' ) {
+    if ( (params.assembly_type != 'short' && !params.skip_polish) || ( params.assembly_type != 'short' && params.polish_method) ){
+        // Set channel for polishing long reads
         ch_for_assembly
             .join( ch_assembly )
-            .set { ch_for_polish }
-
-        MINIMAP2_POLISH (
-            ch_for_polish.map { meta, sr, lr, fasta -> tuple(meta, lr) },
-            ch_for_polish.map { meta, sr, lr, fasta -> tuple(meta, fasta) },
-            true,
-            false,
-            false
-        )
-        ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions)
-
-        SAMTOOLS_INDEX (
-            MINIMAP2_POLISH.out.bam.dump(tag: 'samtools_sort')
-        )
-        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
-
-        ch_for_polish    // tuple val(meta), val(reads), file(longreads), file(assembly)
-            .join( MINIMAP2_POLISH.out.bam )    // tuple val(meta), file(bam)
-            .join( SAMTOOLS_INDEX.out.bai )     // tuple  val(meta), file(bai)
-            .join( ch_fast5 )                   // tuple val(meta), file(fast5)
-            .set { ch_for_nanopolish }          // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
-
-        // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
-        NANOPOLISH (
-            ch_for_nanopolish.dump(tag: 'into_nanopolish')
-        )
-        ch_versions = ch_versions.mix(NANOPOLISH.out.versions)
-    }
-
-    //
-    // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
-    //
-    if ( !params.skip_polish && params.assembly_type == 'long' && params.polish_method == 'medaka' ) {
-        ch_for_assembly
-            .join( ch_assembly )
-            .map { meta, sr, lr, assembly -> tuple(meta, lr, assembly) }
-            .set { ch_for_medaka }
-
-        MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
-        ch_versions = ch_versions.mix(MEDAKA.out.versions)
+            .set { ch_polish_long } // channel: [ val(meta), path(sr), path(lr), path(fasta) ]
+        if (params.polish_method == 'medaka'){
+            //
+            // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
+            //
+            ch_polish_long
+                .map { meta, sr, lr, fasta -> tuple(meta, lr, fasta) }
+                .set { ch_for_medaka }
+            MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
+            ch_assembly = ch_assembly.mix( MEDAKA.out.assembly )
+            ch_versions = ch_versions.mix(MEDAKA.out.versions)
+        } else if (params.polish_method == 'nanopolish') {
+            //
+            // MODULE: Nanopolish, polishes assembly using FAST5 files
+            //
+            if (!ch_fast5){
+                log.error "ERROR: FAST5 files are required for Nanopolish but none were provided. Please supply FAST5 files or choose another polishing method. Available options are: medaka, nanopolish"
+            } else {
+                //
+                // MODULE: Minimap2 polish
+                //
+                MINIMAP2_POLISH (
+                    ch_polish_long.map { meta, sr, lr, fasta -> tuple(meta, lr) },
+                    ch_polish_long.map { meta, sr, lr, fasta -> tuple(meta, fasta) },
+                    true,
+                    false,
+                    false
+                )
+                ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions)
+                //
+                // MODULE: Samtools index
+                //
+                SAMTOOLS_INDEX (
+                    MINIMAP2_POLISH.out.bam.dump(tag: 'samtools_sort')
+                )
+                ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
+                //
+                // MODULE: Nanopolish
+                //
+                ch_polish_long                         // tuple val(meta), val(reads), file(longreads), file(assembly)
+                    .join( MINIMAP2_POLISH.out.bam )  // tuple val(meta), file(bam)
+                    .join( SAMTOOLS_INDEX.out.bai )   // tuple  val(meta), file(bai)
+                    .join( ch_fast5 )                 // tuple val(meta), file(fast5)
+                    .set { ch_for_nanopolish }        // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
+                // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
+                NANOPOLISH (
+                    ch_for_nanopolish.dump(tag: 'into_nanopolish')
+                )
+                ch_assembly = ch_assembly.mix( NANOPOLISH.out.assembly )
+                ch_versions = ch_versions.mix( NANOPOLISH.out.versions )
+            }
+        }
     }
 
     //
