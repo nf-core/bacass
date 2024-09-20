@@ -298,7 +298,7 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Long reads polishing. Uses medaka or Nanopolish (this last requires Fast5 files available in input samplesheet).
     //
-    if ( (params.assembly_type != 'short' && !params.skip_polish) || ( params.assembly_type != 'short' && params.polish_method) ){
+    if ( (params.assembly_type == 'long' && !params.skip_polish) || ( params.assembly_type != 'short' && params.polish_method) ){
         // Set channel for polishing long reads
         ch_for_assembly
             .join( ch_assembly )
