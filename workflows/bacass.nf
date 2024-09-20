@@ -302,16 +302,14 @@ workflow BACASS {
         // Set channel for polishing long reads
         ch_for_assembly
             .join( ch_assembly )
-            .set { ch_polish_long } // channel: [ val(meta), path(sr), path(lr), path(fasta) ]
+            .map { meta, sr, lr, fasta -> tuple(meta, lr, fasta) }
+            .set { ch_polish_long } // channel: [ val(meta), path(lr), path(fasta) ]
         if (params.polish_method == 'medaka'){
             //
             // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
             //
-            ch_polish_long
-                .map { meta, sr, lr, fasta -> tuple(meta, lr, fasta) }
-                .set { ch_for_medaka }
-            MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
-            ch_assembly = ch_assembly.mix( MEDAKA.out.assembly )
+            MEDAKA ( ch_polish_long )
+            ch_assembly = MEDAKA.out.assembly
             ch_versions = ch_versions.mix(MEDAKA.out.versions)
         } else if (params.polish_method == 'nanopolish') {
             //
@@ -324,8 +322,8 @@ workflow BACASS {
                 // MODULE: Minimap2 polish
                 //
                 MINIMAP2_POLISH (
-                    ch_polish_long.map { meta, sr, lr, fasta -> tuple(meta, lr) },
-                    ch_polish_long.map { meta, sr, lr, fasta -> tuple(meta, fasta) },
+                    ch_polish_long.map { meta, lr, fasta -> tuple(meta, lr) },
+                    ch_polish_long.map { meta, lr, fasta -> tuple(meta, fasta) },
                     true,
                     false,
                     false
@@ -350,7 +348,7 @@ workflow BACASS {
                 NANOPOLISH (
                     ch_for_nanopolish.dump(tag: 'into_nanopolish')
                 )
-                ch_assembly = ch_assembly.mix( NANOPOLISH.out.assembly )
+                ch_assembly = NANOPOLISH.out.assembly
                 ch_versions = ch_versions.mix( NANOPOLISH.out.versions )
             }
         }
