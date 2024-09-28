@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- [#169](https://github.com/nf-core/bacass/pull/169) Refactored long-reads polishing step.
 - [#167](https://github.com/nf-core/bacass/pull/167) Remove params.save_merged as merged reads are not used in downstream analysis.
 - [#159](https://github.com/nf-core/bacass/pull/159) Updated Kmerfinder module and increased memory.
 - [#150](https://github.com/nf-core/bacass/pull/150) Replace local unicycler module with nf-core module + bump version.
@@ -17,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#169](https://github.com/nf-core/bacass/pull/169) Fixed long reads polishing input channel.
 - [#168](https://github.com/nf-core/bacass/pull/168) Fix wrong metadata in canu input channel.
 - [#163](https://github.com/nf-core/bacass/pull/163) Fixed `params.save_merged` to properly save merged files.
 - [#160](https://github.com/nf-core/bacass/pull/160) Fixed memory issues in KmerFinder, fixed handling of no species detected, and fixed handling of empty fasta files in the prokka/bakkta channel.
