@@ -52,7 +52,6 @@ workflow FASTQ_TRIM_FASTP_FASTQC {
         FASTP (
             ch_reads,
             ch_adapter_fasta,
-            false,
             val_save_trimmed_fail,
             val_save_merged
         )
