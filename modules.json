@@ -5,20 +5,117 @@
         "https://github.com/nf-core/modules.git": {
             "modules": {
                 "nf-core": {
+                    "bakta/bakta": {
+                        "branch": "master",
+                        "git_sha": "9d0f89b445e1f5b2fb30476f4be9a8b519c07846",
+                        "installed_by": ["modules"]
+                    },
+                    "bakta/baktadbdownload": {
+                        "branch": "master",
+                        "git_sha": "7c06e6820fa3918bc28a040e794f8a2b39fabadb",
+                        "installed_by": ["modules"]
+                    },
+                    "canu": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "dragonflye": {
+                        "branch": "master",
+                        "git_sha": "a3ae45e99f68e513b0feb8d5f27e2fdd0d0f083d",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/dragonflye/dragonflye.diff"
+                    },
+                    "fastp": {
+                        "branch": "master",
+                        "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "installed_by": ["fastq_trim_fastp_fastqc"]
+                    },
                     "fastqc": {
                         "branch": "master",
                         "git_sha": "666652151335353eef2fcd58880bcef5bc2928e1",
+                        "installed_by": ["fastq_trim_fastp_fastqc"]
+                    },
+                    "gunzip": {
+                        "branch": "master",
+                        "git_sha": "3a5fef109d113b4997c9822198664ca5f2716208",
+                        "installed_by": ["modules"]
+                    },
+                    "kraken2/kraken2": {
+                        "branch": "master",
+                        "git_sha": "653218e79ffa76fde20319e9062f8b8da5cf7555",
+                        "installed_by": ["modules"]
+                    },
+                    "miniasm": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "minimap2/align": {
+                        "branch": "master",
+                        "git_sha": "2c2d1cf80866dbd6dd0ea5d61ddd59533a72d41e",
                         "installed_by": ["modules"]
                     },
                     "multiqc": {
                         "branch": "master",
                         "git_sha": "cf17ca47590cc578dfb47db1c2a44ef86f89976d",
                         "installed_by": ["modules"]
+                    },
+                    "nanoplot": {
+                        "branch": "master",
+                        "git_sha": "a31407dfaf0cb0d04768d5cb439fc6f4523a6981",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/nanoplot/nanoplot.diff"
+                    },
+                    "porechop/porechop": {
+                        "branch": "master",
+                        "git_sha": "1d68c7f248d1a480c5959548a9234602b771199e",
+                        "installed_by": ["modules"]
+                    },
+                    "prokka": {
+                        "branch": "master",
+                        "git_sha": "49ebda931c36c2b282f7958d00e1236b751f1031",
+                        "installed_by": ["modules"]
+                    },
+                    "quast": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "racon": {
+                        "branch": "master",
+                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "samtools/index": {
+                        "branch": "master",
+                        "git_sha": "f4596fe0bdc096cf53ec4497e83defdb3a94ff62",
+                        "installed_by": ["modules"]
+                    },
+                    "samtools/sort": {
+                        "branch": "master",
+                        "git_sha": "4352dbdb09ec40db71e9b172b97a01dcf5622c26",
+                        "installed_by": ["modules"]
+                    },
+                    "unicycler": {
+                        "branch": "master",
+                        "git_sha": "5f65b5398f3fe4b8d51d77ed90b0a8cd8c89bba7",
+                        "installed_by": ["modules"]
+                    },
+                    "untar": {
+                        "branch": "master",
+                        "git_sha": "5caf7640a9ef1d18d765d55339be751bb0969dfa",
+                        "installed_by": ["modules"]
                     }
                 }
             },
             "subworkflows": {
                 "nf-core": {
+                    "fastq_trim_fastp_fastqc": {
+                        "branch": "master",
+                        "git_sha": "e743b2dea725bcfc4b76a209981808987332013a",
+                        "installed_by": ["subworkflows"]
+                    },
                     "utils_nextflow_pipeline": {
                         "branch": "master",
                         "git_sha": "3aa0aec1d52d492fe241919f0c6100ebf0074082",

@@ -1,5 +1,7 @@
+name: quast
 channels:
   - conda-forge
   - bioconda
+  - defaults
 dependencies:
-  - bioconda::multiqc=1.25.1
+  - bioconda::quast=5.2.0

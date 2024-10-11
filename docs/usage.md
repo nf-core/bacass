@@ -6,58 +6,44 @@
 
 ## Introduction
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
-
-## Samplesheet input
-
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
 ```
 
-### Multiple runs of the same sample
+### Samplesheet
 
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
+The samplesheet must have 6 columns defined in the table below.
 
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
+A final samplesheet file consisting of short read, long reads, or short and long reads. This is for 3 samples.
+
+```console
+ID    R1    R2    LongFastQ    Fast5    GenomeSize
+shortreads    ./data/S1_R1.fastq.gz    ./data/S1_R2.fastq.gz    NA    NA    NA
+longreads    NA    NA    ./data/S1_long_fastq.gz    ./data/FAST5    2.8m
+shortNlong    ./data/S1_R1.fastq.gz    ./data/S1_R2.fastq.gz    ./data/S1_long_fastq.gz    ./data/FAST5    2.8m
 ```
 
-### Full samplesheet
+> **NB:** `./data/FAST5` points at a folder containing all (i.e. one or mutiple) fast5 files that correspond to the long reads. `NA` indicates that the file is missing.
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
+| Column       | Description                                                                                                                                                                 |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sample`     | Custom sample name. May not contain spaces.                                                                                                                                 |
+| `R1`         | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.         |
+| `R2`         | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.         |
+| `LongFastQ`  | Full path to FastQ file for ONT long reads. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.                 |
+| `Fast5`      | Full path to a folder containing Fast5 file(s) for ONT long reads. `NA` indicates that there are no Fast5 files available.                                                  |
+| `GenomeSize` | Expected genome size. For example, `2.8m` means 2.8 million basepairs genome size expected. This is only used by Canu assembler. `NA` indicates that this value is unknown. |
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
-
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
-```
-
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+An [example samplesheet](../assets/samplesheet.tsv) has been provided with the pipeline.
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
-```bash
-nextflow run nf-core/bacass --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+```console
+nextflow run nf-core/bacass --input samplesheet.tsv -profile docker --skip_kraken2
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -88,9 +74,8 @@ nextflow run nf-core/bacass -profile docker -params-file params.yaml
 with:
 
 ```yaml title="params.yaml"
-input: './samplesheet.csv'
+input: './samplesheet.tsv'
 outdir: './results/'
-genome: 'GRCh37'
 <...>
 ```
 

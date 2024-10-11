@@ -1,0 +1,7 @@
+name: dfast
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bioconda::dfast=1.2.20

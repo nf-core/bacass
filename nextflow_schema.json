@@ -15,13 +15,12 @@
                 "input": {
                     "type": "string",
                     "format": "file-path",
-                    "exists": true,
+                    "exist": true,
                     "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/bacass/usage#samplesheet-input).",
-                    "fa_icon": "fas fa-file-csv"
+                    "description": "Path to tab-separated sample sheet",
+                    "help_text": "Path to sample sheet, either tab-separated (.tsv), comma-separated (.csv), or in YAML format (.yml/.yaml), that points to compressed fastq files.\n\nThe sample sheet must have six tab-separated columns/entries with the following headers: \n- `ID` (required): Unique sample IDs, must start with a letter, and can only contain letters, numbers or underscores\n- `R1` (optional): Paths to (forward) reads zipped FastQ files\n- `R2` (optional): Paths to reverse reads zipped FastQ files, required if the data is paired-end\n- `LongFastQ` (optional): Paths to long reads zipped FastQ files\n- `Fast5` (optional): Paths to the directory containing FAST5 files\n- `GenomeSize` (optional): A number (including decimals) ending with 'm', representing genome size.\n\n Please be aware that files will be required based on the chosen assembly type specified with the '--assembly_type' option, which can be set to one of the following values: ['short', 'long', 'hybrid'].`",
+                    "fa_icon": "fas fa-dna"
                 },
                 "outdir": {
                     "type": "string",
@@ -35,50 +34,206 @@
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
-                },
-                "multiqc_title": {
-                    "type": "string",
-                    "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
-                    "fa_icon": "fas fa-file-signature"
                 }
             }
         },
-        "reference_genome_options": {
-            "title": "Reference genome options",
+        "qc_and_trim": {
+            "title": "QC and Trim",
             "type": "object",
-            "fa_icon": "fas fa-dna",
-            "description": "Reference genome related files and options required for the workflow.",
+            "description": "Parameters for QC and trim short-reads",
+            "default": "",
             "properties": {
-                "genome": {
+                "fastp_args": {
                     "type": "string",
-                    "description": "Name of iGenomes reference.",
-                    "fa_icon": "fas fa-book",
-                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`. \n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
+                    "description": "This can be used to pass arguments to [Fastp](https://github.com/OpenGene/fastp)"
                 },
-                "fasta": {
-                    "type": "string",
-                    "format": "file-path",
-                    "exists": true,
-                    "mimetype": "text/plain",
-                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
-                    "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
-                    "fa_icon": "far fa-file-code"
-                },
-                "igenomes_ignore": {
+                "save_trimmed": {
                     "type": "boolean",
-                    "description": "Do not load the iGenomes reference config.",
-                    "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                    "description": "save trimmed files"
                 },
-                "igenomes_base": {
+                "save_trimmed_fail": {
+                    "type": "boolean",
+                    "description": "save files that failed to pass trimming thresholds ending in `*.fail.fastq.gz`"
+                },
+                "skip_fastqc": {
+                    "type": "boolean",
+                    "description": "Skip FastQC"
+                },
+                "skip_fastp": {
+                    "type": "boolean",
+                    "description": "Skip FastP"
+                }
+            }
+        },
+        "contamination_screening": {
+            "title": "Contamination Screening",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-box",
+            "properties": {
+                "kraken2db": {
                     "type": "string",
-                    "format": "directory-path",
-                    "description": "The base path to the igenomes reference files",
-                    "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "default": "s3://ngi-igenomes/igenomes/"
+                    "fa_icon": "fab fa-gitkraken",
+                    "help_text": "See [Kraken2 homepage](https://benlangmead.github.io/aws-indexes/k2) for download\nlinks. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for\nsample purity.",
+                    "description": "Path to Kraken2 database."
+                },
+                "kmerfinderdb": {
+                    "type": "string",
+                    "description": "Path to the Kmerfinder bacteria database (ie: '/path_to/kmerfinder/bacteria/ or '/path_to/kmerfinder/bacteria.tar.gz'). Only taxonomic group 'bacteria' is allowed. See database installation (guidelines)[https://bitbucket.org/genomicepidemiology/kmerfinder_db/src/master/] for details. The latest version can be downloaded from the KmerFinder Database FTP site  or directly during pipeline execution with. Example:\n\n```--kmerfinder_db 'ftp://ftp.cbs.dtu.dk/public/CGE/databases/KmerFinder/version/latest/bacteria.tar.gz'```\n(Note: Downloading the KmerFinder database (~30GB) via FTP can be time-consuming. It's recommended to pre-download the database and provide the *.tar.gz file using this parameter instead of URL site.).\nAn older version is available on (Zenodo)[https://zenodo.org/records/13447056/files/20190108_kmerfinder_stable_dirs.tar.gz]."
+                },
+                "reference_fasta": {
+                    "type": "string",
+                    "description": "Reference FASTA file."
+                },
+                "reference_gff": {
+                    "type": "string",
+                    "description": "Reference GFF file."
+                },
+                "ncbi_assembly_metadata": {
+                    "type": "string",
+                    "description": "Master file (*.txt) containing a summary of assemblies available in GeneBank or RefSeq. See: https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_refseq.txt"
+                }
+            }
+        },
+        "assembly_parameters": {
+            "title": "Assembly parameters",
+            "type": "object",
+            "description": "Parameters for the assembly",
+            "default": "",
+            "fa_icon": "fas fa-puzzle-piece",
+            "properties": {
+                "assembler": {
+                    "type": "string",
+                    "default": "unicycler",
+                    "fa_icon": "fas fa-puzzle-piece",
+                    "description": "The assembler to use for assembly. Use the appropriate assembler according to the chosen assembly_type. Refer to the README.md for further clarification.",
+                    "enum": ["unicycler", "canu", "miniasm", "dragonflye"]
+                },
+                "assembly_type": {
+                    "type": "string",
+                    "default": "short",
+                    "fa_icon": "fas fa-fingerprint",
+                    "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`.",
+                    "description": "Which type of assembly to perform.",
+                    "enum": ["short", "long", "hybrid"]
+                },
+                "unicycler_args": {
+                    "type": "string",
+                    "fa_icon": "fas fa-bicycle",
+                    "description": "Extra arguments for Unicycler",
+                    "help_text": "This advanced option allows you to pass extra arguments to Unicycler (e.g. `\"--mode conservative\"` or `\"--no_correct\"`). For this to work you need to quote the arguments and add at least one space."
+                },
+                "canu_mode": {
+                    "type": "string",
+                    "enum": ["-pacbio", "-nanopore", "-pacbio-hifi", "null"],
+                    "description": "Allowed technologies for long read assembly."
+                },
+                "canu_args": {
+                    "type": "string",
+                    "fa_icon": "fas fa-ship",
+                    "description": "This can be used to supply [extra options](https://canu.readthedocs.io/en/latest/quick-start.html) to the Canu assembler. Will be ignored when other assemblers are used."
+                },
+                "dragonflye_args": {
+                    "type": "string",
+                    "description": "Extra arguments for [Dragonflye](https://github.com/rpetit3/dragonflye#usage)",
+                    "help_text": "This advanced option allows you to add extra arguments to Dragonflye (e.g.: `\"--gsize 2.4m\"`). For those arguments with no values/options associated (e.g.: `\"--nopolish\"` or `\"--nofilter\"`...) you need to add an extra space at the begining of the input string to params.dragonflye_args. Example: `--params.dragonflye_args ' --nopolish'`"
+                }
+            }
+        },
+        "assembly_polishing": {
+            "title": "Assembly Polishing",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-user-astronaut",
+            "properties": {
+                "polish_method": {
+                    "type": "string",
+                    "default": "medaka",
+                    "fa_icon": "fas fa-hotdog",
+                    "description": "Which assembly polishing method to use.",
+                    "help_text": "Can be used to define which polishing method is used by default for long reads.",
+                    "enum": ["medaka", "nanopolish"]
+                }
+            }
+        },
+        "annotation": {
+            "title": "Annotation",
+            "type": "object",
+            "description": "Parameters for the annotation",
+            "default": "",
+            "fa_icon": "fas fa-align-left",
+            "properties": {
+                "annotation_tool": {
+                    "type": "string",
+                    "default": "prokka",
+                    "description": "The annotation method to annotate the final assembly.",
+                    "enum": ["prokka", "bakta", "dfast"]
+                },
+                "prokka_args": {
+                    "type": "string",
+                    "description": "Extra arguments for prokka annotation tool.",
+                    "help_text": "This advanced option allows you to pass extra arguments to Prokka (e.g. `\" --rfam\"` or `\" --genus name\"`). For this to work you need to quote the arguments and add at least one space between the arguments. Example:\n\n```bash\n--prokka_args `--rfam --genus Escherichia Coli`\n```\n"
+                },
+                "baktadb": {
+                    "type": "string",
+                    "description": "Path to Bakta database"
+                },
+                "baktadb_download": {
+                    "type": "boolean",
+                    "description": "Download Bakta database"
+                },
+                "baktadb_download_args": {
+                    "type": "string",
+                    "default": "--type light",
+                    "description": "This can be used to supply [extra options](https://github.com/oschwengers/bakta#database-download) to the Bakta download module",
+                    "enum": ["--type light", "--type full"]
+                },
+                "dfast_config": {
+                    "type": "string",
+                    "default": "assets/test_config_dfast.py",
+                    "description": "Specifies a configuration file for the [DFAST](https://github.com/nigyta/dfast_core) annotation method.",
+                    "help_text": "If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.  The default config (`assets/test_config_dfast.py`) is just included for testing, so if you want to annotate using DFAST, you have to create a config!"
+                }
+            }
+        },
+        "skipping_options": {
+            "title": "Skipping Options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-forward",
+            "properties": {
+                "skip_kraken2": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip running Kraken2 classifier on reads."
+                },
+                "skip_kmerfinder": {
+                    "type": "boolean",
+                    "description": "Skip contamination analysis with [Kmerfinder](https://bitbucket.org/genomicepidemiology/kmerfinder/src/master/)",
+                    "fa_icon": "fas fa-forward"
+                },
+                "skip_annotation": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip annotating the assembly with Prokka /DFAST."
+                },
+                "skip_pycoqc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip running `PycoQC` on long read input."
+                },
+                "skip_polish": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip polishing the long-read assembly with fast5 input. Will not affect short/hybrid assemblies."
+                },
+                "skip_multiqc": {
+                    "type": "boolean",
+                    "description": "Skip MultiQC",
+                    "fa_icon": "fas fa-forward"
                 }
             }
         },
@@ -137,6 +292,12 @@
             "description": "Less common options for the pipeline, typically set in a config file.",
             "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
             "properties": {
+                "help": {
+                    "type": "boolean",
+                    "description": "Display help text.",
+                    "fa_icon": "fas fa-question-circle",
+                    "hidden": true
+                },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
@@ -151,6 +312,11 @@
                     "fa_icon": "fas fa-copy",
                     "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
+                },
+                "multiqc_title": {
+                    "type": "string",
+                    "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
+                    "fa_icon": "fas fa-file-signature"
                 },
                 "email_on_fail": {
                     "type": "string",
@@ -212,6 +378,12 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
+                "schema_ignore_params": {
+                    "type": "string",
+                    "default": "modules,igenomes_base",
+                    "hidden": true,
+                    "description": "A comma separated string of inputs the schema validation should ignore"
+                },
                 "pipelines_testdata_base_path": {
                     "type": "string",
                     "fa_icon": "far fa-check-circle",
@@ -227,7 +399,22 @@
             "$ref": "#/$defs/input_output_options"
         },
         {
-            "$ref": "#/$defs/reference_genome_options"
+            "$ref": "#/$defs/qc_and_trim"
+        },
+        {
+            "$ref": "#/$defs/contamination_screening"
+        },
+        {
+            "$ref": "#/$defs/assembly_parameters"
+        },
+        {
+            "$ref": "#/$defs/assembly_polishing"
+        },
+        {
+            "$ref": "#/$defs/annotation"
+        },
+        {
+            "$ref": "#/$defs/skipping_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"
