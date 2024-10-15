@@ -16,6 +16,7 @@ template:
   name: bacass
   org: nf-core
   outdir: .
-  skip_features: null
+  skip_features: 
+    - igenomes
   version: 2.4.0dev
 update: null
