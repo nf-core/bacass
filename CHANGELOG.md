@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#176](https://github.com/nf-core/bacass/pull/176) Update nf-core/bacass to nf-core-tools v3.0.2 `TEMPLATE`.
 - [#166](https://github.com/nf-core/bacass/pull/166) Added FastQC after-trimming section to MultiQC report.
+- [#158](https://github.com/nf-core/bacass/pull/158) Support automatic concatenation of FastQ files for the same sample.
 
 ### `Fixed`
 
