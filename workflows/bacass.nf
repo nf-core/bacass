@@ -19,7 +19,7 @@ include { MULTIQC_CUSTOM            } from '../modules/local/multiqc_custom'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
+include { FASTQC                                } from '../modules/nf-core/fastqc/main'
 include { CAT_FASTQ                             } from '../modules/nf-core/cat/fastq'
 include { NANOPLOT                              } from '../modules/nf-core/nanoplot/main'
 include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop/main'
