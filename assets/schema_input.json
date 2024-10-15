@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/bacass/master/assets/schema_input.json",
     "title": "nf-core/bacass pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
@@ -52,7 +52,7 @@
                     },
                     {
                         "type": "string",
-                        "maxLength": 0
+                        "minLength": 0
                     }
                 ]
             },
@@ -61,13 +61,12 @@
                 "anyOf": [
                     {
                         "type": ["string", "null"],
-                        "format": "directory-path",
                         "exists": true,
                         "pattern": "^(\\/[\\S\\s]*|NA)$"
                     },
                     {
                         "type": "string",
-                        "maxLength": 0
+                        "minLength": 0
                     }
                 ]
             },

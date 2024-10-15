@@ -1,10 +1,10 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/bacass/master/nextflow_schema.json",
     "title": "nf-core/bacass pipeline parameters",
     "description": "Simple bacterial assembly and annotation",
     "type": "object",
-    "definitions": {
+    "$defs": {
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -14,12 +14,13 @@
             "properties": {
                 "input": {
                     "type": "string",
+                    "format": "file-path",
                     "exist": true,
-                    "mimetype": "text/tsv",
-                    "fa_icon": "fas fa-dna",
+                    "schema": "assets/schema_input.json",
+                    "mimetype": "text/csv",
                     "description": "Path to tab-separated sample sheet",
                     "help_text": "Path to sample sheet, either tab-separated (.tsv), comma-separated (.csv), or in YAML format (.yml/.yaml), that points to compressed fastq files.\n\nThe sample sheet must have six tab-separated columns/entries with the following headers: \n- `ID` (required): Unique sample IDs, must start with a letter, and can only contain letters, numbers or underscores\n- `R1` (optional): Paths to (forward) reads zipped FastQ files\n- `R2` (optional): Paths to reverse reads zipped FastQ files, required if the data is paired-end\n- `LongFastQ` (optional): Paths to long reads zipped FastQ files\n- `Fast5` (optional): Paths to the directory containing FAST5 files\n- `GenomeSize` (optional): A number (including decimals) ending with 'm', representing genome size.\n\n Please be aware that files will be required based on the chosen assembly type specified with the '--assembly_type' option, which can be set to one of the following values: ['short', 'long', 'hybrid'].`",
-                    "schema": "assets/schema_input.json"
+                    "fa_icon": "fas fa-dna"
                 },
                 "outdir": {
                     "type": "string",
@@ -284,41 +285,6 @@
                 }
             }
         },
-        "max_job_request_options": {
-            "title": "Max job request options",
-            "type": "object",
-            "fa_icon": "fab fa-acquisitions-incorporated",
-            "description": "Set the top limit for requested resources for any single job.",
-            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details.",
-            "properties": {
-                "max_cpus": {
-                    "type": "integer",
-                    "description": "Maximum number of CPUs that can be requested for any single job.",
-                    "default": 16,
-                    "fa_icon": "fas fa-microchip",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
-                },
-                "max_memory": {
-                    "type": "string",
-                    "description": "Maximum amount of memory that can be requested for any single job.",
-                    "default": "128.GB",
-                    "fa_icon": "fas fa-memory",
-                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
-                },
-                "max_time": {
-                    "type": "string",
-                    "description": "Maximum amount of time that can be requested for any single job.",
-                    "default": "240.h",
-                    "fa_icon": "far fa-clock",
-                    "pattern": "^(\\d+\\.?\\s*(s|m|h|d|day)\\s*)+$",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
-                }
-            }
-        },
         "generic_options": {
             "title": "Generic options",
             "type": "object",
@@ -412,27 +378,6 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "validationShowHiddenParams": {
-                    "type": "boolean",
-                    "fa_icon": "far fa-eye-slash",
-                    "description": "Show all params when using `--help`",
-                    "hidden": true,
-                    "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
-                },
-                "validationFailUnrecognisedParams": {
-                    "type": "boolean",
-                    "fa_icon": "far fa-check-circle",
-                    "description": "Validation of parameters fails when an unrecognised parameter is found.",
-                    "hidden": true,
-                    "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
-                },
-                "validationLenientMode": {
-                    "type": "boolean",
-                    "fa_icon": "far fa-check-circle",
-                    "description": "Validation of parameters in lenient more.",
-                    "hidden": true,
-                    "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
-                },
                 "schema_ignore_params": {
                     "type": "string",
                     "default": "modules,igenomes_base",
@@ -451,34 +396,31 @@
     },
     "allOf": [
         {
-            "$ref": "#/definitions/input_output_options"
+            "$ref": "#/$defs/input_output_options"
         },
         {
-            "$ref": "#/definitions/qc_and_trim"
+            "$ref": "#/$defs/qc_and_trim"
         },
         {
-            "$ref": "#/definitions/contamination_screening"
+            "$ref": "#/$defs/contamination_screening"
         },
         {
-            "$ref": "#/definitions/assembly_parameters"
+            "$ref": "#/$defs/assembly_parameters"
         },
         {
-            "$ref": "#/definitions/assembly_polishing"
+            "$ref": "#/$defs/assembly_polishing"
         },
         {
-            "$ref": "#/definitions/annotation"
+            "$ref": "#/$defs/annotation"
         },
         {
-            "$ref": "#/definitions/skipping_options"
+            "$ref": "#/$defs/skipping_options"
         },
         {
-            "$ref": "#/definitions/institutional_config_options"
+            "$ref": "#/$defs/institutional_config_options"
         },
         {
-            "$ref": "#/definitions/max_job_request_options"
-        },
-        {
-            "$ref": "#/definitions/generic_options"
+            "$ref": "#/$defs/generic_options"
         }
     ]
 }
