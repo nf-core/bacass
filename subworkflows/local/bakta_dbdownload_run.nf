@@ -47,7 +47,6 @@ workflow BAKTA_DBDOWNLOAD_RUN {
     ch_fasta
         .combine(ch_baktadb)
         .set{ ch_to_bakta }
-    ch_to_bakta.view()
     BAKTA_BAKTA (
         ch_to_bakta.map{ meta, fasta, bakta_db -> [meta, fasta] },
         ch_to_bakta.map{ meta, fasta, bakta_db -> bakta_db },
