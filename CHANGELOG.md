@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- [#180](https://github.com/nf-core/bacass/pull/180) Bump version 2.4.0.
 - [#169](https://github.com/nf-core/bacass/pull/169) Refactored long-reads polishing step.
 - [#167](https://github.com/nf-core/bacass/pull/167) Remove params.save_merged as merged reads are not used in downstream analysis.
 - [#159](https://github.com/nf-core/bacass/pull/159) Updated Kmerfinder module and increased memory.
