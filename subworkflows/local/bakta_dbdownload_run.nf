@@ -25,16 +25,14 @@ workflow BAKTA_DBDOWNLOAD_RUN {
 
             // MODULE: untar database
             UNTAR( ch_baktadb_tar )
-            ch_baktadb      = UNTAR.out.untar.map{ meta, db -> db }
+            ch_path_baktadb = UNTAR.out.untar.map{ meta, db -> db }
             ch_versions     = ch_versions.mix(UNTAR.out.versions)
-        } else {
-            ch_baktadb      = Channel.from(ch_path_baktadb).map{ db -> db }
         }
     } else if (!ch_path_baktadb && val_baktadb_download){
         // MODULE: Downlado Bakta database from zenodo
         BAKTA_BAKTADBDOWNLOAD()
-        ch_baktadb  = BAKTA_BAKTADBDOWNLOAD.out.db
-        ch_versions = ch_versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
+        ch_path_baktadb  = BAKTA_BAKTADBDOWNLOAD.out.db
+        ch_versions      = ch_versions.mix(BAKTA_BAKTADBDOWNLOAD.out.versions)
 
     } else if (!ch_path_baktadb && !val_baktadb_download ){
         exit 1, "The Bakta database argument is missing. To enable the workflow to access the Bakta database, please include the path using '--baktadb' or use '--bakdtadb_download true' to download the Bakta database."
@@ -43,9 +41,10 @@ workflow BAKTA_DBDOWNLOAD_RUN {
     //
     // MODULE: BAKTA, gene annotation
     //
+    // Setup input channel for Bakta process
     BAKTA_BAKTA (
         ch_fasta,
-        ch_baktadb,
+        ch_path_baktadb,
         [],
         []
     )
