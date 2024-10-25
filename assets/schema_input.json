@@ -19,7 +19,6 @@
                 "anyOf": [
                     {
                         "type": ["string", "null"],
-                        "exists": true,
                         "pattern": "^(\\S+\\.f(ast)?q\\.gz|NA)$"
                     },
                     {
@@ -33,7 +32,6 @@
                 "anyOf": [
                     {
                         "type": ["string", "null"],
-                        "exists": true,
                         "pattern": "^(\\S+\\.f(ast)?q\\.gz|NA)$"
                     },
                     {
@@ -47,7 +45,6 @@
                 "anyOf": [
                     {
                         "type": ["string", "null"],
-                        "exists": true,
                         "pattern": "^(\\S+\\.f(ast)?q\\.gz|NA)$"
                     },
                     {
@@ -61,7 +58,6 @@
                 "anyOf": [
                     {
                         "type": ["string", "null"],
-                        "exists": true,
                         "pattern": "^(\\/[\\S\\s]*|NA)$"
                     },
                     {
