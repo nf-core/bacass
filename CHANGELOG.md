@@ -3,10 +3,11 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.4.0dev nf-core/bacass
+## v2.4.0 nf-core/bacass: "Yellow Copper Crayfish" 2024/11/05
 
 ### `Changed`
 
+- [#180](https://github.com/nf-core/bacass/pull/180) Bump version 2.4.0.
 - [#169](https://github.com/nf-core/bacass/pull/169) Refactored long-reads polishing step.
 - [#167](https://github.com/nf-core/bacass/pull/167) Remove params.save_merged as merged reads are not used in downstream analysis.
 - [#159](https://github.com/nf-core/bacass/pull/159) Updated Kmerfinder module and increased memory.
