@@ -35,6 +35,10 @@ jobs:
           - "singularity"
         test_name:
           - "test"
+          - "test_long"
+          - "test_long_miniasm"
+          - "test_hybrid"
+          - "test_dfast"
         isMaster:
           - ${{ github.base_ref == 'master' }}
         # Exclude conda and singularity on dev
@@ -43,12 +47,6 @@ jobs:
             profile: "conda"
           - isMaster: false
             profile: "singularity"
-        parameters:
-          - "test"
-          - "test_long"
-          - "test_long_miniasm"
-          - "test_hybrid"
-          - "test_dfast"
 
     steps:
       - name: Check out pipeline code
