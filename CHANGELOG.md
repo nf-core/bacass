@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#183](https://github.com/nf-core/bacass/pull/183) Fix DFAST issue in conda environment by updating its version.
 - [#182](https://github.com/nf-core/bacass/pull/182) Uncommented required line to pass linting test in `--release` mode.
 - [#179](https://github.com/nf-core/bacass/pull/179) Fixed matrix.test_name in linting and missing features from template 3.0.2.
 - [#178](https://github.com/nf-core/bacass/pull/178) Fixed bakta running only for one sample.
