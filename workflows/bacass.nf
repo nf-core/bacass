@@ -4,30 +4,12 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-// Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config ]
-for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    CONFIG FILES
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-// Place config files here
-
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT LOCAL MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
 
 //
 // MODULE: Local to the pipeline
 //
 include { PYCOQC                    } from '../modules/local/pycoqc'
-include { UNICYCLER                 } from '../modules/local/unicycler'
+include { UNICYCLER                 } from '../modules/nf-core/unicycler/main'
 include { NANOPOLISH                } from '../modules/local/nanopolish'
 include { MEDAKA                    } from '../modules/local/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
@@ -35,18 +17,10 @@ include { DFAST                     } from '../modules/local/dfast'
 include { MULTIQC_CUSTOM            } from '../modules/local/multiqc_custom'
 
 //
-// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
-//
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT NF-CORE MODULES/SUBWORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
 // MODULE: Installed directly from nf-core/modules
 //
+include { FASTQC                                } from '../modules/nf-core/fastqc/main'
+include { CAT_FASTQ                             } from '../modules/nf-core/cat/fastq'
 include { NANOPLOT                              } from '../modules/nf-core/nanoplot/main'
 include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop/main'
 include { CANU                                  } from '../modules/nf-core/canu/main'
@@ -71,10 +45,20 @@ include { PROKKA                                } from '../modules/nf-core/prokk
 include { FASTQ_TRIM_FASTP_FASTQC               } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc/main'
 include { KMERFINDER_SUBWORKFLOW                } from '../subworkflows/local/kmerfinder_subworkflow'
 include { BAKTA_DBDOWNLOAD_RUN                  } from '../subworkflows/local/bakta_dbdownload_run'
-include { paramsSummaryMap                      } from 'plugin/nf-validation'
+include { paramsSummaryMap                      } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    CONFIG FILES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+// Check input path parameters to see if they exist
+def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config ]
+for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,21 +74,18 @@ workflow BACASS {
     main:
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
+
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
     def criteria = multiMapCriteria {
-        meta, fastq_1, fastq_2, long_fastq, fast5 ->
-            shortreads: fastq_1     != 'NA' ? tuple(meta, [file(fastq_1, checkIfExists: true), file(fastq_2, checkIfExists: true)]) : null
-            longreads: long_fastq   != 'NA' ? tuple(meta, file(long_fastq, checkIfExists: true)) : null
-            fast5: fast5            != 'NA' ? tuple(meta, file(fast5, checkIfExists: true)) : null
+        meta, fastqs, long_fastq, fast5 ->
+            shortreads: meta.single_end != 'NA' ? tuple(meta, fastqs) : null
+            longreads: long_fastq       != 'NA' ? tuple(meta,long_fastq) : null
+            fast5: fast5                != 'NA' ? tuple(meta, fast5) : null
     }
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     ch_samplesheet
-        .map {
-            meta, fastqs, long_fastq, fast5 ->
-            return [meta, fastqs[0], fastqs[1], long_fastq[0], fast5[0]]
-        }
         .multiMap (criteria)
         .set { ch_input }
 
@@ -123,23 +104,44 @@ workflow BACASS {
         .set { ch_fast5 }
 
     //
+    // MODULE: Concatenate FastQ files from same sample if required (shortreads)
+    //
+    ch_shortreads
+        .branch{
+            meta, fastqs ->
+                single: fastqs.size() == 1
+                    return [ meta, fastqs.flatten() ]
+                multiple: fastqs.size() > 1
+                    return [ meta, fastqs.flatten() ]
+        }
+        .set { ch_shortreads_fastqs }
+
+        CAT_FASTQ (
+            ch_shortreads_fastqs.multiple
+        )
+        .reads
+        .mix( ch_shortreads_fastqs.single )
+        .set { ch_shortreads_concat }
+        ch_versions = ch_versions.mix(CAT_FASTQ.out.versions)
+
+    //
     // SUBWORKFLOW: Short reads QC and trim adapters
     //
     ch_fastqc_raw_multiqc = Channel.empty()
     ch_fastqc_trim_multiqc = Channel.empty()
-    ch_trim_json_multiqc = Channel.empty()
+    ch_fastp_json_multiqc = Channel.empty()
     if (params.assembly_type != 'long'){
         FASTQ_TRIM_FASTP_FASTQC (
-        ch_shortreads,
+        ch_shortreads_concat,
         [],
         params.save_trimmed_fail,
-        params.save_merged,
+        [],
         params.skip_fastp,
         params.skip_fastqc
         )
         ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
         ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
-        ch_trim_json_multiqc    = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
+        ch_fastp_json_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
         ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions)
     }
 
@@ -231,7 +233,7 @@ workflow BACASS {
         CANU (
             ch_for_assembly.map { meta, reads, lr -> tuple( meta, lr ) },
             params.canu_mode,
-            ch_for_assembly.map { meta, reads, lr -> meta.genome_size }
+            ch_for_assembly.map { meta, reads, lr -> meta.gsize }
         )
         ch_assembly = ch_assembly.mix( CANU.out.assembly.dump(tag: 'canu') )
         ch_versions = ch_versions.mix(CANU.out.versions)
@@ -240,7 +242,7 @@ workflow BACASS {
     //
     // MODULE: Miniasm, genome assembly, long reads
     //
-    if ( params.assembler == 'miniasm' ) {
+    if ( params.assembly_type != 'short' && params.assembler == 'miniasm' ) {
         MINIMAP2_ALIGN (
             ch_for_assembly.map{ meta,sr,lr -> tuple(meta,lr) },
             [[:],[]],
@@ -280,6 +282,8 @@ workflow BACASS {
         )
         ch_assembly = ch_assembly.mix( RACON.out.improved_assembly.dump(tag: 'miniasm') )
         ch_versions = ch_versions.mix( RACON.out.versions )
+    } else if (params.assembly_type == 'short' && params.assembler == 'miniasm') {
+        exit("Selected assembler ${params.assembler} cannot run on short reads")
     }
 
     //
@@ -294,51 +298,62 @@ workflow BACASS {
     }
 
     //
-    // MODULE: Nanopolish, polishes assembly using FAST5 files - should take either miniasm, canu, or unicycler consensus sequence
+    // SUBWORKFLOW: Long reads polishing. Uses medaka or Nanopolish (this last requires Fast5 files available in input samplesheet).
     //
-    if ( !params.skip_polish && params.assembly_type == 'long' && params.polish_method != 'medaka' ) {
+    if ( (params.assembly_type == 'long' && !params.skip_polish) || ( params.assembly_type != 'short' && params.polish_method) ){
+        // Set channel for polishing long reads
         ch_for_assembly
             .join( ch_assembly )
-            .set { ch_for_polish }
-
-        MINIMAP2_POLISH (
-            ch_for_polish.map { meta, sr, lr, fasta -> tuple(meta, lr)  },
-            ch_for_polish.map { meta, sr, lr, fasta -> fasta  },
-            true,
-            false,
-            false
-        )
-        ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions)
-
-        SAMTOOLS_INDEX (
-            MINIMAP2_POLISH.out.bam.dump(tag: 'samtools_sort')
-        )
-        ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
-
-        ch_for_polish    // tuple val(meta), val(reads), file(longreads), file(assembly)
-            .join( MINIMAP2_POLISH.out.bam )    // tuple val(meta), file(bam)
-            .join( SAMTOOLS_INDEX.out.bai )     // tuple  val(meta), file(bai)
-            .join( ch_fast5 )                   // tuple val(meta), file(fast5)
-            .set { ch_for_nanopolish }          // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
-
-        // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
-        NANOPOLISH (
-            ch_for_nanopolish.dump(tag: 'into_nanopolish')
-        )
-        ch_versions = ch_versions.mix(NANOPOLISH.out.versions)
-    }
-
-    //
-    // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
-    //
-    if ( !params.skip_polish && params.assembly_type == 'long' && params.polish_method == 'medaka' ) {
-        ch_for_assembly
-            .join( ch_assembly )
-            .map { meta, sr, lr, assembly -> tuple(meta, lr, assembly) }
-            .set { ch_for_medaka }
-
-        MEDAKA ( ch_for_medaka.dump(tag: 'into_medaka') )
-        ch_versions = ch_versions.mix(MEDAKA.out.versions)
+            .map { meta, sr, lr, fasta -> tuple(meta, lr, fasta) }
+            .set { ch_polish_long } // channel: [ val(meta), path(lr), path(fasta) ]
+        if (params.polish_method == 'medaka'){
+            //
+            // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
+            //
+            MEDAKA ( ch_polish_long )
+            ch_assembly = MEDAKA.out.assembly
+            ch_versions = ch_versions.mix(MEDAKA.out.versions)
+        } else if (params.polish_method == 'nanopolish') {
+            //
+            // MODULE: Nanopolish, polishes assembly using FAST5 files
+            //
+            if (!ch_fast5){
+                log.error "ERROR: FAST5 files are required for Nanopolish but none were provided. Please supply FAST5 files or choose another polishing method. Available options are: medaka, nanopolish"
+            } else {
+                //
+                // MODULE: Minimap2 polish
+                //
+                MINIMAP2_POLISH (
+                    ch_polish_long.map { meta, lr, fasta -> tuple(meta, lr) },
+                    ch_polish_long.map { meta, lr, fasta -> tuple(meta, fasta) },
+                    true,
+                    false,
+                    false
+                )
+                ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions)
+                //
+                // MODULE: Samtools index
+                //
+                SAMTOOLS_INDEX (
+                    MINIMAP2_POLISH.out.bam.dump(tag: 'samtools_sort')
+                )
+                ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
+                //
+                // MODULE: Nanopolish
+                //
+                ch_polish_long                         // tuple val(meta), val(reads), file(longreads), file(assembly)
+                    .join( MINIMAP2_POLISH.out.bam )  // tuple val(meta), file(bam)
+                    .join( SAMTOOLS_INDEX.out.bai )   // tuple  val(meta), file(bai)
+                    .join( ch_fast5 )                 // tuple val(meta), file(fast5)
+                    .set { ch_for_nanopolish }        // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
+                // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
+                NANOPOLISH (
+                    ch_for_nanopolish.dump(tag: 'into_nanopolish')
+                )
+                ch_assembly = NANOPOLISH.out.assembly
+                ch_versions = ch_versions.mix( NANOPOLISH.out.versions )
+            }
+        }
     }
 
     //
@@ -460,7 +475,7 @@ workflow BACASS {
         ch_versions     = ch_versions.mix( GUNZIP.out.versions )
 
         PROKKA (
-            ch_to_prokka,
+            ch_to_prokka.filter{ meta, fasta -> !fasta.isEmpty() },
             [],
             []
         )
@@ -479,7 +494,7 @@ workflow BACASS {
         ch_versions     = ch_versions.mix( GUNZIP.out.versions )
 
         BAKTA_DBDOWNLOAD_RUN (
-            ch_to_bakta,
+            ch_to_bakta.filter{ meta, fasta -> !fasta.isEmpty() },
             params.baktadb,
             params.baktadb_download
         )
@@ -504,10 +519,11 @@ workflow BACASS {
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_pipeline_software_mqc_versions.yml',
+            name: 'nf_core_'  + 'pipeline_software_' +  'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true
         ).set { ch_collated_versions }
+
 
     //
     // MODULE: MultiQC
@@ -527,7 +543,8 @@ workflow BACASS {
         ch_multiqc_custom_methods_description.ifEmpty([]),
         ch_collated_versions.ifEmpty([]),
         ch_fastqc_raw_multiqc.collect{it[1]}.ifEmpty([]),
-        ch_trim_json_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_fastqc_trim_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_fastp_json_multiqc.collect{it[1]}.ifEmpty([]),
         ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]),
         ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]),
         ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),

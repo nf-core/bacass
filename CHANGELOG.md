@@ -3,6 +3,45 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.4.0 nf-core/bacass: "Yellow Copper Crayfish" 2024/11/05
+
+### `Changed`
+
+- [#180](https://github.com/nf-core/bacass/pull/180) Bump version 2.4.0.
+- [#169](https://github.com/nf-core/bacass/pull/169) Refactored long-reads polishing step.
+- [#167](https://github.com/nf-core/bacass/pull/167) Remove params.save_merged as merged reads are not used in downstream analysis.
+- [#159](https://github.com/nf-core/bacass/pull/159) Updated Kmerfinder module and increased memory.
+- [#150](https://github.com/nf-core/bacass/pull/150) Replace local unicycler module with nf-core module + bump version.
+
+### `Added`
+
+- [#176](https://github.com/nf-core/bacass/pull/176) Update nf-core/bacass to nf-core-tools v3.0.2 `TEMPLATE`.
+- [#166](https://github.com/nf-core/bacass/pull/166) Added FastQC after-trimming section to MultiQC report.
+- [#158](https://github.com/nf-core/bacass/pull/158) Support automatic concatenation of FastQ files for the same sample.
+
+### `Fixed`
+
+- [#183](https://github.com/nf-core/bacass/pull/183) Fix DFAST issue in conda environment by updating its version.
+- [#182](https://github.com/nf-core/bacass/pull/182) Uncommented required line to pass linting test in `--release` mode.
+- [#179](https://github.com/nf-core/bacass/pull/179) Fixed matrix.test_name in linting and missing features from template 3.0.2.
+- [#178](https://github.com/nf-core/bacass/pull/178) Fixed bakta running only for one sample.
+- [#169](https://github.com/nf-core/bacass/pull/169) Fixed long reads polishing input channel.
+- [#168](https://github.com/nf-core/bacass/pull/168) Fix wrong metadata in canu input channel.
+- [#163](https://github.com/nf-core/bacass/pull/163) Fixed `params.save_merged` to properly save merged files.
+- [#160](https://github.com/nf-core/bacass/pull/160) Fixed memory issues in KmerFinder, fixed handling of no species detected, and fixed handling of empty fasta files in the prokka/bakkta channel.
+- [#157](https://github.com/nf-core/bacass/pull/157) Fixed corrupted zenodo URL of Kmerfinder database.
+- [#154](https://github.com/nf-core/bacass/pull/154) Fixed kmerfinder script and increase resources to prevent memory issues.
+- [#153](https://github.com/nf-core/bacass/pull/153) Update `.nf-core.yml` to fix files_unchanged section for accurate linting checks.
+
+### `Dependencies`
+
+| Tool      | Previous version | New version |
+| --------- | ---------------- | ----------- |
+| Dfast     | 1.2.20           | 1.3.2       |
+| Unicycler | 0.4.8            | 0.5.0       |
+
+### `Deprecated`
+
 ## v2.3.1 nf-core/bacass: "Navy Iron Oyster" 2024/06/24
 
 ### `Changed`

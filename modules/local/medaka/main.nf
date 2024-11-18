@@ -8,7 +8,7 @@ process MEDAKA {
         'biocontainers/medaka:1.4.3--py38h130def0_0' }"
 
     input:
-    tuple val(meta), file(longreads), file(assembly)
+    tuple val(meta), path(longreads), path(assembly)
 
     output:
     tuple val(meta), path('*_polished_genome.fa')   , emit: assembly
@@ -33,9 +33,11 @@ process MEDAKA {
     medaka_consensus $args \
         -i ${ reads_bgzip_out ?: longreads } \
         -d ${ assembly_bgzip_out ?: assembly } \
-        -o "${prefix}_polished_genome.fa" \
+        -o "${prefix}_out" \
         -t $task.cpus
 
+    mv ${prefix}_out/* .
+    mv consensus.fasta ${prefix}_polished_genome.fa
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         medaka: \$( medaka --version 2>&1 | sed 's/medaka //g' )

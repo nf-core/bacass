@@ -1,7 +1,7 @@
-name: unicycler
+name: cat_fastq
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - unicycler=0.4.8
+  - conda-forge::coreutils=8.30
