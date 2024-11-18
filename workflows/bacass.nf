@@ -60,9 +60,6 @@ include { methodsDescriptionText                } from '../subworkflows/local/ut
 def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-// Place config files here
-
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
