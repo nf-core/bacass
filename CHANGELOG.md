@@ -35,10 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Dependencies`
 
-| Tool       | Previous version | New version |
-| ---------- | ---------------- | ----------- |
-| Dfast      | 1.2.20           | 1.3.2       |
-| Unicycler  | 0.4.8            | 0.5.0       |
+| Tool      | Previous version | New version |
+| --------- | ---------------- | ----------- |
+| Dfast     | 1.2.20           | 1.3.2       |
+| Unicycler | 0.4.8            | 0.5.0       |
 
 ### `Deprecated`
 
