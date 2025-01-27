@@ -4,7 +4,7 @@ lint:
   nextflow_config:
     - config_defaults:
         - params.dfast_config
-nf_core_version: 3.1.2
+nf_core_version: 3.2.0
 repository_type: pipeline
 template:
   author: Andreas Wilm, Alexander Peltzer
