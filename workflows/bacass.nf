@@ -9,41 +9,41 @@
 // MODULE: Local to the pipeline
 //
 include { PYCOQC                    } from '../modules/local/pycoqc'
-include { UNICYCLER                 } from '../modules/nf-core/unicycler/main'
 include { NANOPOLISH                } from '../modules/local/nanopolish'
 include { MEDAKA                    } from '../modules/local/medaka'
-include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
+include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2/db_preparation'
 include { DFAST                     } from '../modules/local/dfast'
-include { MULTIQC_CUSTOM            } from '../modules/local/multiqc_custom'
+include { CUSTOM_MULTIQC            } from '../modules/local/custom/multiqc'
 
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                                } from '../modules/nf-core/fastqc/main'
+include { FASTQC                                } from '../modules/nf-core/fastqc'
 include { CAT_FASTQ                             } from '../modules/nf-core/cat/fastq'
-include { NANOPLOT                              } from '../modules/nf-core/nanoplot/main'
-include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop/main'
-include { CANU                                  } from '../modules/nf-core/canu/main'
-include { MINIMAP2_ALIGN                        } from '../modules/nf-core/minimap2/align/main'
-include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS  } from '../modules/nf-core/minimap2/align/main'
-include { MINIMAP2_ALIGN as MINIMAP2_POLISH     } from '../modules/nf-core/minimap2/align/main'
-include { MINIASM                               } from '../modules/nf-core/miniasm/main'
-include { DRAGONFLYE                            } from '../modules/nf-core/dragonflye/main'
-include { RACON                                 } from '../modules/nf-core/racon/main'
-include { SAMTOOLS_SORT                         } from '../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samtools/index/main'
-include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/kraken2/kraken2/main'
-include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2/main'
-include { QUAST                                 } from '../modules/nf-core/quast/main'
-include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast/main'
-include { GUNZIP                                } from '../modules/nf-core/gunzip/main'
-include { PROKKA                                } from '../modules/nf-core/prokka/main'
+include { NANOPLOT                              } from '../modules/nf-core/nanoplot'
+include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop'
+include { UNICYCLER                             } from '../modules/nf-core/unicycler'
+include { CANU                                  } from '../modules/nf-core/canu'
+include { MINIMAP2_ALIGN                        } from '../modules/nf-core/minimap2/align'
+include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS  } from '../modules/nf-core/minimap2/align'
+include { MINIMAP2_ALIGN as MINIMAP2_POLISH     } from '../modules/nf-core/minimap2/align'
+include { MINIASM                               } from '../modules/nf-core/miniasm'
+include { DRAGONFLYE                            } from '../modules/nf-core/dragonflye'
+include { RACON                                 } from '../modules/nf-core/racon'
+include { SAMTOOLS_SORT                         } from '../modules/nf-core/samtools/sort'
+include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samtools/index'
+include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/kraken2/kraken2'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2'
+include { QUAST                                 } from '../modules/nf-core/quast'
+include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast'
+include { GUNZIP                                } from '../modules/nf-core/gunzip'
+include { PROKKA                                } from '../modules/nf-core/prokka'
 
 //
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
 //
-include { FASTQ_TRIM_FASTP_FASTQC               } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc/main'
-include { KMERFINDER_SUBWORKFLOW                } from '../subworkflows/local/kmerfinder_subworkflow'
+include { FASTQ_TRIM_FASTP_FASTQC               } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc'
+include { KMERFINDER_SUMMARY_DOWNLOAD           } from '../subworkflows/local/kmerfinder_summary_download'
 include { BAKTA_DBDOWNLOAD_RUN                  } from '../subworkflows/local/bakta_dbdownload_run'
 include { paramsSummaryMap                      } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -533,7 +533,7 @@ workflow BACASS {
     ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
     ch_multiqc_custom_methods_description = params.multiqc_methods_description ? Channel.fromPath(params.multiqc_methods_description, checkIfExists: true) : Channel.fromPath("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
-    MULTIQC_CUSTOM (
+    CUSTOM_MULTIQC (
         ch_multiqc_config.ifEmpty([]),
         ch_multiqc_custom_config.ifEmpty([]),
         ch_multiqc_logo.ifEmpty([]),
@@ -553,10 +553,10 @@ workflow BACASS {
         ch_bakta_txt_multiqc.collect().ifEmpty([]),
         ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
     )
-    multiqc_report = MULTIQC_CUSTOM.out.report.toList()
+    multiqc_report = CUSTOM_MULTIQC.out.report.toList()
 
     emit:
-    multiqc_report = MULTIQC_CUSTOM.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report = CUSTOM_MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                        // channel: [ path(versions.yml) ]
 }
 

@@ -1,8 +1,8 @@
-process FIND_DOWNLOAD_REFERENCE {
+process KMERFINDER_DOWNLOAD_REFERENCE {
     tag "${task.process}"
     label 'process_medium'
 
-    conda "conda-forge::requests=2.26.0"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/requests:2.26.0' :
         'biocontainers/requests:2.26.0' }"

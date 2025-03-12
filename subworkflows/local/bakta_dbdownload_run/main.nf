@@ -2,9 +2,9 @@
 // Annotation of Bacterial genomes with Bakta
 //
 
-include { BAKTA_BAKTADBDOWNLOAD } from '../../modules/nf-core/bakta/baktadbdownload/main'
-include { UNTAR                 } from '../../modules/nf-core/untar/main'
-include { BAKTA_BAKTA           } from '../../modules/nf-core/bakta/bakta/main'
+include { BAKTA_BAKTADBDOWNLOAD } from '../../../modules/nf-core/bakta/baktadbdownload'
+include { UNTAR                 } from '../../../modules/nf-core/untar'
+include { BAKTA_BAKTA           } from '../../../modules/nf-core/bakta/bakta'
 
 
 workflow BAKTA_DBDOWNLOAD_RUN {
