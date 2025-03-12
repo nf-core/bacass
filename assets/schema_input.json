@@ -1,6 +1,6 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/bacass/master/assets/schema_input.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/bacass/main/assets/schema_input.json",
     "title": "nf-core/bacass pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
     "type": "array",
