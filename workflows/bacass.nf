@@ -70,11 +70,9 @@ workflow BACASS {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
-
     main:
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
-
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
@@ -519,7 +517,7 @@ workflow BACASS {
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_'  + 'pipeline_software_' +  'mqc_'  + 'versions.yml',
+            name: 'nf_core_'  +  'bacass_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true
         ).set { ch_collated_versions }
