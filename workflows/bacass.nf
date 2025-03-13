@@ -404,7 +404,7 @@ workflow BACASS {
             ch_for_kmerfinder = PORECHOP_PORECHOP.out.reads
         }
         // RUN kmerfinder subworkflow
-        KMERFINDER_SUBWORKFLOW (
+        KMERFINDER_SUMMARY_DOWNLOAD (
             ch_for_kmerfinder,
             ch_assembly
         )
