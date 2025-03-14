@@ -292,12 +292,6 @@
             "description": "Less common options for the pipeline, typically set in a config file.",
             "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
             "properties": {
-                "help": {
-                    "type": "boolean",
-                    "description": "Display help text.",
-                    "fa_icon": "fas fa-question-circle",
-                    "hidden": true
-                },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
@@ -378,17 +372,17 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "schema_ignore_params": {
-                    "type": "string",
-                    "default": "modules,igenomes_base",
-                    "hidden": true,
-                    "description": "A comma separated string of inputs the schema validation should ignore"
-                },
                 "pipelines_testdata_base_path": {
                     "type": "string",
                     "fa_icon": "far fa-check-circle",
                     "description": "Base URL or local path to location of pipeline test dataset files",
                     "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "hidden": true
+                },
+                "trace_report_suffix": {
+                    "type": "string",
+                    "fa_icon": "far calendar",
+                    "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
                 }
             }
@@ -415,6 +409,9 @@
         },
         {
             "$ref": "#/$defs/skipping_options"
+        },
+        {
+            "$ref": "#/$defs/institutional_config_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

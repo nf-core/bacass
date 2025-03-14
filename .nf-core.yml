@@ -1,12 +1,10 @@
-bump_version: null
 lint:
   files_exist:
     - conf/igenomes.config
   nextflow_config:
     - config_defaults:
         - params.dfast_config
-nf_core_version: 3.0.2
-org_path: null
+nf_core_version: 3.2.0
 repository_type: pipeline
 template:
   author: Andreas Wilm, Alexander Peltzer
@@ -18,5 +16,3 @@ template:
   outdir: .
   skip_features:
     - igenomes
-  version: 2.5.0dev
-update: null
