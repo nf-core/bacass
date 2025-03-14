@@ -393,7 +393,7 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Kmerfinder, QC for sample purity.
     //
-    // Executes both kmerfinder and classifies samples by their reference genome (all this through the kmerfinder_subworkflow()).
+    // Executes both kmerfinder and classifies samples by their reference genome (all this through the KMERFINDER_SUMMARY_DOWNLOAD()).
 
     ch_kmerfinder_multiqc = Channel.empty()
     if (!params.skip_kmerfinder) {
@@ -408,9 +408,9 @@ workflow BACASS {
             ch_for_kmerfinder,
             ch_assembly
         )
-        ch_kmerfinder_multiqc   = KMERFINDER_SUBWORKFLOW.out.summary_yaml
-        ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
-        ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions)
+        ch_kmerfinder_multiqc   = KMERFINDER_SUMMARY_DOWNLOAD.out.summary_yaml
+        ch_consensus_byrefseq   = KMERFINDER_SUMMARY_DOWNLOAD.out.consensus_byrefseq
+        ch_versions             = ch_versions.mix(KMERFINDER_SUMMARY_DOWNLOAD.out.versions)
 
         // Set channel to perform by refseq QUAST based on reference genome identified with KMERFINDER.
         ch_consensus_byrefseq
