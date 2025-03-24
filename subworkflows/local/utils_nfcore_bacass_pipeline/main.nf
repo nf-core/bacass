@@ -175,6 +175,16 @@ def validateInputParameters() {
             error(error_string)
         }
     }
+
+    // Check assembly type
+    if (!params.assembly_type) {
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Assembly type not provided.\n" +
+            "  Please specify the '--assembly_type' parameter to perform the assembly.\n" +
+             "  Accepted: short, long, hybrid.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
+    }
 }
 
 //
