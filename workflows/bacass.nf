@@ -87,6 +87,9 @@ workflow BACASS {
         .multiMap (criteria)
         .set { ch_input }
 
+    // DUMMY TEST:
+    ch_input.view()
+
     // reconfigure channels
     ch_input
         .shortreads
