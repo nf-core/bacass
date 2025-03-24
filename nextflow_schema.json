@@ -112,7 +112,6 @@
                 },
                 "assembly_type": {
                     "type": "string",
-                    "default": "short",
                     "fa_icon": "fas fa-fingerprint",
                     "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`.",
                     "description": "Which type of assembly to perform.",
