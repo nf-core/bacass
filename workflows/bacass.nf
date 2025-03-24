@@ -87,9 +87,6 @@ workflow BACASS {
         .multiMap (criteria)
         .set { ch_input }
 
-    // DUMMY TEST:
-    ch_input.view()
-
     // reconfigure channels
     ch_input
         .shortreads
@@ -200,6 +197,7 @@ workflow BACASS {
             .map{ meta,reads -> tuple(meta,reads,[]) }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
+        FASTQ_TRIM_FASTP_FASTQC.out.reads.view()
     } else if ( params.assembly_type == 'long' ) {
         ch_for_kraken2_short    = Channel.empty()
         ch_for_kraken2_long     = PORECHOP_PORECHOP.out.reads
