@@ -181,13 +181,12 @@ workflow BACASS {
         ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
     }
 
-       //
+    //
     // MODULE: FILTLONG, filtering long reads by quality. It can take a set of long reads and produce a smaller, better subset.
     //
-     ch_filtlong_multiqc = Channel.empty()
+    ch_filtlong_multiqc = Channel.empty()
     //if ((params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type)) && params.long_reads_filtering == 'filtlong' ) {
-    if ( !('short' in params.assembly_type) && params.long_reads_filtering == 'filtlong' ) {
-        
+    if ( !('short' in params.assembly_type) && params.long_reads_filtering == 'filtlong' ) { 
         if (params.assembly_type == 'hybrid') {
             ch_shortreads_4_filtlong = FASTQ_TRIM_FASTP_FASTQC.out.reads
         } else if ( params.assembly_type == 'long' ) {
@@ -195,7 +194,7 @@ workflow BACASS {
         }
 
         FILTLONG (
-           ch_shortreads_4_filtlong.join(ch_longreads)
+            ch_shortreads_4_filtlong.join(ch_longreads)
         )
 
         filtered_long_reads = FILTLONG.out.reads
