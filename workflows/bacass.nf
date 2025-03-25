@@ -176,6 +176,7 @@ workflow BACASS {
         PORECHOP_PORECHOP (
             ch_longreads.dump(tag: 'longreads')
         )
+        filtered_long_reads = PORECHOP_PORECHOP.out.reads
         ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
         ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
     }
@@ -184,11 +185,11 @@ workflow BACASS {
     // MODULE: FILTLONG, filtering long reads by quality. It can take a set of long reads and produce a smaller, better subset.
     //
      ch_filtlong_multiqc = Channel.empty()
-    if (params.assembly_type != 'short' && params.long_reads_filtering == 'filtlong' ) {
+    if ((params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type)) && params.long_reads_filtering == 'filtlong' ) {
         FILTLONG (
-            ch_shortreads_fastqs.join(ch_longreads)
+            FASTQ_TRIM_FASTP_FASTQC.out.reads.join(ch_longreads)
         )
-
+        filtered_long_reads = FILTLONG.out.reads
         ch_filtlong_multiqc = FILTLONG.out.log
         ch_versions       = ch_versions.mix(FILTLONG.out.versions)
     }
@@ -200,10 +201,10 @@ workflow BACASS {
     //
     if(params.assembly_type == 'hybrid'){
         ch_for_kraken2_short    = FASTQ_TRIM_FASTP_FASTQC.out.reads
-        ch_for_kraken2_long     = PORECHOP_PORECHOP.out.reads
+        ch_for_kraken2_long     = filtered_long_reads
         FASTQ_TRIM_FASTP_FASTQC.out.reads
             .dump(tag: 'fastp')
-            .join(PORECHOP_PORECHOP.out.reads)
+            .join(filtered_long_reads)
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
     } else if ( params.assembly_type == 'short' ) {
@@ -216,9 +217,9 @@ workflow BACASS {
             .set { ch_for_assembly }
     } else if ( params.assembly_type == 'long' ) {
         ch_for_kraken2_short    = Channel.empty()
-        ch_for_kraken2_long     = PORECHOP_PORECHOP.out.reads
-        PORECHOP_PORECHOP.out.reads
-            .dump(tag: 'porechop')
+        ch_for_kraken2_long     = filtered_long_reads
+        filtered_long_reads
+            .dump(tag: 'filtered_long_reads')
             .map{ meta,lr -> tuple(meta,[],lr) }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
@@ -418,7 +419,7 @@ workflow BACASS {
         if( params.assembly_type == 'short' || params.assembly_type == 'hybrid' ) {
             ch_for_kmerfinder = FASTQ_TRIM_FASTP_FASTQC.out.reads
         } else if ( params.assembly_type == 'long' ) {
-            ch_for_kmerfinder = PORECHOP_PORECHOP.out.reads
+            ch_for_kmerfinder = filtered_long_reads
         }
         // RUN kmerfinder subworkflow
         KMERFINDER_SUMMARY_DOWNLOAD (
