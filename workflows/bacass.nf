@@ -38,6 +38,8 @@ include { QUAST                                 } from '../modules/nf-core/quast
 include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast'
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
+include { FILTLONG                              } from '../modules/nf-core/filtlong'
+
 
 //
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
@@ -152,6 +154,7 @@ workflow BACASS {
     ch_nanoplot_txt_multiqc = NANOPLOT.out.txt
     ch_versions = ch_versions.mix(NANOPLOT.out.versions)
 
+
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
     //
@@ -169,13 +172,27 @@ workflow BACASS {
     // MODULE: PORECHOP, quality check for nanopore reads and Quality/Length Plots
     //
     ch_porechop_log_multiqc = Channel.empty()
-    if ( params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type) ) {
+    if ((params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type)) && params.long_reads_filtering == 'porechop' ) {
         PORECHOP_PORECHOP (
             ch_longreads.dump(tag: 'longreads')
         )
         ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
         ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
     }
+
+       //
+    // MODULE: FILTLONG, filtering long reads by quality. It can take a set of long reads and produce a smaller, better subset.
+    //
+     ch_filtlong_multiqc = Channel.empty()
+    if (params.assembly_type != 'short' && params.long_reads_filtering == 'filtlong' ) {
+        FILTLONG (
+            ch_shortreads_fastqs.join(ch_longreads)
+        )
+
+        ch_filtlong_multiqc = FILTLONG.out.log
+        ch_versions       = ch_versions.mix(FILTLONG.out.versions)
+    }
+
 
     //
     // Join channels for assemblers. As samples have the same meta data, we can simply use join() to merge the channels based on this. If we only have one of the channels we insert 'NAs' which are not used in the unicycler process then subsequently, in case of short or long read only assembly.
