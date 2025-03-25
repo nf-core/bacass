@@ -71,6 +71,11 @@
                 "filtlong_args": {
                     "type": "string",
                     "description": "Arguments for running Filtlong"
+                },
+                "filtlong_minlen": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Minimum argument for Filtlong to work"
                 }
             }
         },
