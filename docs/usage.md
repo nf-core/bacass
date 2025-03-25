@@ -43,7 +43,7 @@ An [example samplesheet](../assets/samplesheet.tsv) has been provided with the p
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/bacass --input samplesheet.tsv --outdir results  -profile docker --skip_kraken2
+nextflow run nf-core/bacass --input samplesheet.tsv --outdir results  -profile docker --assembly_type 'short' --skip_kraken2
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
