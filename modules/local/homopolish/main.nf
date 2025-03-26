@@ -10,7 +10,7 @@ process HOMOPOLISH {
     input:
     tuple val(meta), path(medaka_genome)
     tuple val(meta_gunzip), path(bacteria_sketch)
-    
+
     output:
     tuple val(meta), path('*_genome_homopolished.fasta') , emit: assembly
     path "versions.yml"                                  , emit: versions
