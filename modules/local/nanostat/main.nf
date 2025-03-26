@@ -13,7 +13,7 @@ process NANOSTATS {
     tuple val(meta), path(reads)
 
     output:
-    tuple val(meta), path("*/assembly_info.txt"), emit: info_cov
+    tuple val(meta), path("*"), emit: info_cov
 
 
     when:
