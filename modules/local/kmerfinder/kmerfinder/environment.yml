@@ -1,7 +1,5 @@
-name: kmerfinder
 channels:
   - conda-forge
   - bioconda
-  - defaults
 dependencies:
   - bioconda::kmerfinder=3.0.2
