@@ -1,0 +1,7 @@
+name: polishing
+channels:
+- conda-forge
+- bioconda
+dependencies:
+- bioconda::minimap2=2.28
+- bioconda::racon=1.5.0
