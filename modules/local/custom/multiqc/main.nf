@@ -18,6 +18,7 @@ process CUSTOM_MULTIQC {
     path ('fastp/*')
     path ('nanoplot/*')
     path ('porechop/*')
+    path ('filtlong/*')
     path ('pycoqc/*')
     path ('kraken2_short/*')
     path ('kraken2_long/*')
