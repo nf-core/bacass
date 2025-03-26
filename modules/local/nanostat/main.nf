@@ -1,7 +1,7 @@
 process NANOSTATS {
 
     tag "ASSAMBLE FLY LONG READS ${sample_code}"
-    
+
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/67/675720c3645bd69ae8bdd55a601e38caa4bbd08f4db1567ab52da778b185c351/data' :
@@ -22,11 +22,9 @@ process NANOSTATS {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def valid_mode = ["-pacbio", "-nanopore", "-pacbio-hifi"]
-    if ( !valid_mode.contains(mode) )  { error "Unrecognised mode to run Fly. Options: ${valid_mode.join(', ')}" }
 
     """
-    
+
     # Generate stats QC
     NanoStat --fastq ${reads} > dedup_${prefix}_NanoStat.log
 

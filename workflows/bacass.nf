@@ -275,7 +275,7 @@ workflow BACASS {
         //
         NANOSTATS(FLY.out.fly_assambly_tuple)
 
-        coverage_ch = NANOSTATS.out.info_cov.map { meta, info_file ->
+        coverage_ch = FLY.out.info_cov.map { meta, info_file ->
             def cov_value = info_file.text.split("\n")
                 .drop(1)
                 .collect { it.split("\t")[2] as int }[0]
