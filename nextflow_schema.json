@@ -140,8 +140,8 @@
                 },
                 "fly_mode": {
                 "type": "string",
-                "default": "-nano-raw",
-                "description": "Mode passed to Flye assembler (e.g., -nano-raw, -nano-corr, etc)."
+                "default": "--nano-raw",
+                "description": "Mode passed to Flye assembler (e.g., --nano-raw, -nano-corr, etc)."
                 },
                 "seqkit_mode": {
                 "type": "string",
