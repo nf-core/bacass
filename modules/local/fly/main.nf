@@ -35,7 +35,7 @@ process FLY {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        fly: \$(echo \$(fly --version 2>&1) | sed 's/^.*fly //; s/Using.*\$//' )
+        flye: \$(echo \$(flye --version 2>&1) | sed 's/^.*flye //; s/Using.*\$//' )
     END_VERSIONS
     """
 
