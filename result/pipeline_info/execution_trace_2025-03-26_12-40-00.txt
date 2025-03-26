@@ -1,0 +1,3 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+2	17/6b7e1f	71257	NFCORE_BACASS:BACASS:NANOPLOT (TestMe)	FAILED	127	2025-03-26 12:40:06.576	27ms	17ms	-	-	-	-	-
+1	01/d67a06	71277	NFCORE_BACASS:BACASS:PORECHOP_PORECHOP (TestMe)	FAILED	127	2025-03-26 12:40:06.609	25ms	2ms	-	-	-	-	-

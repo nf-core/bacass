@@ -1,0 +1,211 @@
+<!--
+  ~ Copyright 2013-2024, Seqera Labs
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<html>
+<head>
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+</head>
+<body>
+<pre class="mermaid" style="text-align: center;">
+flowchart TB
+    subgraph " "
+    v19["ch_shortreads_concat"]
+    v25[" "]
+    v26[" "]
+    v27[" "]
+    v32[" "]
+    v50[" "]
+    v52[" "]
+    v75[" "]
+    v76[" "]
+    v77[" "]
+    v78[" "]
+    v90[" "]
+    v91[" "]
+    v93[" "]
+    v95[" "]
+    v97[" "]
+    v98[" "]
+    v100[" "]
+    v102[" "]
+    v104[" "]
+    v106[" "]
+    v107[" "]
+    v155[" "]
+    v157[" "]
+    v158[" "]
+    v160[" "]
+    v163["multiqc_report"]
+    v167[" "]
+    end
+    subgraph " "
+    v3["Channel.fromList"]
+    v43["mode"]
+    v48["mode"]
+    v72[" "]
+    v73[" "]
+    v87["proteins"]
+    v88["prodigal_tf"]
+    v115["Channel.of"]
+    v118["Channel.fromPath"]
+    v121["Channel.fromPath"]
+    v126["ch_workflow_summary"]
+    end
+    subgraph NFCORE_BACASS
+    subgraph BACASS
+    v17([CAT_FASTQ])
+    v24([NANOPLOT])
+    v31([PYCOQC])
+    v36([PORECHOP_PORECHOP])
+    v45([SEQUIT])
+    v49([FLY])
+    v55([NANOSTATS])
+    v60([POLISHING_PROCESS])
+    v64([MEDAKA])
+    v74([QUAST])
+    v83([GUNZIP])
+    v89([PROKKA])
+    v154([CUSTOM_MULTIQC])
+    v4(( ))
+    v20(( ))
+    v40(( ))
+    v46(( ))
+    v69(( ))
+    v80(( ))
+    v109(( ))
+    v122(( ))
+    v123(( ))
+    v124(( ))
+    v127(( ))
+    v128(( ))
+    v130(( ))
+    v132(( ))
+    v134(( ))
+    v136(( ))
+    v138(( ))
+    v140(( ))
+    v142(( ))
+    v144(( ))
+    v146(( ))
+    v150(( ))
+    v152(( ))
+    v162(( ))
+    v165(( ))
+    end
+    end
+    v3 --> v4
+    v4 --> v17
+    v17 --> v4
+    v17 --> v20
+    v4 --> v19
+    v4 --> v24
+    v24 --> v27
+    v24 --> v26
+    v24 --> v25
+    v24 --> v20
+    v24 --> v136
+    v4 --> v31
+    v31 --> v32
+    v31 --> v20
+    v31 --> v140
+    v4 --> v36
+    v36 --> v20
+    v36 --> v40
+    v36 --> v138
+    v43 --> v45
+    v40 --> v45
+    v45 --> v46
+    v48 --> v49
+    v40 --> v49
+    v46 --> v49
+    v49 --> v52
+    v49 --> v50
+    v49 --> v55
+    v49 --> v20
+    v49 --> v40
+    v49 --> v46
+    v55 --> v46
+    v46 --> v60
+    v60 --> v40
+    v40 --> v64
+    v64 --> v20
+    v64 --> v69
+    v64 --> v80
+    v72 --> v74
+    v73 --> v74
+    v69 --> v74
+    v74 --> v78
+    v74 --> v77
+    v74 --> v76
+    v74 --> v75
+    v74 --> v20
+    v74 --> v146
+    v80 --> v83
+    v83 --> v20
+    v83 --> v80
+    v87 --> v89
+    v88 --> v89
+    v80 --> v89
+    v89 --> v107
+    v89 --> v106
+    v89 --> v104
+    v89 --> v102
+    v89 --> v100
+    v89 --> v98
+    v89 --> v97
+    v89 --> v95
+    v89 --> v93
+    v89 --> v91
+    v89 --> v90
+    v89 --> v20
+    v89 --> v109
+    v115 --> v20
+    v118 --> v122
+    v121 --> v128
+    v126 --> v127
+    v20 --> v154
+    v109 --> v154
+    v122 --> v154
+    v123 --> v154
+    v124 --> v154
+    v127 --> v154
+    v128 --> v154
+    v130 --> v154
+    v132 --> v154
+    v134 --> v154
+    v136 --> v154
+    v138 --> v154
+    v140 --> v154
+    v142 --> v154
+    v144 --> v154
+    v146 --> v154
+    v150 --> v154
+    v152 --> v154
+    v154 --> v160
+    v154 --> v158
+    v154 --> v157
+    v154 --> v155
+    v154 --> v162
+    v154 --> v165
+    v162 --> v163
+    v165 --> v167
+
+</pre>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, maxTextSize: Number.MAX_SAFE_INTEGER, maxEdges: Number.MAX_SAFE_INTEGER });
+</script>
+</body>
+</html>
