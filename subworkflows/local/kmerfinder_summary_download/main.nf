@@ -21,19 +21,16 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
     if ( ch_kmerfinderdb.name.endsWith('.gz') ) {
         UNTAR ( [[ id: ch_kmerfinderdb.getSimpleName() ], ch_kmerfinderdb] )
         ch_kmerfinderdb_untar = UNTAR.out.untar.map{ meta, file -> file }
+
         ch_versions = ch_versions.mix(UNTAR.out.versions)
     } else {
-        ch_kmerfinderdb_untar = Channel.from(params.kmerfinderdb)
+        ch_kmerfinderdb_untar = Channel.fromPath(ch_kmerfinderdb)
     }
-
-    // MODULE: Kmerfinder, QC for sample purity. Identifies reference specie and reference genome assembly for each sample.
-    reads
-        .combine(ch_kmerfinderdb_untar)
-        .map{ meta, reads, db -> tuple(meta, reads, db) }
-        .set{ ch_to_kmerfinder }
+    ch_kmerfinderdb_untar = ch_kmerfinderdb_untar.map { it -> it.toAbsolutePath() }
 
     KMERFINDER_KMERFINDER (
-        ch_to_kmerfinder,    // Channel: [ meta, reads, path_to_kmerfinderdb ]
+        reads,    // Channel: [ meta, reads ]
+        ch_kmerfinderdb_untar.collect(),
         'bacteria'           // Val: 'tax_group'
     )
     ch_kmerfinder_report    = KMERFINDER_KMERFINDER.out.report
