@@ -494,12 +494,12 @@ workflow BACASS {
     ch_busco_multiqc = Channel.empty()
     if (!params.skip_busco) {
         BUSCO (
-                ch_assembly,                          // tuple val(meta), path(fasta)
-        	params.busco_mode,                    // val mode
-        	params.busco_lineage,                 // val lineage
-        	params.busco_db_path ? file(params.busco_db_path) : [],  // path busco_lineages_path
-        	params.busco_config_file ? file(params.busco_config_file) : [],  // path config_file (optional)
-        	params.busco_clean_intermediates      // val clean_intermediates
+            ch_assembly,                                                        // tuple val(meta), path(fasta)
+            params.busco_mode,                                                  // val mode
+            params.busco_lineage,                                               // val lineage
+            params.busco_db_path ? file(params.busco_db_path) : [],             // path busco_lineages_path
+            params.busco_config_file ? file(params.busco_config_file) : [],     // path config_file (optional)
+            params.busco_clean_intermediates                                    // val clean_intermediates
         )
         ch_busco_multiqc = BUSCO.out.short_summaries_txt
         ch_versions = ch_versions.mix(BUSCO.out.versions)
