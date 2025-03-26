@@ -64,12 +64,16 @@ combines reads coming from multiple sequencing runs.
 
 ### Long Read Trimming
 
-This step performs long read trimming on Nanopore input (if provided).
+This step performs long read trimming on Nanopore input (if provided) using [PoreChop](https://github.com/rrwick/Porechop) or filtering using [Filtlong](https://github.com/rrwick/Filtlong).
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `trimming/longreads/`
+- `trimming/longreads/porechop`
+  - `*.fastq.gz`: The trimmed FASTQ file
+  - `*.log*`: Log file
+
+- `trimming/longreads/filtlong`
   - `*.fastq.gz`: The trimmed FASTQ file
   - `*.log*`: Log file
 
