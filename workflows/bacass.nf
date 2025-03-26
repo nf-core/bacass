@@ -593,7 +593,7 @@ workflow BACASS {
         ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]),
         ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]),
         ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
-	ch_busco_multiqc.collect{it[1]}.ifEmpty([]),
+	    ch_busco_multiqc.collect{it[1]}.ifEmpty([]),
         ch_prokka_txt_multiqc.collect().ifEmpty([]),
         ch_bakta_txt_multiqc.collect().ifEmpty([]),
         ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
