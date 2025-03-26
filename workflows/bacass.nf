@@ -296,7 +296,7 @@ workflow BACASS {
 
             POLISHING_PROCESS(polishing_input_ch)
 
-            ch_assembly = ch_assembly.mix(POLISHING_PROCESS.out)
+            ch_assembly = ch_assembly.mix(POLISHING_PROCESS.out.fasta)
         }
     }
 

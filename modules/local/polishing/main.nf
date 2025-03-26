@@ -10,7 +10,7 @@ process POLISHING_PROCESS {
     tuple val(meta), path(reads), path(assembly_fasta), val(max_rounds)
 
     output:
-    tuple val(meta), path("final_polished_${meta.id}.fasta")
+    tuple val(meta), path("final_polished_${meta.id}.fasta"), emit: fasta
 
     script:
     """
