@@ -273,7 +273,7 @@ workflow BACASS {
         //
         // 3. Stats with NanoStat
         //
-        NANOSTATS(FLY.out.fly_assambly_tuple)
+        NANOSTATS(SEQUIT.out.seqkit_fastq)
 
         coverage_ch = FLY.out.info_cov.map { meta, info_file ->
             def cov_value = info_file.text.split("\n")
