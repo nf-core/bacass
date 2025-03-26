@@ -247,10 +247,10 @@ workflow BACASS {
 
     if (params.assembler == 'fly') {
 
-        // 
+        //
         // 1. Remove duplicate reads name flag: skip_seqkit (default: false)
         //
-        reads_for_flye_ch = ch_for_assembly.map { meta, reads, lr -> tuple(meta, reads) }
+        reads_for_flye_ch = ch_for_assembly.map { meta, reads, lr -> tuple(meta, lr) }
 
         if (!params.skip_seqkit) {
             SEQUIT(reads_for_flye_ch, params.seqkit_mode)
@@ -281,9 +281,9 @@ workflow BACASS {
                 .collect { it.split("\t")[2] as int }[0]
             tuple(meta, cov_value)
         }
-        // 
+        //
         // 4. Round of PolishingP flag: skip_polishing (default: false)
-        // 
+        //
         if (!params.skip_polishing) {
             reads_for_flye_ch
                 .join(FLY.out.fly_assambly_tuple)
