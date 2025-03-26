@@ -18,7 +18,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Taxonomic classification](#taxonomic-classification)
 - [Assembly Output](#assembly-output)
   - [Polished assemblies](#polished-assemblies)
-- [Assembly QC with QUAST](#assembly-qc-with-quast)
+- [Assembly QC with QUAST and BUSCO](#assembly-qc-with-quast-and-busco)
 - [Annotation](#annotation)
 - [Report](#report)
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
