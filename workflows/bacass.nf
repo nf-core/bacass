@@ -59,7 +59,7 @@ include { methodsDescriptionText                } from '../subworkflows/local/ut
 */
 
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config ]
+def checkPathParamList = [ params.input, params.multiqc_config, file(params.kraken2db), params.dfast_config ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 /*
@@ -386,7 +386,7 @@ workflow BACASS {
     ch_kraken_long_multiqc  = Channel.empty()
     if ( !params.skip_kraken2 ) {
         KRAKEN2_DB_PREPARATION (
-            params.kraken2db
+            file(params.kraken2db)
         )
         ch_versions = ch_versions.mix(KRAKEN2_DB_PREPARATION.out.versions)
         KRAKEN2 (
