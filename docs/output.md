@@ -192,9 +192,10 @@ Long reads assemblies can be polished using [Medaka](https://github.com/nanopore
 
 </details>
 
-## Assembly QC with QUAST
+## Assembly QC with QUAST and BUSCO
 
 The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast) for all assemblies in one report. It reports multiple metrics including number of contigs, N50, lengths etc in form of an html report. It further creates an HTML file with integrated contig viewer (Icarus).
+It also runs [BUSCO](https://busco.ezlab.org/), a software which assess genome quality based on the presence of lineage-specific single-copy orthologs
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -206,6 +207,10 @@ The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast) fo
   - `icarus.html`: QUAST's contig browser as HTML
   - `report.html`: QUAST assembly QC as HTML report
   - `report.pdf`: QUAST assembly QC as pdf
+- `busco/`: BUSCO reports
+  - `<SampleName>_<stage>-<BuscoLineage>-busco/`: BUSCO output folder, please refer to BUSCO documentation for details.
+  - `<SampleName>_<stage>-<BuscoLineage>-busco.batch_summary.txt`: BUSCO batch summary output
+  - `short_summary.specific.<SampleName>_<stage>.{txt,json}`: BUSCO short summaries in txt and json format
 
 ![QUAST QC](images/quast.png)
 
