@@ -1,5 +1,3 @@
-PORECHOP_PORECHOP:
-  porechop: 0.2.4
 Workflow:
     nf-core/bacass: v2.5.0dev
-    Nextflow: 24.10.5
+    Nextflow: 24.10.4
