@@ -197,7 +197,7 @@ workflow BACASS {
         )
 
         filtered_long_reads = FILTLONG.out.reads
-        ch_filtlong_multiqc = FILTLONG.out.log
+        ch_filtlong_log_multiqc = FILTLONG.out.log
         ch_versions       = ch_versions.mix(FILTLONG.out.versions)
     }
 
@@ -570,6 +570,7 @@ workflow BACASS {
         ch_fastp_json_multiqc.collect{it[1]}.ifEmpty([]),
         ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]),
         ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_filtlong_log_multiqc.collect{it[1]}.ifEmpty([]),
         ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),
         ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]),
         ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]),
