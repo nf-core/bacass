@@ -27,7 +27,7 @@ process FLY {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def valid_mode = ["-nano-raw", "-nano-corr", "-pacbio-raw", "-pacbio-corr", "-meta", "-asm-coverage"]
+    def valid_mode = ["--nano-raw", "--nano-corr", "--pacbio-raw", "--pacbio-corr", "-meta", "-asm-coverage"]
     if ( !valid_mode.contains(mode) )  { error "Unrecognised mode to run Fly. Options: ${valid_mode.join(', ')}" }
 
     """
