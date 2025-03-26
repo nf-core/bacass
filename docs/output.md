@@ -193,6 +193,7 @@ Long reads assemblies can be polished using [Medaka](https://github.com/nanopore
 - `Nanopolish/`
   - `polished_genome.fa`: Polished consensus assembly in fasta format
 
+
 </details>
 
 Long read assemblies can be polished using a Polishing Process ( [Racon](https://github.com/isovic/racon) and [Minimap2](https://github.com/lh3/minimap2) ) with fastq and raw data to polish the genome based on the sequence coverage to achieve the most accurate assembly.
