@@ -154,7 +154,36 @@
                     "fa_icon": "fas fa-hotdog",
                     "description": "Which assembly polishing method to use.",
                     "help_text": "Can be used to define which polishing method is used by default for long reads.",
-                    "enum": ["medaka", "nanopolish"]
+                    "enum": ["medaka", "nanopolish", "medaka_homopolish"]
+                },
+                "homopolish_model": {
+                    "type": "string",
+                    "default": "R9.4.pkl",
+                    "fa_icon": "fas fa-hotdog",
+                    "description": "Which homopolish polishing model to use.",
+                    "help_text": "Used to define which homopolish polishing model is used for long reads after medaka.",
+                    "enum": ["R9.4.pkl", "R10.3.pkl", "pb.pkl"]
+                },
+                "homopolish_reload_sketch": {
+                    "type": "boolean",
+                    "default": false,
+                    "fa_icon": "fas fa-hotdog",
+                    "description": "Reload homopolish bacteria sketch.",
+                    "help_text": "Used to define if homopolish bacteria sketch has to be reloaded from its download webpage."
+                },
+                "homopolish_bacteria_sketch_url": {
+                    "type": "string",
+                    "default": "https://bioinfo.cs.ccu.edu.tw/bioinfo/downloads/Homopolish_Sketch/bacteria.msh.gz",
+                    "fa_icon": "fas fa-hotdog",
+                    "description": "Homopolish Bacteria Sketch download URL.",
+                    "help_text": "Can be used to define the URL for downloading the bacteria Homopolish Sketch."
+                },
+                "homopolish_bacteria_last": {
+                    "type": "string",
+                    "default": "2024-08-16",
+                    "fa_icon": "fas fa-hotdog",
+                    "description": "Homopolish Bacteria Sketch version date.",
+                    "help_text": "Defines the Homopolish Sketch version date for version reporting."
                 }
             }
         },
