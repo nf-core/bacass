@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#222](https://github.com/nf-core/bacass/pull/222) Reinstalled Dragonflye 1.1.2.
 - [#195](https://github.com/nf-core/bacass/pull/195) Update nf-core/bacass to the new nf-core 3.2.0 `TEMPLATE`.
-- [##222](https://github.com/nf-core/bacass/pull/222) Reinstalled Dragonflye 1.1.2.
 
 ### `Fixed`
 
