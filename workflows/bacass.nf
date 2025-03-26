@@ -184,7 +184,7 @@ workflow BACASS {
     //
     // MODULE: FILTLONG, filtering long reads by quality. It can take a set of long reads and produce a smaller, better subset.
     //
-    ch_filtlong_multiqc = Channel.empty()
+    ch_filtlong_log_multiqc = Channel.empty()
     if ( !('short' in params.assembly_type) && params.long_reads_filtering == 'filtlong' ) {
         if (params.assembly_type == 'hybrid') {
             ch_shortreads_4_filtlong = FASTQ_TRIM_FASTP_FASTQC.out.reads
