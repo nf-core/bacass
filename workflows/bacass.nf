@@ -187,13 +187,13 @@ workflow BACASS {
     ch_filtlong_log_multiqc = Channel.empty()
     if ( !('short' in params.assembly_type) && params.long_reads_filtering == 'filtlong' ) {
         if (params.assembly_type == 'hybrid') {
-            ch_shortreads_4_filtlong = FASTQ_TRIM_FASTP_FASTQC.out.reads
+            ch_shortreads_for_filtlong = FASTQ_TRIM_FASTP_FASTQC.out.reads.join(ch_longreads)
         } else if ( params.assembly_type == 'long' ) {
-            ch_shortreads_4_filtlong = ch_longreads.map{ meta, reads -> tuple(meta, []) }
+            ch_shortreads_for_filtlong = ch_longreads.map{ meta, lr -> tuple(meta, [], lr ) }
         }
 
         FILTLONG (
-            ch_shortreads_4_filtlong.join(ch_longreads)
+            ch_shortreads_for_filtlong
         )
 
         filtered_long_reads = FILTLONG.out.reads
