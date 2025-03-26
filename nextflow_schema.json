@@ -154,7 +154,7 @@
                 }
             }
         },
-	 "busco_options": {
+        "busco_options": {
             "title": "BUSCO options",
             "type": "object",
             "description": "Options for running BUSCO",
@@ -271,7 +271,7 @@
                     "fa_icon": "fas fa-forward",
                     "description": "Skip running `PycoQC` on long read input."
                 },
-		"skip_busco": {
+                "skip_busco": {
                     "type": "boolean",
                     "description": "Skip BUSCO",
                     "fa_icon": "fas fa-forward"
@@ -452,7 +452,7 @@
         {
             "$ref": "#/$defs/assembly_parameters"
         },
-	{
+        {
             "$ref": "#/$defs/busco_options"
         },
         {
