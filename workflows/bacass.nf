@@ -8,12 +8,14 @@
 //
 // MODULE: Local to the pipeline
 //
-include { PYCOQC                    } from '../modules/local/pycoqc'
-include { NANOPOLISH                } from '../modules/local/nanopolish'
-include { MEDAKA                    } from '../modules/local/medaka'
-include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2/db_preparation'
-include { DFAST                     } from '../modules/local/dfast'
-include { CUSTOM_MULTIQC            } from '../modules/local/custom/multiqc'
+include { PYCOQC                        } from '../modules/local/pycoqc'
+include { NANOPOLISH                    } from '../modules/local/nanopolish'
+include { MEDAKA                        } from '../modules/local/medaka'
+include { KRAKEN2_DB_PREPARATION        } from '../modules/local/kraken2/db_preparation'
+include { DFAST                         } from '../modules/local/dfast'
+include { CUSTOM_MULTIQC                } from '../modules/local/custom/multiqc'
+include { HOMOPOLISH_SKETCH_PREPARATION } from '../modules/local/homopolish/sketch_preparation'
+include { HOMOPOLISH                    } from '../modules/local/homopolish'
 
 //
 // MODULE: Installed directly from nf-core/modules
@@ -37,6 +39,7 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/krake
 include { QUAST                                 } from '../modules/nf-core/quast'
 include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast'
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
+include { GUNZIP as GUNZIP_HOMOPOLISH           } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
 
 //
@@ -304,13 +307,40 @@ workflow BACASS {
             .join( ch_assembly )
             .map { meta, sr, lr, fasta -> tuple(meta, lr, fasta) }
             .set { ch_polish_long } // channel: [ val(meta), path(lr), path(fasta) ]
-        if (params.polish_method == 'medaka'){
+        if (params.polish_method in ['medaka', 'medaka_homopolish'] ){
             //
             // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
             //
             MEDAKA ( ch_polish_long )
             ch_assembly = MEDAKA.out.assembly
             ch_versions = ch_versions.mix(MEDAKA.out.versions)
+            // If homopolish after medaka
+            if (params.polish_method == 'medaka_homopolish') {
+                // Check if sketch file already exists
+                sketch_path = "$baseDir/$params.outdir/Homopolish_sketch/bacteria.msh.gz"
+                sketch_file = new File(sketch_path)
+                // If sketch exists and not forced to reload, unzip sketch from outdir
+                if (sketch_file.exists() & !params.homopolish_reload_sketch) {
+                    ch_sketch = tuple(
+                        ch_assembly.collect{it[1]}, // meta from assembly channel
+                        sketch_path
+                    )
+                    GUNZIP_HOMOPOLISH( ch_sketch )
+                } else {
+                    // MODULE: Download bacteria sketch
+                    HOMOPOLISH_SKETCH_PREPARATION(
+                        ch_assembly.collect{it[1]}, // meta
+                        params.homopolish_bacteria_sketch_url
+                    )
+                    ch_versions = ch_versions.mix(HOMOPOLISH_SKETCH_PREPARATION.out.versions)
+                    // Unzip bacteria sketch
+                    GUNZIP_HOMOPOLISH ( HOMOPOLISH_SKETCH_PREPARATION.out.sketch )
+                }
+                // MODULE: Homopolish, polishes MEDAKA assembly
+                HOMOPOLISH ( ch_assembly, GUNZIP_HOMOPOLISH.out.gunzip )
+                ch_assembly = HOMOPOLISH.out.assembly
+                ch_versions = ch_versions.mix(HOMOPOLISH.out.versions)
+            }
         } else if (params.polish_method == 'nanopolish') {
             //
             // MODULE: Nanopolish, polishes assembly using FAST5 files
