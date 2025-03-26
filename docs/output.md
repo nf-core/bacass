@@ -70,6 +70,7 @@ This step performs long read trimming on Nanopore input (if provided) using [Por
 <summary>Output files</summary>
 
 - `trimming/longreads/porechop`
+
   - `*.fastq.gz`: The trimmed FASTQ file
   - `*.log*`: Log file
 
