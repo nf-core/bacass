@@ -36,7 +36,7 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/krake
 include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2'
 include { QUAST                                 } from '../modules/nf-core/quast'
 include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast'
-include { BUSCO_BUSCO as BUSCO                  } from '../modules/nf-core/busco/busco/main'
+include { BUSCO_BUSCO                           } from '../modules/nf-core/busco/busco/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
 include { FILTLONG                              } from '../modules/nf-core/filtlong'
@@ -493,7 +493,7 @@ workflow BACASS {
     //
     ch_busco_multiqc = Channel.empty()
     if (!params.skip_busco) {
-        BUSCO (
+        BUSCO_BUSCO (
             ch_assembly,                                                        // tuple val(meta), path(fasta)
             params.busco_mode,                                                  // val mode
             params.busco_lineage,                                               // val lineage

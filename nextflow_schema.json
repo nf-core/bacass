@@ -164,7 +164,7 @@
                 "busco_lineage": {
                     "type": "string",
                     "default": "bacteria_odb10",
-                    "description": "BUSCO lineage to use"
+                    "description": "BUSCO lineage to use, you can use other BUSCO lineages, these are available in: https://busco.ezlab.org/list_of_lineages.html"
                 },
                 "busco_mode": {
                     "type": "string",
