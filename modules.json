@@ -27,9 +27,8 @@
                     },
                     "dragonflye": {
                         "branch": "master",
-                        "git_sha": "a3ae45e99f68e513b0feb8d5f27e2fdd0d0f083d",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/dragonflye/dragonflye.diff"
+                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": ["modules"]
                     },
                     "fastp": {
                         "branch": "master",
