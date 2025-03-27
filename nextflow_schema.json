@@ -62,6 +62,20 @@
                 "skip_fastp": {
                     "type": "boolean",
                     "description": "Skip FastP"
+                },
+                "long_reads_filtering": {
+                    "type": "string",
+                    "default": "porechop",
+                    "description": "Tool for ONT read filtering"
+                },
+                "filtlong_args": {
+                    "type": "string",
+                    "description": "Arguments for running Filtlong"
+                },
+                "filtlong_minlen": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Minimun length for Filtlong to work"
                 }
             }
         },
@@ -408,9 +422,6 @@
         },
         {
             "$ref": "#/$defs/skipping_options"
-        },
-        {
-            "$ref": "#/$defs/institutional_config_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

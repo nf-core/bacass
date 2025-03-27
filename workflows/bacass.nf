@@ -38,6 +38,8 @@ include { QUAST                                 } from '../modules/nf-core/quast
 include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast'
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
+include { FILTLONG                              } from '../modules/nf-core/filtlong'
+
 
 //
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
@@ -152,6 +154,7 @@ workflow BACASS {
     ch_nanoplot_txt_multiqc = NANOPLOT.out.txt
     ch_versions = ch_versions.mix(NANOPLOT.out.versions)
 
+
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
     //
@@ -169,13 +172,35 @@ workflow BACASS {
     // MODULE: PORECHOP, quality check for nanopore reads and Quality/Length Plots
     //
     ch_porechop_log_multiqc = Channel.empty()
-    if ( params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type) ) {
+    if ((params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type)) && params.long_reads_filtering == 'porechop' ) {
         PORECHOP_PORECHOP (
             ch_longreads.dump(tag: 'longreads')
         )
+        filtered_long_reads = PORECHOP_PORECHOP.out.reads
         ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
         ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
     }
+
+    //
+    // MODULE: FILTLONG, filtering long reads by quality. It can take a set of long reads and produce a smaller, better subset.
+    //
+    ch_filtlong_log_multiqc = Channel.empty()
+    if ( !('short' in params.assembly_type) && params.long_reads_filtering == 'filtlong' ) {
+        if (params.assembly_type == 'hybrid') {
+            ch_shortreads_for_filtlong = FASTQ_TRIM_FASTP_FASTQC.out.reads.join(ch_longreads)   //tuple val(meta), file(sr), file(lr)
+        } else if ( params.assembly_type == 'long' ) {
+            ch_shortreads_for_filtlong = ch_longreads.map{ meta, lr -> tuple(meta, [], lr ) }
+        }
+
+        FILTLONG (
+            ch_shortreads_for_filtlong
+        )
+
+        filtered_long_reads = FILTLONG.out.reads
+        ch_filtlong_log_multiqc = FILTLONG.out.log
+        ch_versions       = ch_versions.mix(FILTLONG.out.versions)
+    }
+
 
     //
     // Join channels for assemblers. As samples have the same meta data, we can simply use join() to merge the channels based on this. If we only have one of the channels we insert 'NAs' which are not used in the unicycler process then subsequently, in case of short or long read only assembly.
@@ -183,10 +208,10 @@ workflow BACASS {
     //
     if(params.assembly_type == 'hybrid'){
         ch_for_kraken2_short    = FASTQ_TRIM_FASTP_FASTQC.out.reads
-        ch_for_kraken2_long     = PORECHOP_PORECHOP.out.reads
+        ch_for_kraken2_long     = filtered_long_reads
         FASTQ_TRIM_FASTP_FASTQC.out.reads
             .dump(tag: 'fastp')
-            .join(PORECHOP_PORECHOP.out.reads)
+            .join(filtered_long_reads)
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
     } else if ( params.assembly_type == 'short' ) {
@@ -199,9 +224,9 @@ workflow BACASS {
             .set { ch_for_assembly }
     } else if ( params.assembly_type == 'long' ) {
         ch_for_kraken2_short    = Channel.empty()
-        ch_for_kraken2_long     = PORECHOP_PORECHOP.out.reads
-        PORECHOP_PORECHOP.out.reads
-            .dump(tag: 'porechop')
+        ch_for_kraken2_long     = filtered_long_reads
+        filtered_long_reads
+            .dump(tag: 'filtered_long_reads')
             .map{ meta,lr -> tuple(meta,[],lr) }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
@@ -401,7 +426,7 @@ workflow BACASS {
         if( params.assembly_type == 'short' || params.assembly_type == 'hybrid' ) {
             ch_for_kmerfinder = FASTQ_TRIM_FASTP_FASTQC.out.reads
         } else if ( params.assembly_type == 'long' ) {
-            ch_for_kmerfinder = PORECHOP_PORECHOP.out.reads
+            ch_for_kmerfinder = filtered_long_reads
         }
         // RUN kmerfinder subworkflow
         KMERFINDER_SUMMARY_DOWNLOAD (
@@ -545,6 +570,7 @@ workflow BACASS {
         ch_fastp_json_multiqc.collect{it[1]}.ifEmpty([]),
         ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]),
         ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_filtlong_log_multiqc.collect{it[1]}.ifEmpty([]),
         ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),
         ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]),
         ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]),
