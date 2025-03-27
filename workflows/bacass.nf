@@ -501,8 +501,8 @@ workflow BACASS {
             params.busco_config_file ? file(params.busco_config_file) : [],     // path config_file (optional)
             params.busco_clean_intermediates                                    // val clean_intermediates
         )
-        ch_busco_multiqc = BUSCO.out.short_summaries_txt
-        ch_versions = ch_versions.mix(BUSCO.out.versions)
+        ch_busco_multiqc = BUSCO_BUSCO.out.short_summaries_txt
+        ch_versions = ch_versions.mix(BUSCO_BUSCO.out.versions)
     }
 
     //
