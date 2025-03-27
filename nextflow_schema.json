@@ -75,7 +75,7 @@
                 "filtlong_minlen": {
                     "type": "integer",
                     "default": 10,
-                    "description": "minimun length for Filtlong to work"
+                    "description": "Minimun length for Filtlong to work"
                 }
             }
         },
