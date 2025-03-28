@@ -162,6 +162,14 @@ Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.h
   - `*.fasta.gz`: Assembly in Fasta format
   - `*_assembly_consensus.fasta.gz`: Consensus assembly in fasta format (polished by Racon)
 
+Check out the [Flye documentation](https://github.com/mikolmogorov/Flye) for more information on Fly output.
+
+- `Flye`
+  -`*/assembly.fasta`       : Assembly in fasta format
+  -`*/assembly_graph.gfa`   : graf of the assemble in gfa format
+  -`*/assembly_info.txt`    : sumary of assemble
+
+
 Check out the [Miniasm documentation](https://github.com/lh3/miniasm) for more information on Miniasm output.
 
 - `Dragonflye/`
@@ -190,7 +198,13 @@ Long reads assemblies can be polished using [Medaka](https://github.com/nanopore
 - `Nanopolish/`
   - `polished_genome.fa`: Polished consensus assembly in fasta format
 
+
 </details>
+
+Long read assemblies can be polished using a Polishing Process ( [Racon](https://github.com/isovic/racon) and [Minimap2](https://github.com/lh3/minimap2) ) with fastq and raw data to polish the genome based on the sequence coverage to achieve the most accurate assembly.
+
+- `Polishin_process`
+  -`final_polished.fasta` : accurate assembly in fasta format
 
 ## Assembly QC with QUAST
 

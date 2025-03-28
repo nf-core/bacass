@@ -1,0 +1,8 @@
+name: nanostat
+channels:
+- conda-forge
+- bioconda
+dependencies:
+- pip
+- pip:
+  - NanoStat==1.6.0

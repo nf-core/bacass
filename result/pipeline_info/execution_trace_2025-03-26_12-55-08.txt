@@ -1,0 +1,3 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+2	38/2cd1e6	77377	NFCORE_BACASS:BACASS:PORECHOP_PORECHOP (TestMe)	COMPLETED	0	2025-03-26 12:55:17.025	1m 39s	1m 38s	277.5%	305.2 MB	1.9 GB	121.9 MB	118.9 MB
+1	55/2a26b6	78324	NFCORE_BACASS:BACASS:NANOPLOT (TestMe)	FAILED	129	2025-03-26 12:56:55.620	3m 33s	3m 33s	-	-	-	-	-

@@ -14,6 +14,10 @@ include { MEDAKA                    } from '../modules/local/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2/db_preparation'
 include { DFAST                     } from '../modules/local/dfast'
 include { CUSTOM_MULTIQC            } from '../modules/local/custom/multiqc'
+include { SEQUIT                    } from '../modules/local/seqkit/main'
+include { POLISHING_PROCESS         } from '../modules/local/polishing/main'
+include { NANOSTATS                 } from '../modules/local/nanostat/main'
+include { FLY                       } from '../modules/local/fly'
 
 //
 // MODULE: Installed directly from nf-core/modules
@@ -260,6 +264,65 @@ workflow BACASS {
         )
         ch_assembly = ch_assembly.mix( CANU.out.assembly.dump(tag: 'canu') )
         ch_versions = ch_versions.mix(CANU.out.versions)
+    }
+
+    //
+    // MODULE: fly and POlishing process, genome assembly, long reads
+    //
+
+    if (params.assembler == 'fly') {
+
+        //
+        // 1. Remove duplicate reads name flag: skip_seqkit (default: false)
+        //
+        reads_for_flye_ch = ch_for_assembly.map { meta, reads, lr -> tuple(meta, lr) }
+
+        if (!params.skip_seqkit) {
+            SEQUIT(reads_for_flye_ch, params.seqkit_mode)
+            reads_for_flye_ch = SEQUIT.out.seqkit_fastq.map { meta, reads -> tuple(meta, reads) }
+        }
+
+        //
+        // 2. Assembly with Fly
+        //
+
+        FLY(
+            reads_for_flye_ch,
+            params.fly_mode,
+            ch_for_assembly.map { meta, reads, lr -> meta.gsize }
+        )
+
+        ch_assembly = ch_assembly.mix(FLY.out.fly_assambly_tuple.dump(tag: 'fly'))
+        ch_versions = ch_versions.mix(FLY.out.versions)
+
+        //
+        // 3. Stats with NanoStat
+        //
+        NANOSTATS(SEQUIT.out.seqkit_fastq)
+
+        coverage_ch = FLY.out.info_cov.map { meta, info_file ->
+            def cov_value = info_file.text.split("\n")
+                .drop(1)
+                .collect { it.split("\t")[2] as int }[0]
+            tuple(meta, cov_value)
+        }
+        //
+        // 4. Round of PolishingP flag: skip_polishing (default: false)
+        //
+        if (!params.skip_polishing) {
+            reads_for_flye_ch
+                .join(FLY.out.fly_assambly_tuple)
+                .join(coverage_ch)
+                .map { meta, reads, assembly_fasta, cov_value ->
+                    def rounds = (cov_value <= params.polish_cov ? params.max_rounds : params.polish_rounds)
+                    tuple(meta, reads, assembly_fasta, rounds)
+                }
+                .set { polishing_input_ch }
+
+            POLISHING_PROCESS(polishing_input_ch)
+
+            ch_assembly = ch_assembly.mix(POLISHING_PROCESS.out.fasta)
+        }
     }
 
     //

@@ -122,7 +122,7 @@
                     "default": "unicycler",
                     "fa_icon": "fas fa-puzzle-piece",
                     "description": "The assembler to use for assembly. Use the appropriate assembler according to the chosen assembly_type. Refer to the README.md for further clarification.",
-                    "enum": ["unicycler", "canu", "miniasm", "dragonflye"]
+                    "enum": ["unicycler", "canu", "miniasm", "dragonflye", "fly"]
                 },
                 "assembly_type": {
                     "type": "string",
@@ -151,6 +151,16 @@
                     "type": "string",
                     "description": "Extra arguments for [Dragonflye](https://github.com/rpetit3/dragonflye#usage)",
                     "help_text": "This advanced option allows you to add extra arguments to Dragonflye (e.g.: `\"--gsize 2.4m\"`). For those arguments with no values/options associated (e.g.: `\"--nopolish\"` or `\"--nofilter\"`...) you need to add an extra space at the begining of the input string to params.dragonflye_args. Example: `--params.dragonflye_args ' --nopolish'`"
+                },
+                "fly_mode": {
+                "type": "string",
+                "default": "--nano-raw",
+                "description": "Mode passed to Flye assembler (e.g., --nano-raw, -nano-corr, etc)."
+                },
+                "seqkit_mode": {
+                "type": "string",
+                "default": "-s",
+                "description": "Mode passed to seqkit rmdup for duplicate removal."
                 }
             }
         },
@@ -168,6 +178,21 @@
                     "description": "Which assembly polishing method to use.",
                     "help_text": "Can be used to define which polishing method is used by default for long reads.",
                     "enum": ["medaka", "nanopolish"]
+                },
+                "polish_cov": {
+                    "type": "integer",
+                    "default": 14,
+                    "description": "Coverage threshold to determine number of polishing rounds."
+                },
+                "max_rounds": {
+                    "type": "integer",
+                    "default": 8,
+                    "description": "Number of polishing rounds to run when coverage is low (<= polish_cov)."
+                },
+                "polish_rounds": {
+                    "type": "integer",
+                    "default": 5,
+                    "description": "Number of polishing rounds to run when coverage is high (> polish_cov)."
                 }
             }
         },
@@ -247,6 +272,16 @@
                     "type": "boolean",
                     "description": "Skip MultiQC",
                     "fa_icon": "fas fa-forward"
+                },
+                "skip_seqkit": {
+                "type": "boolean",
+                "default": false,
+                "description": "Skip the seqkit duplicate removal step before Flye."
+                },
+                "skip_polishing": {
+                "type": "boolean",
+                "default": false,
+                "description": "Skip polishing of Flye assembly with polishing process."
                 }
             }
         },

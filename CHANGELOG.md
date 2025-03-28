@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#221](https://github.com/nf-core/bacass/pull/221) update fastq_trim_fastp_fastqc subworkflow and its modules.
 
 ### `Added`
+- [#226](https://github.com/nf-core/bacass/pull/226) Create a new module Polishing process, based on the sequence coverage to achieve the most accurate assembly. Inlcude (Fly + Minimap + Racon )
 
 - [#223](https://github.com/nf-core/bacass/pull/223) Add nf-core/filtlong module.
 - [#222](https://github.com/nf-core/bacass/pull/222) Reinstalled Dragonflye 1.1.2.
