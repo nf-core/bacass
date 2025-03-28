@@ -36,6 +36,7 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/krake
 include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2'
 include { QUAST                                 } from '../modules/nf-core/quast'
 include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast'
+include { BUSCO_BUSCO                           } from '../modules/nf-core/busco/busco/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
 include { FILTLONG                              } from '../modules/nf-core/filtlong'
@@ -488,6 +489,23 @@ workflow BACASS {
         .set{ ch_assembly_for_gunzip }
 
     //
+    // MODULE: BUSCO, assess genome assembly completeness
+    //
+    ch_busco_multiqc = Channel.empty()
+    if (!params.skip_busco) {
+        BUSCO_BUSCO (
+            ch_assembly,                                                        // tuple val(meta), path(fasta)
+            params.busco_mode,                                                  // val mode
+            params.busco_lineage,                                               // val lineage
+            params.busco_db_path ? file(params.busco_db_path) : [],             // path busco_lineages_path
+            params.busco_config_file ? file(params.busco_config_file) : [],     // path config_file (optional)
+            params.busco_clean_intermediates                                    // val clean_intermediates
+        )
+        ch_busco_multiqc = BUSCO_BUSCO.out.short_summaries_txt
+        ch_versions = ch_versions.mix(BUSCO_BUSCO.out.versions)
+    }
+
+    //
     // MODULE: PROKKA, gene annotation
     //
     ch_prokka_txt_multiqc = Channel.empty()
@@ -575,6 +593,7 @@ workflow BACASS {
         ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]),
         ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]),
         ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_busco_multiqc.collect{it[1]}.ifEmpty([]),
         ch_prokka_txt_multiqc.collect().ifEmpty([]),
         ch_bakta_txt_multiqc.collect().ifEmpty([]),
         ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),

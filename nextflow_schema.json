@@ -154,6 +154,39 @@
                 }
             }
         },
+        "busco_options": {
+            "title": "BUSCO options",
+            "type": "object",
+            "description": "Options for running BUSCO",
+            "default": "",
+            "fa_icon": "fas fa-dna",
+            "properties": {
+                "busco_lineage": {
+                    "type": "string",
+                    "default": "bacteria_odb10",
+                    "description": "BUSCO lineage to use, you can use other BUSCO lineages, these are available in: https://busco.ezlab.org/list_of_lineages.html"
+                },
+                "busco_mode": {
+                    "type": "string",
+                    "default": "genome",
+                    "description": "BUSCO mode to use",
+                    "enum": ["genome", "proteins", "transcriptome"]
+                },
+                "busco_db_path": {
+                    "type": ["string", "null"],
+                    "description": "Path to BUSCO database"
+                },
+                "busco_config_file": {
+                    "type": ["string", "null"],
+                    "description": "Path to BUSCO config file"
+                },
+                "busco_clean_intermediates": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Clean intermediate BUSCO files"
+                }
+            }
+        },
         "assembly_polishing": {
             "title": "Assembly Polishing",
             "type": "object",
@@ -237,6 +270,11 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-forward",
                     "description": "Skip running `PycoQC` on long read input."
+                },
+                "skip_busco": {
+                    "type": "boolean",
+                    "description": "Skip BUSCO",
+                    "fa_icon": "fas fa-forward"
                 },
                 "skip_polish": {
                     "type": "boolean",
@@ -413,6 +451,9 @@
         },
         {
             "$ref": "#/$defs/assembly_parameters"
+        },
+        {
+            "$ref": "#/$defs/busco_options"
         },
         {
             "$ref": "#/$defs/assembly_polishing"
