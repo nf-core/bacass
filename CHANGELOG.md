@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#231](https://github.com/nf-core/bacass/pull/231) Fix KmerFinder DB and relative paths resolution issues.
 - [#228](https://github.com/nf-core/bacass/pull/228) Fixed Kmerfinder database path bug.
 - [#220](https://github.com/nf-core/bacass/pull/220) Fixed local environments.
 
