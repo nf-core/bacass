@@ -59,6 +59,16 @@
                     "type": "boolean",
                     "description": "Skip FastQC"
                 },
+                "skip_nanoplot": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip Nanoplot"
+                },
+                "skip_toulligqc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip ToulligQC"
+                },
                 "skip_fastp": {
                     "type": "boolean",
                     "description": "Skip FastP"
