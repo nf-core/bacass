@@ -1,12 +1,12 @@
 //
 // Kmerfinder subworkflow for species identification & QC
 //
-include { UNTAR                     } from '../../modules/nf-core/untar/main'
-include { KMERFINDER                } from '../../modules/local/kmerfinder/main'
-include { KMERFINDER_SUMMARY        } from '../../modules/local/kmerfinder_summary/main'
-include { FIND_DOWNLOAD_REFERENCE   } from '../../modules/local/find_download_reference'
+include { UNTAR                         } from '../../../modules/nf-core/untar'
+include { KMERFINDER_KMERFINDER         } from '../../../modules/local/kmerfinder/kmerfinder'
+include { KMERFINDER_SUMMARY            } from '../../../modules/local/kmerfinder/summary'
+include { KMERFINDER_DOWNLOAD_REFERENCE } from '../../../modules/local/kmerfinder/download_reference'
 
-workflow KMERFINDER_SUBWORKFLOW {
+workflow KMERFINDER_SUMMARY_DOWNLOAD {
     take:
     reads                   // channel: [ meta, reads ]
     consensus               // channel: [ meta, consensus ]
@@ -21,24 +21,21 @@ workflow KMERFINDER_SUBWORKFLOW {
     if ( ch_kmerfinderdb.name.endsWith('.gz') ) {
         UNTAR ( [[ id: ch_kmerfinderdb.getSimpleName() ], ch_kmerfinderdb] )
         ch_kmerfinderdb_untar = UNTAR.out.untar.map{ meta, file -> file }
+
         ch_versions = ch_versions.mix(UNTAR.out.versions)
     } else {
-        ch_kmerfinderdb_untar = Channel.from(params.kmerfinderdb)
+        ch_kmerfinderdb_untar = Channel.fromPath(ch_kmerfinderdb)
     }
+    ch_kmerfinderdb_untar = ch_kmerfinderdb_untar.map { it -> it.toAbsolutePath() }
 
-    // MODULE: Kmerfinder, QC for sample purity. Identifies reference specie and reference genome assembly for each sample.
-    reads
-        .combine(ch_kmerfinderdb_untar)
-        .map{ meta, reads, db -> tuple(meta, reads, db) }
-        .set{ ch_to_kmerfinder }
-
-    KMERFINDER (
-        ch_to_kmerfinder,    // Channel: [ meta, reads, path_to_kmerfinderdb ]
+    KMERFINDER_KMERFINDER (
+        reads,    // Channel: [ meta, reads ]
+        ch_kmerfinderdb_untar.collect(),
         'bacteria'           // Val: 'tax_group'
     )
-    ch_kmerfinder_report    = KMERFINDER.out.report
-    ch_kmerfinder_json      = KMERFINDER.out.json
-    ch_versions             = ch_versions.mix(KMERFINDER.out.versions)
+    ch_kmerfinder_report    = KMERFINDER_KMERFINDER.out.report
+    ch_kmerfinder_json      = KMERFINDER_KMERFINDER.out.json
+    ch_versions             = ch_versions.mix(KMERFINDER_KMERFINDER.out.versions)
 
     // MODULE: Kmerfinder summary report. Generates a csv report file collecting all sample references.
     KMERFINDER_SUMMARY (
@@ -62,19 +59,19 @@ workflow KMERFINDER_SUBWORKFLOW {
         .set { ch_reports_byreference }
 
     // SUBWORKFLOW: For each species target, this subworkflow collects reference genome assemblies ('GCF*') and subsequently downloads the best matching reference assembly.
-    FIND_DOWNLOAD_REFERENCE (
+    KMERFINDER_DOWNLOAD_REFERENCE (
         ch_reports_byreference
             .map{ specie, meta, report_txt, fasta-> tuple(specie, report_txt) }
             .filter{ specie, report_txt -> specie != "Unknown Species" },
         ch_ncbi_assembly_metadata
     )
-    ch_versions = ch_versions.mix(FIND_DOWNLOAD_REFERENCE.out.versions)
+    ch_versions = ch_versions.mix(KMERFINDER_DOWNLOAD_REFERENCE.out.versions)
 
     // Organize sample assemblies into channels based on their corresponding reference files.
     ch_reports_byreference
-        .join(FIND_DOWNLOAD_REFERENCE.out.fna)
-        .join(FIND_DOWNLOAD_REFERENCE.out.gff)
-        .join(FIND_DOWNLOAD_REFERENCE.out.winner)
+        .join(KMERFINDER_DOWNLOAD_REFERENCE.out.fna)
+        .join(KMERFINDER_DOWNLOAD_REFERENCE.out.gff)
+        .join(KMERFINDER_DOWNLOAD_REFERENCE.out.winner)
         .map {
             specie, meta, report_txt, fasta, fna, gff, winner_id ->
                 return tuple([id: winner_id.getBaseName()], meta, fasta, fna, gff)

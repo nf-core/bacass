@@ -1,7 +1,7 @@
-process MULTIQC_CUSTOM {
+process CUSTOM_MULTIQC {
     label 'process_medium'
 
-    conda "bioconda::multiqc=1.19"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/multiqc:1.19--pyhdfd78af_0' :
         'biocontainers/multiqc:1.19--pyhdfd78af_0' }"
@@ -18,10 +18,12 @@ process MULTIQC_CUSTOM {
     path ('fastp/*')
     path ('nanoplot/*')
     path ('porechop/*')
+    path ('filtlong/*')
     path ('pycoqc/*')
     path ('kraken2_short/*')
     path ('kraken2_long/*')
     path ('quast/*')
+    path ('busco/*')
     path ('prokka/*')
     path ('bakta/*')
     path ('extra/*')

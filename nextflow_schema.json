@@ -72,6 +72,20 @@
                 "skip_fastp": {
                     "type": "boolean",
                     "description": "Skip FastP"
+                },
+                "long_reads_filtering": {
+                    "type": "string",
+                    "default": "porechop",
+                    "description": "Tool for ONT read filtering"
+                },
+                "filtlong_args": {
+                    "type": "string",
+                    "description": "Arguments for running Filtlong"
+                },
+                "filtlong_minlen": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Minimun length for Filtlong to work"
                 }
             }
         },
@@ -122,7 +136,6 @@
                 },
                 "assembly_type": {
                     "type": "string",
-                    "default": "short",
                     "fa_icon": "fas fa-fingerprint",
                     "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`.",
                     "description": "Which type of assembly to perform.",
@@ -148,6 +161,39 @@
                     "type": "string",
                     "description": "Extra arguments for [Dragonflye](https://github.com/rpetit3/dragonflye#usage)",
                     "help_text": "This advanced option allows you to add extra arguments to Dragonflye (e.g.: `\"--gsize 2.4m\"`). For those arguments with no values/options associated (e.g.: `\"--nopolish\"` or `\"--nofilter\"`...) you need to add an extra space at the begining of the input string to params.dragonflye_args. Example: `--params.dragonflye_args ' --nopolish'`"
+                }
+            }
+        },
+        "busco_options": {
+            "title": "BUSCO options",
+            "type": "object",
+            "description": "Options for running BUSCO",
+            "default": "",
+            "fa_icon": "fas fa-dna",
+            "properties": {
+                "busco_lineage": {
+                    "type": "string",
+                    "default": "bacteria_odb10",
+                    "description": "BUSCO lineage to use, you can use other BUSCO lineages, these are available in: https://busco.ezlab.org/list_of_lineages.html"
+                },
+                "busco_mode": {
+                    "type": "string",
+                    "default": "genome",
+                    "description": "BUSCO mode to use",
+                    "enum": ["genome", "proteins", "transcriptome"]
+                },
+                "busco_db_path": {
+                    "type": ["string", "null"],
+                    "description": "Path to BUSCO database"
+                },
+                "busco_config_file": {
+                    "type": ["string", "null"],
+                    "description": "Path to BUSCO config file"
+                },
+                "busco_clean_intermediates": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Clean intermediate BUSCO files"
                 }
             }
         },
@@ -235,6 +281,11 @@
                     "fa_icon": "fas fa-forward",
                     "description": "Skip running `PycoQC` on long read input."
                 },
+                "skip_busco": {
+                    "type": "boolean",
+                    "description": "Skip BUSCO",
+                    "fa_icon": "fas fa-forward"
+                },
                 "skip_polish": {
                     "type": "boolean",
                     "fa_icon": "fas fa-forward",
@@ -302,12 +353,6 @@
             "description": "Less common options for the pipeline, typically set in a config file.",
             "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
             "properties": {
-                "help": {
-                    "type": "boolean",
-                    "description": "Display help text.",
-                    "fa_icon": "fas fa-question-circle",
-                    "hidden": true
-                },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
@@ -388,17 +433,17 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "schema_ignore_params": {
-                    "type": "string",
-                    "default": "modules,igenomes_base",
-                    "hidden": true,
-                    "description": "A comma separated string of inputs the schema validation should ignore"
-                },
                 "pipelines_testdata_base_path": {
                     "type": "string",
                     "fa_icon": "far fa-check-circle",
                     "description": "Base URL or local path to location of pipeline test dataset files",
                     "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "hidden": true
+                },
+                "trace_report_suffix": {
+                    "type": "string",
+                    "fa_icon": "far calendar",
+                    "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
                 }
             }
@@ -416,6 +461,9 @@
         },
         {
             "$ref": "#/$defs/assembly_parameters"
+        },
+        {
+            "$ref": "#/$defs/busco_options"
         },
         {
             "$ref": "#/$defs/assembly_polishing"

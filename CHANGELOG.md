@@ -3,17 +3,36 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.5.0 nf-core/bacass:
+## v2.5.0dev
 
-### Added
+### `Changed`
+
+- [#221](https://github.com/nf-core/bacass/pull/221) update fastq_trim_fastp_fastqc subworkflow and its modules.
+
+### `Added`
 
 - Added [ToulligQC](https://github.com/GenomiqueENS/toulligQC) for Nanopore Raw Reads
 - Added the parameters: `--skip_nanoplot` and `--skip_toulligqc` to skip the nanopore qc steps
+- [#225](https://github.com/nf-core/bacass/pull/225) add BUSCO nf-core module.
+- [#223](https://github.com/nf-core/bacass/pull/223) Add nf-core/filtlong module.
+- [#222](https://github.com/nf-core/bacass/pull/222) Reinstalled Dragonflye 1.1.2.
+- [#195](https://github.com/nf-core/bacass/pull/195) Update nf-core/bacass to the new nf-core 3.2.0 `TEMPLATE`.
+
+### `Fixed`
+
+- [#228](https://github.com/nf-core/bacass/pull/228) Fixed Kmerfinder database path bug.
+- [#220](https://github.com/nf-core/bacass/pull/220) Fixed local environments.
+
+### `Dependencies`
+
+### `Deprecated`
+
 
 ## v2.4.0 nf-core/bacass: "Yellow Copper Crayfish" 2024/11/05
 
 ### `Changed`
 
+- [#219](https://github.com/nf-core/bacass/pull/219) Required --assembly_type
 - [#180](https://github.com/nf-core/bacass/pull/180) Bump version 2.4.0.
 - [#169](https://github.com/nf-core/bacass/pull/169) Refactored long-reads polishing step.
 - [#167](https://github.com/nf-core/bacass/pull/167) Remove params.save_merged as merged reads are not used in downstream analysis.
