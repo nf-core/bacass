@@ -27,7 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Deprecated`
 
-
 ## v2.4.0 nf-core/bacass: "Yellow Copper Crayfish" 2024/11/05
 
 ### `Changed`
