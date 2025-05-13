@@ -87,6 +87,7 @@ Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/Nan
 - `QC_Longreads/NanoPlot`: Various plots in HTML and PNG format
 
 - `QC_Longreads/PycoQC`
+
   - `*_pycoqc.html`: QC report in HTML format
   - `*_pycoqc.json`: QC report in JSON format
 
