@@ -21,7 +21,6 @@ include { MULTIQC_CUSTOM            } from '../modules/local/multiqc_custom'
 //
 include { FASTQC                                } from '../modules/nf-core/fastqc/main'
 include { CAT_FASTQ                             } from '../modules/nf-core/cat/fastq'
-include { NANOPLOT                              } from '../modules/nf-core/nanoplot/main'
 include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop/main'
 include { CANU                                  } from '../modules/nf-core/canu/main'
 include { MINIMAP2_ALIGN                        } from '../modules/nf-core/minimap2/align/main'
@@ -43,6 +42,7 @@ include { PROKKA                                } from '../modules/nf-core/prokk
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
 //
 include { FASTQ_TRIM_FASTP_FASTQC               } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc/main'
+include { QC_NANOPLOT_TOULLIGQC                 } from '../subworkflows/local/qc_nanoplot_toulliqc'
 include { KMERFINDER_SUBWORKFLOW                } from '../subworkflows/local/kmerfinder_subworkflow'
 include { BAKTA_DBDOWNLOAD_RUN                  } from '../subworkflows/local/bakta_dbdownload_run'
 include { paramsSummaryMap                      } from 'plugin/nf-schema'
@@ -146,13 +146,25 @@ workflow BACASS {
     }
 
     //
+    // SUBWORKFLOW: quality check for nanopore reads with Nanoplot and ToulligQC
+    //
+    QC_NANOPLOT_TOULLIGQC (
+        ch_longreads,
+        params.skip_nanoplot,  // skip the nanoplot qc
+        params.skip_toulligqc  // skip the toulligqc
+    )
+    ch_nanoplot_txt_multiqc = QC_NANOPLOT_TOULLIGQC.out.nanoplot_txt
+    ch_versions = ch_versions.mix(QC_NANOPLOT_TOULLIGQC.out.nanoplot_version)
+    ch_versions = ch_versions.mix(QC_NANOPLOT_TOULLIGQC.out.toulligqc_version)
+
+    //
     // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots
     //
-    NANOPLOT (
-        ch_longreads
-    )
-    ch_nanoplot_txt_multiqc = NANOPLOT.out.txt
-    ch_versions = ch_versions.mix(NANOPLOT.out.versions)
+    // NANOPLOT (
+    //     ch_longreads
+    // )
+    // ch_nanoplot_txt_multiqc = NANOPLOT.out.txt
+    // ch_versions = ch_versions.mix(NANOPLOT.out.versions)
 
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
