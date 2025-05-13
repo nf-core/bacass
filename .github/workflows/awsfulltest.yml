@@ -1,5 +1,5 @@
 name: nf-core AWS full size tests
-# This workflow is triggered on PRs opened against the master branch.
+# This workflow is triggered on PRs opened against the main/master branch.
 # It can be additionally triggered manually with GitHub actions workflow dispatch button.
 # It runs the -profile 'test_full' on AWS batch
 
@@ -11,14 +11,20 @@ on:
   workflow_dispatch:
   pull_request_review:
     types: [submitted]
+  release:
+    types: [published]
 
 jobs:
   run-platform:
     name: Run AWS full tests
-    # run only if the PR is approved by at least 2 reviewers and against the master branch or manually triggered
-    if: github.repository == 'nf-core/bacass' && github.event.review.state == 'approved' && github.event.pull_request.base.ref == 'master' || github.event_name == 'workflow_dispatch'
+    # run only if the PR is approved by at least 2 reviewers and against the master/main branch or manually triggered
+    if: github.repository == 'nf-core/bacass' && github.event.review.state == 'approved' && (github.event.pull_request.base.ref == 'master' || github.event.pull_request.base.ref == 'main') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
+      - name: Set revision variable
+        id: revision
+        run: |
+          echo "revision=${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'release') && github.sha || 'dev' }}" >> "$GITHUB_OUTPUT"
       - name: Get PR reviews
         uses: octokit/request-action@v2.x
         if: github.event_name != 'workflow_dispatch'
@@ -51,12 +57,12 @@ jobs:
           workspace_id: ${{ secrets.TOWER_WORKSPACE_ID }}
           access_token: ${{ secrets.TOWER_ACCESS_TOKEN }}
           compute_env: ${{ secrets.TOWER_COMPUTE_ENV }}
-          revision: ${{ github.sha }}
-          workdir: s3://${{ secrets.AWS_S3_BUCKET }}/work/bacass/work-${{ github.sha }}
+          revision: ${{ steps.revision.outputs.revision }}
+          workdir: s3://${{ secrets.AWS_S3_BUCKET }}/work/bacass/work-${{ steps.revision.outputs.revision }}
           parameters: |
             {
               "hook_url": "${{ secrets.MEGATESTS_ALERTS_SLACK_HOOK_URL }}",
-              "outdir": "s3://${{ secrets.AWS_S3_BUCKET }}/bacass/results-${{ github.sha }}"
+              "outdir": "s3://${{ secrets.AWS_S3_BUCKET }}/bacass/results-${{ steps.revision.outputs.revision }}"
             }
           profiles: test_full
 
