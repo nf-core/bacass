@@ -158,15 +158,6 @@ workflow BACASS {
     ch_versions = ch_versions.mix(QC_NANOPLOT_TOULLIGQC.out.toulligqc_version)
 
     //
-    // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots
-    //
-    // NANOPLOT (
-    //     ch_longreads
-    // )
-    // ch_nanoplot_txt_multiqc = NANOPLOT.out.txt
-    // ch_versions = ch_versions.mix(NANOPLOT.out.versions)
-
-    //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
     //
     // TODO: Couldn't be tested. No configuration test available (lack of fast5 file or params.skip_pycoqc=false).
