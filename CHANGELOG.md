@@ -8,9 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Changed`
 
 - [#221](https://github.com/nf-core/bacass/pull/221) update fastq_trim_fastp_fastqc subworkflow and its modules.
+- [#232](https://github.com/nf-core/bacass/pull/232) Update Template to 3.2.1
 
 ### `Added`
 
+- Added [ToulligQC](https://github.com/GenomiqueENS/toulligQC) for Nanopore Raw Reads
+- Added the parameters: `--skip_nanoplot` and `--skip_toulligqc` to skip the nanopore qc steps
 - [#225](https://github.com/nf-core/bacass/pull/225) add BUSCO nf-core module.
 - [#223](https://github.com/nf-core/bacass/pull/223) Add nf-core/filtlong module.
 - [#222](https://github.com/nf-core/bacass/pull/222) Reinstalled Dragonflye 1.1.2.

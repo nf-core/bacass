@@ -84,7 +84,7 @@ This step performs long read trimming on Nanopore input (if provided) using [Por
 
 These steps perform long read QC for input data (if provided).
 
-Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/NanoPlot) and [PycoQC](https://a-slide.github.io/pycoQC/) if you want to know more about the plots created by these tools.
+Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/NanoPlot), [PycoQC](https://a-slide.github.io/pycoQC/) and [ToulligQC](https://github.com/GenomiqueENS/toulligQC) if you want to know more about the plots created by these tools.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -92,14 +92,24 @@ Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/Nan
 - `QC_Longreads/NanoPlot`: Various plots in HTML and PNG format
 
 - `QC_Longreads/PycoQC`
+
   - `*_pycoqc.html`: QC report in HTML format
   - `*_pycoqc.json`: QC report in JSON format
+
+- QC_Longreads/ToulligQC
+  - `*/report.html`: QC report in HTML format
 
 Example plot from Nanoplot:
 
 ![Nanoplot](images/nanoplot.png)
 
+Example plot from ToulligQC:
+
+![ToulligQC](images/toulligqc.png)
+
 </details>
+
+Example
 
 ## Taxonomic classification
 
