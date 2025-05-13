@@ -71,6 +71,10 @@ jobs:
         run: |
           mkdir -p ./singularity_container_images
 
+      - name: Make a cache directory for the container images
+        run: |
+          mkdir -p ./singularity_container_images
+
       - name: Download the pipeline
         env:
           NXF_SINGULARITY_CACHEDIR: ./singularity_container_images

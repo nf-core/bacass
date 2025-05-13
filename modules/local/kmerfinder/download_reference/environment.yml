@@ -1,0 +1,5 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - conda-forge::requests=2.26.0

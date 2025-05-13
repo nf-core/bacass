@@ -15,7 +15,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { BACASS  } from './workflows/bacass'
+include { BACASS                  } from './workflows/bacass'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_bacass_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_bacass_pipeline'
 /*

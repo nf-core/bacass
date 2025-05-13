@@ -205,6 +205,8 @@ def logColours(monochrome_logs=true) {
 
 // Return a single report from an object that may be a Path or List
 //
+// Return a single report from an object that may be a Path or List
+//
 def getSingleReport(multiqc_reports) {
     if (multiqc_reports instanceof Path) {
         return multiqc_reports

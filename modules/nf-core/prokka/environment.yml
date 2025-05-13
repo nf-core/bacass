@@ -1,0 +1,6 @@
+name: prokka
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::prokka=1.14.6
