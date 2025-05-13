@@ -203,7 +203,6 @@ def logColours(monochrome_logs=true) {
     return colorcodes
 }
 
-// Return a single report from an object that may be a Path or List
 //
 // Return a single report from an object that may be a Path or List
 //
