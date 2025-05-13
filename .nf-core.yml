@@ -1,4 +1,6 @@
 lint:
+  files_unchanged:
+    - .github/PULL_REQUEST_TEMPLATE.md
   files_exist:
     - conf/igenomes.config
   nextflow_config:
