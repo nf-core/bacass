@@ -61,8 +61,15 @@ include { methodsDescriptionText                } from '../subworkflows/local/ut
 */
 
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config ]
+def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config, params.reference_fasta, params.reference_gff ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+
+if (params.reference_fasta) {
+    reference_fasta = file(params.reference_fasta, type: 'file')
+}
+if (params.reference_gff) {
+    reference_gff = file(params.reference_gff, type: 'file')
+}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -563,14 +570,14 @@ workflow BACASS {
     //
     if ( !params.skip_annotation && params.annotation_tool == 'liftoff' ) {
         // check if the reference files (fasta, gff) are given
-        if ( !params.reference_fasta && !params.reference_gff ) {
+        if ( !params.reference_fasta || !params.reference_gff ) {
             log.error "ERROR: when using liftoff for protein annotation, the `params.reference_fasta` and `params.reference_gff` must be provided."
         }
 
         LIFTOFF (
             ch_assembly,
-            params.reference_fasta ?: [],
-            params.reference_gff ?: [],
+            reference_fasta,
+            reference_gff,
             []
         )
         ch_versions = ch_versions.mix(LIFTOFF.out.versions)
