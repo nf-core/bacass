@@ -39,6 +39,7 @@ include { BUSCO_BUSCO                           } from '../modules/nf-core/busco
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
 include { FILTLONG                              } from '../modules/nf-core/filtlong'
+include { LIFTOFF                               } from '../modules/nf-core/liftoff'
 
 //
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
@@ -555,6 +556,23 @@ workflow BACASS {
             Channel.value(params.dfast_config ? file(params.dfast_config) : "")
         )
         ch_versions = ch_versions.mix(DFAST.out.versions)
+    }
+
+    //
+    // MODULE: LIFTOFF, protein annotation
+    //
+    if ( !params.skip_annotation && params.annotation_tool == 'liftoff' ) {
+        // check if the reference files (fasta, gff) are given
+        if ( !params.reference_fasta && !params.reference_gff ) {
+            log.error "ERROR: when using liftoff for protein annotation, the `params.reference_fasta` and `params.reference_gff` must be provided."
+        }
+
+        LIFTOFF (
+            ch_assembly,
+            params.reference_fasta ?: [],
+            params.reference_gff ?: []
+        )
+        ch_versions = ch_versions.mix(LIFTOFF.out.versions)
     }
 
     //
