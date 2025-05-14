@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#237](https://github.com/nf-core/bacass/issues/237) Add LIFTOFF nf-core module
 - Added [ToulligQC](https://github.com/GenomiqueENS/toulligQC) for Nanopore Raw Reads
 - Added the parameters: `--skip_nanoplot` and `--skip_toulligqc` to skip the nanopore qc steps
 - [#225](https://github.com/nf-core/bacass/pull/225) add BUSCO nf-core module.
