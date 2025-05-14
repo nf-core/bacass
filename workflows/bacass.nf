@@ -570,7 +570,8 @@ workflow BACASS {
         LIFTOFF (
             ch_assembly,
             params.reference_fasta ?: [],
-            params.reference_gff ?: []
+            params.reference_gff ?: [],
+            []
         )
         ch_versions = ch_versions.mix(LIFTOFF.out.versions)
     }
