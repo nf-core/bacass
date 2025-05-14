@@ -222,6 +222,11 @@
                     "description": "Extra arguments for prokka annotation tool.",
                     "help_text": "This advanced option allows you to pass extra arguments to Prokka (e.g. `\" --rfam\"` or `\" --genus name\"`). For this to work you need to quote the arguments and add at least one space between the arguments. Example:\n\n```bash\n--prokka_args `--rfam --genus Escherichia Coli`\n```\n"
                 },
+                "prokka_proteins": {
+                    "type": "string",
+                    "description": "FASTA file with protein sequences to be used as reference by PROKKA.",
+                    "help_text": "If a file with protein sequences are provided, PROKKA will use this to annotate proteins in the assembly."
+                },
                 "baktadb": {
                     "type": "string",
                     "description": "Path to Bakta database"

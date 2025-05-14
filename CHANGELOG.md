@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- Add protein FASTA file as an optional parameter to be used by PROKKA to annotate the assembly.
 - [#221](https://github.com/nf-core/bacass/pull/221) update fastq_trim_fastp_fastqc subworkflow and its modules.
 - [#232](https://github.com/nf-core/bacass/pull/232) Update Template to 3.2.1
 
