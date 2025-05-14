@@ -519,7 +519,6 @@ workflow BACASS {
         PROKKA (
             ch_to_prokka.filter{ meta, fasta -> !fasta.isEmpty() },
             ch_proteins,
-            //[],
             []
         )
         ch_prokka_txt_multiqc   = PROKKA.out.txt.map{ meta, prokka_txt -> [ prokka_txt ]}
