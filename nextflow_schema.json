@@ -251,6 +251,10 @@
                     "default": "assets/test_config_dfast.py",
                     "description": "Specifies a configuration file for the [DFAST](https://github.com/nigyta/dfast_core) annotation method.",
                     "help_text": "If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.  The default config (`assets/test_config_dfast.py`) is just included for testing, so if you want to annotate using DFAST, you have to create a config!"
+                },
+                "liftoff_ref_from_kmerfinder": {
+                    "type": "boolean",
+                    "description": "Use the reference files (.fasta, .gff) from kmerfinder step for LIFTOFF."
                 }
             }
         },
