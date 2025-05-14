@@ -39,6 +39,7 @@ jobs:
           - "test_long_miniasm"
           - "test_hybrid"
           - "test_dfast"
+          - "test_liftoff"
         isMaster:
           - ${{ github.base_ref == 'master' }}
         # Exclude conda and singularity on dev
