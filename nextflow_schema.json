@@ -225,7 +225,7 @@
                     "type": "string",
                     "default": "prokka",
                     "description": "The annotation method to annotate the final assembly.",
-                    "enum": ["prokka", "bakta", "dfast"]
+                    "enum": ["prokka", "bakta", "dfast", "liftoff"]
                 },
                 "prokka_args": {
                     "type": "string",
