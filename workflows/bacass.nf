@@ -104,7 +104,7 @@ workflow BACASS {
         .set { ch_fast5 }
 
     //
-    // MODULE: Concatenate FastQ files from same sample if required (shortreads)
+    // MODULE: Concatenate FastQ files from same sample if required (shortreads & longreads)
     //
     ch_shortreads
         .branch{
@@ -123,6 +123,23 @@ workflow BACASS {
         .mix( ch_shortreads_fastqs.single )
         .set { ch_shortreads_concat }
         ch_versions = ch_versions.mix(CAT_FASTQ.out.versions)
+
+    ch_longreads
+	.branch{
+	    meta, long_fastq ->
+		single: long_fastq.size() == 1
+		    return [ meta, long_fastq.flatten() ]
+		multiple: long_fastq.size() > 1
+		    return [ meta, long_fastq.flatten() ]
+	}
+	.set { ch_longreads_fastqs }
+	
+	CAT_FASTQ (
+	    ch_longreads_fastqs.multiple
+	)
+	.reads
+	.mix( ch_longreads_fastqs.single )
+	.set { ch_longreads_concat }
 
     //
     // SUBWORKFLOW: Short reads QC and trim adapters
