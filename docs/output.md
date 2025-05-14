@@ -252,6 +252,7 @@ See [Prokka's documentation](https://github.com/tseemann/prokka#output-files) fo
 See [Baktas's documentation](https://github.com/oschwengers/bakta#output) for a full description of all output files.
 
 - `DFAST/{ID}_results/`
+
   - `genome.gff`: Annotation in gff format
   - `statistics.txt`: Annotation statistics in text format
   - `protein.faa`: Protein sequences in fasta format
