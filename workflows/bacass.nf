@@ -469,8 +469,8 @@ workflow BACASS {
     if(params.skip_kmerfinder){
         QUAST(
             ch_to_quast,
-            params.reference_fasta ?: [[:],[]],
-            params.reference_gff ?: [[:],[]]
+            params.reference_fasta ? [[:], reference_fasta] : [[:],[]],
+            params.reference_gff ? [[:], reference_gff] : [[:],[]]
         )
         ch_quast_multiqc = QUAST.out.results
     } else if (!params.skip_kmerfinder) {
