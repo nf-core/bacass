@@ -569,18 +569,30 @@ workflow BACASS {
     // MODULE: LIFTOFF, protein annotation
     //
     if ( !params.skip_annotation && params.annotation_tool == 'liftoff' ) {
-        // check if the reference files (fasta, gff) are given
-        if ( !params.reference_fasta || !params.reference_gff ) {
-            log.error "ERROR: when using liftoff for protein annotation, the `params.reference_fasta` and `params.reference_gff` must be provided."
-        }
+        if (params.skip_kmerfinder || !params.liftoff_ref_from_kmerfinder) {
+            // check if the reference files (fasta, gff) are given
+            if ( !params.reference_fasta || !params.reference_gff ) {
+                log.error "ERROR: when using liftoff with user specified reference, the `params.reference_fasta` and `params.reference_gff` must be provided."
+            }
 
-        LIFTOFF (
-            ch_assembly,
-            reference_fasta,
-            reference_gff,
-            []
-        )
-        ch_versions = ch_versions.mix(LIFTOFF.out.versions)
+            LIFTOFF (
+                ch_assembly,
+                reference_fasta,
+                reference_gff,
+                []
+            )
+            ch_versions = ch_versions.mix(LIFTOFF.out.versions)
+        } else {
+            // run liftoff with kmerfinder reference
+
+            LIFTOFF (
+                ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, consensus)},
+                ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_fasta)},
+                ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_gff)},
+                []
+            )
+            ch_versions = ch_versions.mix(LIFTOFF.out.versions)
+        }
     }
 
     //
