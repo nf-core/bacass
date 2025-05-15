@@ -4,8 +4,8 @@ process UNICYCLER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/unicycler:0.5.0--py312hc60241a_5' :
-        'biocontainers/unicycler:0.5.0--py312hc60241a_5' }"
+        'https://depot.galaxyproject.org/singularity/unicycler:0.5.1--py312hdcc493e_4' :
+        'biocontainers/unicycler:0.5.1--py312hdcc493e_4' }"
 
     input:
     tuple val(meta), path(shortreads), path(longreads)
