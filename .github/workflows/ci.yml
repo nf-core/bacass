@@ -37,6 +37,7 @@ jobs:
           - "test"
           - "test_long"
           - "test_long_miniasm"
+          - "test_long_miniasm_prokka"
           - "test_hybrid"
           - "test_dfast"
         isMaster:

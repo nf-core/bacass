@@ -85,6 +85,7 @@ workflow BACASS {
             longreads: long_fastq       != 'NA' ? tuple(meta,long_fastq) : null
             fast5: fast5                != 'NA' ? tuple(meta, fast5) : null
     }
+    ch_proteins = params.prokka_proteins ? Channel.fromPath(params.prokka_proteins, checkIfExists: true)  : []
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     ch_samplesheet
         .multiMap (criteria)
@@ -520,7 +521,7 @@ workflow BACASS {
 
         PROKKA (
             ch_to_prokka.filter{ meta, fasta -> !fasta.isEmpty() },
-            [],
+            ch_proteins,
             []
         )
         ch_prokka_txt_multiqc   = PROKKA.out.txt.map{ meta, prokka_txt -> [ prokka_txt ]}

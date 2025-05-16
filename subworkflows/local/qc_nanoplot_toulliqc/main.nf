@@ -2,8 +2,8 @@
  * Nanopore Long Read QC with Nanoplot and ToulligQC
  */
 
-include { NANOPLOT  } from '../../modules/nf-core/nanoplot/main'
-include { TOULLIGQC } from '../../modules/nf-core/toulligqc/main'
+include { NANOPLOT  } from '../../../modules/nf-core/nanoplot/main'
+include { TOULLIGQC } from '../../../modules/nf-core/toulligqc/main'
 
 workflow QC_NANOPLOT_TOULLIGQC {
 
