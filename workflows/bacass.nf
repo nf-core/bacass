@@ -39,6 +39,7 @@ include { BUSCO_BUSCO                           } from '../modules/nf-core/busco
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
 include { FILTLONG                              } from '../modules/nf-core/filtlong'
+include { LIFTOFF                               } from '../modules/nf-core/liftoff'
 
 //
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
@@ -60,8 +61,15 @@ include { methodsDescriptionText                } from '../subworkflows/local/ut
 */
 
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config ]
+def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config, params.reference_fasta, params.reference_gff ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+
+if (params.reference_fasta) {
+    reference_fasta = file(params.reference_fasta, type: 'file')
+}
+if (params.reference_gff) {
+    reference_gff = file(params.reference_gff, type: 'file')
+}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -462,8 +470,8 @@ workflow BACASS {
     if(params.skip_kmerfinder){
         QUAST(
             ch_to_quast,
-            params.reference_fasta ?: [[:],[]],
-            params.reference_gff ?: [[:],[]]
+            params.reference_fasta ? [[:], reference_fasta] : [[:],[]],
+            params.reference_gff ? [[:], reference_gff] : [[:],[]]
         )
         ch_quast_multiqc = QUAST.out.results
     } else if (!params.skip_kmerfinder) {
@@ -556,6 +564,36 @@ workflow BACASS {
             Channel.value(params.dfast_config ? file(params.dfast_config) : "")
         )
         ch_versions = ch_versions.mix(DFAST.out.versions)
+    }
+
+    //
+    // MODULE: LIFTOFF, protein annotation
+    //
+    if ( !params.skip_annotation && params.annotation_tool == 'liftoff' ) {
+        if (params.skip_kmerfinder || !params.liftoff_ref_from_kmerfinder) {
+            // check if the reference files (fasta, gff) are given
+            if ( !params.reference_fasta || !params.reference_gff ) {
+                log.error "ERROR: when using liftoff with user specified reference, the `params.reference_fasta` and `params.reference_gff` must be provided."
+            }
+
+            LIFTOFF (
+                ch_assembly,
+                reference_fasta,
+                reference_gff,
+                []
+            )
+            ch_versions = ch_versions.mix(LIFTOFF.out.versions)
+        } else {
+            // run liftoff with kmerfinder reference
+
+            LIFTOFF (
+                ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, consensus)},
+                ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_fasta)},
+                ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_gff)},
+                []
+            )
+            ch_versions = ch_versions.mix(LIFTOFF.out.versions)
+        }
     }
 
     //

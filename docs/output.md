@@ -230,7 +230,7 @@ It also runs [BUSCO](https://busco.ezlab.org/), a software which assess genome q
 
 ## Annotation
 
-By default, the assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend for several annotation tools and includes rRNA and ORF predictions. Alternatively, on request, the assembly is annotated with [Bakta](https://github.com/oschwengers/bakta) or [DFAST](https://github.com/nigyta/dfast_core).
+By default, the assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend for several annotation tools and includes rRNA and ORF predictions. Alternatively, on request, the assembly is annotated with [Bakta](https://github.com/oschwengers/bakta), [DFAST](https://github.com/nigyta/dfast_core) or [LIFTOFF](https://github.com/agshumate/Liftoff).
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -252,9 +252,17 @@ See [Prokka's documentation](https://github.com/tseemann/prokka#output-files) fo
 See [Baktas's documentation](https://github.com/oschwengers/bakta#output) for a full description of all output files.
 
 - `DFAST/{ID}_results/`
+
   - `genome.gff`: Annotation in gff format
   - `statistics.txt`: Annotation statistics in text format
   - `protein.faa`: Protein sequences in fasta format
+
+- `LIFTOFF/`
+  - `{ID}.gff3`: Annotation in gff format
+  - `{ID}.polished.gff3`: Polished lifted annotations in gff format
+  - `{ID}.unmapped.txt`: Unmapped reference annotations
+
+See [LIFTOFF's documentation](https://github.com/agshumate/Liftoff#output) for a full description of all output files.
 
 </details>
 

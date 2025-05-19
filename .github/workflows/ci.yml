@@ -40,6 +40,7 @@ jobs:
           - "test_long_miniasm_prokka"
           - "test_hybrid"
           - "test_dfast"
+          - "test_liftoff"
         isMaster:
           - ${{ github.base_ref == 'master' }}
         # Exclude conda and singularity on dev
