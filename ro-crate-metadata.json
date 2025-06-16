@@ -137,7 +137,7 @@
                 }
             ],
             "dateCreated": "",
-            "dateModified": "2025-04-30T12:25:47Z",
+            "dateModified": "2025-06-03T11:01:37Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "keywords": [
                 "nf-core",
@@ -188,11 +188,11 @@
             "version": "!>=24.04.2"
         },
         {
-            "@id": "#1f4094ba-7047-4348-88dd-90b162e39f24",
+            "@id": "#fbe5391e-ee23-4a71-a2b6-286e8bfd3b05",
             "@type": "TestSuite",
             "instance": [
                 {
-                    "@id": "#bc2a442b-a0d3-4659-9557-4f951d29550e"
+                    "@id": "#8bdf64bb-c86c-4e37-943f-721555bd9760"
                 }
             ],
             "mainEntity": {
@@ -201,10 +201,10 @@
             "name": "Test suite for nf-core/bacass"
         },
         {
-            "@id": "#bc2a442b-a0d3-4659-9557-4f951d29550e",
+            "@id": "#8bdf64bb-c86c-4e37-943f-721555bd9760",
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing nf-core/bacass",
-            "resource": "repos/nf-core/bacass/actions/workflows/ci.yml",
+            "resource": "repos/nf-core/bacass/actions/workflows/nf-test.yml",
             "runsOn": {
                 "@id": "https://w3id.org/ro/terms/test#GithubService"
             },
@@ -333,7 +333,7 @@
             "@id": "https://orcid.org/0000-0002-7344-3764",
             "@type": "Person",
             "email": "wilma@gis.a-star.edu.sg",
-            "name": "Andreas WILM"
+            "name": "Andreas Wilm"
         },
         {
             "@id": "#ben.taylor@sanger.ac.uk",
