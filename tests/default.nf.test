@@ -3,7 +3,6 @@ nextflow_pipeline {
     name "Test pipeline"
     script "../main.nf"
     tag "pipeline"
-
     test("-profile test") {
 
         when {
