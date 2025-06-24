@@ -73,6 +73,10 @@
                     "type": "boolean",
                     "description": "Skip FastP"
                 },
+                "discard_trimmed_pass": {
+                    "type": "boolean",
+                    "description": "Discard reads"
+                },
                 "long_reads_filtering": {
                     "type": "string",
                     "default": "porechop",
