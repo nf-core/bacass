@@ -123,7 +123,7 @@
                     },
                     "unicycler": {
                         "branch": "master",
-                        "git_sha": "5f65b5398f3fe4b8d51d77ed90b0a8cd8c89bba7",
+                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
                         "installed_by": ["modules"]
                     },
                     "untar": {
