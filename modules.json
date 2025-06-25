@@ -32,7 +32,7 @@
                     },
                     "dragonflye": {
                         "branch": "master",
-                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "git_sha": "ccfd6f5c2e6a24f50c7713e9a5ab887056ec9416",
                         "installed_by": ["modules"]
                     },
                     "fastp": {
