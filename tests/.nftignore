@@ -27,5 +27,3 @@ QUAST/report/report.{html,pdf}
 Unicycler/*.unicycler.log
 .checkpoint
 **/.checkpoint
-
-
