@@ -32,10 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Dependencies`
 
-| Tool      | Previous version | New version |
-| --------- | ---------------- | ----------- |
-| Dragonflye| 1.1.2            | 1.2.1       |
-| Unicycler | 0.5.0            | 0.5.1       |
+| Tool       | Previous version | New version |
+| ---------- | ---------------- | ----------- |
+| Dragonflye | 1.1.2            | 1.2.1       |
+| Unicycler  | 0.5.0            | 0.5.1       |
 
 ### `Deprecated`
 
@@ -102,7 +102,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 
 - [#135](https://github.com/nf-core/bacass/pull/135) Implementation of KmerFinder subworkflow Custom Quast, and Custom MultiQC Reports:
-
   - Added KmerFinder subworkflow for read quality control, purity assessment, and sample grouping based on reference genome estimation.
   - Enhanced Quast Assembly QC to run both general and reference genome-based analyses when KmerFinder is invoked.
   - Implemented custom MultiQC module with multiqc_config.yml files for different assembly modes (short, long, hybrid).
@@ -222,7 +221,6 @@ This version merges the nf-core template updates of v2.9 and v2.10, and updates 
 ### `Deprecated`
 
 - [#86](https://github.com/nf-core/bacass/pull/86) Replace depecated modules with nf-core/modules.
-
   - Replace `local/get_software_versions.nf` with `nf-core/custom/dumpsoftwareversions.nf`
   - Replace `local/skewer` by `nf-core/fastp` and wrap fastqc plus fastp into `subworkflows/nf-core/fastq_trim_fastp_fastqc`
 
