@@ -19,7 +19,7 @@ busco/*.batch_summary.txt
 busco/short_summary.specific.bacteria_odb10.*.scaffolds.fa.{json,txt}
 trimming/shortreads/json_html/*.fastp.html
 trimming/shortreads/log/*.fastp.log
-Prokka/*/*.{gbk,sgn,log}
+Prokka/*/*.{gbk,sgn,log,err}
 QUAST/report/basic_stats/*.scaffolds_GC_content_plot.pdf
 QUAST/report/basic_stats/{GC_content_plot,Nx_plot,cumulative_plot}.pdf
 QUAST/report/quast.log
