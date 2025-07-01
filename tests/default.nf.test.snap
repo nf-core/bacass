@@ -1243,20 +1243,15 @@
                 "trimming/shortreads/log/ERR064912.fastp.log"
             ],
             [
-                "ERR044595_1_fastqc.html:md5,371b580aee2051c937ce86c35412a147",
-                "ERR044595_2_fastqc.html:md5,3fdf88ad5745750a56e5fd9b157e760b",
-                "ERR064912_1_fastqc.html:md5,6fbe32392987dc637a5f08a93060aa12",
-                "ERR064912_2_fastqc.html:md5,da561243d817aba7bec2bd7da79a4128",
-                "ERR044595_1_fastqc.html:md5,369a26fc623fae94be13ad6c89cc4a9d",
-                "ERR044595_2_fastqc.html:md5,f0a9cc433be9076e7dff3e0e7b12a729",
-                "ERR064912_1_fastqc.html:md5,7ded8cc3c78e25ce3dd8bcc7028e2905",
-                "ERR064912_2_fastqc.html:md5,9eb19ace576b88cb23b974538e5df5ef",
+                "ERR044595_1_fastqc.html:md5,fb04a0657ef1f634ab425ca46a92e9a9",
+                "ERR044595_2_fastqc.html:md5,ce015628f2975de4d44bceda5d3a7849",
+                "ERR064912_1_fastqc.html:md5,a70d508c621cf6cae28b760926b675b4",
+                "ERR064912_2_fastqc.html:md5,4f8a1a1c71c697fe6bdb57330cbede36",
                 "ERR044595.faa:md5,a2b12e3a32731f2f3480341a58f729b2",
                 "ERR044595.ffn:md5,f97bb7af9292268f1002804e37daee02",
                 "ERR044595.fna:md5,1f71b03a60830a7f0fb9bac89c0076f0",
                 "ERR044595.fsa:md5,4295493558344f3115b7f2f0fd925142",
                 "ERR044595.gff:md5,1247f301c0ca996c96c6a4b908105d06",
-                "ERR044595.sqn:md5,1d6600ebd59d84203028f5e1371dd39e",
                 "ERR044595.tbl:md5,1547575de8ecbdb0a8a8475507a3d948",
                 "ERR044595.tsv:md5,0bc2ddba28214d15015b587e2ca2ca76",
                 "ERR044595.txt:md5,938cbf90f6f42b97359af02ba57a435a",
@@ -1265,7 +1260,6 @@
                 "ERR064912.fna:md5,c537dece23f9d04122f343857d28a610",
                 "ERR064912.fsa:md5,63d00f92372a99f8ed8a683296bd1aae",
                 "ERR064912.gff:md5,3577b17be12e35d3def290bc7c6d7567",
-                "ERR064912.sqn:md5,78bec8c1ffab35b3122582845eb936a9",
                 "ERR064912.tbl:md5,14bf0e23fe460fe5442dc2573aa3235f",
                 "ERR064912.tsv:md5,dbe280cbd3eb39ffa38aae76962ffe0e",
                 "ERR064912.txt:md5,b11d4f0e519879fe6c1e73405369fcbb",
@@ -1984,6 +1978,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.2"
         },
-        "timestamp": "2025-06-27T09:48:52.331431973"
+        "timestamp": "2025-07-01T16:33:24.372012843"
     }
 }
