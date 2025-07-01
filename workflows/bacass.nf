@@ -19,7 +19,8 @@ include { CUSTOM_MULTIQC            } from '../modules/local/custom/multiqc'
 // MODULE: Installed directly from nf-core/modules
 //
 include { FASTQC                                } from '../modules/nf-core/fastqc'
-include { CAT_FASTQ                             } from '../modules/nf-core/cat/fastq'
+include { CAT_FASTQ as CAT_FASTQ_SHORT          } from '../modules/nf-core/cat/fastq'
+include { CAT_FASTQ as CAT_FASTQ_LONG           } from '../modules/nf-core/cat/fastq'
 include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop'
 include { UNICYCLER                             } from '../modules/nf-core/unicycler'
 include { CANU                                  } from '../modules/nf-core/canu'
@@ -114,25 +115,57 @@ workflow BACASS {
         .set { ch_fast5 }
 
     //
-    // MODULE: Concatenate FastQ files from same sample if required (shortreads)
+    // MODULE: Concatenate FastQ files from same sample if required
     //
-    ch_shortreads
-        .branch{
-            meta, fastqs ->
-                single: fastqs.size() == 1
-                    return [ meta, fastqs.flatten() ]
-                multiple: fastqs.size() > 1
-                    return [ meta, fastqs.flatten() ]
-        }
-        .set { ch_shortreads_fastqs }
+    if (params.assembly_type in ['short', 'hybrid']) {
+        ch_shortreads
+            .branch{
+                meta, fastqs ->
+                    single: fastqs.size() == 1
+                        return [ meta, fastqs.flatten() ]
+                    multiple: fastqs.size() > 1
+                        return [ meta, fastqs.flatten() ]
+            }
+            .set { ch_shortreads_fastqs }
 
-        CAT_FASTQ (
+        CAT_FASTQ_SHORT (
             ch_shortreads_fastqs.multiple
         )
-        .reads
-        .mix( ch_shortreads_fastqs.single )
-        .set { ch_shortreads_concat }
-        ch_versions = ch_versions.mix(CAT_FASTQ.out.versions)
+
+        ch_shortreads_concat = CAT_FASTQ_SHORT.out.reads
+            .mix( ch_shortreads_fastqs.single )
+
+        ch_versions = ch_versions.mix(CAT_FASTQ_SHORT.out.versions)
+    } else {
+        ch_shortreads_concat = Channel.empty()
+    }
+
+    if (params.assembly_type in ['long', 'hybrid']) {
+        ch_longreads
+            .map {
+                meta, long_fastq ->
+                    meta.single_end = true // Force single end in long-reads.
+                    return [ meta, long_fastq ]
+            }
+            .branch{
+                meta, long_fastqs ->
+                    single: long_fastqs.size() == 1
+                        return [ meta, long_fastqs.flatten() ]
+                    multiple: long_fastqs.size() > 1
+                        return [ meta, long_fastqs.flatten() ]
+            }
+            .set { ch_longreads_fastqs }
+
+        CAT_FASTQ_LONG (
+            ch_longreads_fastqs.multiple
+        )
+        ch_longreads_concat = CAT_FASTQ_LONG.out.reads
+            .mix( ch_longreads_fastqs.single )
+
+        ch_versions = ch_versions.mix(CAT_FASTQ_LONG.out.versions)
+    } else {
+        ch_longreads_concat = Channel.empty()
+    }
 
     //
     // SUBWORKFLOW: Short reads QC and trim adapters
@@ -159,7 +192,7 @@ workflow BACASS {
     // SUBWORKFLOW: quality check for nanopore reads with Nanoplot and ToulligQC
     //
     QC_NANOPLOT_TOULLIGQC (
-        ch_longreads,
+        ch_longreads_concat,
         params.skip_nanoplot,  // skip the nanoplot qc
         params.skip_toulligqc  // skip the toulligqc
     )
@@ -187,7 +220,7 @@ workflow BACASS {
     ch_porechop_log_multiqc = Channel.empty()
     if ((params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type)) && params.long_reads_filtering == 'porechop' ) {
         PORECHOP_PORECHOP (
-            ch_longreads.dump(tag: 'longreads')
+            ch_longreads_concat.dump(tag: 'longreads')
         )
         filtered_long_reads = PORECHOP_PORECHOP.out.reads
         ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
@@ -200,9 +233,9 @@ workflow BACASS {
     ch_filtlong_log_multiqc = Channel.empty()
     if ( !('short' in params.assembly_type) && params.long_reads_filtering == 'filtlong' ) {
         if (params.assembly_type == 'hybrid') {
-            ch_shortreads_for_filtlong = FASTQ_TRIM_FASTP_FASTQC.out.reads.join(ch_longreads)   //tuple val(meta), file(sr), file(lr)
+            ch_shortreads_for_filtlong = FASTQ_TRIM_FASTP_FASTQC.out.reads.join(ch_longreads_concat)   //tuple val(meta), file(sr), file(lr)
         } else if ( params.assembly_type == 'long' ) {
-            ch_shortreads_for_filtlong = ch_longreads.map{ meta, lr -> tuple(meta, [], lr ) }
+            ch_shortreads_for_filtlong = ch_longreads_concat.map{ meta, lr -> tuple(meta, [], lr ) }
         }
 
         FILTLONG (
@@ -645,6 +678,7 @@ workflow BACASS {
     emit:
     multiqc_report = CUSTOM_MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                        // channel: [ path(versions.yml) ]
+
 }
 
 /*
