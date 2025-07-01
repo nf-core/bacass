@@ -75,7 +75,8 @@
                 },
                 "discard_trimmed_pass": {
                     "type": "boolean",
-                    "description": "Discard reads"
+                    "default": false,
+                    "description": "Specify true to not write any reads that pass trimming thresholds.This can be used to use fastp for the output report only."
                 },
                 "long_reads_filtering": {
                     "type": "string",
