@@ -16,7 +16,6 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
 
     // Prepare kmerfinder database
     ch_kmerfinderdb           = file(params.kmerfinderdb, checkIfExists: true)
-    ch_ncbi_assembly_metadata = file(params.ncbi_assembly_metadata, checkIfExists: true)
 
     if ( ch_kmerfinderdb.name.endsWith('.gz') ) {
         UNTAR ( [[ id: ch_kmerfinderdb.getSimpleName() ], ch_kmerfinderdb] )
@@ -62,8 +61,7 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
     KMERFINDER_DOWNLOAD_REFERENCE (
         ch_reports_byreference
             .map{ specie, meta, report_txt, fasta-> tuple(specie, report_txt) }
-            .filter{ specie, report_txt -> specie != "Unknown Species" },
-        ch_ncbi_assembly_metadata
+            .filter{ specie, report_txt -> specie != "Unknown Species" }
     )
     ch_versions = ch_versions.mix(KMERFINDER_DOWNLOAD_REFERENCE.out.versions)
 

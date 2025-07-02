@@ -9,15 +9,13 @@ process KMERFINDER_DOWNLOAD_REFERENCE {
 
     input:
     tuple val(refmeta), path(reports,  stageAs: 'reports/*')
-    path(ncbi_metadata_db)
 
     output:
-    tuple val(refmeta), path("*.fna.gz")              , emit: fna
-    tuple val(refmeta), path("*.gff.gz")              , emit: gff
-    tuple val(refmeta), path("*.faa.gz")              , emit: faa
-    tuple val(refmeta), path("references_found.tsv")  , emit: references_tsv
-    tuple val(refmeta), path("*.winner")              , emit: winner
-    path "versions.yml"                               , emit: versions
+    tuple val(refmeta), path("ncbi_dataset/data/*.fna") , emit: fna
+    tuple val(refmeta), path("ncbi_dataset/data/*.gff") , emit: gff
+    tuple val(refmeta), path("references_found.tsv")    , emit: references_tsv
+    tuple val(refmeta), path("*.winner")                , emit: winner
+    path "versions.yml"                                 , emit: versions
 
     script:
     """
@@ -29,7 +27,6 @@ process KMERFINDER_DOWNLOAD_REFERENCE {
     ## Download the winner reference genome from the ncbi database
     download_reference.py \\
         -file references_found.tsv \\
-        -reference $ncbi_metadata_db \\
         -out_dir .
 
     cat <<-END_VERSIONS > versions.yml
