@@ -145,14 +145,12 @@ workflow BACASS {
             .map {
                 meta, long_fastq ->
                     meta.single_end = true // Force single end in long-reads.
-                    return [ meta, long_fastq ]
+                    return [ meta, long_fastq.flatten() ]
             }
             .branch{
                 meta, long_fastqs ->
                     single: long_fastqs.size() == 1
-                        return [ meta, long_fastqs.flatten() ]
                     multiple: long_fastqs.size() > 1
-                        return [ meta, long_fastqs.flatten() ]
             }
             .set { ch_longreads_fastqs }
 
