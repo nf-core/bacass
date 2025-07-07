@@ -3,9 +3,9 @@ nextflow_pipeline {
     name "Test pipeline"
     script "../main.nf"
     tag "pipeline"
-    profile "test"
+    profile "test_long"
 
-    test("-profile test") {
+    test("-profile test_long") {
 
         when {
             params {
