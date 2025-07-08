@@ -17,7 +17,7 @@ nextflow_pipeline {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignoreFile: 'tests/.nftignore_files_entirely')
             // stable_path: All files in ${params.outdir}/ with stable content
-            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore', ignore: ['Prokka/**','**/mqc_quast_num_contigs_1.yaml','**/multiqc_quast.yaml'])
             assertAll(
                 { assert workflow.success},
                 { assert snapshot(

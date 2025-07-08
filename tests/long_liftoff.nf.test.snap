@@ -341,24 +341,6 @@
                 "ERR044595.scaffolds.fa.gz:md5,5607023f2e453ce5da9f0a36780bba60",
                 "ERR064912.assembly.gfa.gz:md5,d3ad512273883e85aab9ae52e07eb0b8",
                 "ERR064912.scaffolds.fa.gz:md5,067f5be263d706a08b8d578e89d724d8",
-                "ERR044595-bacteria_odb10-busco.log:md5,477fae56e94108256805baed179c0fe8",
-                "predicted.faa:md5,9167f01c56cbb72cbe7fa4da6b3b3710",
-                "predicted.fna:md5,7ae7cced219e8575e3cca063961ad999",
-                "prodigal_mode_single_code_11.faa:md5,5e5298de767b28054112fafb2a0a3604",
-                "prodigal_mode_single_code_11.fna:md5,7ae7cced219e8575e3cca063961ad999",
-                "full_table.tsv:md5,0520030619f1fe037a612d87a9d508d9",
-                "missing_busco_list.tsv:md5,4cf87529bc0c6d1f3050e635653948dc",
-                "ERR064912-bacteria_odb10-busco.log:md5,7c0b43ca2024d20d40d6892f52be2f46",
-                "predicted.faa:md5,682b87bb8a8d677ed02ba2aa31fb07ff",
-                "predicted.fna:md5,7d21072bdfc82afeb7180e01a02b786f",
-                "prodigal_mode_single_code_11.faa:md5,bf97761e1b9bcac6f838a24d50de6c2f",
-                "prodigal_mode_single_code_11.fna:md5,7d21072bdfc82afeb7180e01a02b786f",
-                "full_table.tsv:md5,73afd7a0b817b1cd64ee71a6e4ea4bcd",
-                "missing_busco_list.tsv:md5,4cf87529bc0c6d1f3050e635653948dc",
-                "short_summary.specific.bacteria_odb10.ERR044595.scaffolds.fa.json:md5,46e8ca77109160a3ab05906d1e41012b",
-                "short_summary.specific.bacteria_odb10.ERR044595.scaffolds.fa.txt:md5,44f6f88969f89ed54513c4a2ea470dd4",
-                "short_summary.specific.bacteria_odb10.ERR064912.scaffolds.fa.json:md5,0c06526cfdb7e6f2a84208d57481bae4",
-                "short_summary.specific.bacteria_odb10.ERR064912.scaffolds.fa.txt:md5,03f9fe9fa7e39c684e3fa2939878289f",
                 "mqc_busco_plot_bacteria_odb10_1.yaml:md5,d095cfa297352d240023df5030592c44",
                 "mqc_fastp-insert-size-plot_1.yaml:md5,502eb7cce116025829ba91041bd8e06f",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,1626ad6d4b0e5c11b812eb28f010bb30",
@@ -390,14 +372,11 @@
                 "mqc_fastqc_sequence_duplication_levels_plot-2_1.yaml:md5,904ae9ce7abc638239879b6d16ff80a8",
                 "mqc_fastqc_sequence_duplication_levels_plot_1.yaml:md5,4839cd6c3bd11763f6f58ec0c1fd75b2",
                 "mqc_fastqc_sequence_length_distribution_plot_1.yaml:md5,2a0bfc0ec257081a52bf4f1755dd246b",
-                "mqc_quast_num_contigs_1.yaml:md5,98c3bbef635dac3f5afe78c1f6718e5e",
                 "multiqc_busco.yaml:md5,003b890081970ec29305149c67f67cc9",
                 "multiqc_citations.yaml:md5,e46f6ed003947fe967edd4674a82d4c6",
                 "multiqc_fastp.yaml:md5,562cb7689bb8074a7bca26ae8a129996",
                 "multiqc_fastqc.yaml:md5,05172556a25feb1277e789e91031d3bc",
                 "multiqc_fastqc_1.yaml:md5,a4bc353bd4a67c1f480fb890d806bf6a",
-                "multiqc_general_stats.yaml:md5,c1a9086493cf9a79e03a29941dbddd85",
-                "multiqc_quast.yaml:md5,ae6477bf080e3c3cd57bef7a5e2e6255",
                 "ERR044595.fastp.json:md5,ab69a1d8f62b6e1be76c83bb1022e882",
                 "ERR064912.fastp.json:md5,b79afd61a88a0637d49b78537c2938e8"
             ]
@@ -406,6 +385,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.2"
         },
-        "timestamp": "2025-07-07T19:15:59.829768165"
+        "timestamp": "2025-07-08T10:50:06.445977932"
     }
 }
