@@ -355,7 +355,6 @@
                 "trimming/shortreads/log/A1403KPN.fastp.log"
             ],
             [
-                "mqc_busco_plot_bacteria_odb10_1.yaml:md5,f518abd2780ef768903dd5da62548fdb",
                 "mqc_fastp-insert-size-plot_1.yaml:md5,57eb8863c4b8db578660ab66c341ab07",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,b44852244e0643016e4b83c6bd507ac3",
                 "mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,f1a231f0f1df726c86132da8866be0a8",
@@ -390,7 +389,6 @@
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,a6396edf17f4e4ed9954cda933af2b7b",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,5e89ca1f45fb6876b58ddbb20b86ea77",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,34e8d91183bd582532ac654e8e287945",
-                "multiqc_busco.yaml:md5,b645040c8295ca4a3b63af126dc68633",
                 "multiqc_citations.yaml:md5,c1962a840fe1cf1698fbdeb8953601ed",
                 "multiqc_fastp.yaml:md5,ed975e259ac4db3e9c2ba4dcd618fc18",
                 "multiqc_fastqc.yaml:md5,a0b5fd24bb745bb77511c1962086fcf0",
