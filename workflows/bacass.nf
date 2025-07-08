@@ -177,6 +177,7 @@ workflow BACASS {
         [],
         params.save_trimmed_fail,
         [],
+        params.discard_trimmed_pass,
         params.skip_fastp,
         params.skip_fastqc
         )
