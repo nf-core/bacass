@@ -1,0 +1,7 @@
+.DS_Store
+pipeline_info/*.{html,json,txt}
+busco/busco_downloads/**
+busco/**/busco_sequences/**
+busco/**/hmmer_output/**
+QC_longreads/ToulligQC/**
+QC_longreads/NanoPlot/*.log
