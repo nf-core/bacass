@@ -259,7 +259,7 @@ workflow BACASS {
         ch_for_kraken2_long     = filtered_long_reads
         FASTQ_TRIM_FASTP_FASTQC.out.reads
             .dump(tag: 'fastp')
-            .cross(filtered_long_reads) { it[0].id }  // Cross por meta.id
+            .cross(filtered_long_reads) { it[0].id }
             .map { short_tuple, long_tuple ->
                 def meta_short = short_tuple[0]
                 def short_reads = short_tuple[1]
