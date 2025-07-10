@@ -90,9 +90,9 @@ workflow BACASS {
     //
     def criteria = multiMapCriteria {
         meta, fastqs, long_fastq, fast5 ->
-            shortreads: meta.single_end != 'NA' ? tuple(meta, fastqs) : null
-            longreads: long_fastq       != 'NA' ? tuple(meta,long_fastq) : null
-            fast5: fast5                != 'NA' ? tuple(meta, fast5) : null
+            shortreads: fastqs          != 'NA' ? tuple(meta, fastqs) : null
+            longreads:  long_fastq      != 'NA' ? tuple(meta,long_fastq) : null
+            fast5:      fast5           != 'NA' ? tuple(meta, fast5) : null
     }
     ch_proteins = params.prokka_proteins ? Channel.fromPath(params.prokka_proteins, checkIfExists: true)  : []
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
@@ -144,8 +144,10 @@ workflow BACASS {
         ch_longreads
             .map {
                 meta, long_fastq ->
-                    meta.single_end = true // Force single end in long-reads.
-                    return [ meta, long_fastq.flatten() ]
+                    // Force single_end=true for long reads
+                    // Create a copy of meta to avoid interference with short reads meta (when hybrid mode is activated)
+                    def new_meta = meta + [single_end: true]  // Force single_end
+                    return [ new_meta, long_fastq.flatten() ]
             }
             .branch{
                 meta, long_fastqs ->
@@ -157,6 +159,7 @@ workflow BACASS {
         CAT_FASTQ_LONG (
             ch_longreads_fastqs.multiple
         )
+
         ch_longreads_concat = CAT_FASTQ_LONG.out.reads
             .mix( ch_longreads_fastqs.single )
 
@@ -256,7 +259,13 @@ workflow BACASS {
         ch_for_kraken2_long     = filtered_long_reads
         FASTQ_TRIM_FASTP_FASTQC.out.reads
             .dump(tag: 'fastp')
-            .join(filtered_long_reads)
+            .cross(filtered_long_reads) { it[0].id }  // Cross por meta.id
+            .map { short_tuple, long_tuple ->
+                def meta_short = short_tuple[0]
+                def short_reads = short_tuple[1]
+                def long_reads = long_tuple[1]
+                [meta_short, short_reads, long_reads]
+            }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
     } else if ( params.assembly_type == 'short' ) {
