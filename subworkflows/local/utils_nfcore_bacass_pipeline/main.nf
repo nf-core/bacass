@@ -83,7 +83,7 @@ workflow PIPELINE_INITIALISATION {
         }
         .map {
             meta, fastqs, longread, fast5 ->
-                return [ meta, fastqs, longread[0], fast5[0] ]
+                return [ meta, fastqs, longread, fast5[0] ]
         }
         .set { ch_samplesheet }
 
