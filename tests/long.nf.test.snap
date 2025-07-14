@@ -1,10 +1,13 @@
 {
     "-profile test_long": {
         "content": [
-            9,
+            10,
             {
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
+                },
+                "CAT_FASTQ_LONG": {
+                    "cat": 8.3
                 },
                 "MEDAKA": {
                     "medaka": "1.4.3"
@@ -207,17 +210,17 @@
                 "TestMe.assembly.gfa.gz:md5,23a7fcda434d9d31bc77c88db004f2f8",
                 "TestMe.scaffolds.fa.gz:md5,0f8a3007f245df1870c892ed11a60f94",
                 "mqc_nanostat_quality_dist_1.yaml:md5,56c27ab1c9f26bd454e5db00f1c3d573",
-                "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
-                "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
-                "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
+                "mqc_porechop-endtrim-barplot_1.yaml:md5,f56a725033b25e6b3d6a997fd1fb2207",
+                "mqc_porechop-middlesplit-barplot_1.yaml:md5,540c75c62a5a722c28b541fd3f78fcb5",
+                "mqc_porechop-starttrim-barplot_1.yaml:md5,660ceaeae7e228049454bf08aa65b0c2",
                 "multiqc_citations.yaml:md5,80450f20190a42871cb64f62ae9bec3e",
                 "multiqc_nanostat.yaml:md5,044869a9bdb292fbbd0e5a285739aa53"
             ]
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.04.2"
+            "nextflow": "25.04.4"
         },
-        "timestamp": "2025-07-08T08:50:25.380907714"
+        "timestamp": "2025-07-11T17:19:18.806957665"
     }
 }

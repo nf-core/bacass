@@ -1,10 +1,13 @@
 {
     "-profile test_long_miniasm": {
         "content": [
-            14,
+            15,
             {
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
+                },
+                "CAT_FASTQ_LONG": {
+                    "cat": 8.3
                 },
                 "KRAKEN2_DB_PREPARATION": {
                     "tar": null
@@ -295,9 +298,9 @@
                 "mqc_kraken-top-n-plot_Species.yaml:md5,ce232488b8bd073ed7532b87449aad01",
                 "mqc_kraken-top-n-plot_Unclassified.yaml:md5,7d49dc19372a9a73fab2adcb418ccf44",
                 "mqc_nanostat_quality_dist_1.yaml:md5,56c27ab1c9f26bd454e5db00f1c3d573",
-                "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
-                "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
-                "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
+                "mqc_porechop-endtrim-barplot_1.yaml:md5,f56a725033b25e6b3d6a997fd1fb2207",
+                "mqc_porechop-middlesplit-barplot_1.yaml:md5,540c75c62a5a722c28b541fd3f78fcb5",
+                "mqc_porechop-starttrim-barplot_1.yaml:md5,660ceaeae7e228049454bf08aa65b0c2",
                 "multiqc_busco.yaml:md5,226e0e15f4b333a589c94dc6f449c60b",
                 "multiqc_citations.yaml:md5,683ec25d002e4678ebfdee6cfe8f1930",
                 "multiqc_kraken.yaml:md5,2579a276fcd6e51c35b361fd803d6d0b",
@@ -306,8 +309,8 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.04.2"
+            "nextflow": "25.04.4"
         },
-        "timestamp": "2025-07-08T10:53:47.019782537"
+        "timestamp": "2025-07-11T17:51:14.266615807"
     }
 }

@@ -1,10 +1,13 @@
 {
     "-profile test_liftoff": {
         "content": [
-            14,
+            16,
             {
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
+                },
+                "CAT_FASTQ_SHORT": {
+                    "cat": 8.3
                 },
                 "FASTP": {
                     "fastp": "0.23.4"
@@ -383,8 +386,8 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.04.2"
+            "nextflow": "25.04.4"
         },
-        "timestamp": "2025-07-08T10:50:06.445977932"
+        "timestamp": "2025-07-11T17:47:06.648270016"
     }
 }
