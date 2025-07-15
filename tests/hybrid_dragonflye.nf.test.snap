@@ -1,16 +1,10 @@
 {
     "-profile test_hybrid_dragonflye": {
         "content": [
-            14,
+            12,
             {
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
-                },
-                "CAT_FASTQ_LONG": {
-                    "cat": 8.3
-                },
-                "CAT_FASTQ_SHORT": {
-                    "cat": 8.3
                 },
                 "DRAGONFLYE": {
                     "dragonflye": "1.1.2"
@@ -407,6 +401,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.4"
         },
-        "timestamp": "2025-07-11T17:14:14.4765868"
+        "timestamp": "2025-07-15T13:11:31.424750075"
     }
 }
