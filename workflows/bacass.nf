@@ -125,7 +125,7 @@ workflow BACASS {
                     multiple: meta.single_end ? fastqs.size() > 1 : fastqs.size() > 2
             }
             .set { ch_shortreads_fastqs }
-    
+
         CAT_FASTQ_SHORT (
             ch_shortreads_fastqs.multiple
         )
