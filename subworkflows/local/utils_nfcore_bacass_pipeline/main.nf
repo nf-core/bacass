@@ -81,7 +81,7 @@ workflow PIPELINE_INITIALISATION {
             def resolved_fastq_2    = resolveFilePath(fastq_2)
             def resolved_longreads  = resolveFilePath(longreads)
             def resolved_fast5      = resolveFilePath(fast5)
-            
+
             if (!resolved_fastq_2 || resolved_fastq_2 == 'NA') {
                 return [ meta.id, meta + [ single_end:true ], [ resolved_fastq_1 ], resolved_longreads, resolved_fast5 ]
             } else {
