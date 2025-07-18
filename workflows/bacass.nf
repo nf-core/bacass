@@ -121,10 +121,8 @@ workflow BACASS {
         ch_shortreads
             .branch{
                 meta, fastqs ->
-                    single: fastqs.size() == 1
-                        return [ meta, fastqs.flatten() ]
-                    multiple: fastqs.size() > 1
-                        return [ meta, fastqs.flatten() ]
+                    single: meta.single_end ? fastqs.size() == 1 : fastqs.size() == 2
+                    multiple: meta.single_end ? fastqs.size() > 1 : fastqs.size() > 2
             }
             .set { ch_shortreads_fastqs }
 
@@ -147,7 +145,7 @@ workflow BACASS {
                     // Force single_end=true for long reads
                     // Create a copy of meta to avoid interference with short reads meta (when hybrid mode is activated)
                     def new_meta = meta + [single_end: true]  // Force single_end
-                    return [ new_meta, long_fastq.flatten() ]
+                    return [ new_meta, long_fastq ]
             }
             .branch{
                 meta, long_fastqs ->

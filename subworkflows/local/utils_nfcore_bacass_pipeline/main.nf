@@ -64,6 +64,10 @@ workflow PIPELINE_INITIALISATION {
     )
 
     //
+    // Custom parameter validation
+    //
+    validateInputParameters()
+
     // Create channel from input file provided through params.input
     //
 
@@ -71,10 +75,17 @@ workflow PIPELINE_INITIALISATION {
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
         .map {
             meta, fastq_1, fastq_2, longreads, fast5 ->
-            if (!fastq_2) {
-                return [ meta.id, meta + [ single_end:true ], [ fastq_1 ], longreads, fast5 ]
+
+            // Resolve input paths when they are symbolic links - https://github.com/nf-core/bacass/issues/215
+            def resolved_fastq_1    = resolveFilePath(fastq_1)
+            def resolved_fastq_2    = resolveFilePath(fastq_2)
+            def resolved_longreads  = resolveFilePath(longreads)
+            def resolved_fast5      = resolveFilePath(fast5)
+
+            if (!resolved_fastq_2 || resolved_fastq_2 == 'NA') {
+                return [ meta.id, meta + [ single_end:true ], [ resolved_fastq_1 ], resolved_longreads, resolved_fast5 ]
             } else {
-                return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ], longreads, fast5 ]
+                return [ meta.id, meta + [ single_end:false ], [ resolved_fastq_1, resolved_fastq_2 ], resolved_longreads, resolved_fast5 ]
             }
         }
         .groupTuple()
@@ -83,7 +94,7 @@ workflow PIPELINE_INITIALISATION {
         }
         .map {
             meta, fastqs, longread, fast5 ->
-                return [ meta, fastqs, longread, fast5[0] ]
+                return [ meta, fastqs.flatten(), longread, fast5[0] ]
         }
         .set { ch_samplesheet }
 
@@ -195,6 +206,22 @@ def validateInputSamplesheet(input) {
 
     return [ metas[0], fastqs, longread, fast5]
 }
+
+//
+// Resolve symbolic link accesibility
+//
+def resolveFilePath(filePath) {
+    if (filePath == 'NA' || filePath == null || filePath == '') {
+        return filePath
+    }
+    try {
+        return file(filePath, checkIfExists: true)
+    } catch (Exception e) {
+        log.warn "Could not resolve file path for ${filePath}: ${e.message}"
+        return filePath
+    }
+}
+
 //
 // Generate methods description for MultiQC
 //
