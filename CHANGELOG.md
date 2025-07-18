@@ -7,7 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-
 - [#247](https://github.com/nf-core/bacass/pull/247) Update modules: unicycler (to 0.5.1) and dragonflye (to 1.2.1)
 - [#239](https://github.com/nf-core/bacass/pull/239) Add protein FASTA file as an optional parameter to be used by PROKKA to annotate the assembly. Using `--prokka_proteins` parameter to point to the protein FASTA file.
 - [#221](https://github.com/nf-core/bacass/pull/221) update fastq_trim_fastp_fastqc subworkflow and its modules.
@@ -102,7 +101,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 
 - [#135](https://github.com/nf-core/bacass/pull/135) Implementation of KmerFinder subworkflow Custom Quast, and Custom MultiQC Reports:
-
   - Added KmerFinder subworkflow for read quality control, purity assessment, and sample grouping based on reference genome estimation.
   - Enhanced Quast Assembly QC to run both general and reference genome-based analyses when KmerFinder is invoked.
   - Implemented custom MultiQC module with multiqc_config.yml files for different assembly modes (short, long, hybrid).
