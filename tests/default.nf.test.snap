@@ -28,7 +28,7 @@
                     "quast": "5.2.0"
                 },
                 "UNICYCLER": {
-                    "unicycler": "0.5.0"
+                    "unicycler": "0.5.1"
                 },
                 "Workflow": {
                     "nf-core/bacass": "v2.5.0dev"
@@ -355,26 +355,26 @@
                 "trimming/shortreads/log/ERR064912.fastp.log"
             ],
             [
-                "ERR044595.faa:md5,a2b12e3a32731f2f3480341a58f729b2",
-                "ERR044595.ffn:md5,f97bb7af9292268f1002804e37daee02",
-                "ERR044595.fna:md5,1f71b03a60830a7f0fb9bac89c0076f0",
-                "ERR044595.fsa:md5,4295493558344f3115b7f2f0fd925142",
-                "ERR044595.gff:md5,1247f301c0ca996c96c6a4b908105d06",
-                "ERR044595.tbl:md5,1547575de8ecbdb0a8a8475507a3d948",
-                "ERR044595.tsv:md5,0bc2ddba28214d15015b587e2ca2ca76",
-                "ERR044595.txt:md5,938cbf90f6f42b97359af02ba57a435a",
-                "ERR064912.faa:md5,ad90a51f3c2e923c1e97283cb0611911",
-                "ERR064912.ffn:md5,ff8266f5841588c9cc6e23bb6a152b61",
-                "ERR064912.fna:md5,c537dece23f9d04122f343857d28a610",
-                "ERR064912.fsa:md5,63d00f92372a99f8ed8a683296bd1aae",
-                "ERR064912.gff:md5,3577b17be12e35d3def290bc7c6d7567",
-                "ERR064912.tbl:md5,14bf0e23fe460fe5442dc2573aa3235f",
-                "ERR064912.tsv:md5,dbe280cbd3eb39ffa38aae76962ffe0e",
-                "ERR064912.txt:md5,b11d4f0e519879fe6c1e73405369fcbb",
-                "ERR044595.assembly.gfa.gz:md5,91e0535ae5de4613ef56eb5360bafabe",
-                "ERR044595.scaffolds.fa.gz:md5,347f2de2f160832fb7a63fe9e7730e66",
-                "ERR064912.assembly.gfa.gz:md5,d3ad512273883e85aab9ae52e07eb0b8",
-                "ERR064912.scaffolds.fa.gz:md5,067f5be263d706a08b8d578e89d724d8",
+                "ERR044595.faa:md5,302449e0a43d763b27def8e81afa7d4e",
+                "ERR044595.ffn:md5,14065366e562f5385332bb06f2d3a9a3",
+                "ERR044595.fna:md5,567484c06921e9100d73d90c883b90fc",
+                "ERR044595.fsa:md5,a360d101a51b7c62e36f39ccc9beae7d",
+                "ERR044595.gff:md5,1bbc1472a3fee1fe9f846f63b74ff403",
+                "ERR044595.tbl:md5,4df278383861e92d8bc0fffc0f6e599d",
+                "ERR044595.tsv:md5,27d76c140260e8ca353b16fc492ed4d5",
+                "ERR044595.txt:md5,49824bb55b6e942cd180478888fa3ea6",
+                "ERR064912.faa:md5,50496c00b2d8c6edb788aef62e5ddcce",
+                "ERR064912.ffn:md5,b900491ea7e0f8aadc65341f956869ce",
+                "ERR064912.fna:md5,d92d528d30458f33d3102311a77bb715",
+                "ERR064912.fsa:md5,cb83ba06350fd4bc5fe91987132c9ff2",
+                "ERR064912.gff:md5,1c844174604aa1bebb66891aedb4489f",
+                "ERR064912.tbl:md5,f31ec628679d74f2248094764ba048f6",
+                "ERR064912.tsv:md5,b917f4ec5a1144ed8dccdb3e665ee33d",
+                "ERR064912.txt:md5,a0ea358143d22a547f9445095d7fee6d",
+                "ERR044595.assembly.gfa.gz:md5,87769d87d717d40198ef9b340e4747ef",
+                "ERR044595.scaffolds.fa.gz:md5,7497990c64bc5572a77b3233bf0fa916",
+                "ERR064912.assembly.gfa.gz:md5,01faaeca29910ae15e49dd355dda556a",
+                "ERR064912.scaffolds.fa.gz:md5,0965953c184cd27da1550b757d7911c7",
                 "mqc_busco_plot_bacteria_odb10_1.yaml:md5,2e1c897d672181a4ee893911dc23b679",
                 "mqc_fastp-insert-size-plot_1.yaml:md5,1da35415f0542ec3d3f6d6d7d250ae32",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,23ace34b503b638ef667647f7de2020a",
@@ -419,6 +419,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.4"
         },
-        "timestamp": "2025-07-15T10:45:40.312244821"
+        "timestamp": "2025-07-18T10:37:14.418839062"
     }
 }
