@@ -34,7 +34,7 @@
                     "toulligqc": "2.5.6"
                 },
                 "UNICYCLER": {
-                    "unicycler": "0.5.0"
+                    "unicycler": "0.5.1"
                 },
                 "Workflow": {
                     "nf-core/bacass": "v2.5.0dev"
@@ -356,8 +356,8 @@
                 "trimming/shortreads/log/ERR044595.fastp.log"
             ],
             [
-                "ERR044595.assembly.gfa.gz:md5,bc898821edeaf84029c214d9870df9c1",
-                "ERR044595.scaffolds.fa.gz:md5,5607023f2e453ce5da9f0a36780bba60",
+                "ERR044595.assembly.gfa.gz:md5,66fcb08f315b69b3639ab394f4171f58",
+                "ERR044595.scaffolds.fa.gz:md5,cc86896317eea5e7bf1aa5321e212ee1",
                 "mqc_busco_plot_bacteria_odb10_1.yaml:md5,4226198a9300d1c31243aa23b32bf0fe",
                 "mqc_fastp-insert-size-plot_1.yaml:md5,b361f3cadd080fbb7d4eaf3255ca8587",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,77982458bba1ca892c41c2917f11517e",
@@ -406,6 +406,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.4"
         },
-        "timestamp": "2025-07-15T12:54:31.262892742"
+        "timestamp": "2025-07-18T11:03:28.605139013"
     }
 }
