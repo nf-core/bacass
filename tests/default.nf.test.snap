@@ -10,7 +10,7 @@
                     "cat": 8.3
                 },
                 "FASTP": {
-                    "fastp": "0.23.4"
+                    "fastp": "0.24.0"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -376,7 +376,7 @@
                 "ERR064912.assembly.gfa.gz:md5,01faaeca29910ae15e49dd355dda556a",
                 "ERR064912.scaffolds.fa.gz:md5,0965953c184cd27da1550b757d7911c7",
                 "mqc_busco_plot_bacteria_odb10_1.yaml:md5,2e1c897d672181a4ee893911dc23b679",
-                "mqc_fastp-insert-size-plot_1.yaml:md5,1da35415f0542ec3d3f6d6d7d250ae32",
+                "mqc_fastp-insert-size-plot_1.yaml:md5,51ab9ff6bc3fa18d08f051177475ec2e",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,23ace34b503b638ef667647f7de2020a",
                 "mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,397256e935c62fe43ff1fbdc6c99a3d9",
                 "mqc_fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,f1f18181a140f5d9d37f185911dedc8b",
@@ -408,17 +408,17 @@
                 "mqc_fastqc_sequence_length_distribution_plot_1.yaml:md5,f10ae65942541fa331f9e3f840da2478",
                 "multiqc_busco.yaml:md5,929d2dcdb46aaba007a75fd3a58ab6dd",
                 "multiqc_citations.yaml:md5,0842be95dd6c2081198f682f370c7f0a",
-                "multiqc_fastp.yaml:md5,76a57b9c81dd4125a92ad036ae9daf49",
+                "multiqc_fastp.yaml:md5,ba636d7e319a58b6d1c27c0a80fd9d34",
                 "multiqc_fastqc.yaml:md5,4c4e1b713139eef4b82e3aa9e6dbaca2",
                 "multiqc_fastqc_1.yaml:md5,1136cc6159989b6675b324746d67c3f1",
-                "ERR044595.fastp.json:md5,75fdd7a9ef72dfd289e5dc18618949b7",
-                "ERR064912.fastp.json:md5,b79afd61a88a0637d49b78537c2938e8"
+                "ERR044595.fastp.json:md5,2e65af5406f8d479e142e2fa888f4e4c",
+                "ERR064912.fastp.json:md5,82472580154ff6911376ee426f8abbac"
             ]
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.04.4"
+            "nextflow": "25.04.6"
         },
-        "timestamp": "2025-07-18T10:37:14.418839062"
+        "timestamp": "2025-07-22T14:25:48.158983519"
     }
 }

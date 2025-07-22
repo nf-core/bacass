@@ -7,7 +7,7 @@
                     "busco": "5.8.3"
                 },
                 "FASTP": {
-                    "fastp": "0.23.4"
+                    "fastp": "0.24.0"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -359,7 +359,7 @@
                 "ERR044595.assembly.gfa.gz:md5,66fcb08f315b69b3639ab394f4171f58",
                 "ERR044595.scaffolds.fa.gz:md5,cc86896317eea5e7bf1aa5321e212ee1",
                 "mqc_busco_plot_bacteria_odb10_1.yaml:md5,4226198a9300d1c31243aa23b32bf0fe",
-                "mqc_fastp-insert-size-plot_1.yaml:md5,b361f3cadd080fbb7d4eaf3255ca8587",
+                "mqc_fastp-insert-size-plot_1.yaml:md5,c1ffe695f527c9211382b2d8adb56d5b",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,77982458bba1ca892c41c2917f11517e",
                 "mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,5626ca743bfabb3807408bd4b3624c92",
                 "mqc_fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,6ac2cfdc7bc1f2c61d701a2391e2eba4",
@@ -395,17 +395,17 @@
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,e6cced8fc844dabd795ba0dfa6ec0e64",
                 "multiqc_busco.yaml:md5,cc14257553d13289016474578391216c",
                 "multiqc_citations.yaml:md5,c1962a840fe1cf1698fbdeb8953601ed",
-                "multiqc_fastp.yaml:md5,c77f208bad399ef0250ae293a9d35a4e",
+                "multiqc_fastp.yaml:md5,802298d669fc11e4b35048489bc3388d",
                 "multiqc_fastqc.yaml:md5,68dcba3602303c17700845789c5228fb",
                 "multiqc_fastqc_1.yaml:md5,9e5474735bdcccbaf6f2bd6039b1a4ee",
                 "multiqc_nanostat.yaml:md5,b15cabc45adc271cd6d355ec18244ddc",
-                "ERR044595.fastp.json:md5,ab69a1d8f62b6e1be76c83bb1022e882"
+                "ERR044595.fastp.json:md5,3a5e0e63e47280dd797cf4c1a23b316e"
             ]
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.04.4"
+            "nextflow": "25.04.6"
         },
-        "timestamp": "2025-07-18T11:03:28.605139013"
+        "timestamp": "2025-07-22T14:51:50.145282754"
     }
 }

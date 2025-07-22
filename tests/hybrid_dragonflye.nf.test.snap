@@ -10,7 +10,7 @@
                     "dragonflye": "1.2.1"
                 },
                 "FASTP": {
-                    "fastp": "0.23.4"
+                    "fastp": "0.24.0"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -356,7 +356,7 @@
                 "trimming/shortreads/log/A1403KPN.fastp.log"
             ],
             [
-                "mqc_fastp-insert-size-plot_1.yaml:md5,57eb8863c4b8db578660ab66c341ab07",
+                "mqc_fastp-insert-size-plot_1.yaml:md5,28e52d3ced515cea3b238e9c3cc0e405",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,b44852244e0643016e4b83c6bd507ac3",
                 "mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,f1a231f0f1df726c86132da8866be0a8",
                 "mqc_fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,2c7ca4a5b5dba818d6dec811a2a2a4e0",
@@ -391,17 +391,17 @@
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,5e89ca1f45fb6876b58ddbb20b86ea77",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,34e8d91183bd582532ac654e8e287945",
                 "multiqc_citations.yaml:md5,c1962a840fe1cf1698fbdeb8953601ed",
-                "multiqc_fastp.yaml:md5,ed975e259ac4db3e9c2ba4dcd618fc18",
+                "multiqc_fastp.yaml:md5,a90bab0f0162202421986bf1c11e4f07",
                 "multiqc_fastqc.yaml:md5,a0b5fd24bb745bb77511c1962086fcf0",
                 "multiqc_fastqc_1.yaml:md5,daf5f34bdacbbc207f86fc95768ce9a2",
                 "multiqc_nanostat.yaml:md5,c9346968eeb2741d12322c9a5bb0c6c2",
-                "A1403KPN.fastp.json:md5,be3cb43a0cfe3d2bd4990953318262d2"
+                "A1403KPN.fastp.json:md5,61275baa1954b309371c53a978f6a789"
             ]
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.04.4"
+            "nextflow": "25.04.6"
         },
-        "timestamp": "2025-07-18T14:32:56.652821087"
+        "timestamp": "2025-07-22T15:12:31.386549042"
     }
 }
