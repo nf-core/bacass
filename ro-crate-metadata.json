@@ -99,7 +99,7 @@
             },
             "mentions": [
                 {
-                    "@id": "#c65f7bee-04ad-452f-9169-4bd6dd8ab87d"
+                    "@id": "#2541f0c1-a08e-4235-a4ab-8091526262b6"
                 }
             ],
             "name": "nf-core/bacass"
@@ -131,17 +131,17 @@
                     "@id": "https://orcid.org/0000-0002-6503-2180"
                 },
                 {
-                    "@id": "#ben.taylor@sanger.ac.uk"
+                    "@id": "https://orcid.org/0000-0002-7344-3764"
                 },
                 {
-                    "@id": "https://orcid.org/0000-0002-7344-3764"
+                    "@id": "#ben.taylor@sanger.ac.uk"
                 },
                 {
                     "@id": "https://orcid.org/0000-0002-7344-3764"
                 }
             ],
             "dateCreated": "",
-            "dateModified": "2025-06-24T11:56:17Z",
+            "dateModified": "2025-07-22T10:17:22Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "keywords": [
                 "nf-core",
@@ -159,9 +159,6 @@
                 "MIT"
             ],
             "maintainer": [
-                {
-                    "@id": "https://orcid.org/0000-0002-6503-2180"
-                },
                 {
                     "@id": "https://orcid.org/0000-0002-7344-3764"
                 }
@@ -193,14 +190,14 @@
             "url": {
                 "@id": "https://www.nextflow.io/"
             },
-            "version": "!>=24.04.2"
+            "version": "!>=24.10.5"
         },
         {
-            "@id": "#c65f7bee-04ad-452f-9169-4bd6dd8ab87d",
+            "@id": "#2541f0c1-a08e-4235-a4ab-8091526262b6",
             "@type": "TestSuite",
             "instance": [
                 {
-                    "@id": "#27cbd02a-ee4c-4e51-a095-660992da0da5"
+                    "@id": "#9f1b3102-6917-4b25-aa93-df8ed293e4c3"
                 }
             ],
             "mainEntity": {
@@ -209,7 +206,7 @@
             "name": "Test suite for nf-core/bacass"
         },
         {
-            "@id": "#27cbd02a-ee4c-4e51-a095-660992da0da5",
+            "@id": "#9f1b3102-6917-4b25-aa93-df8ed293e4c3",
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing nf-core/bacass",
             "resource": "repos/nf-core/bacass/actions/workflows/nf-test.yml",
@@ -344,16 +341,16 @@
             "name": "Alexander Peltzer"
         },
         {
-            "@id": "#ben.taylor@sanger.ac.uk",
-            "@type": "Person",
-            "email": "ben.taylor@sanger.ac.uk",
-            "name": "Ben Taylor"
-        },
-        {
             "@id": "https://orcid.org/0000-0002-7344-3764",
             "@type": "Person",
             "email": "wilma@gis.a-star.edu.sg",
             "name": "Andreas Wilm"
+        },
+        {
+            "@id": "#ben.taylor@sanger.ac.uk",
+            "@type": "Person",
+            "email": "ben.taylor@sanger.ac.uk",
+            "name": "Ben Taylor"
         }
     ]
 }
