@@ -7,24 +7,24 @@ report_comment: >
 max_table_rows: 10000
 
 module_order:
-- fastqc:
-    name: "PREPROCESS: FastQC (raw reads)"
-    info: "This section of the report shows FastQC results for the raw reads before
-      adapter trimming."
-    path_filters:
-    - "./fastqc/*.zip"
-- fastqc:
-    name: "PREPROCESS: FastQC (trimmed reads)"
-    info: "This section of the report shows FastQC results for the processed and trimmed
-      reads."
-    path_filters:
-    - "./fastqc_trim/*.zip"
-- fastp:
-    name: "PREPROCESS: fastp (adapter trimming)"
-    info: "This section of the report shows fastp results for reads after adapter
-      and quality trimming."
-    path_filters:
-    - "./fastp/*.json"
+  - fastqc:
+      name: "PREPROCESS: FastQC (raw reads)"
+      info: "This section of the report shows FastQC results for the raw reads before
+        adapter trimming."
+      path_filters:
+        - "./fastqc/*.zip"
+  - fastqc:
+      name: "PREPROCESS: FastQC (trimmed reads)"
+      info: "This section of the report shows FastQC results for the processed and trimmed
+        reads."
+      path_filters:
+        - "./fastqc_trim/*.zip"
+  - fastp:
+      name: "PREPROCESS: fastp (adapter trimming)"
+      info: "This section of the report shows fastp results for reads after adapter
+        and quality trimming."
+      path_filters:
+        - "./fastp/*.json"
 
 report_section_order:
   "nf-core-bacass-methods-description":
@@ -38,5 +38,5 @@ export_plots: true
 
 disable_version_detection: true
 use_filename_as_sample_name:
-- prokka
-- bakta
+  - prokka
+  - bakta
