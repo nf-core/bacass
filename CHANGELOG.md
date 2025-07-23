@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- [#254](https://github.com/nf-core/bacass/pull/254) Bump version v2.5.0.
 - [#253](https://github.com/nf-core/bacass/pull/253) Update Template to 3.3.2
-- [#249] (https://github.com/nf-core/bacass/pull/249) Replace `download_reference.py` with NCBI Datasets API implementation (`removes assembly_summary_refseq.txt` dependency).
+- [#249](https://github.com/nf-core/bacass/pull/249) Replace `download_reference.py` with NCBI Datasets API implementation (`removes assembly_summary_refseq.txt` dependency).
 - [#247](https://github.com/nf-core/bacass/pull/247) Update modules: unicycler (to 0.5.1) and dragonflye (to 1.2.1)
 - [#239](https://github.com/nf-core/bacass/pull/239) Add protein FASTA file as an optional parameter to be used by PROKKA to annotate the assembly. Using `--prokka_proteins` parameter to point to the protein FASTA file.
 - [#221](https://github.com/nf-core/bacass/pull/221) update fastq_trim_fastp_fastqc subworkflow and its modules.
