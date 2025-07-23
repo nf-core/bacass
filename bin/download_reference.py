@@ -56,6 +56,7 @@ _SUFFIX_MAP: Dict[str, str] = {
 # Helpers
 # -----------------------------------------------------------------------------
 
+
 def _datasets_url(acc: str, anno_types: List[str]) -> str:
     anno_qs = "&".join(f"include_annotation_type={t}" for t in anno_types)
     return (
@@ -115,12 +116,15 @@ def _extract_files(zip_bytes: BytesIO, acc: str, out_dir: Path):
 # CLI
 # -----------------------------------------------------------------------------
 
+
 def _parse_cli(argv: list[str] | None = None):
     p = argparse.ArgumentParser(
         description="Download reference assembly via NCBI Datasets REST API with smart fallbacks",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    p.add_argument("-f", "--file", required=True, help="TSV from find_common_reference.py")
+    p.add_argument(
+        "-f", "--file", required=True, help="TSV from find_common_reference.py"
+    )
     p.add_argument("-o", "--out_dir", required=True, help="Directory to place outputs")
     return p.parse_args(argv)
 
@@ -128,6 +132,7 @@ def _parse_cli(argv: list[str] | None = None):
 # -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
+
 
 def main(argv: list[str] | None = None):
     args = _parse_cli(argv)

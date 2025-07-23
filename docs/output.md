@@ -70,7 +70,6 @@ This step performs long read trimming on Nanopore input (if provided) using [Por
 <summary>Output files</summary>
 
 - `trimming/longreads/porechop`
-
   - `*.fastq.gz`: The trimmed FASTQ file
   - `*.log*`: Log file
 
@@ -92,7 +91,6 @@ Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/Nan
 - `QC_Longreads/NanoPlot`: Various plots in HTML and PNG format
 
 - `QC_Longreads/PycoQC`
-
   - `*_pycoqc.html`: QC report in HTML format
   - `*_pycoqc.json`: QC report in JSON format
 
@@ -190,7 +188,6 @@ Long reads assemblies can be polished using [Medaka](https://github.com/nanopore
 <summary>Output files</summary>
 
 - `Medaka/*_polished_genome.fa`
-
   - `*_polished_genome.fa`: Polished consensus assembly in fasta format
   - `calls_to_draft.bam`: Alignment in bam format
   - `calls_to_draft.bam.bai`: Index of alignment
@@ -252,7 +249,6 @@ See [Prokka's documentation](https://github.com/tseemann/prokka#output-files) fo
 See [Baktas's documentation](https://github.com/oschwengers/bakta#output) for a full description of all output files.
 
 - `DFAST/{ID}_results/`
-
   - `genome.gff`: Annotation in gff format
   - `statistics.txt`: Annotation statistics in text format
   - `protein.faa`: Protein sequences in fasta format
