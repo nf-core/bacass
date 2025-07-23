@@ -173,11 +173,10 @@ def validateInputParameters() {
 
     // Check kmerfinder dependencies
     if (!params.skip_kmerfinder) {
-        if (!params.kmerfinderdb || !params.ncbi_assembly_metadata) {
+        if (!params.kmerfinderdb ) {
             def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Kmerfinder database and NCBI assembly metadata not provided.\n" +
-                "  Please specify the '--kmerfinderdb' and '--ncbi_assembly_metadata' parameters.\n" +
-                "  Both are required to run Kmerfinder.\n" +
+                "  Kmerfinder database not provided.\n" +
+                "  Please specify the '--kmerfinderdb'  parameter to provide the necessary database.\n"
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             error(error_string)
         }

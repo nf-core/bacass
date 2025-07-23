@@ -118,10 +118,6 @@
                 "reference_gff": {
                     "type": "string",
                     "description": "Reference GFF file."
-                },
-                "ncbi_assembly_metadata": {
-                    "type": "string",
-                    "description": "Master file (*.txt) containing a summary of assemblies available in GeneBank or RefSeq. See: https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_refseq.txt"
                 }
             }
         },
