@@ -28,7 +28,7 @@
                     "toulligqc": "2.5.6"
                 },
                 "Workflow": {
-                    "nf-core/bacass": "v2.5.0dev"
+                    "nf-core/bacass": "v2.5.0"
                 }
             },
             [
@@ -214,8 +214,8 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.04.4"
+            "nextflow": "25.04.6"
         },
-        "timestamp": "2025-07-18T14:55:09.126313258"
+        "timestamp": "2025-07-23T18:02:20.041973398"
     }
 }

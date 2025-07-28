@@ -31,7 +31,7 @@
                     "unicycler": "0.5.1"
                 },
                 "Workflow": {
-                    "nf-core/bacass": "v2.5.0dev"
+                    "nf-core/bacass": "v2.5.0"
                 }
             },
             [
@@ -419,6 +419,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-07-22T14:25:48.158983519"
+        "timestamp": "2025-07-23T16:54:20.71486508"
     }
 }

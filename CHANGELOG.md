@@ -3,12 +3,14 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.5.0dev
+## v2.5.0 nf-core/bacass: "Blue Mercury Sturgeon" 2025/07/23
 
 ### `Changed`
 
-- [#253](https://github.com/nf-core/bacass/pull/253) Update Template to 3.3.2
-- [#249] (https://github.com/nf-core/bacass/pull/249) Replace `download_reference.py` with NCBI Datasets API implementation (`removes assembly_summary_refseq.txt` dependency).
+- [#254](https://github.com/nf-core/bacass/pull/254) Bump version v2.5.0.
+- [#253](https://github.com/nf-core/bacass/pull/253) Update Template to 3.3.2.
+- [#252](https://github.com/nf-core/bacass/pull/252) Update nf-core/bacass to the new nf-core 3.2.0 `TEMPLATE`.
+- [#249](https://github.com/nf-core/bacass/pull/249) Replace `download_reference.py` with NCBI Datasets API implementation (`removes assembly_summary_refseq.txt` dependency).
 - [#247](https://github.com/nf-core/bacass/pull/247) Update modules: unicycler (to 0.5.1) and dragonflye (to 1.2.1)
 - [#239](https://github.com/nf-core/bacass/pull/239) Add protein FASTA file as an optional parameter to be used by PROKKA to annotate the assembly. Using `--prokka_proteins` parameter to point to the protein FASTA file.
 - [#221](https://github.com/nf-core/bacass/pull/221) update fastq_trim_fastp_fastqc subworkflow and its modules.
@@ -23,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#225](https://github.com/nf-core/bacass/pull/225) add BUSCO nf-core module.
 - [#223](https://github.com/nf-core/bacass/pull/223) Add nf-core/filtlong module.
 - [#222](https://github.com/nf-core/bacass/pull/222) Reinstalled Dragonflye 1.1.2.
-- [#195](https://github.com/nf-core/bacass/pull/195),[#252](https://github.com/nf-core/bacass/pull/252) Update nf-core/bacass to the new nf-core 3.2.0 `TEMPLATE` and added nf-test
+- [#195](https://github.com/nf-core/bacass/pull/195) Added nf-test.
 
 ### `Fixed`
 
