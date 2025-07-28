@@ -17,7 +17,7 @@
                     },
                     "busco/busco": {
                         "branch": "master",
-                        "git_sha": "34ad4b80436e33ebac07e53a8e19af30fb00a684",
+                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
                         "installed_by": ["modules"]
                     },
                     "canu": {
