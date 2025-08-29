@@ -22,7 +22,7 @@
                     "medaka": "1.4.3"
                 },
                 "NANOPLOT": {
-                    "nanoplot": "1.41.6"
+                    "nanoplot": "1.46.1"
                 },
                 "PORECHOP_PORECHOP": {
                     "porechop": "0.2.4"
@@ -74,20 +74,13 @@
                 "QC_longreads/NanoPlot",
                 "QC_longreads/NanoPlot/A1403KPN.txt",
                 "QC_longreads/NanoPlot/LengthvsQualityScatterPlot_dot.html",
-                "QC_longreads/NanoPlot/LengthvsQualityScatterPlot_dot.png",
                 "QC_longreads/NanoPlot/LengthvsQualityScatterPlot_kde.html",
-                "QC_longreads/NanoPlot/LengthvsQualityScatterPlot_kde.png",
                 "QC_longreads/NanoPlot/NanoPlot-report.html",
                 "QC_longreads/NanoPlot/Non_weightedHistogramReadlength.html",
-                "QC_longreads/NanoPlot/Non_weightedHistogramReadlength.png",
                 "QC_longreads/NanoPlot/Non_weightedLogTransformed_HistogramReadlength.html",
-                "QC_longreads/NanoPlot/Non_weightedLogTransformed_HistogramReadlength.png",
                 "QC_longreads/NanoPlot/WeightedHistogramReadlength.html",
-                "QC_longreads/NanoPlot/WeightedHistogramReadlength.png",
                 "QC_longreads/NanoPlot/WeightedLogTransformed_HistogramReadlength.html",
-                "QC_longreads/NanoPlot/WeightedLogTransformed_HistogramReadlength.png",
                 "QC_longreads/NanoPlot/Yield_By_Length.html",
-                "QC_longreads/NanoPlot/Yield_By_Length.png",
                 "QC_longreads/ToulligQC",
                 "QUAST",
                 "QUAST/report",
@@ -176,7 +169,6 @@
                 "multiqc/multiqc_data/mqc_fastqc_sequence_duplication_levels_plot_1.yaml",
                 "multiqc/multiqc_data/mqc_fastqc_sequence_length_distribution_plot-2_1.yaml",
                 "multiqc/multiqc_data/mqc_fastqc_sequence_length_distribution_plot_1.yaml",
-                "multiqc/multiqc_data/mqc_nanostat_quality_dist_1.yaml",
                 "multiqc/multiqc_data/mqc_porechop-endtrim-barplot_1.yaml",
                 "multiqc/multiqc_data/mqc_porechop-middlesplit-barplot_1.yaml",
                 "multiqc/multiqc_data/mqc_porechop-starttrim-barplot_1.yaml",
@@ -233,8 +225,6 @@
                 "multiqc/multiqc_plots/pdf/mqc_fastqc_sequence_duplication_levels_plot_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_fastqc_sequence_length_distribution_plot-2_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_fastqc_sequence_length_distribution_plot_1.pdf",
-                "multiqc/multiqc_plots/pdf/mqc_nanostat_quality_dist_1.pdf",
-                "multiqc/multiqc_plots/pdf/mqc_nanostat_quality_dist_1_pc.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_porechop-endtrim-barplot_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_porechop-endtrim-barplot_1_pc.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_porechop-middlesplit-barplot_1.pdf",
@@ -281,8 +271,6 @@
                 "multiqc/multiqc_plots/png/mqc_fastqc_sequence_duplication_levels_plot_1.png",
                 "multiqc/multiqc_plots/png/mqc_fastqc_sequence_length_distribution_plot-2_1.png",
                 "multiqc/multiqc_plots/png/mqc_fastqc_sequence_length_distribution_plot_1.png",
-                "multiqc/multiqc_plots/png/mqc_nanostat_quality_dist_1.png",
-                "multiqc/multiqc_plots/png/mqc_nanostat_quality_dist_1_pc.png",
                 "multiqc/multiqc_plots/png/mqc_porechop-endtrim-barplot_1.png",
                 "multiqc/multiqc_plots/png/mqc_porechop-endtrim-barplot_1_pc.png",
                 "multiqc/multiqc_plots/png/mqc_porechop-middlesplit-barplot_1.png",
@@ -329,8 +317,6 @@
                 "multiqc/multiqc_plots/svg/mqc_fastqc_sequence_duplication_levels_plot_1.svg",
                 "multiqc/multiqc_plots/svg/mqc_fastqc_sequence_length_distribution_plot-2_1.svg",
                 "multiqc/multiqc_plots/svg/mqc_fastqc_sequence_length_distribution_plot_1.svg",
-                "multiqc/multiqc_plots/svg/mqc_nanostat_quality_dist_1.svg",
-                "multiqc/multiqc_plots/svg/mqc_nanostat_quality_dist_1_pc.svg",
                 "multiqc/multiqc_plots/svg/mqc_porechop-endtrim-barplot_1.svg",
                 "multiqc/multiqc_plots/svg/mqc_porechop-endtrim-barplot_1_pc.svg",
                 "multiqc/multiqc_plots/svg/mqc_porechop-middlesplit-barplot_1.svg",
@@ -386,7 +372,6 @@
                 "mqc_fastqc_sequence_duplication_levels_plot_1.yaml:md5,48bcfc30b81a4a77fca5ff31b97a1b94",
                 "mqc_fastqc_sequence_length_distribution_plot-2_1.yaml:md5,d13a473647db97788ee55c40278e8884",
                 "mqc_fastqc_sequence_length_distribution_plot_1.yaml:md5,b61ee98db5dbee6c5e74e7e77567f9c2",
-                "mqc_nanostat_quality_dist_1.yaml:md5,e9b3d36de04919a03bde805a3e2df7a1",
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,a6396edf17f4e4ed9954cda933af2b7b",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,5e89ca1f45fb6876b58ddbb20b86ea77",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,34e8d91183bd582532ac654e8e287945",
@@ -394,7 +379,7 @@
                 "multiqc_fastp.yaml:md5,a90bab0f0162202421986bf1c11e4f07",
                 "multiqc_fastqc.yaml:md5,a0b5fd24bb745bb77511c1962086fcf0",
                 "multiqc_fastqc_1.yaml:md5,daf5f34bdacbbc207f86fc95768ce9a2",
-                "multiqc_nanostat.yaml:md5,c9346968eeb2741d12322c9a5bb0c6c2",
+                "multiqc_nanostat.yaml:md5,cff0c79f74776d0e8c451e87bb332d2d",
                 "A1403KPN.fastp.json:md5,61275baa1954b309371c53a978f6a789"
             ]
         ],
@@ -402,6 +387,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-07-23T17:40:22.075699666"
+        "timestamp": "2025-08-29T13:24:09.183086936"
     }
 }
