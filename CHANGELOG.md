@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- [#257](https://github.com/nf-core/bacass/pull/257) Update module Nanoplot (to 1.46.1).
 - [#254](https://github.com/nf-core/bacass/pull/254) Bump version v2.5.0.
 - [#253](https://github.com/nf-core/bacass/pull/253) Update Template to 3.3.2.
 - [#252](https://github.com/nf-core/bacass/pull/252) Update nf-core/bacass to the new nf-core 3.2.0 `TEMPLATE`.
@@ -40,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | ---------- | ---------------- | ----------- |
 | Dragonflye | 1.1.2            | 1.2.1       |
 | Unicycler  | 0.5.0            | 0.5.1       |
+| Nanoplot   | 1.41.6           | 1.46.1      |
 
 ### `Deprecated`
 

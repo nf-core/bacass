@@ -1,16 +1,18 @@
-Changes in module 'nf-core/nanoplot'
+Changes in component 'nf-core/nanoplot'
+'modules/nf-core/nanoplot/environment.yml' is unchanged
+'modules/nf-core/nanoplot/meta.yml' is unchanged
+Changes in 'nanoplot/main.nf':
 --- modules/nf-core/nanoplot/main.nf
 +++ modules/nf-core/nanoplot/main.nf
-@@ -22,13 +22,15 @@
+@@ -21,6 +21,7 @@
  
      script:
      def args = task.ext.args ?: ''
--    def input_file = ("$ontfile".endsWith(".fastq.gz")) ? "--fastq ${ontfile}" :
--        ("$ontfile".endsWith(".txt")) ? "--summary ${ontfile}" : ''
 +    def prefix = task.ext.prefix ?: "${meta.id}"
-+    def input_file = ("$ontfile".endsWith(".fastq.gz") || "$ontfile".endsWith(".fq.gz")) ? "--fastq ${ontfile}" :  ("$ontfile".endsWith(".txt")) ? "--summary ${ontfile}" : ''
+     def input_file = ("$ontfile".endsWith(".fastq.gz") || "$ontfile".endsWith(".fq.gz")) ? "--fastq ${ontfile}" :
+         ("$ontfile".endsWith(".txt")) ? "--summary ${ontfile}" : ''
      """
-     NanoPlot \\
+@@ -28,6 +29,8 @@
          $args \\
          -t $task.cpus \\
          $input_file
@@ -20,4 +22,7 @@ Changes in module 'nf-core/nanoplot'
      cat <<-END_VERSIONS > versions.yml
      "${task.process}":
 
+'modules/nf-core/nanoplot/tests/main.nf.test' is unchanged
+'modules/nf-core/nanoplot/tests/tags.yaml' is unchanged
+'modules/nf-core/nanoplot/tests/main.nf.test.snap' is unchanged
 ************************************************************

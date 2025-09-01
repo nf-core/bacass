@@ -82,7 +82,7 @@
                     },
                     "nanoplot": {
                         "branch": "master",
-                        "git_sha": "a31407dfaf0cb0d04768d5cb439fc6f4523a6981",
+                        "git_sha": "9322f997f94451510f974e417ec5277869030b44",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/nanoplot/nanoplot.diff"
                     },
