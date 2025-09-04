@@ -31,7 +31,7 @@
                     "quast": "5.2.0"
                 },
                 "TOULLIGQC": {
-                    "toulligqc": "2.5.6"
+                    "toulligqc": "2.7.1"
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -391,6 +391,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-08-29T13:04:25.869069388"
+        "timestamp": "2025-09-04T14:58:46.145509956"
     }
 }
