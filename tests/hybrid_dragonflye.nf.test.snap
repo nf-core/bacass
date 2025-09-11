@@ -34,7 +34,7 @@
                     "quast": "5.2.0"
                 },
                 "TOULLIGQC": {
-                    "toulligqc": "2.5.6"
+                    "toulligqc": "2.7.1"
                 },
                 "Workflow": {
                     "nf-core/bacass": "v2.5.0"
@@ -387,6 +387,6 @@
             "nf-test": "0.9.2",
             "nextflow": "25.04.6"
         },
-        "timestamp": "2025-08-29T13:24:09.183086936"
+        "timestamp": "2025-09-04T15:19:28.692454414"
     }
 }
