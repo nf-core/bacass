@@ -58,29 +58,8 @@
                 "Medaka/A1403KPN_polished_genome.fa",
                 "Prokka",
                 "Prokka/A1403KPN",
-                "Prokka/A1403KPN/A1403KPN.err",
-                "Prokka/A1403KPN/A1403KPN.faa",
-                "Prokka/A1403KPN/A1403KPN.ffn",
-                "Prokka/A1403KPN/A1403KPN.fna",
-                "Prokka/A1403KPN/A1403KPN.fsa",
-                "Prokka/A1403KPN/A1403KPN.gbk",
-                "Prokka/A1403KPN/A1403KPN.gff",
-                "Prokka/A1403KPN/A1403KPN.log",
-                "Prokka/A1403KPN/A1403KPN.sqn",
-                "Prokka/A1403KPN/A1403KPN.tbl",
-                "Prokka/A1403KPN/A1403KPN.tsv",
-                "Prokka/A1403KPN/A1403KPN.txt",
                 "QC_longreads",
                 "QC_longreads/NanoPlot",
-                "QC_longreads/NanoPlot/A1403KPN.txt",
-                "QC_longreads/NanoPlot/LengthvsQualityScatterPlot_dot.html",
-                "QC_longreads/NanoPlot/LengthvsQualityScatterPlot_kde.html",
-                "QC_longreads/NanoPlot/NanoPlot-report.html",
-                "QC_longreads/NanoPlot/Non_weightedHistogramReadlength.html",
-                "QC_longreads/NanoPlot/Non_weightedLogTransformed_HistogramReadlength.html",
-                "QC_longreads/NanoPlot/WeightedHistogramReadlength.html",
-                "QC_longreads/NanoPlot/WeightedLogTransformed_HistogramReadlength.html",
-                "QC_longreads/NanoPlot/Yield_By_Length.html",
                 "QC_longreads/ToulligQC",
                 "QUAST",
                 "QUAST/report",
@@ -385,8 +364,8 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.04.6"
+            "nextflow": "25.04.7"
         },
-        "timestamp": "2025-09-04T15:19:28.692454414"
+        "timestamp": "2025-10-09T12:03:14.500365955"
     }
 }

@@ -55,29 +55,8 @@
                 "Miniasm/TestMe.fasta.gz",
                 "Prokka",
                 "Prokka/TestMe",
-                "Prokka/TestMe/TestMe.err",
-                "Prokka/TestMe/TestMe.faa",
-                "Prokka/TestMe/TestMe.ffn",
-                "Prokka/TestMe/TestMe.fna",
-                "Prokka/TestMe/TestMe.fsa",
-                "Prokka/TestMe/TestMe.gbk",
-                "Prokka/TestMe/TestMe.gff",
-                "Prokka/TestMe/TestMe.log",
-                "Prokka/TestMe/TestMe.sqn",
-                "Prokka/TestMe/TestMe.tbl",
-                "Prokka/TestMe/TestMe.tsv",
-                "Prokka/TestMe/TestMe.txt",
                 "QC_longreads",
                 "QC_longreads/NanoPlot",
-                "QC_longreads/NanoPlot/LengthvsQualityScatterPlot_dot.html",
-                "QC_longreads/NanoPlot/LengthvsQualityScatterPlot_kde.html",
-                "QC_longreads/NanoPlot/NanoPlot-report.html",
-                "QC_longreads/NanoPlot/Non_weightedHistogramReadlength.html",
-                "QC_longreads/NanoPlot/Non_weightedLogTransformed_HistogramReadlength.html",
-                "QC_longreads/NanoPlot/TestMe.txt",
-                "QC_longreads/NanoPlot/WeightedHistogramReadlength.html",
-                "QC_longreads/NanoPlot/WeightedLogTransformed_HistogramReadlength.html",
-                "QC_longreads/NanoPlot/Yield_By_Length.html",
                 "QC_longreads/ToulligQC",
                 "QUAST",
                 "QUAST/report",
@@ -291,8 +270,8 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.04.6"
+            "nextflow": "25.04.7"
         },
-        "timestamp": "2025-09-10T18:26:28.989743936"
+        "timestamp": "2025-10-09T12:32:56.633589499"
     }
 }
