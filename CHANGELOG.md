@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
-. [#260](https://github.com/nf-core/bacass/pull/260) Fix unestable files when nf-tests run using conda.
+- [#260](https://github.com/nf-core/bacass/pull/260) Fix unestable files when nf-tests run using conda.
 - [#258](https://github.com/nf-core/bacass/pull/258) Update and Fix ToulligQC.
 - [#256](https://github.com/nf-core/bacass/pull/256) Update module busco to avoid version number error when using conda.
 - [#231](https://github.com/nf-core/bacass/pull/231) Fix KmerFinder DB and relative paths resolution issues.
