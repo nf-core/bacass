@@ -23,10 +23,12 @@ trimming/shortreads/json_html/*.fastp.html
 trimming/shortreads/log/*.fastp.log
 trimming/longreads/porechop/*.porechop.log
 Prokka/*/*.{gbk,sqn,log,err}
+Prokka/*/*.{faa,ffn,fna,fsa,gff,tbl,tsv,txt}
 QUAST/report/**
 Unicycler/*.unicycler.log
 DFAST/*/*.{tsv,log,gbk}
+LIFTOFF/*.gff3
 QC_longreads/ToulligQC/**
-QC_longreads/NanoPlot/*
+QC_longreads/NanoPlot/**
 Dragonflye/*
 Medaka/*
