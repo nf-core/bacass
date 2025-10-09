@@ -74,7 +74,7 @@ jobs:
         # Exclude conda and singularity on dev
         exclude:
           - isMain: false
-            profile: "conda"
+            profile: "docker"
           - isMain: false
             profile: "singularity"
         NXF_VER:
