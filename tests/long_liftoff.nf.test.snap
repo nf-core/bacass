@@ -333,9 +333,7 @@
                 "trimming/shortreads/log/ERR064912.fastp.log"
             ],
             [
-                "ERR044595.gff3:md5,7153b7d4d224c20fc2d532171f71c5ea",
                 "ERR044595.unmapped.txt:md5,b4c04cfb80263b48c1937e1144c01bb0",
-                "ERR064912.gff3:md5,3765a67d0c2b81990b218f56c9dafb51",
                 "ERR064912.unmapped.txt:md5,b4c04cfb80263b48c1937e1144c01bb0",
                 "ERR044595.assembly.gfa.gz:md5,66fcb08f315b69b3639ab394f4171f58",
                 "ERR044595.scaffolds.fa.gz:md5,cc86896317eea5e7bf1aa5321e212ee1",
@@ -383,8 +381,8 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.04.6"
+            "nextflow": "25.04.7"
         },
-        "timestamp": "2025-09-10T18:22:21.09205384"
+        "timestamp": "2025-10-09T13:38:24.024694858"
     }
 }

@@ -48,29 +48,8 @@
                 "Miniasm/TestMe.fasta.gz",
                 "Prokka",
                 "Prokka/TestMe",
-                "Prokka/TestMe/TestMe.err",
-                "Prokka/TestMe/TestMe.faa",
-                "Prokka/TestMe/TestMe.ffn",
-                "Prokka/TestMe/TestMe.fna",
-                "Prokka/TestMe/TestMe.fsa",
-                "Prokka/TestMe/TestMe.gbk",
-                "Prokka/TestMe/TestMe.gff",
-                "Prokka/TestMe/TestMe.log",
-                "Prokka/TestMe/TestMe.sqn",
-                "Prokka/TestMe/TestMe.tbl",
-                "Prokka/TestMe/TestMe.tsv",
-                "Prokka/TestMe/TestMe.txt",
                 "QC_longreads",
                 "QC_longreads/NanoPlot",
-                "QC_longreads/NanoPlot/LengthvsQualityScatterPlot_dot.html",
-                "QC_longreads/NanoPlot/LengthvsQualityScatterPlot_kde.html",
-                "QC_longreads/NanoPlot/NanoPlot-report.html",
-                "QC_longreads/NanoPlot/Non_weightedHistogramReadlength.html",
-                "QC_longreads/NanoPlot/Non_weightedLogTransformed_HistogramReadlength.html",
-                "QC_longreads/NanoPlot/TestMe.txt",
-                "QC_longreads/NanoPlot/WeightedHistogramReadlength.html",
-                "QC_longreads/NanoPlot/WeightedLogTransformed_HistogramReadlength.html",
-                "QC_longreads/NanoPlot/Yield_By_Length.html",
                 "QC_longreads/ToulligQC",
                 "QUAST",
                 "QUAST/report",
@@ -200,14 +179,6 @@
             [
                 "TestMe.consensus.fasta.gz:md5,199994f97a7c7617af79e334ae388a46",
                 "TestMe.fasta.gz:md5,11ae7a338e60155a4c132bd2165339cd",
-                "TestMe.faa:md5,61c3e89f58773111c3dab8eb8317350b",
-                "TestMe.ffn:md5,33a9ffd1d4930815d7e709b5d3d48525",
-                "TestMe.fna:md5,c74b10ec4f66d0b67c79f45e424cd37b",
-                "TestMe.fsa:md5,2ab178f1a440650c57ce4e681648ad9c",
-                "TestMe.gff:md5,f630236ba3ee6d17c4afb6fe8f6b4a68",
-                "TestMe.tbl:md5,eadad310078ad919e617701cb02a7784",
-                "TestMe.tsv:md5,1e4b7c53f3ba35fa977c4693e278d30b",
-                "TestMe.txt:md5,374388c4bf3d022b62d061bb494d4a53",
                 "mqc_busco_plot_bacteria_odb10_1.yaml:md5,b0c60571185671c3a7a17280e257dee9",
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,711a2deae67088db22b1a2a462da4969",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,dab7cce19986f3193484fd241075b221",
@@ -219,8 +190,8 @@
         ],
         "meta": {
             "nf-test": "0.9.2",
-            "nextflow": "25.04.6"
+            "nextflow": "25.04.7"
         },
-        "timestamp": "2025-09-10T18:28:36.574646203"
+        "timestamp": "2025-10-09T12:35:14.141740364"
     }
 }
