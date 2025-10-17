@@ -76,10 +76,17 @@ workflow PIPELINE_INITIALISATION {
         .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
         .map {
             meta, fastq_1, fastq_2, longreads, fast5 ->
-            if (!fastq_2) {
-                return [ meta.id, meta + [ single_end:true ], [ fastq_1 ], longreads, fast5 ]
+
+            // Resolve input paths when they are symbolic links - https://github.com/nf-core/bacass/issues/215
+            def resolved_fastq_1    = resolveFilePath(fastq_1)
+            def resolved_fastq_2    = resolveFilePath(fastq_2)
+            def resolved_longreads  = resolveFilePath(longreads)
+            def resolved_fast5      = resolveFilePath(fast5)
+
+            if (!resolved_fastq_2 || resolved_fastq_2 == 'NA') {
+                return [ meta.id, meta + [ single_end:true ], [ resolved_fastq_1 ], resolved_longreads, resolved_fast5 ]
             } else {
-                return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ], longreads, fast5 ]
+                return [ meta.id, meta + [ single_end:false ], [ resolved_fastq_1, resolved_fastq_2 ], resolved_longreads, resolved_fast5 ]
             }
         }
         .groupTuple()
@@ -88,7 +95,7 @@ workflow PIPELINE_INITIALISATION {
         }
         .map {
             meta, fastqs, longread, fast5 ->
-                return [ meta, fastqs, longread[0], fast5[0] ]
+                return [ meta, fastqs.flatten(), longread, fast5[0] ]
         }
         .set { ch_samplesheet }
 
@@ -116,6 +123,7 @@ workflow PIPELINE_COMPLETION {
 
     main:
     summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    def multiqc_reports = multiqc_report.toList()
 
     //
     // Completion email and summary
@@ -129,7 +137,7 @@ workflow PIPELINE_COMPLETION {
                 plaintext_email,
                 outdir,
                 monochrome_logs,
-                multiqc_report.toList()
+                multiqc_reports.getVal(),
             )
         }
 
@@ -165,14 +173,23 @@ def validateInputParameters() {
 
     // Check kmerfinder dependencies
     if (!params.skip_kmerfinder) {
-        if (!params.kmerfinderdb || !params.ncbi_assembly_metadata) {
+        if (!params.kmerfinderdb ) {
             def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  Kmerfinder database and NCBI assembly metadata not provided.\n" +
-                "  Please specify the '--kmerfinderdb' and '--ncbi_assembly_metadata' parameters.\n" +
-                "  Both are required to run Kmerfinder.\n" +
+                "  Kmerfinder database not provided.\n" +
+                "  Please specify the '--kmerfinderdb'  parameter to provide the necessary database.\n"
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             error(error_string)
         }
+    }
+
+    // Check assembly type
+    if (!params.assembly_type) {
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Assembly type not provided.\n" +
+            "  Please specify the '--assembly_type' parameter to perform the assembly.\n" +
+            "  Accepted: short, long, hybrid.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
     }
 }
 
@@ -189,6 +206,22 @@ def validateInputSamplesheet(input) {
 
     return [ metas[0], fastqs, longread, fast5]
 }
+
+//
+// Resolve symbolic link accesibility
+//
+def resolveFilePath(filePath) {
+    if (filePath == 'NA' || filePath == null || filePath == '') {
+        return filePath
+    }
+    try {
+        return file(filePath, checkIfExists: true)
+    } catch (Exception e) {
+        log.warn "Could not resolve file path for ${filePath}: ${e.message}"
+        return filePath
+    }
+}
+
 //
 // Generate methods description for MultiQC
 //
@@ -239,6 +272,7 @@ def toolBibliographyText() {
             "<li>Medaka: Sequence correction provided by ONT Research. https://github.com/nanoporetech/medaka,</li>",
             "<li>Loman, N., Quick, J. & Simpson, J. A complete bacterial genome assembled de novo using only nanopore sequencing data. Nat Methods 12, 733–735 (2015). https://doi.org/10.1038/nmeth.3444</li>",
             "<li>Gurevich A, Saveliev V, Vyahhi N, Tesler G. QUAST: quality assessment tool for genome assemblies. Bioinformatics. 2013 Apr 15;29(8):1072-5. doi: 10.1093/bioinformatics/btt086. Epub 2013 Feb 19.</li>",
+            "<li>Manni M., Berkeley M.R., Seppey M., Simao F.A., Zdobnov E.M. 2021. BUSCO update: novel and streamlined workflows along with broader and deeper phylogenetic coverage for scoring of eukaryotic, prokaryotic, and viral genomes. arXiv:2106.11799 [q-bio] [Internet]. Available from: http://arxiv.org/abs/2106.11799</li>",
             "<li>Seemann T. Prokka: rapid prokaryotic genome annotation. Bioinformatics. 2014 Jul 15;30(14):2068-9. doi: 10.1093/bioinformatics/btu153.</li>",
             "<li>Schwengers O, Jelonek L, Dieckmann MA, Beyvers S, Blom J, Goesmann A. Bakta: rapid and standardized annotation of bacterial genomes via alignment-free sequence identification. Microb Genom. 2021 Nov;7(11):000685. doi: 10.1099/mgen.0.000685.</li>",
             "<li>Tanizawa Y, Fujisawa T, Nakamura Y. DFAST: a flexible prokaryotic genome annotation pipeline for faster genome publication. Bioinformatics. 2018 Mar 15;34(6):1037-1039. doi: 10.1093/bioinformatics/btx713.</li>",
@@ -249,7 +283,7 @@ def toolBibliographyText() {
 }
 
 def methodsDescriptionText(mqc_methods_yaml) {
-    // Convert  to a named map so can be used as with familar NXF ${workflow} variable syntax in the MultiQC YML file
+    // Convert  to a named map so can be used as with familiar NXF ${workflow} variable syntax in the MultiQC YML file
     def meta = [:]
     meta.workflow = workflow.toMap()
     meta["manifest_map"] = workflow.manifest.toMap()
@@ -284,4 +318,3 @@ def methodsDescriptionText(mqc_methods_yaml) {
 
     return description_html.toString()
 }
-

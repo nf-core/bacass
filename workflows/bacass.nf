@@ -9,41 +9,46 @@
 // MODULE: Local to the pipeline
 //
 include { PYCOQC                    } from '../modules/local/pycoqc'
-include { UNICYCLER                 } from '../modules/nf-core/unicycler/main'
 include { NANOPOLISH                } from '../modules/local/nanopolish'
 include { MEDAKA                    } from '../modules/local/medaka'
-include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2_db_preparation'
+include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2/db_preparation'
 include { DFAST                     } from '../modules/local/dfast'
-include { MULTIQC_CUSTOM            } from '../modules/local/multiqc_custom'
+include { CUSTOM_MULTIQC            } from '../modules/local/custom/multiqc'
 
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                                } from '../modules/nf-core/fastqc/main'
-include { CAT_FASTQ                             } from '../modules/nf-core/cat/fastq'
-include { NANOPLOT                              } from '../modules/nf-core/nanoplot/main'
-include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop/main'
-include { CANU                                  } from '../modules/nf-core/canu/main'
-include { MINIMAP2_ALIGN                        } from '../modules/nf-core/minimap2/align/main'
-include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS  } from '../modules/nf-core/minimap2/align/main'
-include { MINIMAP2_ALIGN as MINIMAP2_POLISH     } from '../modules/nf-core/minimap2/align/main'
-include { MINIASM                               } from '../modules/nf-core/miniasm/main'
-include { DRAGONFLYE                            } from '../modules/nf-core/dragonflye/main'
-include { RACON                                 } from '../modules/nf-core/racon/main'
-include { SAMTOOLS_SORT                         } from '../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samtools/index/main'
-include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/kraken2/kraken2/main'
-include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2/main'
-include { QUAST                                 } from '../modules/nf-core/quast/main'
-include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast/main'
-include { GUNZIP                                } from '../modules/nf-core/gunzip/main'
-include { PROKKA                                } from '../modules/nf-core/prokka/main'
+include { FASTQC                                } from '../modules/nf-core/fastqc'
+include { CAT_FASTQ as CAT_FASTQ_SHORT          } from '../modules/nf-core/cat/fastq'
+include { CAT_FASTQ as CAT_FASTQ_LONG           } from '../modules/nf-core/cat/fastq'
+include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop'
+include { UNICYCLER                             } from '../modules/nf-core/unicycler'
+include { CANU                                  } from '../modules/nf-core/canu'
+include { MINIMAP2_ALIGN                        } from '../modules/nf-core/minimap2/align'
+include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS  } from '../modules/nf-core/minimap2/align'
+include { MINIMAP2_ALIGN as MINIMAP2_POLISH     } from '../modules/nf-core/minimap2/align'
+include { MINIASM                               } from '../modules/nf-core/miniasm'
+include { DRAGONFLYE                            } from '../modules/nf-core/dragonflye'
+include { RACON                                 } from '../modules/nf-core/racon'
+include { SAMTOOLS_SORT                         } from '../modules/nf-core/samtools/sort'
+include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samtools/index'
+include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/kraken2/kraken2'
+include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2'
+include { QUAST                                 } from '../modules/nf-core/quast'
+include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast'
+include { BUSCO_BUSCO                           } from '../modules/nf-core/busco/busco/main'
+include { GUNZIP                                } from '../modules/nf-core/gunzip'
+include { PROKKA                                } from '../modules/nf-core/prokka'
+include { FILTLONG                              } from '../modules/nf-core/filtlong'
+include { LIFTOFF                               } from '../modules/nf-core/liftoff'
 
 //
 // SUBWORKFLOWS: Consisting of a mix of local and nf-core/modules
 //
+
 include { FASTQ_TRIM_FASTP_FASTQC               } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc/main'
-include { KMERFINDER_SUBWORKFLOW                } from '../subworkflows/local/kmerfinder_subworkflow'
+include { QC_NANOPLOT_TOULLIGQC                 } from '../subworkflows/local/qc_nanoplot_toulliqc'
+include { KMERFINDER_SUMMARY_DOWNLOAD           } from '../subworkflows/local/kmerfinder_summary_download'
 include { BAKTA_DBDOWNLOAD_RUN                  } from '../subworkflows/local/bakta_dbdownload_run'
 include { paramsSummaryMap                      } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -57,8 +62,15 @@ include { methodsDescriptionText                } from '../subworkflows/local/ut
 */
 
 // Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config ]
+def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config, params.reference_fasta, params.reference_gff ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+
+if (params.reference_fasta) {
+    reference_fasta = file(params.reference_fasta, type: 'file')
+}
+if (params.reference_gff) {
+    reference_gff = file(params.reference_gff, type: 'file')
+}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,20 +82,19 @@ workflow BACASS {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
-
     main:
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
-
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
     def criteria = multiMapCriteria {
         meta, fastqs, long_fastq, fast5 ->
-            shortreads: meta.single_end != 'NA' ? tuple(meta, fastqs) : null
-            longreads: long_fastq       != 'NA' ? tuple(meta,long_fastq) : null
-            fast5: fast5                != 'NA' ? tuple(meta, fast5) : null
+            shortreads: fastqs          != 'NA' ? tuple(meta, fastqs) : null
+            longreads:  long_fastq      != 'NA' ? tuple(meta,long_fastq) : null
+            fast5:      fast5           != 'NA' ? tuple(meta, fast5) : null
     }
+    ch_proteins = params.prokka_proteins ? Channel.fromPath(params.prokka_proteins, checkIfExists: true)  : []
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     ch_samplesheet
         .multiMap (criteria)
@@ -104,25 +115,56 @@ workflow BACASS {
         .set { ch_fast5 }
 
     //
-    // MODULE: Concatenate FastQ files from same sample if required (shortreads)
+    // MODULE: Concatenate FastQ files from same sample if required
     //
-    ch_shortreads
-        .branch{
-            meta, fastqs ->
-                single: fastqs.size() == 1
-                    return [ meta, fastqs.flatten() ]
-                multiple: fastqs.size() > 1
-                    return [ meta, fastqs.flatten() ]
-        }
-        .set { ch_shortreads_fastqs }
+    if (params.assembly_type in ['short', 'hybrid']) {
+        ch_shortreads
+            .branch{
+                meta, fastqs ->
+                    single: meta.single_end ? fastqs.size() == 1 : fastqs.size() == 2
+                    multiple: meta.single_end ? fastqs.size() > 1 : fastqs.size() > 2
+            }
+            .set { ch_shortreads_fastqs }
 
-        CAT_FASTQ (
+        CAT_FASTQ_SHORT (
             ch_shortreads_fastqs.multiple
         )
-        .reads
-        .mix( ch_shortreads_fastqs.single )
-        .set { ch_shortreads_concat }
-        ch_versions = ch_versions.mix(CAT_FASTQ.out.versions)
+
+        ch_shortreads_concat = CAT_FASTQ_SHORT.out.reads
+            .mix( ch_shortreads_fastqs.single )
+
+        ch_versions = ch_versions.mix(CAT_FASTQ_SHORT.out.versions)
+    } else {
+        ch_shortreads_concat = Channel.empty()
+    }
+
+    if (params.assembly_type in ['long', 'hybrid']) {
+        ch_longreads
+            .map {
+                meta, long_fastq ->
+                    // Force single_end=true for long reads
+                    // Create a copy of meta to avoid interference with short reads meta (when hybrid mode is activated)
+                    def new_meta = meta + [single_end: true]  // Force single_end
+                    return [ new_meta, long_fastq ]
+            }
+            .branch{
+                meta, long_fastqs ->
+                    single: long_fastqs.size() == 1
+                    multiple: long_fastqs.size() > 1
+            }
+            .set { ch_longreads_fastqs }
+
+        CAT_FASTQ_LONG (
+            ch_longreads_fastqs.multiple
+        )
+
+        ch_longreads_concat = CAT_FASTQ_LONG.out.reads
+            .mix( ch_longreads_fastqs.single )
+
+        ch_versions = ch_versions.mix(CAT_FASTQ_LONG.out.versions)
+    } else {
+        ch_longreads_concat = Channel.empty()
+    }
 
     //
     // SUBWORKFLOW: Short reads QC and trim adapters
@@ -136,6 +178,7 @@ workflow BACASS {
         [],
         params.save_trimmed_fail,
         [],
+        params.discard_trimmed_pass,
         params.skip_fastp,
         params.skip_fastqc
         )
@@ -146,13 +189,17 @@ workflow BACASS {
     }
 
     //
-    // MODULE: Nanoplot, quality check for nanopore reads and Quality/Length Plots
+    // SUBWORKFLOW: quality check for nanopore reads with Nanoplot and ToulligQC
     //
-    NANOPLOT (
-        ch_longreads
+    QC_NANOPLOT_TOULLIGQC (
+        ch_longreads_concat,
+        params.skip_nanoplot,  // skip the nanoplot qc
+        params.skip_toulligqc  // skip the toulligqc
     )
-    ch_nanoplot_txt_multiqc = NANOPLOT.out.txt
-    ch_versions = ch_versions.mix(NANOPLOT.out.versions)
+    ch_nanoplot_txt_multiqc = QC_NANOPLOT_TOULLIGQC.out.nanoplot_txt
+    ch_versions = ch_versions.mix(QC_NANOPLOT_TOULLIGQC.out.nanoplot_version)
+    ch_versions = ch_versions.mix(QC_NANOPLOT_TOULLIGQC.out.toulligqc_version)
+
 
     //
     // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
@@ -171,13 +218,35 @@ workflow BACASS {
     // MODULE: PORECHOP, quality check for nanopore reads and Quality/Length Plots
     //
     ch_porechop_log_multiqc = Channel.empty()
-    if ( params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type) ) {
+    if ((params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type)) && params.long_reads_filtering == 'porechop' ) {
         PORECHOP_PORECHOP (
-            ch_longreads.dump(tag: 'longreads')
+            ch_longreads_concat.dump(tag: 'longreads')
         )
+        filtered_long_reads = PORECHOP_PORECHOP.out.reads
         ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
         ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
     }
+
+    //
+    // MODULE: FILTLONG, filtering long reads by quality. It can take a set of long reads and produce a smaller, better subset.
+    //
+    ch_filtlong_log_multiqc = Channel.empty()
+    if ( !('short' in params.assembly_type) && params.long_reads_filtering == 'filtlong' ) {
+        if (params.assembly_type == 'hybrid') {
+            ch_shortreads_for_filtlong = FASTQ_TRIM_FASTP_FASTQC.out.reads.join(ch_longreads_concat)   //tuple val(meta), file(sr), file(lr)
+        } else if ( params.assembly_type == 'long' ) {
+            ch_shortreads_for_filtlong = ch_longreads_concat.map{ meta, lr -> tuple(meta, [], lr ) }
+        }
+
+        FILTLONG (
+            ch_shortreads_for_filtlong
+        )
+
+        filtered_long_reads = FILTLONG.out.reads
+        ch_filtlong_log_multiqc = FILTLONG.out.log
+        ch_versions       = ch_versions.mix(FILTLONG.out.versions)
+    }
+
 
     //
     // Join channels for assemblers. As samples have the same meta data, we can simply use join() to merge the channels based on this. If we only have one of the channels we insert 'NAs' which are not used in the unicycler process then subsequently, in case of short or long read only assembly.
@@ -185,10 +254,16 @@ workflow BACASS {
     //
     if(params.assembly_type == 'hybrid'){
         ch_for_kraken2_short    = FASTQ_TRIM_FASTP_FASTQC.out.reads
-        ch_for_kraken2_long     = PORECHOP_PORECHOP.out.reads
+        ch_for_kraken2_long     = filtered_long_reads
         FASTQ_TRIM_FASTP_FASTQC.out.reads
             .dump(tag: 'fastp')
-            .join(PORECHOP_PORECHOP.out.reads)
+            .cross(filtered_long_reads) { it[0].id }
+            .map { short_tuple, long_tuple ->
+                def meta_short = short_tuple[0]
+                def short_reads = short_tuple[1]
+                def long_reads = long_tuple[1]
+                [meta_short, short_reads, long_reads]
+            }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
     } else if ( params.assembly_type == 'short' ) {
@@ -201,9 +276,9 @@ workflow BACASS {
             .set { ch_for_assembly }
     } else if ( params.assembly_type == 'long' ) {
         ch_for_kraken2_short    = Channel.empty()
-        ch_for_kraken2_long     = PORECHOP_PORECHOP.out.reads
-        PORECHOP_PORECHOP.out.reads
-            .dump(tag: 'porechop')
+        ch_for_kraken2_long     = filtered_long_reads
+        filtered_long_reads
+            .dump(tag: 'filtered_long_reads')
             .map{ meta,lr -> tuple(meta,[],lr) }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
@@ -395,7 +470,7 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Kmerfinder, QC for sample purity.
     //
-    // Executes both kmerfinder and classifies samples by their reference genome (all this through the kmerfinder_subworkflow()).
+    // Executes both kmerfinder and classifies samples by their reference genome (all this through the KMERFINDER_SUMMARY_DOWNLOAD()).
 
     ch_kmerfinder_multiqc = Channel.empty()
     if (!params.skip_kmerfinder) {
@@ -403,16 +478,16 @@ workflow BACASS {
         if( params.assembly_type == 'short' || params.assembly_type == 'hybrid' ) {
             ch_for_kmerfinder = FASTQ_TRIM_FASTP_FASTQC.out.reads
         } else if ( params.assembly_type == 'long' ) {
-            ch_for_kmerfinder = PORECHOP_PORECHOP.out.reads
+            ch_for_kmerfinder = filtered_long_reads
         }
         // RUN kmerfinder subworkflow
-        KMERFINDER_SUBWORKFLOW (
+        KMERFINDER_SUMMARY_DOWNLOAD (
             ch_for_kmerfinder,
             ch_assembly
         )
-        ch_kmerfinder_multiqc   = KMERFINDER_SUBWORKFLOW.out.summary_yaml
-        ch_consensus_byrefseq   = KMERFINDER_SUBWORKFLOW.out.consensus_byrefseq
-        ch_versions             = ch_versions.mix(KMERFINDER_SUBWORKFLOW.out.versions)
+        ch_kmerfinder_multiqc   = KMERFINDER_SUMMARY_DOWNLOAD.out.summary_yaml
+        ch_consensus_byrefseq   = KMERFINDER_SUMMARY_DOWNLOAD.out.consensus_byrefseq
+        ch_versions             = ch_versions.mix(KMERFINDER_SUMMARY_DOWNLOAD.out.versions)
 
         // Set channel to perform by refseq QUAST based on reference genome identified with KMERFINDER.
         ch_consensus_byrefseq
@@ -434,8 +509,8 @@ workflow BACASS {
     if(params.skip_kmerfinder){
         QUAST(
             ch_to_quast,
-            params.reference_fasta ?: [[:],[]],
-            params.reference_gff ?: [[:],[]]
+            params.reference_fasta ? [[:], reference_fasta] : [[:],[]],
+            params.reference_gff ? [[:], reference_gff] : [[:],[]]
         )
         ch_quast_multiqc = QUAST.out.results
     } else if (!params.skip_kmerfinder) {
@@ -465,6 +540,23 @@ workflow BACASS {
         .set{ ch_assembly_for_gunzip }
 
     //
+    // MODULE: BUSCO, assess genome assembly completeness
+    //
+    ch_busco_multiqc = Channel.empty()
+    if (!params.skip_busco) {
+        BUSCO_BUSCO (
+            ch_assembly,                                                        // tuple val(meta), path(fasta)
+            params.busco_mode,                                                  // val mode
+            params.busco_lineage,                                               // val lineage
+            params.busco_db_path ? file(params.busco_db_path) : [],             // path busco_lineages_path
+            params.busco_config_file ? file(params.busco_config_file) : [],     // path config_file (optional)
+            params.busco_clean_intermediates                                    // val clean_intermediates
+        )
+        ch_busco_multiqc = BUSCO_BUSCO.out.short_summaries_txt
+        ch_versions = ch_versions.mix(BUSCO_BUSCO.out.versions)
+    }
+
+    //
     // MODULE: PROKKA, gene annotation
     //
     ch_prokka_txt_multiqc = Channel.empty()
@@ -476,7 +568,7 @@ workflow BACASS {
 
         PROKKA (
             ch_to_prokka.filter{ meta, fasta -> !fasta.isEmpty() },
-            [],
+            ch_proteins,
             []
         )
         ch_prokka_txt_multiqc   = PROKKA.out.txt.map{ meta, prokka_txt -> [ prokka_txt ]}
@@ -514,12 +606,42 @@ workflow BACASS {
     }
 
     //
+    // MODULE: LIFTOFF, protein annotation
+    //
+    if ( !params.skip_annotation && params.annotation_tool == 'liftoff' ) {
+        if (params.skip_kmerfinder || !params.liftoff_ref_from_kmerfinder) {
+            // check if the reference files (fasta, gff) are given
+            if ( !params.reference_fasta || !params.reference_gff ) {
+                log.error "ERROR: when using liftoff with user specified reference, the `params.reference_fasta` and `params.reference_gff` must be provided."
+            }
+
+            LIFTOFF (
+                ch_assembly,
+                reference_fasta,
+                reference_gff,
+                []
+            )
+            ch_versions = ch_versions.mix(LIFTOFF.out.versions)
+        } else {
+            // run liftoff with kmerfinder reference
+
+            LIFTOFF (
+                ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, consensus)},
+                ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_fasta)},
+                ch_to_quast_byrefseq.map{ refmeta, consensus, ref_fasta, ref_gff -> tuple( refmeta, ref_gff)},
+                []
+            )
+            ch_versions = ch_versions.mix(LIFTOFF.out.versions)
+        }
+    }
+
+    //
     // Collate and save software versions
     //
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_'  + 'pipeline_software_' +  'mqc_'  + 'versions.yml',
+            name: 'nf_core_'  +  'bacass_software_'  + 'mqc_'  + 'versions.yml',
             sort: true,
             newLine: true
         ).set { ch_collated_versions }
@@ -535,7 +657,7 @@ workflow BACASS {
     ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
     ch_multiqc_custom_methods_description = params.multiqc_methods_description ? Channel.fromPath(params.multiqc_methods_description, checkIfExists: true) : Channel.fromPath("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
-    MULTIQC_CUSTOM (
+    CUSTOM_MULTIQC (
         ch_multiqc_config.ifEmpty([]),
         ch_multiqc_custom_config.ifEmpty([]),
         ch_multiqc_logo.ifEmpty([]),
@@ -547,19 +669,22 @@ workflow BACASS {
         ch_fastp_json_multiqc.collect{it[1]}.ifEmpty([]),
         ch_nanoplot_txt_multiqc.collect{it[1]}.ifEmpty([]),
         ch_porechop_log_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_filtlong_log_multiqc.collect{it[1]}.ifEmpty([]),
         ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),
         ch_kraken_short_multiqc.collect{it[1]}.ifEmpty([]),
         ch_kraken_long_multiqc.collect{it[1]}.ifEmpty([]),
         ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
+        ch_busco_multiqc.collect{it[1]}.ifEmpty([]),
         ch_prokka_txt_multiqc.collect().ifEmpty([]),
         ch_bakta_txt_multiqc.collect().ifEmpty([]),
         ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
     )
-    multiqc_report = MULTIQC_CUSTOM.out.report.toList()
+    multiqc_report = CUSTOM_MULTIQC.out.report.toList()
 
     emit:
-    multiqc_report = MULTIQC_CUSTOM.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report = CUSTOM_MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                        // channel: [ path(versions.yml) ]
+
 }
 
 /*

@@ -1,0 +1,197 @@
+{
+    "-profile test_long_miniasm_prokka": {
+        "content": [
+            12,
+            {
+                "BUSCO_BUSCO": {
+                    "busco": "5.8.3"
+                },
+                "MEDAKA": {
+                    "medaka": "1.4.3"
+                },
+                "MINIASM": {
+                    "miniasm": "0.3-r179"
+                },
+                "MINIMAP2_ALIGN": {
+                    "minimap2": "2.24-r1122"
+                },
+                "MINIMAP2_CONSENSUS": {
+                    "minimap2": "2.24-r1122"
+                },
+                "NANOPLOT": {
+                    "nanoplot": "1.46.1"
+                },
+                "PORECHOP_PORECHOP": {
+                    "porechop": "0.2.4"
+                },
+                "PROKKA": {
+                    "prokka": "1.14.6"
+                },
+                "QUAST": {
+                    "quast": "5.2.0"
+                },
+                "RACON": {
+                    "racon": "1.4.20"
+                },
+                "TOULLIGQC": {
+                    "toulligqc": "2.7.1"
+                },
+                "Workflow": {
+                    "nf-core/bacass": "v2.5.0"
+                }
+            },
+            [
+                "Medaka",
+                "Medaka/TestMe_polished_genome.fa",
+                "Miniasm",
+                "Miniasm/TestMe.consensus.fasta.gz",
+                "Miniasm/TestMe.fasta.gz",
+                "Prokka",
+                "Prokka/TestMe",
+                "QC_longreads",
+                "QC_longreads/NanoPlot",
+                "QC_longreads/ToulligQC",
+                "QUAST",
+                "QUAST/report",
+                "QUAST/report/basic_stats",
+                "QUAST/report/basic_stats/GC_content_plot.pdf",
+                "QUAST/report/basic_stats/Nx_plot.pdf",
+                "QUAST/report/basic_stats/TestMe_polished_genome_GC_content_plot.pdf",
+                "QUAST/report/basic_stats/cumulative_plot.pdf",
+                "QUAST/report/icarus.html",
+                "QUAST/report/icarus_viewers",
+                "QUAST/report/icarus_viewers/contig_size_viewer.html",
+                "QUAST/report/quast.log",
+                "QUAST/report/report.html",
+                "QUAST/report/report.pdf",
+                "QUAST/report/report.tex",
+                "QUAST/report/report.tsv",
+                "QUAST/report/report.txt",
+                "QUAST/report/transposed_report.tex",
+                "QUAST/report/transposed_report.tsv",
+                "QUAST/report/transposed_report.txt",
+                "busco",
+                "busco/TestMe-bacteria_odb10-busco",
+                "busco/TestMe-bacteria_odb10-busco.batch_summary.txt",
+                "busco/TestMe-bacteria_odb10-busco.log",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/logs",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/logs/bbtools_err.log",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/logs/bbtools_out.log",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/logs/hmmsearch_err.log",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/logs/hmmsearch_out.log",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/logs/prodigal_err.log",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/logs/prodigal_out.log",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/.checkpoint",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes/predicted.faa",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes/predicted.fna",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes/tmp",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_11.faa",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_11.fna",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_11_err.log",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_11_out.log",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_4.faa",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_4.fna",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_4_err.log",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_4_out.log",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/run_bacteria_odb10",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/run_bacteria_odb10/.bbtools_output",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/run_bacteria_odb10/.bbtools_output/.checkpoint",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/run_bacteria_odb10/busco_sequences",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/run_bacteria_odb10/full_table.tsv",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/run_bacteria_odb10/hmmer_output",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/run_bacteria_odb10/missing_busco_list.tsv",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/run_bacteria_odb10/short_summary.json",
+                "busco/TestMe-bacteria_odb10-busco/TestMe_polished_genome.fa/run_bacteria_odb10/short_summary.txt",
+                "busco/TestMe-bacteria_odb10-busco/logs",
+                "busco/busco_downloads",
+                "busco/short_summary.specific.bacteria_odb10.TestMe_polished_genome.fa.json",
+                "busco/short_summary.specific.bacteria_odb10.TestMe_polished_genome.fa.txt",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/mqc_busco_plot_bacteria_odb10_1.yaml",
+                "multiqc/multiqc_data/mqc_porechop-endtrim-barplot_1.yaml",
+                "multiqc/multiqc_data/mqc_porechop-middlesplit-barplot_1.yaml",
+                "multiqc/multiqc_data/mqc_porechop-starttrim-barplot_1.yaml",
+                "multiqc/multiqc_data/mqc_prokka_plot_1.yaml",
+                "multiqc/multiqc_data/mqc_quast_num_contigs_1.yaml",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_busco.yaml",
+                "multiqc/multiqc_data/multiqc_citations.yaml",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_general_stats.yaml",
+                "multiqc/multiqc_data/multiqc_nanostat.yaml",
+                "multiqc/multiqc_data/multiqc_prokka.yaml",
+                "multiqc/multiqc_data/multiqc_quast.yaml",
+                "multiqc/multiqc_data/multiqc_software_versions.yaml",
+                "multiqc/multiqc_data/multiqc_sources.yaml",
+                "multiqc/multiqc_data/porechop.yaml",
+                "multiqc/multiqc_plots",
+                "multiqc/multiqc_plots/pdf",
+                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1_pc.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-endtrim-barplot_1.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-endtrim-barplot_1_pc.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-middlesplit-barplot_1.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-middlesplit-barplot_1_pc.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-starttrim-barplot_1.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-starttrim-barplot_1_pc.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_prokka_plot_1.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_prokka_plot_1_pc.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1_pc.pdf",
+                "multiqc/multiqc_plots/png",
+                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1.png",
+                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1_pc.png",
+                "multiqc/multiqc_plots/png/mqc_porechop-endtrim-barplot_1.png",
+                "multiqc/multiqc_plots/png/mqc_porechop-endtrim-barplot_1_pc.png",
+                "multiqc/multiqc_plots/png/mqc_porechop-middlesplit-barplot_1.png",
+                "multiqc/multiqc_plots/png/mqc_porechop-middlesplit-barplot_1_pc.png",
+                "multiqc/multiqc_plots/png/mqc_porechop-starttrim-barplot_1.png",
+                "multiqc/multiqc_plots/png/mqc_porechop-starttrim-barplot_1_pc.png",
+                "multiqc/multiqc_plots/png/mqc_prokka_plot_1.png",
+                "multiqc/multiqc_plots/png/mqc_prokka_plot_1_pc.png",
+                "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1.png",
+                "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1_pc.png",
+                "multiqc/multiqc_plots/svg",
+                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1.svg",
+                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1_pc.svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-endtrim-barplot_1.svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-endtrim-barplot_1_pc.svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-middlesplit-barplot_1.svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-middlesplit-barplot_1_pc.svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-starttrim-barplot_1.svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-starttrim-barplot_1_pc.svg",
+                "multiqc/multiqc_plots/svg/mqc_prokka_plot_1.svg",
+                "multiqc/multiqc_plots/svg/mqc_prokka_plot_1_pc.svg",
+                "multiqc/multiqc_plots/svg/mqc_quast_num_contigs_1.svg",
+                "multiqc/multiqc_plots/svg/mqc_quast_num_contigs_1_pc.svg",
+                "multiqc/multiqc_report.html",
+                "pipeline_info",
+                "pipeline_info/nf_core_bacass_software_mqc_versions.yml",
+                "trimming",
+                "trimming/longreads",
+                "trimming/longreads/porechop",
+                "trimming/longreads/porechop/TestMe.porechop.log"
+            ],
+            [
+                "TestMe.consensus.fasta.gz:md5,199994f97a7c7617af79e334ae388a46",
+                "TestMe.fasta.gz:md5,11ae7a338e60155a4c132bd2165339cd",
+                "mqc_busco_plot_bacteria_odb10_1.yaml:md5,b0c60571185671c3a7a17280e257dee9",
+                "mqc_porechop-endtrim-barplot_1.yaml:md5,711a2deae67088db22b1a2a462da4969",
+                "mqc_porechop-middlesplit-barplot_1.yaml:md5,dab7cce19986f3193484fd241075b221",
+                "mqc_porechop-starttrim-barplot_1.yaml:md5,d179142c064a1ab5d0d5eca777400982",
+                "multiqc_busco.yaml:md5,c3eb539eb1f80483d02d72f7a7ec3844",
+                "multiqc_citations.yaml:md5,80450f20190a42871cb64f62ae9bec3e",
+                "multiqc_nanostat.yaml:md5,851c9a0693d1fc482d620fed8824ed9c"
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.04.7"
+        },
+        "timestamp": "2025-10-09T12:35:14.141740364"
+    }
+}

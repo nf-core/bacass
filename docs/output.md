@@ -18,7 +18,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Taxonomic classification](#taxonomic-classification)
 - [Assembly Output](#assembly-output)
   - [Polished assemblies](#polished-assemblies)
-- [Assembly QC with QUAST](#assembly-qc-with-quast)
+- [Assembly QC with QUAST and BUSCO](#assembly-qc-with-quast-and-busco)
 - [Annotation](#annotation)
 - [Report](#report)
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
@@ -64,12 +64,16 @@ combines reads coming from multiple sequencing runs.
 
 ### Long Read Trimming
 
-This step performs long read trimming on Nanopore input (if provided).
+This step performs long read trimming on Nanopore input (if provided) using [PoreChop](https://github.com/rrwick/Porechop) or filtering using [Filtlong](https://github.com/rrwick/Filtlong).
 
 <details markdown="1">
 <summary>Output files</summary>
 
-- `trimming/longreads/`
+- `trimming/longreads/porechop`
+  - `*.fastq.gz`: The trimmed FASTQ file
+  - `*.log*`: Log file
+
+- `trimming/longreads/filtlong`
   - `*.fastq.gz`: The trimmed FASTQ file
   - `*.log*`: Log file
 
@@ -79,7 +83,7 @@ This step performs long read trimming on Nanopore input (if provided).
 
 These steps perform long read QC for input data (if provided).
 
-Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/NanoPlot) and [PycoQC](https://a-slide.github.io/pycoQC/) if you want to know more about the plots created by these tools.
+Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/NanoPlot), [PycoQC](https://a-slide.github.io/pycoQC/) and [ToulligQC](https://github.com/GenomiqueENS/toulligQC) if you want to know more about the plots created by these tools.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -90,11 +94,20 @@ Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/Nan
   - `*_pycoqc.html`: QC report in HTML format
   - `*_pycoqc.json`: QC report in JSON format
 
+- QC_Longreads/ToulligQC
+  - `*/report.html`: QC report in HTML format
+
 Example plot from Nanoplot:
 
 ![Nanoplot](images/nanoplot.png)
 
+Example plot from ToulligQC:
+
+![ToulligQC](images/toulligqc.png)
+
 </details>
+
+Example
 
 ## Taxonomic classification
 
@@ -175,7 +188,6 @@ Long reads assemblies can be polished using [Medaka](https://github.com/nanopore
 <summary>Output files</summary>
 
 - `Medaka/*_polished_genome.fa`
-
   - `*_polished_genome.fa`: Polished consensus assembly in fasta format
   - `calls_to_draft.bam`: Alignment in bam format
   - `calls_to_draft.bam.bai`: Index of alignment
@@ -187,9 +199,10 @@ Long reads assemblies can be polished using [Medaka](https://github.com/nanopore
 
 </details>
 
-## Assembly QC with QUAST
+## Assembly QC with QUAST and BUSCO
 
 The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast) for all assemblies in one report. It reports multiple metrics including number of contigs, N50, lengths etc in form of an html report. It further creates an HTML file with integrated contig viewer (Icarus).
+It also runs [BUSCO](https://busco.ezlab.org/), a software which assess genome quality based on the presence of lineage-specific single-copy orthologs
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -201,6 +214,10 @@ The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast) fo
   - `icarus.html`: QUAST's contig browser as HTML
   - `report.html`: QUAST assembly QC as HTML report
   - `report.pdf`: QUAST assembly QC as pdf
+- `busco/`: BUSCO reports
+  - `<SampleName>_<stage>-<BuscoLineage>-busco/`: BUSCO output folder, please refer to BUSCO documentation for details.
+  - `<SampleName>_<stage>-<BuscoLineage>-busco.batch_summary.txt`: BUSCO batch summary output
+  - `short_summary.specific.<SampleName>_<stage>.{txt,json}`: BUSCO short summaries in txt and json format
 
 ![QUAST QC](images/quast.png)
 
@@ -210,7 +227,7 @@ The assembly QC is performed with [QUAST](http://quast.sourceforge.net/quast) fo
 
 ## Annotation
 
-By default, the assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend for several annotation tools and includes rRNA and ORF predictions. Alternatively, on request, the assembly is annotated with [Bakta](https://github.com/oschwengers/bakta) or [DFAST](https://github.com/nigyta/dfast_core).
+By default, the assembly is annotated with [Prokka](https://github.com/tseemann/prokka) which acts as frontend for several annotation tools and includes rRNA and ORF predictions. Alternatively, on request, the assembly is annotated with [Bakta](https://github.com/oschwengers/bakta), [DFAST](https://github.com/nigyta/dfast_core) or [LIFTOFF](https://github.com/agshumate/Liftoff).
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -235,6 +252,13 @@ See [Baktas's documentation](https://github.com/oschwengers/bakta#output) for a 
   - `genome.gff`: Annotation in gff format
   - `statistics.txt`: Annotation statistics in text format
   - `protein.faa`: Protein sequences in fasta format
+
+- `LIFTOFF/`
+  - `{ID}.gff3`: Annotation in gff format
+  - `{ID}.polished.gff3`: Polished lifted annotations in gff format
+  - `{ID}.unmapped.txt`: Unmapped reference annotations
+
+See [LIFTOFF's documentation](https://github.com/agshumate/Liftoff#output) for a full description of all output files.
 
 </details>
 

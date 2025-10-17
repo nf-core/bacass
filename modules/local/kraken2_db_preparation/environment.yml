@@ -1,7 +1,0 @@
-name: kraken2_db_preparation
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-dependencies:
-  - conda-forge::sed=4.7

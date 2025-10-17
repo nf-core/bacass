@@ -33,11 +33,12 @@ process MEDAKA {
     medaka_consensus $args \
         -i ${ reads_bgzip_out ?: longreads } \
         -d ${ assembly_bgzip_out ?: assembly } \
-        -o "${prefix}_out" \
+        -o . \
         -t $task.cpus
 
-    mv ${prefix}_out/* .
+    mv medaka/* . && rm -r medaka/
     mv consensus.fasta ${prefix}_polished_genome.fa
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         medaka: \$( medaka --version 2>&1 | sed 's/medaka //g' )

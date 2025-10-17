@@ -3,10 +3,56 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.5.0 nf-core/bacass: "Blue Mercury Sturgeon" 2025/07/23
+
+### `Changed`
+
+- [#257](https://github.com/nf-core/bacass/pull/257) Update module Nanoplot (to 1.46.1).
+- [#254](https://github.com/nf-core/bacass/pull/254) Bump version v2.5.0.
+- [#253](https://github.com/nf-core/bacass/pull/253) Update Template to 3.3.2.
+- [#252](https://github.com/nf-core/bacass/pull/252) Update nf-core/bacass to the new nf-core 3.2.0 `TEMPLATE`.
+- [#249](https://github.com/nf-core/bacass/pull/249) Replace `download_reference.py` with NCBI Datasets API implementation (`removes assembly_summary_refseq.txt` dependency).
+- [#247](https://github.com/nf-core/bacass/pull/247) Update modules: unicycler (to 0.5.1) and dragonflye (to 1.2.1)
+- [#239](https://github.com/nf-core/bacass/pull/239) Add protein FASTA file as an optional parameter to be used by PROKKA to annotate the assembly. Using `--prokka_proteins` parameter to point to the protein FASTA file.
+- [#221](https://github.com/nf-core/bacass/pull/221) update fastq_trim_fastp_fastqc subworkflow and its modules.
+- [#232](https://github.com/nf-core/bacass/pull/232) Update Template to 3.2.1
+
+### `Added`
+
+- [#248](https://github.com/nf-core/bacass/pull/248) Fix CAT_FASTQ handling for long reads and hybrid assembly modes.
+- [#237](https://github.com/nf-core/bacass/issues/237) Add LIFTOFF nf-core module
+- Added [ToulligQC](https://github.com/GenomiqueENS/toulligQC) for Nanopore Raw Reads
+- Added the parameters: `--skip_nanoplot` and `--skip_toulligqc` to skip the nanopore qc steps
+- [#225](https://github.com/nf-core/bacass/pull/225) add BUSCO nf-core module.
+- [#223](https://github.com/nf-core/bacass/pull/223) Add nf-core/filtlong module.
+- [#222](https://github.com/nf-core/bacass/pull/222) Reinstalled Dragonflye 1.1.2.
+- [#195](https://github.com/nf-core/bacass/pull/195) Added nf-test.
+
+### `Fixed`
+
+- [#260](https://github.com/nf-core/bacass/pull/260) Fix unestable files when nf-tests run using conda.
+- [#258](https://github.com/nf-core/bacass/pull/258) Update and Fix ToulligQC.
+- [#256](https://github.com/nf-core/bacass/pull/256) Update module busco to avoid version number error when using conda.
+- [#231](https://github.com/nf-core/bacass/pull/231) Fix KmerFinder DB and relative paths resolution issues.
+- [#228](https://github.com/nf-core/bacass/pull/228) Fixed Kmerfinder database path bug.
+- [#220](https://github.com/nf-core/bacass/pull/220) Fixed local environments.
+
+### `Dependencies`
+
+| Tool       | Previous version | New version |
+| ---------- | ---------------- | ----------- |
+| Dragonflye | 1.1.2            | 1.2.1       |
+| Unicycler  | 0.5.0            | 0.5.1       |
+| Nanoplot   | 1.41.6           | 1.46.1      |
+| ToulligQC  | 2.5.6            | 2.7.1       |
+
+### `Deprecated`
+
 ## v2.4.0 nf-core/bacass: "Yellow Copper Crayfish" 2024/11/05
 
 ### `Changed`
 
+- [#219](https://github.com/nf-core/bacass/pull/219) Required --assembly_type
 - [#180](https://github.com/nf-core/bacass/pull/180) Bump version 2.4.0.
 - [#169](https://github.com/nf-core/bacass/pull/169) Refactored long-reads polishing step.
 - [#167](https://github.com/nf-core/bacass/pull/167) Remove params.save_merged as merged reads are not used in downstream analysis.
@@ -65,7 +111,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Added`
 
 - [#135](https://github.com/nf-core/bacass/pull/135) Implementation of KmerFinder subworkflow Custom Quast, and Custom MultiQC Reports:
-
   - Added KmerFinder subworkflow for read quality control, purity assessment, and sample grouping based on reference genome estimation.
   - Enhanced Quast Assembly QC to run both general and reference genome-based analyses when KmerFinder is invoked.
   - Implemented custom MultiQC module with multiqc_config.yml files for different assembly modes (short, long, hybrid).
@@ -185,7 +230,6 @@ This version merges the nf-core template updates of v2.9 and v2.10, and updates 
 ### `Deprecated`
 
 - [#86](https://github.com/nf-core/bacass/pull/86) Replace depecated modules with nf-core/modules.
-
   - Replace `local/get_software_versions.nf` with `nf-core/custom/dumpsoftwareversions.nf`
   - Replace `local/skewer` by `nf-core/fastp` and wrap fastqc plus fastp into `subworkflows/nf-core/fastq_trim_fastp_fastqc`
 

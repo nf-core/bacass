@@ -12,7 +12,7 @@
 
 - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
-  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online].
+> Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online].
 
 - [FastP](https://github.com/OpenGene/fastp)
 
@@ -23,6 +23,8 @@
 - [NanoPlot](https://doi.org/10.1093/bioinformatics/bty149)
 
   > De Coster, W., D’Hert, S., Schultz, D. T., Cruts, M., & Van Broeckhoven, C. (2018). NanoPack: visualizing and processing long-read sequencing data. Bioinformatics, 34(15), 2666-2669. doi: 10.1093/bioinformatics/bty149.
+
+- [ToulligQC](https://github.com/GenomiqueENS/toulligQC)
 
 - [pycoQC](https://github.com/tleonardi/pycoQC)
 
@@ -49,6 +51,10 @@
 - [DFAST](https://pubmed.ncbi.nlm.nih.gov/29106469/)
 
   > Tanizawa Y, Fujisawa T, Nakamura Y. DFAST: a flexible prokaryotic genome annotation pipeline for faster genome publication. Bioinformatics. 2018 Mar 15;34(6):1037-1039. doi: 10.1093/bioinformatics/btx713. PMID: 29106469; PMCID: PMC5860143.
+
+- [Liftoff](https://github.com/agshumate/Liftoff)
+
+  > Shumate, Alaina, and Steven L. Salzberg. 2020. “Liftoff: Accurate Mapping of Gene Annotations.” Bioinformatics, December. https://doi.org/10.1093/bioinformatics/btaa1016.
 
 - [Medaka](https://github.com/nanoporetech/medaka)
 

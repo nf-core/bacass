@@ -59,9 +59,38 @@
                     "type": "boolean",
                     "description": "Skip FastQC"
                 },
+                "skip_nanoplot": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip Nanoplot"
+                },
+                "skip_toulligqc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip ToulligQC"
+                },
                 "skip_fastp": {
                     "type": "boolean",
                     "description": "Skip FastP"
+                },
+                "discard_trimmed_pass": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Specify true to not write any reads that pass trimming thresholds.This can be used to use fastp for the output report only."
+                },
+                "long_reads_filtering": {
+                    "type": "string",
+                    "default": "porechop",
+                    "description": "Tool for ONT read filtering"
+                },
+                "filtlong_args": {
+                    "type": "string",
+                    "description": "Arguments for running Filtlong"
+                },
+                "filtlong_minlen": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Minimun length for Filtlong to work"
                 }
             }
         },
@@ -80,7 +109,7 @@
                 },
                 "kmerfinderdb": {
                     "type": "string",
-                    "description": "Path to the Kmerfinder bacteria database (ie: '/path_to/kmerfinder/bacteria/ or '/path_to/kmerfinder/bacteria.tar.gz'). Only taxonomic group 'bacteria' is allowed. See database installation (guidelines)[https://bitbucket.org/genomicepidemiology/kmerfinder_db/src/master/] for details. The latest version can be downloaded from the KmerFinder Database FTP site  or directly during pipeline execution with. Example:\n\n```--kmerfinder_db 'ftp://ftp.cbs.dtu.dk/public/CGE/databases/KmerFinder/version/latest/bacteria.tar.gz'```\n(Note: Downloading the KmerFinder database (~30GB) via FTP can be time-consuming. It's recommended to pre-download the database and provide the *.tar.gz file using this parameter instead of URL site.).\nAn older version is available on (Zenodo)[https://zenodo.org/records/13447056/files/20190108_kmerfinder_stable_dirs.tar.gz]."
+                    "description": "Path to the Kmerfinder bacteria database (ie: '/path_to/kmerfinder/bacteria/ or '/path_to/kmerfinder/bacteria.tar.gz'). Only taxonomic group 'bacteria' is allowed. See database installation (guidelines)[https://bitbucket.org/genomicepidemiology/kmerfinder_db/src/master/] for details. The latest version can be downloaded from the KmerFinder Database FTP site  or directly during pipeline execution with. Example:\n\n```--kmerfinderdb 'ftp://ftp.cbs.dtu.dk/public/CGE/databases/KmerFinder/version/latest/bacteria.tar.gz'```\n(Note: Downloading the KmerFinder database (~30GB) via FTP can be time-consuming. It's recommended to pre-download the database and provide the *.tar.gz file using this parameter instead of URL site.).\nAn older version is available on (Zenodo)[https://zenodo.org/records/13447056/files/20190108_kmerfinder_stable_dirs.tar.gz]."
                 },
                 "reference_fasta": {
                     "type": "string",
@@ -89,10 +118,6 @@
                 "reference_gff": {
                     "type": "string",
                     "description": "Reference GFF file."
-                },
-                "ncbi_assembly_metadata": {
-                    "type": "string",
-                    "description": "Master file (*.txt) containing a summary of assemblies available in GeneBank or RefSeq. See: https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_refseq.txt"
                 }
             }
         },
@@ -112,7 +137,6 @@
                 },
                 "assembly_type": {
                     "type": "string",
-                    "default": "short",
                     "fa_icon": "fas fa-fingerprint",
                     "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`.",
                     "description": "Which type of assembly to perform.",
@@ -138,6 +162,39 @@
                     "type": "string",
                     "description": "Extra arguments for [Dragonflye](https://github.com/rpetit3/dragonflye#usage)",
                     "help_text": "This advanced option allows you to add extra arguments to Dragonflye (e.g.: `\"--gsize 2.4m\"`). For those arguments with no values/options associated (e.g.: `\"--nopolish\"` or `\"--nofilter\"`...) you need to add an extra space at the begining of the input string to params.dragonflye_args. Example: `--params.dragonflye_args ' --nopolish'`"
+                }
+            }
+        },
+        "busco_options": {
+            "title": "BUSCO options",
+            "type": "object",
+            "description": "Options for running BUSCO",
+            "default": "",
+            "fa_icon": "fas fa-dna",
+            "properties": {
+                "busco_lineage": {
+                    "type": "string",
+                    "default": "bacteria_odb10",
+                    "description": "BUSCO lineage to use, you can use other BUSCO lineages, these are available in: https://busco.ezlab.org/list_of_lineages.html"
+                },
+                "busco_mode": {
+                    "type": "string",
+                    "default": "genome",
+                    "description": "BUSCO mode to use",
+                    "enum": ["genome", "proteins", "transcriptome"]
+                },
+                "busco_db_path": {
+                    "type": ["string", "null"],
+                    "description": "Path to BUSCO database"
+                },
+                "busco_config_file": {
+                    "type": ["string", "null"],
+                    "description": "Path to BUSCO config file"
+                },
+                "busco_clean_intermediates": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Clean intermediate BUSCO files"
                 }
             }
         },
@@ -169,12 +226,17 @@
                     "type": "string",
                     "default": "prokka",
                     "description": "The annotation method to annotate the final assembly.",
-                    "enum": ["prokka", "bakta", "dfast"]
+                    "enum": ["prokka", "bakta", "dfast", "liftoff"]
                 },
                 "prokka_args": {
                     "type": "string",
                     "description": "Extra arguments for prokka annotation tool.",
                     "help_text": "This advanced option allows you to pass extra arguments to Prokka (e.g. `\" --rfam\"` or `\" --genus name\"`). For this to work you need to quote the arguments and add at least one space between the arguments. Example:\n\n```bash\n--prokka_args `--rfam --genus Escherichia Coli`\n```\n"
+                },
+                "prokka_proteins": {
+                    "type": "string",
+                    "description": "FASTA file with protein sequences to be used as reference by PROKKA.",
+                    "help_text": "If a file with protein sequences are provided, PROKKA will use this to annotate proteins in the assembly."
                 },
                 "baktadb": {
                     "type": "string",
@@ -195,6 +257,10 @@
                     "default": "assets/test_config_dfast.py",
                     "description": "Specifies a configuration file for the [DFAST](https://github.com/nigyta/dfast_core) annotation method.",
                     "help_text": "If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.  The default config (`assets/test_config_dfast.py`) is just included for testing, so if you want to annotate using DFAST, you have to create a config!"
+                },
+                "liftoff_ref_from_kmerfinder": {
+                    "type": "boolean",
+                    "description": "Use the reference files (.fasta, .gff) from kmerfinder step for LIFTOFF."
                 }
             }
         },
@@ -224,6 +290,11 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-forward",
                     "description": "Skip running `PycoQC` on long read input."
+                },
+                "skip_busco": {
+                    "type": "boolean",
+                    "description": "Skip BUSCO",
+                    "fa_icon": "fas fa-forward"
                 },
                 "skip_polish": {
                     "type": "boolean",
@@ -292,12 +363,6 @@
             "description": "Less common options for the pipeline, typically set in a config file.",
             "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
             "properties": {
-                "help": {
-                    "type": "boolean",
-                    "description": "Display help text.",
-                    "fa_icon": "fas fa-question-circle",
-                    "hidden": true
-                },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
@@ -378,17 +443,17 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "schema_ignore_params": {
-                    "type": "string",
-                    "default": "modules,igenomes_base",
-                    "hidden": true,
-                    "description": "A comma separated string of inputs the schema validation should ignore"
-                },
                 "pipelines_testdata_base_path": {
                     "type": "string",
                     "fa_icon": "far fa-check-circle",
                     "description": "Base URL or local path to location of pipeline test dataset files",
                     "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "hidden": true
+                },
+                "trace_report_suffix": {
+                    "type": "string",
+                    "fa_icon": "far calendar",
+                    "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
                 }
             }
@@ -406,6 +471,9 @@
         },
         {
             "$ref": "#/$defs/assembly_parameters"
+        },
+        {
+            "$ref": "#/$defs/busco_options"
         },
         {
             "$ref": "#/$defs/assembly_polishing"
