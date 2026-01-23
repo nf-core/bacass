@@ -12,23 +12,23 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
     consensus               // channel: [ meta, consensus ]
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     // Prepare kmerfinder database
     ch_kmerfinderdb           = file(params.kmerfinderdb, checkIfExists: true)
 
     if ( ch_kmerfinderdb.name.endsWith('.gz') ) {
         UNTAR ( [[ id: ch_kmerfinderdb.getSimpleName() ], ch_kmerfinderdb] )
-        ch_kmerfinderdb_untar = UNTAR.out.untar.map{ meta, file -> file }
+        ch_kmerfinderdb_untar = UNTAR.out.untar.map{ _meta, file -> file }
 
         ch_versions = ch_versions.mix(UNTAR.out.versions)
     } else {
-        ch_kmerfinderdb_untar = Channel.fromPath(ch_kmerfinderdb)
+        ch_kmerfinderdb_untar = channel.fromPath(ch_kmerfinderdb)
     }
     ch_kmerfinderdb_untar = ch_kmerfinderdb_untar.map { it -> it.toAbsolutePath() }
 
     KMERFINDER_KMERFINDER (
-        reads,    // Channel: [ meta, reads ]
+        reads,    // channel: [ meta, reads ]
         ch_kmerfinderdb_untar.collect(),
         'bacteria'           // Val: 'tax_group'
     )
@@ -38,7 +38,7 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
 
     // MODULE: Kmerfinder summary report. Generates a csv report file collecting all sample references.
     KMERFINDER_SUMMARY (
-        ch_kmerfinder_report.map{ meta, report -> report }.collect()
+        ch_kmerfinder_report.map{ _meta, report -> report }.collect()
     )
     ch_summary_yaml     = KMERFINDER_SUMMARY.out.yaml
     ch_versions         = ch_versions.mix(KMERFINDER_SUMMARY.out.versions)
@@ -60,8 +60,8 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
     // SUBWORKFLOW: For each species target, this subworkflow collects reference genome assemblies ('GCF*') and subsequently downloads the best matching reference assembly.
     KMERFINDER_DOWNLOAD_REFERENCE (
         ch_reports_byreference
-            .map{ specie, meta, report_txt, fasta-> tuple(specie, report_txt) }
-            .filter{ specie, report_txt -> specie != "Unknown Species" }
+            .map{ specie, _meta, report_txt, _fasta-> tuple(specie, report_txt) }
+            .filter{ specie, _report_txt -> specie != "Unknown Species" }
     )
     ch_versions = ch_versions.mix(KMERFINDER_DOWNLOAD_REFERENCE.out.versions)
 
@@ -71,7 +71,7 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
         .join(KMERFINDER_DOWNLOAD_REFERENCE.out.gff)
         .join(KMERFINDER_DOWNLOAD_REFERENCE.out.winner)
         .map {
-            specie, meta, report_txt, fasta, fna, gff, winner_id ->
+            _specie, meta, _report_txt, fasta, fna, gff, winner_id ->
                 return tuple([id: winner_id.getBaseName()], meta, fasta, fna, gff)
         }
         .set { ch_consensus_byrefseq }
