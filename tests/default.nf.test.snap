@@ -7,7 +7,7 @@
                     "busco": "5.8.3"
                 },
                 "CAT_FASTQ_SHORT": {
-                    "cat": 8.3
+                    "cat": 9.5
                 },
                 "FASTP": {
                     "fastp": "1.0.1"

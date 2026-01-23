@@ -11,7 +11,7 @@
                 },
                 "KRAKEN2_LONG": {
                     "kraken2": "2.1.6",
-                    "pigz": 2.6
+                    "pigz": 2.8
                 },
                 "MEDAKA": {
                     "medaka": "1.4.3"

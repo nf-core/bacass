@@ -355,11 +355,11 @@
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,5e89ca1f45fb6876b58ddbb20b86ea77",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,34e8d91183bd582532ac654e8e287945",
                 "multiqc_citations.yaml:md5,c1962a840fe1cf1698fbdeb8953601ed",
-                "multiqc_fastp.yaml:md5,a90bab0f0162202421986bf1c11e4f07",
+                "multiqc_fastp.yaml:md5,e46556982ecb40dbb107a00aa392a2b0",
                 "multiqc_fastqc.yaml:md5,a0b5fd24bb745bb77511c1962086fcf0",
                 "multiqc_fastqc_1.yaml:md5,daf5f34bdacbbc207f86fc95768ce9a2",
                 "multiqc_nanostat.yaml:md5,cff0c79f74776d0e8c451e87bb332d2d",
-                "A1403KPN.fastp.json:md5,61275baa1954b309371c53a978f6a789"
+                "A1403KPN.fastp.json:md5,af1a7e6610168cc6df5b1df62adac9fc"
             ]
         ],
         "meta": {
