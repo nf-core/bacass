@@ -7,7 +7,7 @@
                     "busco": "5.8.3"
                 },
                 "FASTP": {
-                    "fastp": "0.24.0"
+                    "fastp": "1.0.1"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -19,7 +19,7 @@
                     "liftoff": "v1.6.3"
                 },
                 "QUAST": {
-                    "quast": "5.2.0"
+                    "quast": "5.3.0"
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"

@@ -7,7 +7,7 @@
                     "busco": "5.8.3"
                 },
                 "FASTP": {
-                    "fastp": "0.24.0"
+                    "fastp": "1.0.1"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -28,7 +28,7 @@
                     "prokka": "1.14.6"
                 },
                 "QUAST": {
-                    "quast": "5.2.0"
+                    "quast": "5.3.0"
                 },
                 "TOULLIGQC": {
                     "toulligqc": "2.7.1"
