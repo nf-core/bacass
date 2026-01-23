@@ -49,7 +49,7 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
         .join(consensus, by:0)
         .map{
             meta, report_json, report_txt, fasta ->
-                species_hits = report_json.splitJson(path:"kmerfinder.results.species_hits").value
+                def species_hits = report_json.splitJson(path:"kmerfinder.results.species_hits").value
                 def specie = species_hits.size() > 0 ? species_hits.get(0)["Species"] : "Unknown Species"
 
                 return tuple(specie, meta, report_txt, fasta)
