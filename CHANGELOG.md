@@ -3,7 +3,21 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.5.0 nf-core/bacass: "Blue Mercury Sturgeon" 2025/07/23
+## v2.6.0dev nf-core/bacass
+
+### `Changed`
+
+- [#263](https://github.com/nf-core/bacass/pull/263) Update Template to 3.5.1
+
+### `Added`
+
+### `Fixed`
+
+### `Dependencies`
+
+### `Deprecated`
+
+## v2.5.0 nf-core/bacass: "Blue Mercury Sturgeon" 2025/10/17
 
 ### `Changed`
 
