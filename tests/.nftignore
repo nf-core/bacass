@@ -5,6 +5,7 @@ multiqc/multiqc_data/multiqc.log
 multiqc/multiqc_data/multiqc_data.json
 multiqc/multiqc_data/multiqc_sources.{txt,yaml}
 multiqc/multiqc_data/multiqc_software_versions.{txt,yaml}
+multiqc/multiqc_data/llms-full.txt
 multiqc/multiqc_plots/{svg,pdf,png}/*.{svg,pdf,png}
 multiqc/multiqc_report.html
 multiqc/multiqc_data/mqc_prokka_plot_1.yaml
