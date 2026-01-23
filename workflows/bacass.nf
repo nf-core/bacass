@@ -167,15 +167,15 @@ workflow BACASS {
     ch_fastqc_raw_multiqc = channel.empty()
     ch_fastqc_trim_multiqc = channel.empty()
     ch_fastp_json_multiqc = channel.empty()
+
     if (params.assembly_type != 'long'){
         FASTQ_TRIM_FASTP_FASTQC (
-        ch_shortreads_concat,
-        [],
-        params.save_trimmed_fail,
-        [],
-        params.discard_trimmed_pass,
-        params.skip_fastp,
-        params.skip_fastqc
+            ch_shortreads_concat.map{ meta, reads -> [meta, reads, []] }, //add an empty field for adapters
+            params.save_trimmed_fail,
+            [],
+            params.discard_trimmed_pass,
+            params.skip_fastp,
+            params.skip_fastqc
         )
         ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
         ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
