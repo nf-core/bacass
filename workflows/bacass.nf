@@ -441,7 +441,6 @@ workflow BACASS {
             false
         )
         ch_kraken_short_multiqc = KRAKEN2.out.report
-        ch_versions = ch_versions.mix(KRAKEN2.out.versions)
 
         KRAKEN2_LONG (
             ch_for_kraken2_long
