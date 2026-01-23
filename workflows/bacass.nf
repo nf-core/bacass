@@ -155,7 +155,6 @@ workflow BACASS {
         ch_longreads_concat = CAT_FASTQ_LONG.out.reads
             .mix( ch_longreads_fastqs.single )
 
-        ch_versions = ch_versions.mix(CAT_FASTQ_LONG.out.versions)
     } else {
         ch_longreads_concat = channel.empty()
     }
