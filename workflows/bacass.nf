@@ -128,7 +128,6 @@ workflow BACASS {
         ch_shortreads_concat = CAT_FASTQ_SHORT.out.reads
             .mix( ch_shortreads_fastqs.single )
 
-        ch_versions = ch_versions.mix(CAT_FASTQ_SHORT.out.versions)
     } else {
         ch_shortreads_concat = channel.empty()
     }
@@ -524,7 +523,6 @@ workflow BACASS {
         ch_quast_multiqc = QUAST_BYREFSEQID.out.results
         ch_versions      = ch_versions.mix(QUAST_BYREFSEQID.out.versions)
     }
-    ch_versions = ch_versions.mix(QUAST.out.versions)
 
     // Check assemblies that require further processing for gene annotation
     ch_assembly

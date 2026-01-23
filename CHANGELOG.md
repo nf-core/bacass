@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | ---------- | ---------------- | ----------- |
 | Bakta      | 1.9.3            | 1.11.4      |
 | fastp      | 0.24.0           | 1.0.1       |
+| kraken2    | 2.1.2            | 2.1.6       |
+| quast      | 5.2.0            | 5.3.0       |
 
 ### `Deprecated`
 
