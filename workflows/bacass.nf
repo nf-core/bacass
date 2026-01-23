@@ -456,7 +456,6 @@ workflow BACASS {
             false
         )
         ch_kraken_long_multiqc = KRAKEN2_LONG.out.report
-        ch_versions = ch_versions.mix(KRAKEN2_LONG.out.versions)
     }
 
     //
