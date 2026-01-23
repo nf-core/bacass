@@ -46,6 +46,8 @@ workflow BAKTA_DBDOWNLOAD_RUN {
         ch_fasta,
         ch_path_baktadb,
         [],
+        [],
+        [],
         []
     )
     ch_bakta_txt_multiqc    = BAKTA_BAKTA.out.txt

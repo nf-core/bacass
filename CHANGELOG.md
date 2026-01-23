@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Dependencies`
 
+| Tool       | Previous version | New version |
+| ---------- | ---------------- | ----------- |
+| Bakta      | 1.9.3            | 1.11.4      |
+
 ### `Deprecated`
 
 ## v2.5.0 nf-core/bacass: "Blue Mercury Sturgeon" 2025/10/17
