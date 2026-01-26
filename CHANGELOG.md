@@ -18,12 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#264](https://github.com/nf-core/bacass/pull/264) Update some nf-core subworkflows and modules
 
-| Tool       | Previous version | New version |
-| ---------- | ---------------- | ----------- |
-| Bakta      | 1.9.3            | 1.11.4      |
-| FASTP      | 0.24.0           | 1.0.1       |
-| KRAKEN2    | 2.1.2            | 2.1.6       |
-| QUAST      | 5.2.0            | 5.3.0       |
+| Tool    | Previous version | New version |
+| ------- | ---------------- | ----------- |
+| Bakta   | 1.9.3            | 1.11.4      |
+| FASTP   | 0.24.0           | 1.0.1       |
+| KRAKEN2 | 2.1.2            | 2.1.6       |
+| QUAST   | 5.2.0            | 5.3.0       |
 
 ### `Deprecated`
 
