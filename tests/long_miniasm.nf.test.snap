@@ -10,8 +10,8 @@
                     "tar": null
                 },
                 "KRAKEN2_LONG": {
-                    "kraken2": "2.1.2",
-                    "pigz": 2.6
+                    "kraken2": "2.1.6",
+                    "pigz": 2.8
                 },
                 "MEDAKA": {
                     "medaka": "1.4.3"
@@ -35,7 +35,7 @@
                     "prokka": "1.14.6"
                 },
                 "QUAST": {
-                    "quast": "5.2.0"
+                    "quast": "5.3.0"
                 },
                 "RACON": {
                     "racon": "1.4.20"

@@ -18,11 +18,11 @@ workflow QC_NANOPLOT_TOULLIGQC {
      * Nanopore QC with Nanoplot
      */
 
-    nanoplot_png     = Channel.empty()
-    nanoplot_html    = Channel.empty()
-    nanoplot_txt     = Channel.empty()
-    nanoplot_log     = Channel.empty()
-    nanoplot_version = Channel.empty()
+    nanoplot_png     = channel.empty()
+    nanoplot_html    = channel.empty()
+    nanoplot_txt     = channel.empty()
+    nanoplot_log     = channel.empty()
+    nanoplot_version = channel.empty()
     if (!skip_nanplot) {
         NANOPLOT ( ch_fastq )
         nanoplot_png     = NANOPLOT.out.png
@@ -35,11 +35,11 @@ workflow QC_NANOPLOT_TOULLIGQC {
     /*
      * Nanopore QC with ToulligQC
      */
-    toulligqc_report_data   = Channel.empty()
-    toulligqc_report_html   = Channel.empty()
-    toulligqc_plots_html    = Channel.empty()
-    toulligqc_plotly_js     = Channel.empty()
-    toulligqc_version       = Channel.empty()
+    toulligqc_report_data   = channel.empty()
+    toulligqc_report_html   = channel.empty()
+    toulligqc_plots_html    = channel.empty()
+    toulligqc_plotly_js     = channel.empty()
+    toulligqc_version       = channel.empty()
     if (!skip_toulligqc) {
         TOULLIGQC ( ch_fastq )
         toulligqc_report_data  = TOULLIGQC.out.report_data

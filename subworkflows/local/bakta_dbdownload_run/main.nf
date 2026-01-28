@@ -14,18 +14,18 @@ workflow BAKTA_DBDOWNLOAD_RUN {
     val_baktadb_download    // value: boolean
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     //
     // SUBWORKFLOW: Parse, download and/or untar Bakta database
     //
     if( ch_path_baktadb ){
         if (ch_path_baktadb.endsWith('.tar.gz')){
-            ch_baktadb_tar  = Channel.from(ch_path_baktadb).map{ db -> [ [id: 'baktadb'], db ]}
+            ch_baktadb_tar  = channel.from(ch_path_baktadb).map{ db -> [ [id: 'baktadb'], db ]}
 
             // MODULE: untar database
             UNTAR( ch_baktadb_tar )
-            ch_path_baktadb = UNTAR.out.untar.map{ meta, db -> db }
+            ch_path_baktadb = UNTAR.out.untar.map{ _meta, db -> db }
             ch_versions     = ch_versions.mix(UNTAR.out.versions)
         }
     } else if (!ch_path_baktadb && val_baktadb_download){
@@ -45,6 +45,8 @@ workflow BAKTA_DBDOWNLOAD_RUN {
     BAKTA_BAKTA (
         ch_fasta,
         ch_path_baktadb,
+        [],
+        [],
         [],
         []
     )

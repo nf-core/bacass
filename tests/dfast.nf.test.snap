@@ -10,7 +10,7 @@
                     "dfast": "1.3.2"
                 },
                 "FASTP": {
-                    "fastp": "0.24.0"
+                    "fastp": "1.0.1"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -19,7 +19,7 @@
                     "fastqc": "0.12.1"
                 },
                 "QUAST": {
-                    "quast": "5.2.0"
+                    "quast": "5.3.0"
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -343,15 +343,15 @@
                 "trimming/shortreads/log/ERR064912.fastp.log"
             ],
             [
-                "cds.fna:md5,6a821f6afcc0a47663937bf270f15b40",
-                "mss.ann:md5,5d6b37b545f899a5a2f57e16f19a101b",
-                "mss.fasta:md5,254637883a717e5f7a65752045e171f1",
-                "genome.embl:md5,bba9ac1c1a63071b4bd5c4e4b05948c0",
-                "genome.fna:md5,da633f7f35d9aa33fdc669bcad3c8a97",
-                "genome.gff:md5,a97bec06f2785058d9400e8b09764263",
-                "protein.faa:md5,66ab12a5a07666268fe72e00869f254a",
+                "cds.fna:md5,a89fa3c0d5cda0ac5642e74c7bacdc30",
+                "mss.ann:md5,d5169fdb6f8cbe3ef208e433081a1c0f",
+                "mss.fasta:md5,1bf85e7b183c1444fbc5d45bcd571dc2",
+                "genome.embl:md5,33ef3f8c496dfd37ce37636f9c0c39bf",
+                "genome.fna:md5,1c193d50e732c5bf9ddbbcde8b135107",
+                "genome.gff:md5,ae7ae11e02e8c0dc34704b287b6525e6",
+                "protein.faa:md5,cb8401ed55ee28121d82b73f60699555",
                 "rna.fna:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "statistics.txt:md5,94aea138720444d5a32b77e4192d88c3",
+                "statistics.txt:md5,77d29429ac7a3ba432ffa982e1032586",
                 "cds.fna:md5,d7da7066d58352c8004410997256e8e0",
                 "mss.ann:md5,0b37decf849fdce96563e7583dc5470a",
                 "mss.fasta:md5,d0be5dd3e5e75508d2b32a46d3885b5c",
@@ -361,48 +361,48 @@
                 "protein.faa:md5,86e0b987698e6cc064fe06f9cc39b8e3",
                 "rna.fna:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "statistics.txt:md5,7997a7e2e3b5e98ee8200bffb7a6de73",
-                "ERR044595.assembly.gfa.gz:md5,66fcb08f315b69b3639ab394f4171f58",
-                "ERR044595.scaffolds.fa.gz:md5,cc86896317eea5e7bf1aa5321e212ee1",
+                "ERR044595.assembly.gfa.gz:md5,3558ea16e8397970aa6dff03ebea7886",
+                "ERR044595.scaffolds.fa.gz:md5,7854e8c8e26f21d7acfeaca4a872f7ea",
                 "ERR064912.assembly.gfa.gz:md5,01faaeca29910ae15e49dd355dda556a",
                 "ERR064912.scaffolds.fa.gz:md5,0965953c184cd27da1550b757d7911c7",
                 "mqc_busco_plot_bacteria_odb10_1.yaml:md5,d095cfa297352d240023df5030592c44",
                 "mqc_fastp-insert-size-plot_1.yaml:md5,d10378b39df6bfae8fb4f372200c017f",
-                "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,1626ad6d4b0e5c11b812eb28f010bb30",
+                "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,c573302c3734040c71e4b176a93d7e1f",
                 "mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,5e6257ca358949b2b1f81e6c4cac566e",
-                "mqc_fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,5de403821c5d77e7f212d4b3b71983cc",
+                "mqc_fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,4935356a42abbcd443c0da812c0e9d5f",
                 "mqc_fastp-seq-content-gc-plot_Read_2_Before_filtering.yaml:md5,9c600f2b14a7c92c533a7b4f53093e61",
-                "mqc_fastp-seq-content-n-plot_Read_1_After_filtering.yaml:md5,ec0fd6e4ded22726e1f1c5c83f0840b7",
+                "mqc_fastp-seq-content-n-plot_Read_1_After_filtering.yaml:md5,62ddc3cf54803c8002e18a1ddd3129ca",
                 "mqc_fastp-seq-content-n-plot_Read_1_Before_filtering.yaml:md5,3a2e278070b35d5e54beb98e3de3ac19",
-                "mqc_fastp-seq-content-n-plot_Read_2_After_filtering.yaml:md5,823a0bc166948f77cf8ec360328fd8e1",
+                "mqc_fastp-seq-content-n-plot_Read_2_After_filtering.yaml:md5,b3d90bcc8f032b6d2b287a09fbad7e48",
                 "mqc_fastp-seq-content-n-plot_Read_2_Before_filtering.yaml:md5,199f91d9e762a6a054c22a0b93698870",
-                "mqc_fastp-seq-quality-plot_Read_1_After_filtering.yaml:md5,b6d62af1e24d74cfc8860e2c3bb1e1f8",
+                "mqc_fastp-seq-quality-plot_Read_1_After_filtering.yaml:md5,fdbd8b8502d55ebc0381a42ca81287af",
                 "mqc_fastp-seq-quality-plot_Read_1_Before_filtering.yaml:md5,8a2f99badd4307372fbf3cbad6d0ea1d",
-                "mqc_fastp-seq-quality-plot_Read_2_After_filtering.yaml:md5,b6cd211a33c6a5ea2f33ba0b8bff2e12",
+                "mqc_fastp-seq-quality-plot_Read_2_After_filtering.yaml:md5,5ac03452d85cbb6082e82df1688a843b",
                 "mqc_fastp-seq-quality-plot_Read_2_Before_filtering.yaml:md5,53b11895fa7b0f3a217c6d08b656edde",
-                "mqc_fastp_filtered_reads_plot_1.yaml:md5,8b8ca8b9b2ba74ff4878848ccc7a0c1f",
+                "mqc_fastp_filtered_reads_plot_1.yaml:md5,e6bfe4de0635df7182d9e892ddcc78af",
                 "mqc_fastqc_adapter_content_plot_1.yaml:md5,03765b759de8ca659af65aa226a0c91b",
-                "mqc_fastqc_per_base_n_content_plot-2_1.yaml:md5,133136f55a621314f29395b0b590e02c",
+                "mqc_fastqc_per_base_n_content_plot-2_1.yaml:md5,917507f6eb57b8a7aab87b70240a9cb3",
                 "mqc_fastqc_per_base_n_content_plot_1.yaml:md5,7c8cebddb77c63cf63e31c559c02c9fa",
-                "mqc_fastqc_per_base_sequence_quality_plot-2_1.yaml:md5,c36608746f280013ed31fe1d3b6059de",
+                "mqc_fastqc_per_base_sequence_quality_plot-2_1.yaml:md5,8d61fa10e56818176ff65b06770e5ffe",
                 "mqc_fastqc_per_base_sequence_quality_plot_1.yaml:md5,8b543fd862b00615123e5a62be0d5099",
-                "mqc_fastqc_per_sequence_gc_content_plot-2_Counts.yaml:md5,a9e7955b572fcb86414dd273c648141f",
-                "mqc_fastqc_per_sequence_gc_content_plot-2_Percentages.yaml:md5,ec175b43fc74064aac53695244cd47d7",
+                "mqc_fastqc_per_sequence_gc_content_plot-2_Counts.yaml:md5,16cef2520a5f72a706b4de50034c978b",
+                "mqc_fastqc_per_sequence_gc_content_plot-2_Percentages.yaml:md5,6a9f7e03cfe3d000bcfa86c9dad0e7b6",
                 "mqc_fastqc_per_sequence_gc_content_plot_Counts.yaml:md5,786db52131724d97f598f14b17e15e1c",
                 "mqc_fastqc_per_sequence_gc_content_plot_Percentages.yaml:md5,569ff6b6eee59b26ce354b4b93f2fdc4",
-                "mqc_fastqc_per_sequence_quality_scores_plot-2_1.yaml:md5,6a83696e544a9d39db9231efc91915ad",
+                "mqc_fastqc_per_sequence_quality_scores_plot-2_1.yaml:md5,10cf9f29d0f59fa71c70411a33854af4",
                 "mqc_fastqc_per_sequence_quality_scores_plot_1.yaml:md5,e9012a938a3e11c0bd9847d18273fe88",
-                "mqc_fastqc_sequence_counts_plot-2_1.yaml:md5,9c4bf16973d87cfe3731b660fffb4ddb",
+                "mqc_fastqc_sequence_counts_plot-2_1.yaml:md5,4d9a4c71070deeae3ade6bef69acb130",
                 "mqc_fastqc_sequence_counts_plot_1.yaml:md5,a940e04693bcbadf20405148a1b1be35",
-                "mqc_fastqc_sequence_duplication_levels_plot-2_1.yaml:md5,904ae9ce7abc638239879b6d16ff80a8",
+                "mqc_fastqc_sequence_duplication_levels_plot-2_1.yaml:md5,ebb5023f7b992f372091a819d87d7b19",
                 "mqc_fastqc_sequence_duplication_levels_plot_1.yaml:md5,4839cd6c3bd11763f6f58ec0c1fd75b2",
-                "mqc_fastqc_sequence_length_distribution_plot_1.yaml:md5,2a0bfc0ec257081a52bf4f1755dd246b",
+                "mqc_fastqc_sequence_length_distribution_plot_1.yaml:md5,2d0ea34b5b27a6062475b6827467aadf",
                 "multiqc_busco.yaml:md5,003b890081970ec29305149c67f67cc9",
                 "multiqc_citations.yaml:md5,e46f6ed003947fe967edd4674a82d4c6",
-                "multiqc_fastp.yaml:md5,e67b5fcc2127573ff63f89c390793e5a",
+                "multiqc_fastp.yaml:md5,0e1632d8054abdd5faa70312ee4e77ce",
                 "multiqc_fastqc.yaml:md5,05172556a25feb1277e789e91031d3bc",
-                "multiqc_fastqc_1.yaml:md5,a4bc353bd4a67c1f480fb890d806bf6a",
-                "ERR044595.fastp.json:md5,3a5e0e63e47280dd797cf4c1a23b316e",
-                "ERR064912.fastp.json:md5,82472580154ff6911376ee426f8abbac"
+                "multiqc_fastqc_1.yaml:md5,ea1b355716cd910e4e23ae33c6cfcc10",
+                "ERR044595.fastp.json:md5,316525c967c7d3ecbc0457526de9cb9b",
+                "ERR064912.fastp.json:md5,39de6f3e116abb4798df1d748ad9ff63"
             ]
         ],
         "meta": {
