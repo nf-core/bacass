@@ -80,6 +80,11 @@
                         "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
                         "installed_by": ["modules"]
                     },
+                    "flye": {
+                        "branch": "master",
+                        "git_sha": "1ab453187e9eada07bdd98609ce770971bfe86e4",
+                        "installed_by": ["modules"]
+                    },
                     "gunzip": {
                         "branch": "master",
                         "git_sha": "3a5fef109d113b4997c9822198664ca5f2716208",
@@ -134,6 +139,11 @@
                     "racon": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "raven": {
+                        "branch": "master",
+                        "git_sha": "6479ace28248469b1231819b66e0572a0af51379",
                         "installed_by": ["modules"]
                     },
                     "samtools/index": {
