@@ -25,6 +25,11 @@
                         "git_sha": "55492bb796dc15d32db2673fc3f269b8cb24dcb2",
                         "installed_by": ["fasta_consensus_autocycler"]
                     },
+                    "autocycler/subsample": {
+                        "branch": "master",
+                        "git_sha": "55492bb796dc15d32db2673fc3f269b8cb24dcb2",
+                        "installed_by": ["modules"]
+                    },
                     "autocycler/trim": {
                         "branch": "master",
                         "git_sha": "55492bb796dc15d32db2673fc3f269b8cb24dcb2",
