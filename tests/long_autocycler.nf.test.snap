@@ -205,8 +205,6 @@
                 "TestMe-sample_01.report:md5,319c8eaa5ba5349feac3b7475275bf47",
                 "TestMe-sample_02.contigs.fasta.gz:md5,03a2c41c6920c9ea32e4c78689af1e93",
                 "TestMe-sample_02.report:md5,b18f993dc5bf8b092a30286900092328",
-                "TestMe-sample_01.assembly.fasta.gz:md5,f64ad77cd7014fc94feca91285537045",
-                "TestMe-sample_02.assembly.fasta.gz:md5,a5297340665ba18baab6010b99ee4369",
                 "TestMe-sample_01.fasta.gz:md5,ebc67e9f0a5e5e8b20e23f90901139e2",
                 "TestMe-sample_02.fasta.gz:md5,5fdfaf522526c9142bb9f62986726ca5",
                 "consensus_assembly.fasta:md5,8c32f3d1ed2876626d958a215a15b759",
@@ -223,6 +221,6 @@
             "nf-test": "0.9.3",
             "nextflow": "25.10.4"
         },
-        "timestamp": "2026-02-16T18:13:31.543929207"
+        "timestamp": "2026-02-16T21:30:30.460285044"
     }
 }
