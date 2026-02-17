@@ -20,13 +20,13 @@ workflow AUTOCYCLER {
     ch_assemblies = channel.empty()
 
     // subsample and transpose to one subset per channel entry
-    AUTOCYCLER_SUBSAMPLE ( 
-        ch_preprocessed_fastq.map{ meta, _short_reads, long_reads -> [meta, long_reads] }, 
-        ch_preprocessed_fastq.map { meta, _reads, _lr -> meta.gsize } 
+    AUTOCYCLER_SUBSAMPLE (
+        ch_preprocessed_fastq.map{ meta, _short_reads, long_reads -> [meta, long_reads] },
+        ch_preprocessed_fastq.map { meta, _reads, _lr -> meta.gsize }
     )
     AUTOCYCLER_SUBSAMPLE.out.subsampled_reads
         .transpose() // transpose to [ meta, fasta ]
-        .map{ meta, reads -> 
+        .map{ meta, reads ->
             def new_meta = meta.clone()
             new_meta.subsample = reads.getBaseName() -'.fastq'
             [ new_meta, reads ]
@@ -56,7 +56,7 @@ workflow AUTOCYCLER {
     }
 
     // unify assemblies with SUBWORKFLOW FASTA_CONSENSUS_AUTOCYCLER
-    FASTA_CONSENSUS_AUTOCYCLER ( 
+    FASTA_CONSENSUS_AUTOCYCLER (
         ch_assemblies
             .map{ meta, assembly ->
                 def new_meta = meta.clone()

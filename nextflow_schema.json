@@ -187,7 +187,14 @@
                 "flye_mode": {
                     "type": "string",
                     "default": "--nano-raw",
-                    "enum": ["--pacbio-raw", "--pacbio-corr", "--pacbio-hifi", "--nano-raw", "--nano-corr", "--nano-hq"],
+                    "enum": [
+                        "--pacbio-raw",
+                        "--pacbio-corr",
+                        "--pacbio-hifi",
+                        "--nano-raw",
+                        "--nano-corr",
+                        "--nano-hq"
+                    ],
                     "description": "Allowed technologies for long read assembly with Flye."
                 }
             }
