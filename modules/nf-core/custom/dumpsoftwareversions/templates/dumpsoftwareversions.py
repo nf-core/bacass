@@ -3,7 +3,6 @@
 
 """Provide functions to merge multiple versions.yml files."""
 
-
 import yaml
 import platform
 from textwrap import dedent
@@ -11,9 +10,7 @@ from textwrap import dedent
 
 def _make_versions_html(versions):
     """Generate a tabular HTML output of all versions for MultiQC."""
-    html = [
-        dedent(
-            """\\
+    html = [dedent("""\\
             <style>
             #nf-core-versions tbody:nth-child(even) {
                 background-color: #f2f2f2;
@@ -27,23 +24,17 @@ def _make_versions_html(versions):
                         <th> Version  </th>
                     </tr>
                 </thead>
-            """
-        )
-    ]
+            """)]
     for process, tmp_versions in sorted(versions.items()):
         html.append("<tbody>")
         for i, (tool, version) in enumerate(sorted(tmp_versions.items())):
-            html.append(
-                dedent(
-                    f"""\\
+            html.append(dedent(f"""\\
                     <tr>
                         <td><samp>{process if (i == 0) else ''}</samp></td>
                         <td><samp>{tool}</samp></td>
                         <td><samp>{version}</samp></td>
                     </tr>
-                    """
-                )
-            )
+                    """))
         html.append("</tbody>")
     html.append("</table>")
     return "\\n".join(html)
