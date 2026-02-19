@@ -3,9 +3,6 @@
         "content": [
             19,
             {
-                "AUTOCYCLER_CANU": {
-                    "canu": 2.2
-                },
                 "AUTOCYCLER_CLUSTER": {
                     "autocycler": "0.5.2"
                 },
@@ -14,12 +11,6 @@
                 },
                 "AUTOCYCLER_COMPRESS": {
                     "autocycler": "0.5.2"
-                },
-                "AUTOCYCLER_FLYE": {
-                    "flye": "2.9.5-b1801"
-                },
-                "AUTOCYCLER_RAVEN": {
-                    "raven": "1.6.1"
                 },
                 "AUTOCYCLER_RESOLVE": {
                     "autocycler": "0.5.2"
@@ -33,6 +24,12 @@
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
                 },
+                "CANU": {
+                    "canu": 2.2
+                },
+                "FLYE": {
+                    "flye": "2.9.5-b1801"
+                },
                 "NANOPLOT": {
                     "nanoplot": "1.46.1"
                 },
@@ -44,6 +41,9 @@
                 },
                 "QUAST": {
                     "quast": "5.3.0"
+                },
+                "RAVEN": {
+                    "raven": "1.6.1"
                 },
                 "TOULLIGQC": {
                     "toulligqc": "2.7.1"
@@ -207,9 +207,9 @@
                 "TestMe-sample_02.report:md5,b18f993dc5bf8b092a30286900092328",
                 "TestMe-sample_01.fasta.gz:md5,ebc67e9f0a5e5e8b20e23f90901139e2",
                 "TestMe-sample_02.fasta.gz:md5,5fdfaf522526c9142bb9f62986726ca5",
-                "consensus_assembly.fasta:md5,8c32f3d1ed2876626d958a215a15b759",
-                "consensus_assembly.gfa:md5,b74c0329d2ebda3c4842ee7e25ab947a",
-                "consensus_assembly.yaml:md5,4895b3626df5c44fed372f171f768e7f",
+                "consensus_assembly.fasta:md5,31d6114feaeebf96bb36056df1fd79ef",
+                "consensus_assembly.gfa:md5,40c3f817505c7a006a96b378abbe5a0b",
+                "consensus_assembly.yaml:md5,fffc3afde9fa2d0da67971091bde9f85",
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
