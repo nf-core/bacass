@@ -83,7 +83,7 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
 
     // Organize sample assemblies into channels based on their corresponding reference files.
     ch_reports_byreference
-        .map { specie, meta, report_txt, fasta -> 
+        .map { specie, meta, report_txt, fasta ->
             // Extract base accession from the first report to match with downloads
             def first_line = report_txt[0].text.split('\n').find { !it.startsWith('#') && it.trim() }
             def full_accession = first_line ? first_line.split('\t')[0] : null

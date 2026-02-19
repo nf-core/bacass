@@ -25,10 +25,10 @@ process KMERFINDER_KMERFINDER {
     """
     # Auto-detect structure
     [ -d "${kmerfinderdb_path}/${tax_group}" ] && BASE="${kmerfinderdb_path}/${tax_group}" || BASE="${kmerfinderdb_path}"
-    
+
     # Find taxonomy file
     TAX_FILE=\$(find "\${BASE}" -maxdepth 1 -name "${tax_group}.tax" -o -name "${tax_group}.name" -o -name "${tax_group}.ATG.name" | head -n1)
-    
+
     kmerfinder.py \\
         --infile ${in_reads} \\
         --output_folder . \\

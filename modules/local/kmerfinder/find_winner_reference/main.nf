@@ -29,15 +29,15 @@ process KMERFINDER_FIND_WINNER_REFERENCE {
     ## Extract the winner accession from the TSV file
     FULL_ACCESSION=\$(head -n 1 references_found.tsv | grep -v '^#' | cut -f1)
     echo "Found full accession: \$FULL_ACCESSION"
-    
+
     ## Extract base accession (remove assembly version part)
     ## GCF_002795805.1_ASM279580v1 → GCF_002795805.1
     BASE_ACCESSION=\$(echo "\$FULL_ACCESSION" | cut -d'_' -f1,2)
     echo "Base accession for datasets: \$BASE_ACCESSION"
-    
+
     ## Create winner file with full accession (for compatibility)
     echo "\$FULL_ACCESSION" > \${FULL_ACCESSION}.winner
-    
+
     ## Create base accession file for datasets tool
     echo "\$BASE_ACCESSION" > base_accession.txt
 
