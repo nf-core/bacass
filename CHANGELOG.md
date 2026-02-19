@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#266](https://github.com/nf-core/bacass/pull/266) Combined long read assembly with Autocycler is now available, also long read assemblers Flye and Raven were added
+
 ### `Fixed`
 
 ### `Dependencies`

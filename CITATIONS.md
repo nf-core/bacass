@@ -40,6 +40,18 @@
 
   > Koren S, Walenz BP, Berlin K, Miller JR, Bergman NH, Phillippy AM. Canu: scalable and accurate long-read assembly via adaptive k-mer weighting and repeat separation. Genome Res. 2017 May;27(5):722-736. doi: 10.1101/gr.215087.116. Epub 2017 Mar 15. PMID: 28298431; PMCID: PMC5411767.
 
+- [Flye](https://pubmed.ncbi.nlm.nih.gov/33020656/)
+
+  > Kolmogorov M, Bickhart DM, Behsaz B, Gurevich A, Rayko M, Shin SB, Kuhn K, Yuan J, Polevikov E, Smith TPL, Pevzner PA. metaFlye: scalable long-read metagenome assembly using repeat graphs. Nat Methods. 2020 Nov;17(11):1103-1110. doi: 10.1038/s41592-020-00971-x. Epub 2020 Oct 5. PMID: 33020656; PMCID: PMC10699202.
+
+- [Raven](https://doi.org/10.1038/s43588-021-00073-4)
+
+  > Vaser, R., Šikić, M. Time- and memory-efficient genome assembly with Raven. Nat Comput Sci 1, 332–336 (2021). https://doi.org/10.1038/s43588-021-00073-4
+
+- [Autocycler](https://pubmed.ncbi.nlm.nih.gov/40875535/)
+
+  > Wick RR, Howden BP, Stinear TP. Autocycler: long-read consensus assembly for bacterial genomes. Bioinformatics. 2025 Sep 1;41(9):btaf474. doi: 10.1093/bioinformatics/btaf474. PMID: 40875535; PMCID: PMC12460055.
+
 - [QUAST](https://pubmed.ncbi.nlm.nih.gov/23422339/)
 
   > Gurevich A, Saveliev V, Vyahhi N, Tesler G. QUAST: quality assessment tool for genome assemblies. Bioinformatics. 2013 Apr 15;29(8):1072-5. doi: 10.1093/bioinformatics/btt086. Epub 2013 Feb 19. PMID: 23422339; PMCID: PMC3624806.
