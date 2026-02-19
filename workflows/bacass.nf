@@ -321,7 +321,7 @@ workflow BACASS {
     //
     // MODULE: Canu, genome assembly, long reads
     //
-    if ( params.assembler == 'canu' || params.autocycler_assemblers.tokenize(",").contains("canu") ) {
+    if ( params.assembler == 'canu' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("canu") ) ) {
         CANU (
             ch_for_assembly.map { meta, _reads, lr -> tuple( meta, lr ) },
             params.canu_mode,
@@ -334,7 +334,7 @@ workflow BACASS {
     //
     // MODULE: Miniasm, genome assembly, long reads
     //
-    if ( params.assembly_type != 'short' && ( params.assembler == 'miniasm' || params.autocycler_assemblers.tokenize(",").contains("miniasm") ) ) {
+    if ( params.assembly_type != 'short' && ( params.assembler == 'miniasm' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("miniasm") ) ) ) {
         MINIMAP2_ALIGN (
             ch_for_assembly.map{ meta,_sr,lr -> tuple(meta,lr) },
             [[:],[]],
@@ -392,7 +392,7 @@ workflow BACASS {
     //
     // MODULE: Raven, genome assembly of long reads.
     //
-    if ( params.assembler == 'raven' || params.autocycler_assemblers.tokenize(",").contains("raven") ) {
+    if ( params.assembler == 'raven' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("raven") ) ) {
         RAVEN (
             ch_for_assembly.map{ meta, _sr, lr -> [ meta, lr ] }
         )
@@ -402,7 +402,7 @@ workflow BACASS {
     //
     // MODULE: Flye, genome assembly of long reads.
     //
-    if ( params.assembler == 'flye' || params.autocycler_assemblers.tokenize(",").contains("flye") ) {
+    if ( params.assembler == 'flye' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("flye") ) ) {
         FLYE (
             ch_for_assembly.map{ meta, _sr, lr -> [ meta, lr ] },
             params.flye_mode
