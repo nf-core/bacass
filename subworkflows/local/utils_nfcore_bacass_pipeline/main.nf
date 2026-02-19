@@ -220,6 +220,21 @@ def validateInputParameters() {
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         error(error_string)
     }
+
+    // Check that assemblers for Autocycler are chosen correctly
+    String[] autocycler_compatible_assemblers = [
+        "canu","miniasm","raven","flye"
+    ]
+    if (params.assembler == 'autocycler'){
+        if ( params.autocycler_assemblers.tokenize(",").findAll { e -> autocycler_compatible_assemblers.contains( e ) }.size() != params.autocycler_assemblers.tokenize(",").size() ) {
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Incompatible assemblers for Atocycler specified.\n" +
+            "  Please use for '--autocycler_assemblers' a comma separated list of compatible longread assemblers.\n" +
+            "  Compatible assemblers: ${autocycler_compatible_assemblers.join(", ")}\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string)
+        }
+    }
 }
 
 //
