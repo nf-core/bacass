@@ -268,10 +268,10 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
+        "timestamp": "2025-10-09T12:32:56.633589499",
         "meta": {
             "nf-test": "0.9.2",
             "nextflow": "25.04.7"
-        },
-        "timestamp": "2025-10-09T12:32:56.633589499"
+        }
     }
 }
