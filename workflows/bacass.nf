@@ -178,6 +178,7 @@ workflow BACASS {
         ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
         ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
         ch_fastp_json_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
+        ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions)
     }
 
     //
