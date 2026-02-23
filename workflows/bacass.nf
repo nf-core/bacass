@@ -22,6 +22,7 @@ include { FASTQC                                } from '../modules/nf-core/fastq
 include { CAT_FASTQ as CAT_FASTQ_SHORT          } from '../modules/nf-core/cat/fastq'
 include { CAT_FASTQ as CAT_FASTQ_LONG           } from '../modules/nf-core/cat/fastq'
 include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop'
+include { AUTOCYCLER_SUBSAMPLE                  } from '../modules/nf-core/autocycler/subsample/main'
 include { UNICYCLER                             } from '../modules/nf-core/unicycler'
 include { CANU                                  } from '../modules/nf-core/canu'
 include { MINIMAP2_ALIGN                        } from '../modules/nf-core/minimap2/align'
@@ -29,6 +30,8 @@ include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS  } from '../modules/nf-core/minim
 include { MINIMAP2_ALIGN as MINIMAP2_POLISH     } from '../modules/nf-core/minimap2/align'
 include { MINIASM                               } from '../modules/nf-core/miniasm'
 include { DRAGONFLYE                            } from '../modules/nf-core/dragonflye'
+include { RAVEN                                 } from '../modules/nf-core/raven/main'
+include { FLYE                                  } from '../modules/nf-core/flye/main'
 include { RACON                                 } from '../modules/nf-core/racon'
 include { SAMTOOLS_SORT                         } from '../modules/nf-core/samtools/sort'
 include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samtools/index'
@@ -49,6 +52,7 @@ include { LIFTOFF                               } from '../modules/nf-core/lifto
 include { FASTQ_TRIM_FASTP_FASTQC               } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc/main'
 include { QC_NANOPLOT_TOULLIGQC                 } from '../subworkflows/local/qc_nanoplot_toulliqc'
 include { KMERFINDER_SUMMARY_DOWNLOAD           } from '../subworkflows/local/kmerfinder_summary_download'
+include { FASTA_CONSENSUS_AUTOCYCLER            } from '../subworkflows/nf-core/fasta_consensus_autocycler/main'
 include { BAKTA_DBDOWNLOAD_RUN                  } from '../subworkflows/local/bakta_dbdownload_run'
 include { paramsSummaryMap                      } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -278,6 +282,26 @@ workflow BACASS {
     }
 
     //
+    // MODULE: Autocycler, subset long reads for multiple assemblies per sample.
+    //
+    if( params.assembler == 'autocycler' ) {
+        // subsample and transpose to one subset per channel entry
+        AUTOCYCLER_SUBSAMPLE (
+            ch_for_assembly.map{ meta, _short_reads, long_reads -> [meta, long_reads] },
+            ch_for_assembly.map { meta, _reads, _lr -> meta.gsize }
+        )
+        AUTOCYCLER_SUBSAMPLE.out.subsampled_reads // transpose to [ meta, fasta-subset1, fasta-subset2, ... ]
+            .transpose() // transpose to [ meta, fasta ]
+            .map{ meta, long_reads ->
+                def new_meta = meta.clone()
+                new_meta.subsample = long_reads.getBaseName() -'.fastq'
+                [ new_meta, [], long_reads ]
+            }
+            .set{ ch_for_assembly }
+        // ch_for_assembly was replaced with subsamples for subsequent assembly steps
+    }
+
+    //
     // ASSEMBLY: Unicycler, Canu, Miniasm, Dragonflye
     //
     ch_assembly = channel.empty()
@@ -297,7 +321,7 @@ workflow BACASS {
     //
     // MODULE: Canu, genome assembly, long reads
     //
-    if ( params.assembler == 'canu' ) {
+    if ( params.assembler == 'canu' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("canu") ) ) {
         CANU (
             ch_for_assembly.map { meta, _reads, lr -> tuple( meta, lr ) },
             params.canu_mode,
@@ -310,7 +334,7 @@ workflow BACASS {
     //
     // MODULE: Miniasm, genome assembly, long reads
     //
-    if ( params.assembly_type != 'short' && params.assembler == 'miniasm' ) {
+    if ( params.assembly_type != 'short' && ( params.assembler == 'miniasm' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("miniasm") ) ) ) {
         MINIMAP2_ALIGN (
             ch_for_assembly.map{ meta,_sr,lr -> tuple(meta,lr) },
             [[:],[]],
@@ -363,6 +387,45 @@ workflow BACASS {
         )
         ch_assembly = ch_assembly.mix( DRAGONFLYE.out.contigs.dump(tag: 'dragonflye') )
         ch_versions = ch_versions.mix( DRAGONFLYE.out.versions )
+    }
+
+    //
+    // MODULE: Raven, genome assembly of long reads.
+    //
+    if ( params.assembler == 'raven' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("raven") ) ) {
+        RAVEN (
+            ch_for_assembly.map{ meta, _sr, lr -> [ meta, lr ] }
+        )
+        ch_assembly = ch_assembly.mix( RAVEN.out.fasta )
+    }
+
+    //
+    // MODULE: Flye, genome assembly of long reads.
+    //
+    if ( params.assembler == 'flye' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("flye") ) ) {
+        FLYE (
+            ch_for_assembly.map{ meta, _sr, lr -> [ meta, lr ] },
+            params.flye_mode
+        )
+        ch_assembly = ch_assembly.mix( FLYE.out.fasta )
+    }
+
+    //
+    // SUBWORKFLOW: Autocycler, combine genome assembly of long reads.
+    //
+    if( params.assembler == 'autocycler' ){
+        FASTA_CONSENSUS_AUTOCYCLER (
+            ch_assembly
+                .map{ meta, assembly ->
+                    def new_meta = meta.clone()
+                    new_meta.remove("subsample")
+                    tuple( new_meta, assembly)
+                }
+                .filter{ meta, assembly -> assembly.countLines() > 1 } // keep only non-empty assembly files
+                .groupTuple() // group to "[ val(meta), [ fasta, fasta, ... ] ]"
+            )
+        // overwrite previously generated assemblies with the combined assembly for subsequent steps
+        ch_assembly = FASTA_CONSENSUS_AUTOCYCLER.out.consensus_assembly
     }
 
     //

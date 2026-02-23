@@ -172,11 +172,30 @@ Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.h
 
 Check out the [Miniasm documentation](https://github.com/lh3/miniasm) for more information on Miniasm output.
 
+- `Flye/`
+  - `*.assembly.fasta.gz`: Assembly in Fasta format
+
+Check out the [Flye documentation](https://github.com/mikolmogorov/Flye) for more information on Flye output.
+
+- `Raven/`
+  - `*.fasta.gz`: Assembly in Fasta format
+
+Check out the [Raven documentation](https://github.com/lbcb-sci/raven) for more information on Raven output.
+
 - `Dragonflye/`
   - `*.contigs.fa`: Assembly in Fasta format
   - `*.dragonflye.log`: Log file containing the report of the dragonflye process
 
 Checkout the [Dragonflye](https://github.com/rpetit3/dragonflye) documentation for more information of the Dragonflye output.
+
+- `Autocycler/`
+  - `<assembler>/<sample>-<subset>*.fasta.gz`: Assembly of `assembler` and `sample` of `subset`. Also includes other assembler-specific files as detailed above.
+- `Autocycler/combine/`
+  - `<sample>/consensus_assembly.fasta`: Assembly of `sample` in Fasta format
+  - `<sample>/consensus_assembly.gfa`: Assembly of `sample` in Graphical Fragment Assembly (GFA) format
+  - `<sample>/consensus_assembly.yaml`: Assembly statistics of `sample` in yaml format
+
+Checkout the [Autocycler](https://github.com/rrwick/Autocycler) documentation for more information of the Autocycler output.
 
 </details>
 

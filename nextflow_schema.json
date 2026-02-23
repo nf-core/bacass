@@ -133,7 +133,7 @@
                     "default": "unicycler",
                     "fa_icon": "fas fa-puzzle-piece",
                     "description": "The assembler to use for assembly. Use the appropriate assembler according to the chosen assembly_type. Refer to the README.md for further clarification.",
-                    "enum": ["unicycler", "canu", "miniasm", "dragonflye"]
+                    "enum": ["unicycler", "canu", "miniasm", "dragonflye", "autocycler"]
                 },
                 "assembly_type": {
                     "type": "string",
@@ -151,7 +151,7 @@
                 "canu_mode": {
                     "type": "string",
                     "enum": ["-pacbio", "-nanopore", "-pacbio-hifi", "null"],
-                    "description": "Allowed technologies for long read assembly."
+                    "description": "Allowed technologies for long read assembly with CANU."
                 },
                 "canu_args": {
                     "type": "string",
@@ -162,6 +162,40 @@
                     "type": "string",
                     "description": "Extra arguments for [Dragonflye](https://github.com/rpetit3/dragonflye#usage)",
                     "help_text": "This advanced option allows you to add extra arguments to Dragonflye (e.g.: `\"--gsize 2.4m\"`). For those arguments with no values/options associated (e.g.: `\"--nopolish\"` or `\"--nofilter\"`...) you need to add an extra space at the begining of the input string to params.dragonflye_args. Example: `--params.dragonflye_args ' --nopolish'`"
+                },
+                "autocycler_assemblers": {
+                    "type": "string",
+                    "default": "canu,flye,raven",
+                    "description": "What assemblers to use for autocycler",
+                    "help_text": "Comma separated string of assemblers. For example 'canu,flye,raven'. Allowed is any subset and combination of canu, flye, raven, miniasm ..."
+                },
+                "autocycler_subsample_count": {
+                    "type": "integer",
+                    "default": 4,
+                    "description": "Number of subsets to assemble."
+                },
+                "autocycler_subsample_mindepth": {
+                    "type": "integer",
+                    "default": 25,
+                    "description": "Minimum depth for subsets to assemble."
+                },
+                "autocycler_cluster_args": {
+                    "type": "string",
+                    "description": "Arguments to autocycler cluster.",
+                    "help_text": "--cutoff <CUTOFF>: cutoff distance threshold for hierarchical clustering [default: 0.2]; --min_assemblies <MIN_ASSEMBLIES>: exclude clusters with fewer than this many assemblies [default: automatic]; --max_contigs <MAX_CONTIGS>: refuse to run if mean contigs per assembly exceeds this value [default: 25]."
+                },
+                "flye_mode": {
+                    "type": "string",
+                    "default": "--nano-raw",
+                    "enum": [
+                        "--pacbio-raw",
+                        "--pacbio-corr",
+                        "--pacbio-hifi",
+                        "--nano-raw",
+                        "--nano-corr",
+                        "--nano-hq"
+                    ],
+                    "description": "Allowed technologies for long read assembly with Flye."
                 }
             }
         },
@@ -211,7 +245,7 @@
                     "fa_icon": "fas fa-hotdog",
                     "description": "Which assembly polishing method to use.",
                     "help_text": "Can be used to define which polishing method is used by default for long reads.",
-                    "enum": ["medaka", "nanopolish"]
+                    "enum": ["medaka", "nanopolish", "none"]
                 }
             }
         },
