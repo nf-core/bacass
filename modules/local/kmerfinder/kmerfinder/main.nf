@@ -20,8 +20,8 @@ process KMERFINDER_KMERFINDER {
     script:
     def prefix   = task.ext.prefix ?: "${meta.id}"
     def in_reads = reads[0] && reads[1] ? "${reads[0]} ${reads[1]}" : "${reads}"
+    // WARNING: Ensure to update software version in this line if you modify the container/environment.
     def kmerfinder_version = "3.0.2"
-
     """
     # Auto-detect structure
     [ -d "${kmerfinderdb_path}/${tax_group}" ] && BASE="${kmerfinderdb_path}/${tax_group}" || BASE="${kmerfinderdb_path}"

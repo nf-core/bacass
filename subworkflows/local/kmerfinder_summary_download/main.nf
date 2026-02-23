@@ -13,7 +13,7 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
     consensus               // channel: [ meta, consensus ]
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     // Prepare kmerfinder database
     ch_kmerfinderdb = file(params.kmerfinderdb, checkIfExists: true)
@@ -23,7 +23,7 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
         ch_kmerfinderdb_untar = UNTAR.out.untar.map{ _meta, file -> file }
         ch_versions = ch_versions.mix(UNTAR.out.versions)
     } else {
-        ch_kmerfinderdb_untar = Channel.fromPath(ch_kmerfinderdb)
+        ch_kmerfinderdb_untar = channel.fromPath(ch_kmerfinderdb)
     }
     ch_kmerfinderdb_untar = ch_kmerfinderdb_untar.map { it -> it.toAbsolutePath() }
 

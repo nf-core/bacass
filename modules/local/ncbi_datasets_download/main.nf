@@ -11,7 +11,7 @@ process NCBI_DATASETS_DOWNLOAD {
     tuple val(meta), val(accession)
 
     output:
-    tuple val(meta), path("*_genomic.fna"), emit: fna
+    tuple val(meta), path("*.fna"), emit: fna
     tuple val(meta), path("*.gff"), emit: gff
     path "versions.yml", emit: versions
 
@@ -21,7 +21,6 @@ process NCBI_DATASETS_DOWNLOAD {
     script:
     def args = task.ext.args ?: ''
     """
-    ## Download genome data (only genome and gff3)
     datasets download genome accession ${accession} \\
         --include genome,gff3 \\
         --filename dataset.zip \\
@@ -31,12 +30,11 @@ process NCBI_DATASETS_DOWNLOAD {
     unzip -j dataset.zip "ncbi_dataset/data/${accession}*/*_genomic.fna" && mv *_genomic.fna ${accession}_genomic.fna
     unzip -j dataset.zip "ncbi_dataset/data/${accession}*/genomic.gff" && mv genomic.gff ${accession}.gff
 
-    ## Clean up immediately
     rm -f dataset.zip
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        ncbi-datasets-cli: \$(datasets --version 2>&1 | grep -oP 'datasets version \\K[0-9.]+' || echo "unknown")
+        ncbi-datasets-cli: \$(datasets --version 2>&1 | grep -oP 'datasets version \\K[0-9.]+')
     END_VERSIONS
     """
 
@@ -47,7 +45,7 @@ process NCBI_DATASETS_DOWNLOAD {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        ncbi-datasets-cli: 18.17.1
+        ncbi-datasets-cli: \$(datasets --version 2>&1 | grep -oP 'datasets version \\K[0-9.]+')
     END_VERSIONS
     """
 }
