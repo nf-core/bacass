@@ -173,7 +173,7 @@ Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.h
 Check out the [Miniasm documentation](https://github.com/lh3/miniasm) for more information on Miniasm output.
 
 - `Flye/`
-  - `*.fasta.gz`: Assembly in Fasta format
+  - `*.assembly.fasta.gz`: Assembly in Fasta format
 
 Check out the [Flye documentation](https://github.com/mikolmogorov/Flye) for more information on Flye output.
 
