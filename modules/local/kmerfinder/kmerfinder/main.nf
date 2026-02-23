@@ -20,25 +20,20 @@ process KMERFINDER_KMERFINDER {
     script:
     def prefix   = task.ext.prefix ?: "${meta.id}"
     def in_reads = reads[0] && reads[1] ? "${reads[0]} ${reads[1]}" : "${reads}"
-    def db = "${kmerfinderdb_path}/${tax_group}"
-    def db_atg = "${kmerfinderdb_path}/${tax_group}.ATG"
     // WARNING: Ensure to update software version in this line if you modify the container/environment.
     def kmerfinder_version = "3.0.2"
-
     """
-    if [ -f "${db}.tax" ]; then
-        db_tax_file="${db}.tax"
-    elif [ -f "${db}.name" ]; then
-        db_tax_file="${db}.name"
-    else
-        db_tax_file="${db_atg}.name"
-    fi
+    # Auto-detect structure
+    [ -d "${kmerfinderdb_path}/${tax_group}" ] && BASE="${kmerfinderdb_path}/${tax_group}" || BASE="${kmerfinderdb_path}"
+
+    # Find taxonomy file
+    TAX_FILE=\$(find "\${BASE}" -maxdepth 1 -name "${tax_group}.tax" -o -name "${tax_group}.name" -o -name "${tax_group}.ATG.name" | head -n1)
 
     kmerfinder.py \\
         --infile ${in_reads} \\
         --output_folder . \\
-        --db_path ${db_atg} \\
-        -tax "\${db_tax_file}" \\
+        --db_path "\${BASE}/${tax_group}.ATG" \\
+        -tax "\${TAX_FILE}" \\
         -x
 
     mv results.txt ${prefix}_results.txt

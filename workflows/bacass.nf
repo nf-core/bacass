@@ -569,7 +569,6 @@ workflow BACASS {
         ch_quast_multiqc = QUAST.out.results
     } else if (!params.skip_kmerfinder) {
         // Quast runs twice if kmerfinder is allowed.
-        // This approach allow Quast to calculate relevant parameters such as genome fraction based on a reference genome.
         QUAST(
             ch_to_quast,
             [[:],[]],
@@ -581,7 +580,6 @@ workflow BACASS {
             ch_to_quast_byrefseq.map{ refmeta, _consensus, _ref_fasta, ref_gff -> tuple( refmeta, ref_gff)}
         )
         ch_quast_multiqc = QUAST_BYREFSEQID.out.results
-        ch_versions      = ch_versions.mix(QUAST_BYREFSEQID.out.versions)
     }
 
     // Check assemblies that require further processing for gene annotation

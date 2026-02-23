@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#268](https://github.com/nf-core/bacass/pull/268) Fix test_full profile and refactor kmerfinder subworkflow (NCBI datasets migration)
+
 ### `Dependencies`
 
 - [#264](https://github.com/nf-core/bacass/pull/264) Update some nf-core subworkflows and modules
