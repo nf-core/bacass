@@ -167,7 +167,7 @@
                     "type": "string",
                     "default": "canu,flye,raven",
                     "description": "What assemblers to use for autocycler",
-                    "help_text": "Comma separated string of assemblers. For example 'canu,flye,raven'. Allowed is any subset and combination of canu, flye, and raven."
+                    "help_text": "Comma separated string of assemblers. For example 'canu,flye,raven'. Allowed is any subset and combination of canu, flye, raven, miniasm ..."
                 },
                 "autocycler_subsample_count": {
                     "type": "integer",
