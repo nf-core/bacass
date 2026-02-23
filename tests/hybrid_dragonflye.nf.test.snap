@@ -362,10 +362,10 @@
                 "A1403KPN.fastp.json:md5,af1a7e6610168cc6df5b1df62adac9fc"
             ]
         ],
+        "timestamp": "2025-10-09T12:03:14.500365955",
         "meta": {
             "nf-test": "0.9.2",
             "nextflow": "25.04.7"
-        },
-        "timestamp": "2025-10-09T12:03:14.500365955"
+        }
     }
 }
