@@ -69,6 +69,7 @@ workflow BACASS {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
+
     main:
 
     // Check input path parameters to see if they exist
@@ -96,6 +97,10 @@ workflow BACASS {
     ch_proteins = params.prokka_proteins ? channel.fromPath(params.prokka_proteins, checkIfExists: true)  : []
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     ch_samplesheet
+        .map { meta, fastqs, long_fastq, fast5  ->
+            def new_meta = meta + [id: meta.sample] // add "meta.id" !
+            new_meta.subsample = false
+            return [ new_meta, fastqs, long_fastq, fast5  ] }
         .multiMap (criteria)
         .set { ch_input }
 
@@ -254,7 +259,7 @@ workflow BACASS {
         ch_for_kraken2_long     = filtered_long_reads
         FASTQ_TRIM_FASTP_FASTQC.out.reads
             .dump(tag: 'fastp')
-            .cross(filtered_long_reads) { it -> it[0].id }
+            .cross(filtered_long_reads) { it -> it[0].sample }
             .map { short_tuple, long_tuple ->
                 def meta_short = short_tuple[0]
                 def short_reads = short_tuple[1]
@@ -284,7 +289,7 @@ workflow BACASS {
     //
     // MODULE: Autocycler, subset long reads for multiple assemblies per sample.
     //
-    if( params.assembler == 'autocycler' ) {
+    if( params.assembler.tokenize(",").contains("autocycler") ) {
         // subsample and transpose to one subset per channel entry
         AUTOCYCLER_SUBSAMPLE (
             ch_for_assembly.map{ meta, _short_reads, long_reads -> [meta, long_reads] },
@@ -297,8 +302,9 @@ workflow BACASS {
                 new_meta.subsample = long_reads.getBaseName() -'.fastq'
                 [ new_meta, [], long_reads ]
             }
-            .set{ ch_for_assembly }
-        // ch_for_assembly was replaced with subsamples for subsequent assembly steps
+            .set{ ch_subsets }
+        // data subsets are mixed into ch_for_assembly
+        ch_for_assembly = ch_for_assembly.mix(ch_subsets)
     }
 
     //
@@ -309,9 +315,10 @@ workflow BACASS {
     //
     // MODULE: Unicycler, genome assembly, nf-core module allows only short, long and hybrid assembly
     //
-    if ( params.assembler == 'unicycler' ) {
+    if ( params.assembler.tokenize(",").contains("unicycler") ) {
         UNICYCLER (
             ch_for_assembly
+                .filter{ meta, sr, lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
         )
         ch_assembly = ch_assembly.mix( UNICYCLER.out.scaffolds.dump(tag: 'unicycler') )
         ch_versions = ch_versions.mix( UNICYCLER.out.versions )
@@ -321,11 +328,23 @@ workflow BACASS {
     //
     // MODULE: Canu, genome assembly, long reads
     //
-    if ( params.assembler == 'canu' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("canu") ) ) {
+    if ( params.assembler.tokenize(",").contains("canu") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("canu") ) ) {
+        ch_for_assembly
+            .map{ meta, _short_reads, long_reads ->
+                def new_meta = meta.clone()
+                new_meta.assembler = "canu"
+                new_meta.id = meta.subsample ? "${meta.id}-${meta.subsample}-canu" : meta.id + "-canu"
+                [ new_meta, long_reads ]
+            }
+            .filter { meta, lr -> 
+                params.assembler.tokenize(",").contains("autocycler") && !params.assembler.tokenize(",").contains("canu") ? meta.subsample : // if with autocycler and not canu accept only subsamples
+                    !params.assembler.tokenize(",").contains("autocycler") && params.assembler.tokenize(",").contains("canu") ? !meta.subsample : true // if without autocycler and with canu reject subsample
+            }
+            .set { ch_for_assembly_canu }
         CANU (
-            ch_for_assembly.map { meta, _reads, lr -> tuple( meta, lr ) },
+            ch_for_assembly_canu,
             params.canu_mode,
-            ch_for_assembly.map { meta, _reads, _lr -> meta.gsize }
+            ch_for_assembly_canu.map { meta, _lr -> meta.gsize }
         )
         ch_assembly = ch_assembly.mix( CANU.out.assembly.dump(tag: 'canu') )
         ch_versions = ch_versions.mix(CANU.out.versions)
@@ -334,9 +353,23 @@ workflow BACASS {
     //
     // MODULE: Miniasm, genome assembly, long reads
     //
-    if ( params.assembly_type != 'short' && ( params.assembler == 'miniasm' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("miniasm") ) ) ) {
+    if ( params.assembly_type != 'short' && ( params.assembler.tokenize(",").contains("miniasm") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") ) ) ) {
+        ch_for_assembly
+            .map{ meta, _short_reads, long_reads ->
+                def new_meta = meta.clone()
+                new_meta.assembler = "miniasm"
+                new_meta.id = meta.subsample ? "${meta.id}-${meta.subsample}-miniasm" : meta.id + "-miniasm"
+                [ new_meta, long_reads ]
+            }
+            .filter { meta, lr -> 
+                params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") && params.assembler.tokenize(",").contains("miniasm") ? true : // if with autocycler and miniasm accept all data sets
+                    params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") && !params.assembler.tokenize(",").contains("miniasm") ? meta.subsample : // if with autocycler and not miniasm accept only subsamples
+                    ( !params.assembler.tokenize(",").contains("autocycler") || !params.autocycler_assemblers.tokenize(",").contains("miniasm") ) && params.assembler.tokenize(",").contains("miniasm") ? !meta.subsample : false // if without autocycler and with miniasm reject subsample
+            }
+            .set { ch_for_assembly_miniasm }
+
         MINIMAP2_ALIGN (
-            ch_for_assembly.map{ meta,_sr,lr -> tuple(meta,lr) },
+            ch_for_assembly_miniasm,
             [[:],[]],
             false,
             false,
@@ -344,9 +377,8 @@ workflow BACASS {
         )
         ch_versions = ch_versions.mix(MINIMAP2_ALIGN.out.versions)
 
-        ch_for_assembly
+        ch_for_assembly_miniasm
             .join(MINIMAP2_ALIGN.out.paf)
-            .map { meta, _sr, lr, paf-> tuple(meta, lr, paf) }
             .set { ch_for_miniasm }
 
         MINIASM (
@@ -355,7 +387,7 @@ workflow BACASS {
         ch_versions = ch_versions.mix(MINIASM.out.versions)
 
         MINIMAP2_CONSENSUS (
-            ch_for_assembly.map{ meta, _sr, lr -> tuple(meta, lr) },
+            ch_for_assembly_miniasm,
             MINIASM.out.assembly,
             false,
             false,
@@ -363,10 +395,9 @@ workflow BACASS {
         )
         ch_versions = ch_versions.mix(MINIMAP2_CONSENSUS.out.versions)
 
-        ch_for_assembly
+        ch_for_assembly_miniasm
             .join(MINIASM.out.assembly)
             .join(MINIMAP2_CONSENSUS.out.paf)
-            .map { meta, _sr, lr, assembly, paf -> tuple(meta, lr, assembly, paf) }
             .set{ ch_for_racon }
 
         RACON (
@@ -374,16 +405,23 @@ workflow BACASS {
         )
         ch_assembly = ch_assembly.mix( RACON.out.improved_assembly.dump(tag: 'miniasm') )
         ch_versions = ch_versions.mix( RACON.out.versions )
-    } else if (params.assembly_type == 'short' && params.assembler == 'miniasm') {
-        exit("Selected assembler ${params.assembler} cannot run on short reads")
+    } else if (params.assembly_type == 'short' && params.assembler.tokenize(",").contains("miniasm") ) {
+        exit("Selected assembler Miniasm cannot run on short reads")
     }
 
     //
     // MODULE: Dragonflye, genome assembly of long reads. Moreover, it provides the option for polishing the draft genome using short reads when both short and long reads are available.
     //
-    if( params.assembler == 'dragonflye' ){
+    if( params.assembler.tokenize(",").contains("dragonflye") ){
         DRAGONFLYE(
             ch_for_assembly
+                .map{ meta, short_reads, long_reads ->
+                    def new_meta = meta.clone()
+                    new_meta.assembler = "dragonflye"
+                    new_meta.id = meta.id + "-dragonflye"
+                    [ new_meta, short_reads, long_reads ]
+                }
+                .filter{ meta, sr, lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
         )
         ch_assembly = ch_assembly.mix( DRAGONFLYE.out.contigs.dump(tag: 'dragonflye') )
         ch_versions = ch_versions.mix( DRAGONFLYE.out.versions )
@@ -392,9 +430,22 @@ workflow BACASS {
     //
     // MODULE: Raven, genome assembly of long reads.
     //
-    if ( params.assembler == 'raven' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("raven") ) ) {
+    if ( params.assembler.tokenize(",").contains("raven") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("raven") ) ) {
+        ch_for_assembly
+            .map{ meta, _short_reads, long_reads ->
+                def new_meta = meta.clone()
+                new_meta.assembler = "raven"
+                new_meta.id = meta.subsample ? "${meta.id}-${meta.subsample}-raven" : meta.id + "-raven"
+                [ new_meta, long_reads ]
+            }
+            .filter { meta, lr -> 
+                params.assembler.tokenize(",").contains("autocycler") && !params.assembler.tokenize(",").contains("raven") ? meta.subsample : // if with autocycler and not raven accept only subsamples
+                    !params.assembler.tokenize(",").contains("autocycler") && params.assembler.tokenize(",").contains("raven") ? !meta.subsample : true // if without autocycler and with raven reject subsample
+            }
+            .set { ch_for_assembly_raven }
+
         RAVEN (
-            ch_for_assembly.map{ meta, _sr, lr -> [ meta, lr ] }
+            ch_for_assembly_raven
         )
         ch_assembly = ch_assembly.mix( RAVEN.out.fasta )
     }
@@ -402,9 +453,21 @@ workflow BACASS {
     //
     // MODULE: Flye, genome assembly of long reads.
     //
-    if ( params.assembler == 'flye' || ( params.assembler == 'autocycler' && params.autocycler_assemblers.tokenize(",").contains("flye") ) ) {
+    if ( params.assembler.tokenize(",").contains("flye") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("flye") ) ) {
+        ch_for_assembly
+            .map{ meta, _short_reads, long_reads ->
+                def new_meta = meta.clone()
+                new_meta.assembler = "flye"
+                new_meta.id = meta.subsample ? "${meta.id}-${meta.subsample}-flye" : meta.id + "-flye"
+                [ new_meta, long_reads ]
+            }
+            .filter { meta, lr -> 
+                params.assembler.tokenize(",").contains("autocycler") && !params.assembler.tokenize(",").contains("flye") ? meta.subsample : // if with autocycler and not flye accept only subsamples
+                    !params.assembler.tokenize(",").contains("autocycler") && params.assembler.tokenize(",").contains("flye") ? !meta.subsample : true // if without autocycler and with flye reject subsample
+            }
+            .set { ch_for_assembly_flye }
         FLYE (
-            ch_for_assembly.map{ meta, _sr, lr -> [ meta, lr ] },
+            ch_for_assembly_flye,
             params.flye_mode
         )
         ch_assembly = ch_assembly.mix( FLYE.out.fasta )
@@ -413,20 +476,33 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Autocycler, combine genome assembly of long reads.
     //
-    if( params.assembler == 'autocycler' ){
+    if( params.assembler.tokenize(",").contains("autocycler") ){
+        ch_assembly
+            .filter{ meta, assembly -> meta.subsample } // only assemblies of subsamples pass, i.e. anything with "meta.subsample"
+            .map{ meta, assembly ->
+                def new_meta = meta.clone()
+                new_meta.remove("subsample")
+                new_meta.assembler = "autocycler"
+                new_meta.id = meta.sample + "-autocycler"
+                [ new_meta, assembly ]
+            }
+            .filter{ meta, assembly -> assembly.countLines() > 1 } // keep only non-empty assembly files
+            .groupTuple() // group to "[ val(meta), [ fasta, fasta, ... ] ]"
+            .set { ch_assembly_autocycler }
+
         FASTA_CONSENSUS_AUTOCYCLER (
-            ch_assembly
-                .map{ meta, assembly ->
-                    def new_meta = meta.clone()
-                    new_meta.remove("subsample")
-                    tuple( new_meta, assembly)
-                }
-                .filter{ meta, assembly -> assembly.countLines() > 1 } // keep only non-empty assembly files
-                .groupTuple() // group to "[ val(meta), [ fasta, fasta, ... ] ]"
+                ch_assembly_autocycler
             )
-        // overwrite previously generated assemblies with the combined assembly for subsequent steps
-        ch_assembly = FASTA_CONSENSUS_AUTOCYCLER.out.consensus_assembly
+        // combine assemblies with autocycler combined assembly
+        ch_assembly
+            .mix( FASTA_CONSENSUS_AUTOCYCLER.out.consensus_assembly )
+            .set { ch_assembly }
     }
+
+    // clean assemblies from subsamples
+    ch_assembly
+        .filter { meta, assembly -> !meta.subsample } // omit subsample assemblies
+        .set { ch_assembly }
 
     //
     // SUBWORKFLOW: Long reads polishing. Uses medaka or Nanopolish (this last requires Fast5 files available in input samplesheet).
@@ -434,17 +510,40 @@ workflow BACASS {
     if ( (params.assembly_type == 'long' && !params.skip_polish) || ( params.assembly_type != 'short' && params.polish_method) ){
         // Set channel for polishing long reads
         ch_for_assembly
-            .join( ch_assembly )
-            .map { meta, _sr, lr, fasta -> tuple(meta, lr, fasta) }
+            .filter { meta, sr, lr -> !meta.subsample } // remove any subsamples
+            .cross(ch_assembly) { it -> it[0].sample } // merge by meta.sample -> [[ meta, sr, lr ],[ meta, assembly ]]
+            .map { for_assembly,assembly -> 
+                def meta_assembly  = assembly[0]
+                def long_reads     = for_assembly[2]
+                def fasta_assembly = assembly[1]
+                [ meta_assembly, long_reads, fasta_assembly ] }
             .set { ch_polish_long } // channel: [ val(meta), path(lr), path(fasta) ]
+
         if (params.polish_method == 'medaka'){
+            ch_polish_long
+                .map{ meta, lr, assembly ->
+                    def new_meta = meta.clone()
+                    new_meta.polish = "medaka"
+                    new_meta.id = meta.id + "-medaka"
+                    [ new_meta, lr, assembly ]
+                }
+                .set { ch_polish_long_medaka }
+
             //
             // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
             //
-            MEDAKA ( ch_polish_long )
+            MEDAKA ( ch_polish_long_medaka )
             ch_assembly = MEDAKA.out.assembly
             ch_versions = ch_versions.mix(MEDAKA.out.versions)
         } else if (params.polish_method == 'nanopolish') {
+            ch_polish_long
+                .map{ meta, lr, assembly ->
+                    def new_meta = meta.clone()
+                    new_meta.polish = "nanopolish"
+                    new_meta.id = meta.id + "-nanopolish"
+                    [ new_meta, lr, assembly ]
+                }
+                .set { ch_polish_long_nanopolish }
             //
             // MODULE: Nanopolish, polishes assembly using FAST5 files
             //
@@ -455,8 +554,8 @@ workflow BACASS {
                 // MODULE: Minimap2 polish
                 //
                 MINIMAP2_POLISH (
-                    ch_polish_long.map { meta, lr, _fasta -> tuple(meta, lr) },
-                    ch_polish_long.map { meta, _lr, fasta -> tuple(meta, fasta) },
+                    ch_polish_long_nanopolish.map { meta, lr, _fasta -> tuple(meta, lr) },
+                    ch_polish_long_nanopolish.map { meta, _lr, fasta -> tuple(meta, fasta) },
                     true,
                     false,
                     false
@@ -472,10 +571,19 @@ workflow BACASS {
                 //
                 // MODULE: Nanopolish
                 //
-                ch_polish_long                         // tuple val(meta), val(reads), file(longreads), file(assembly)
-                    .join( MINIMAP2_POLISH.out.bam )  // tuple val(meta), file(bam)
-                    .join( SAMTOOLS_INDEX.out.bai )   // tuple  val(meta), file(bai)
-                    .join( ch_fast5 )                 // tuple val(meta), file(fast5)
+                ch_polish_long_nanopolish                     // tuple val(meta), file(longreads), file(assembly)
+                    .join( MINIMAP2_POLISH.out.bam )          // tuple val(meta), file(bam)
+                    .join( SAMTOOLS_INDEX.out.bai )           // tuple val(meta), file(bai)
+                    .cross( ch_fast5 ) { it -> it[0].sample } // tuple val(meta), file(fast5) // meta differs here and needs a join on meta.sample!
+                    .map { input_tuple, fast5_tuple ->
+                        def meta       = input_tuple[0]
+                        def long_reads = input_tuple[1]
+                        def assembly   = input_tuple[2]
+                        def bam        = input_tuple[3]
+                        def bai        = input_tuple[4]
+                        def fast5      = fast5_tuple[1]
+                        [meta, long_reads, assembly, bam, bai, fast5]
+                    }
                     .set { ch_for_nanopolish }        // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
                 // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
                 NANOPOLISH (

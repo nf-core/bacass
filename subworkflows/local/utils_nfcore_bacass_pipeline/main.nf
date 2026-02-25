@@ -221,6 +221,19 @@ def validateInputParameters() {
         error(error_string)
     }
 
+    // Check that assemblers are chosen correctly
+    String[] compatible_assemblers = [
+        "canu","miniasm","raven","flye","autocycler","unicycler","dragonflye"
+    ]
+    if ( params.assembler.tokenize(",").findAll { e -> compatible_assemblers.contains( e ) }.size() != params.assembler.tokenize(",").size() ) {
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+        "  Incompatible assembler specified.\n" +
+        "  Please use for '--assembler' a comma separated list of available assemblers.\n" +
+        "  Compatible assemblers: ${compatible_assemblers.join(", ")}\n" +
+        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
+    }
+
     // Check that assemblers for Autocycler are chosen correctly
     String[] autocycler_compatible_assemblers = [
         "canu","miniasm","raven","flye"

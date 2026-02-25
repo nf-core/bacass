@@ -132,8 +132,8 @@
                     "type": "string",
                     "default": "unicycler",
                     "fa_icon": "fas fa-puzzle-piece",
-                    "description": "The assembler to use for assembly. Use the appropriate assembler according to the chosen assembly_type. Refer to the README.md for further clarification.",
-                    "enum": ["unicycler", "canu", "miniasm", "dragonflye", "autocycler"]
+                    "description": "The assembler(s) to use for assembly.",
+                    "help_text": "Use the appropriate assembler(s) according to the chosen assembly_type. Can be one or multiple of the available assemblers (e.g. unicycler, canu, miniasm, dragonflye, autocycler, raven, flye, ...) as comma separated string (e.g. `-- assembler \"canu,flye,autocycler\"`)."
                 },
                 "assembly_type": {
                     "type": "string",
