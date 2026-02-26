@@ -316,9 +316,17 @@ workflow BACASS {
     // MODULE: Unicycler, genome assembly, nf-core module allows only short, long and hybrid assembly
     //
     if ( params.assembler.tokenize(",").contains("unicycler") ) {
+        ch_for_assembly
+            .filter{ meta, sr, lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
+            .map{ meta, _short_reads, long_reads ->
+                def new_meta = meta.clone()
+                new_meta.assembler = "unicycler"
+                new_meta.id = meta.id + "-unicycler"
+                [ new_meta, long_reads ]
+            }
+            .set { ch_for_assembly_uniycler }
         UNICYCLER (
-            ch_for_assembly
-                .filter{ meta, sr, lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
+            ch_for_assembly_uniycler
         )
         ch_assembly = ch_assembly.mix( UNICYCLER.out.scaffolds.dump(tag: 'unicycler') )
         ch_versions = ch_versions.mix( UNICYCLER.out.versions )
