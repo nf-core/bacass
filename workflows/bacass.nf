@@ -318,11 +318,11 @@ workflow BACASS {
     if ( params.assembler.tokenize(",").contains("unicycler") ) {
         ch_for_assembly
             .filter{ meta, sr, lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
-            .map{ meta, _short_reads, long_reads ->
+            .map{ meta, sr, lr ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "unicycler"
                 new_meta.id = meta.id + "-unicycler"
-                [ new_meta, long_reads ]
+                [ new_meta, sr, lr ]
             }
             .set { ch_for_assembly_uniycler }
         UNICYCLER (
