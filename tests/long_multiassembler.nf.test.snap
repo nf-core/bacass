@@ -1,7 +1,6 @@
 {
     "-profile test_multiassembler": {
         "content": [
-            115,
             {
                 "AUTOCYCLER_CLUSTER": {
                     "autocycler": "0.5.2"
@@ -293,9 +292,6 @@
             [
                 "TestMe-sample_01-raven.fasta.gz:md5,ebc67e9f0a5e5e8b20e23f90901139e2",
                 "TestMe-sample_02-raven.fasta.gz:md5,5fdfaf522526c9142bb9f62986726ca5",
-                "consensus_assembly.fasta:md5,e34e33fcf598c740a74dfca06d7a4245",
-                "consensus_assembly.gfa:md5,329669b3aa6ebe9ff64ae06e2918a696",
-                "consensus_assembly.yaml:md5,0a2f5450174bd69ed23205ab5e14e9d9",
                 "TestMe-miniasm.consensus.fasta.gz:md5,4899e7b112077d045ecaf13daae4ae4a",
                 "TestMe-miniasm.fasta.gz:md5,cfde74bc269a51162851d9ae7c76207b",
                 "TestMe-raven.fasta.gz:md5,5236a351461c22c5c6ca1f86cbd13f10",
