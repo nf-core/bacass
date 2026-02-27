@@ -65,7 +65,7 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
     // MODULE: Find the winner reference for each species
     KMERFINDER_FIND_WINNER_REFERENCE (
         ch_reports_byreference
-            .map{ species, _meta, report_txt, _fasta -> 
+            .map{ species, _meta, report_txt, _fasta ->
                 [ species, report_txt ] }
             .filter{ species, _report_txt -> species != "Unknown Species" }
     )
