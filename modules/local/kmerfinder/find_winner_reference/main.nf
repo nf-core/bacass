@@ -8,7 +8,7 @@ process KMERFINDER_FIND_WINNER_REFERENCE {
         'biocontainers/python:3.10' }"
 
     input:
-    tuple val(refmeta), path(reports, stageAs: 'reports/*')
+    tuple val(refmeta), path('reports/results_*.txt')
 
     output:
     tuple val(refmeta), path("references_found.tsv"), emit: references_tsv
