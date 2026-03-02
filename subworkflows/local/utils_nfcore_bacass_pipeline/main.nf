@@ -238,7 +238,7 @@ def validateInputParameters() {
     String[] autocycler_compatible_assemblers = [
         "canu","miniasm","raven","flye"
     ]
-    if (params.assembler == 'autocycler'){
+    if ( params.assembler.tokenize(",").contains("autocycler") ){
         if ( params.autocycler_assemblers.tokenize(",").findAll { e -> autocycler_compatible_assemblers.contains( e ) }.size() != params.autocycler_assemblers.tokenize(",").size() ) {
             def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
             "  Incompatible assemblers for Atocycler specified.\n" +
