@@ -308,7 +308,7 @@ workflow BACASS {
     }
 
     //
-    // ASSEMBLY: Unicycler, Canu, Miniasm, Dragonflye
+    // ASSEMBLY: Unicycler, Canu, Miniasm, Dragonflye, Raven, Flye, Autocycler
     //
     ch_assembly = channel.empty()
 
