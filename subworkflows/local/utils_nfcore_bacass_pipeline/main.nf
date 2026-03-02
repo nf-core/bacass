@@ -113,9 +113,9 @@ workflow PIPELINE_INITIALISATION {
             def resolved_fast5      = resolveFilePath(fast5)
 
             if (!resolved_fastq_2 || resolved_fastq_2 == 'NA') {
-                return [ meta.id, meta + [ single_end:true ], [ resolved_fastq_1 ], resolved_longreads, resolved_fast5 ]
+                return [ meta.sample, meta + [ single_end:true ], [ resolved_fastq_1 ], resolved_longreads, resolved_fast5 ]
             } else {
-                return [ meta.id, meta + [ single_end:false ], [ resolved_fastq_1, resolved_fastq_2 ], resolved_longreads, resolved_fast5 ]
+                return [ meta.sample, meta + [ single_end:false ], [ resolved_fastq_1, resolved_fastq_2 ], resolved_longreads, resolved_fast5 ]
             }
         }
         .groupTuple()
@@ -221,11 +221,24 @@ def validateInputParameters() {
         error(error_string)
     }
 
+    // Check that assemblers are chosen correctly
+    String[] compatible_assemblers = [
+        "canu","miniasm","raven","flye","autocycler","unicycler","dragonflye"
+    ]
+    if ( params.assembler.tokenize(",").findAll { e -> compatible_assemblers.contains( e ) }.size() != params.assembler.tokenize(",").size() ) {
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+        "  Incompatible assembler specified.\n" +
+        "  Please use for '--assembler' a comma separated list of available assemblers.\n" +
+        "  Compatible assemblers: ${compatible_assemblers.join(", ")}\n" +
+        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
+    }
+
     // Check that assemblers for Autocycler are chosen correctly
     String[] autocycler_compatible_assemblers = [
         "canu","miniasm","raven","flye"
     ]
-    if (params.assembler == 'autocycler'){
+    if ( params.assembler.tokenize(",").contains("autocycler") ){
         if ( params.autocycler_assemblers.tokenize(",").findAll { e -> autocycler_compatible_assemblers.contains( e ) }.size() != params.autocycler_assemblers.tokenize(",").size() ) {
             def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
             "  Incompatible assemblers for Atocycler specified.\n" +
@@ -245,7 +258,7 @@ def validateInputSamplesheet(input) {
     // Check that multiple runs of the same sample are of the same datatype i.e. single-end / paired-end
     def endedness_ok = metas.collect{ meta -> meta.single_end }.unique().size == 1
     if (!endedness_ok) {
-        error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].id}")
+        error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].sample}")
     }
 
     return [ metas[0], fastqs, longread, fast5]
