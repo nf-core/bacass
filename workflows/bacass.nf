@@ -421,15 +421,18 @@ workflow BACASS {
     // MODULE: Dragonflye, genome assembly of long reads. Moreover, it provides the option for polishing the draft genome using short reads when both short and long reads are available.
     //
     if( params.assembler.tokenize(",").contains("dragonflye") ){
+        ch_for_assembly
+            .map{ meta, short_reads, long_reads ->
+                def new_meta = meta.clone()
+                new_meta.assembler = "dragonflye"
+                new_meta.id = meta.id + "-dragonflye"
+                [ new_meta, short_reads, long_reads ]
+            }
+            .filter{ meta, sr, lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
+            .set { ch_for_assembly_dragonflye }
+
         DRAGONFLYE(
-            ch_for_assembly
-                .map{ meta, short_reads, long_reads ->
-                    def new_meta = meta.clone()
-                    new_meta.assembler = "dragonflye"
-                    new_meta.id = meta.id + "-dragonflye"
-                    [ new_meta, short_reads, long_reads ]
-                }
-                .filter{ meta, sr, lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
+            ch_for_assembly_dragonflye
         )
         ch_assembly = ch_assembly.mix( DRAGONFLYE.out.contigs.dump(tag: 'dragonflye') )
         ch_versions = ch_versions.mix( DRAGONFLYE.out.versions )
