@@ -223,7 +223,7 @@ def validateInputParameters() {
 
     // Check that assemblers are chosen correctly
     String[] compatible_assemblers = [
-        "canu","miniasm","raven","flye","autocycler","unicycler","dragonflye"
+        "autocycler","canu","dragonflye","flye","miniasm","raven","unicycler"
     ]
     if ( params.assembler.tokenize(",").findAll { e -> compatible_assemblers.contains( e ) }.size() != params.assembler.tokenize(",").size() ) {
         def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
@@ -236,7 +236,7 @@ def validateInputParameters() {
 
     // Check that assemblers for Autocycler are chosen correctly
     String[] autocycler_compatible_assemblers = [
-        "canu","miniasm","raven","flye"
+        "canu","flye","miniasm","raven"
     ]
     if ( params.assembler.tokenize(",").contains("autocycler") ){
         if ( params.autocycler_assemblers.tokenize(",").findAll { e -> autocycler_compatible_assemblers.contains( e ) }.size() != params.autocycler_assemblers.tokenize(",").size() ) {
