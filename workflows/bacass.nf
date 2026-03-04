@@ -39,6 +39,7 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/krake
 include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2'
 include { QUAST                                 } from '../modules/nf-core/quast'
 include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast'
+include { QUAST as QUAST_BYSAMPLE               } from '../modules/nf-core/quast'
 include { BUSCO_BUSCO                           } from '../modules/nf-core/busco/busco/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
@@ -695,6 +696,25 @@ workflow BACASS {
         .map{ consensus -> tuple([id:'report'], consensus) }
         .set{ ch_to_quast }
 
+    // First, check if there are multiple distinct samples
+    ch_assembly
+        .map { meta, _consensus -> meta.sample } // Extract sample value
+        .unique()                                // Get only distinct values
+        .collect()                               // Collect all distinct values
+        .filter { sample -> sample.size() > 1 }  // Only proceed if more than 1 distinct value
+        .flatMap { sample -> sample }            // Emit each distinct value separately
+        .set{ ch_multisamples }
+    // If there are multiple samples, make sure they have multiple assemblies
+    ch_assembly
+        .map { meta, file -> [meta.sample, meta, file] }
+        .combine(ch_multisamples)                                                          // When ch_multisamples is empty, nothing will be forwarded
+        .filter { sample_name, meta, files, valid_sample -> sample_name == valid_sample }  // The previous step produced too many combinations, reduce to genuine entries
+        .map { sample_name, metas, files, valid_sample -> [sample_name, metas, files] }
+        .groupTuple(by: 0) // Group by samples
+        .map { sample_name, _meta, files -> [ [id: sample_name], files ] } // Drop meta information
+        .filter { meta, files -> files.size() > 1 } // Only keep samples that have several assemblies
+        .set { ch_to_quast_bysample }
+
     if(params.skip_kmerfinder){
         QUAST(
             ch_to_quast,
@@ -702,10 +722,20 @@ workflow BACASS {
             params.reference_gff ? [[:], reference_gff] : [[:],[]]
         )
         ch_quast_multiqc = QUAST.out.results
+        QUAST_BYSAMPLE(
+            ch_to_quast_bysample,
+            params.reference_fasta ? [[:], reference_fasta] : [[:],[]],
+            params.reference_gff ? [[:], reference_gff] : [[:],[]]
+        )
     } else if (!params.skip_kmerfinder) {
         // Quast runs twice if kmerfinder is allowed.
         QUAST(
             ch_to_quast,
+            [[:],[]],
+            [[:],[]]
+        )
+        QUAST_BYSAMPLE(
+            ch_to_quast_bysample,
             [[:],[]],
             [[:],[]]
         )
