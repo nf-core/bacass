@@ -39,6 +39,7 @@ include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/krake
 include { KRAKEN2_KRAKEN2 as KRAKEN2_LONG       } from '../modules/nf-core/kraken2/kraken2'
 include { QUAST                                 } from '../modules/nf-core/quast'
 include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast'
+include { QUAST as QUAST_BYSAMPLE               } from '../modules/nf-core/quast'
 include { BUSCO_BUSCO                           } from '../modules/nf-core/busco/busco/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
@@ -90,9 +91,9 @@ workflow BACASS {
     //
     def criteria = multiMapCriteria {
         meta, fastqs, long_fastq, fast5 ->
-            shortreads: fastqs          != 'NA' ? tuple(meta, fastqs) : null
-            longreads:  long_fastq      != 'NA' ? tuple(meta,long_fastq) : null
-            fast5:      fast5           != 'NA' ? tuple(meta, fast5) : null
+            shortreads: fastqs[0]       != 'NA' ? tuple(meta, fastqs)    : tuple(meta, [])
+            longreads:  long_fastq      != 'NA' ? tuple(meta,long_fastq) : tuple(meta, [])
+            fast5:      fast5           != 'NA' ? tuple(meta, fast5)     : tuple(meta, [])
     }
     ch_proteins = params.prokka_proteins ? channel.fromPath(params.prokka_proteins, checkIfExists: true)  : []
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
@@ -107,21 +108,28 @@ workflow BACASS {
     // reconfigure channels
     ch_input
         .shortreads
-        .filter{ it -> it != null }
+        .filter{ meta, data -> data }
         .set { ch_shortreads }
     ch_input
         .longreads
-        .filter{ it -> it != null }
+        .filter{ meta, data -> data }
         .set { ch_longreads }
     ch_input
         .fast5
-        .filter{ it -> it != null }
+        .filter{ meta, data -> data }
         .set { ch_fast5 }
 
     //
-    // MODULE: Concatenate FastQ files from same sample if required
+    // Short read preprocessing and QC
     //
+    ch_short_preprocessed  = channel.empty()
+    ch_fastqc_raw_multiqc  = channel.empty()
+    ch_fastqc_trim_multiqc = channel.empty()
+    ch_fastp_json_multiqc  = channel.empty()
     if (params.assembly_type in ['short', 'hybrid']) {
+        //
+        // MODULE: Concatenate FastQ files from same sample if required
+        //
         ch_shortreads
             .branch{
                 meta, fastqs ->
@@ -129,19 +137,42 @@ workflow BACASS {
                     multiple: meta.single_end ? fastqs.size() > 1 : fastqs.size() > 2
             }
             .set { ch_shortreads_fastqs }
-
         CAT_FASTQ_SHORT (
             ch_shortreads_fastqs.multiple
         )
-
         ch_shortreads_concat = CAT_FASTQ_SHORT.out.reads
             .mix( ch_shortreads_fastqs.single )
 
-    } else {
-        ch_shortreads_concat = channel.empty()
+        //
+        // SUBWORKFLOW: Short reads QC and trim adapters
+        //
+        FASTQ_TRIM_FASTP_FASTQC (
+            ch_shortreads_concat.map{ meta, reads -> [meta, reads, []] }, //add an empty field for adapters
+            params.save_trimmed_fail,
+            [],
+            params.discard_trimmed_pass,
+            params.skip_fastp,
+            params.skip_fastqc
+        )
+        ch_short_preprocessed   = FASTQ_TRIM_FASTP_FASTQC.out.reads
+        ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
+        ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
+        ch_fastp_json_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
+        ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions)
     }
 
+    //
+    // Long read preprocessing and QC
+    //
+    ch_pycoqc_multiqc       = channel.empty()
+    ch_nanoplot_txt_multiqc = channel.empty()
+    ch_porechop_log_multiqc = channel.empty()
+    ch_filtlong_log_multiqc = channel.empty()
+    ch_longreads_filtered   = channel.empty()
     if (params.assembly_type in ['long', 'hybrid']) {
+        //
+        // MODULE: Concatenate FastQ files from same sample if required
+        //
         ch_longreads
             .map {
                 meta, long_fastq ->
@@ -156,97 +187,67 @@ workflow BACASS {
                     multiple: long_fastqs.size() > 1
             }
             .set { ch_longreads_fastqs }
-
         CAT_FASTQ_LONG (
             ch_longreads_fastqs.multiple
         )
-
         ch_longreads_concat = CAT_FASTQ_LONG.out.reads
             .mix( ch_longreads_fastqs.single )
 
-    } else {
-        ch_longreads_concat = channel.empty()
-    }
-
-    //
-    // SUBWORKFLOW: Short reads QC and trim adapters
-    //
-    ch_fastqc_raw_multiqc = channel.empty()
-    ch_fastqc_trim_multiqc = channel.empty()
-    ch_fastp_json_multiqc = channel.empty()
-
-    if (params.assembly_type != 'long'){
-        FASTQ_TRIM_FASTP_FASTQC (
-            ch_shortreads_concat.map{ meta, reads -> [meta, reads, []] }, //add an empty field for adapters
-            params.save_trimmed_fail,
-            [],
-            params.discard_trimmed_pass,
-            params.skip_fastp,
-            params.skip_fastqc
+        //
+        // SUBWORKFLOW: quality check for nanopore reads with Nanoplot and ToulligQC
+        //
+        QC_NANOPLOT_TOULLIGQC (
+            ch_longreads_concat,
+            params.skip_nanoplot,  // skip the nanoplot qc
+            params.skip_toulligqc  // skip the toulligqc
         )
-        ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
-        ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
-        ch_fastp_json_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
-        ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions)
-    }
+        ch_nanoplot_txt_multiqc = QC_NANOPLOT_TOULLIGQC.out.nanoplot_txt
+        ch_versions = ch_versions.mix(QC_NANOPLOT_TOULLIGQC.out.nanoplot_version)
+        ch_versions = ch_versions.mix(QC_NANOPLOT_TOULLIGQC.out.toulligqc_version)
 
-    //
-    // SUBWORKFLOW: quality check for nanopore reads with Nanoplot and ToulligQC
-    //
-    QC_NANOPLOT_TOULLIGQC (
-        ch_longreads_concat,
-        params.skip_nanoplot,  // skip the nanoplot qc
-        params.skip_toulligqc  // skip the toulligqc
-    )
-    ch_nanoplot_txt_multiqc = QC_NANOPLOT_TOULLIGQC.out.nanoplot_txt
-    ch_versions = ch_versions.mix(QC_NANOPLOT_TOULLIGQC.out.nanoplot_version)
-    ch_versions = ch_versions.mix(QC_NANOPLOT_TOULLIGQC.out.toulligqc_version)
-
-
-    //
-    // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
-    //
-    // TODO: Couldn't be tested. No configuration test available (lack of fast5 file or params.skip_pycoqc=false).
-    ch_pycoqc_multiqc = channel.empty()
-    if ( !params.skip_pycoqc ) {
-        PYCOQC (
-            ch_fast5.dump(tag: 'fast5')
-        )
-        ch_pycoqc_multiqc = PYCOQC.out.json
-        ch_versions       = ch_versions.mix(PYCOQC.out.versions)
-    }
-
-    //
-    // MODULE: PORECHOP, quality check for nanopore reads and Quality/Length Plots
-    //
-    ch_porechop_log_multiqc = channel.empty()
-    if ((params.assembly_type == 'hybrid' || params.assembly_type == 'long' && !('short' in params.assembly_type)) && params.long_reads_filtering == 'porechop' ) {
-        PORECHOP_PORECHOP (
-            ch_longreads_concat.dump(tag: 'longreads')
-        )
-        filtered_long_reads = PORECHOP_PORECHOP.out.reads
-        ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
-        ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
-    }
-
-    //
-    // MODULE: FILTLONG, filtering long reads by quality. It can take a set of long reads and produce a smaller, better subset.
-    //
-    ch_filtlong_log_multiqc = channel.empty()
-    if ( !('short' in params.assembly_type) && params.long_reads_filtering == 'filtlong' ) {
-        if (params.assembly_type == 'hybrid') {
-            ch_shortreads_for_filtlong = FASTQ_TRIM_FASTP_FASTQC.out.reads.join(ch_longreads_concat)   //tuple val(meta), file(sr), file(lr)
-        } else if ( params.assembly_type == 'long' ) {
-            ch_shortreads_for_filtlong = ch_longreads_concat.map{ meta, lr -> tuple(meta, [], lr ) }
+        //
+        // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots
+        //
+        // TODO: Couldn't be tested. No configuration test available (lack of fast5 file or params.skip_pycoqc=false).
+        if ( !params.skip_pycoqc ) {
+            PYCOQC (
+                ch_fast5.dump(tag: 'fast5')
+            )
+            ch_pycoqc_multiqc = PYCOQC.out.json
+            ch_versions       = ch_versions.mix(PYCOQC.out.versions)
         }
 
-        FILTLONG (
-            ch_shortreads_for_filtlong
-        )
+        //
+        // MODULE: PORECHOP, quality check for nanopore reads and Quality/Length Plots
+        //
+        if ( params.long_reads_filtering == 'porechop' ) {
+            PORECHOP_PORECHOP (
+                ch_longreads_concat.dump(tag: 'longreads')
+            )
+            ch_longreads_filtered   = PORECHOP_PORECHOP.out.reads
+            ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
+            ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
+        }
 
-        filtered_long_reads = FILTLONG.out.reads
-        ch_filtlong_log_multiqc = FILTLONG.out.log
-        ch_versions       = ch_versions.mix(FILTLONG.out.versions)
+        //
+        // MODULE: FILTLONG, filtering long reads by quality. It can take a set of long reads and produce a smaller, better subset.
+        //
+        if ( params.long_reads_filtering == 'filtlong' ) {
+            ch_shortreads_for_filtlong = channel.empty()
+            if (params.assembly_type == 'hybrid') {
+                ch_shortreads_for_filtlong = ch_short_preprocessed.join(ch_longreads_concat)   //tuple val(meta), file(sr), file(lr)
+            } else if ( params.assembly_type == 'long' ) {
+                ch_shortreads_for_filtlong = ch_longreads_concat.map{ meta, lr -> tuple(meta, [], lr ) }
+            }
+
+            FILTLONG (
+                ch_shortreads_for_filtlong
+            )
+
+            ch_longreads_filtered   = FILTLONG.out.reads
+            ch_filtlong_log_multiqc = FILTLONG.out.log
+            ch_versions       = ch_versions.mix(FILTLONG.out.versions)
+        }
     }
 
 
@@ -255,11 +256,11 @@ workflow BACASS {
     // Prepare channel for Kraken2
     //
     if(params.assembly_type == 'hybrid'){
-        ch_for_kraken2_short    = FASTQ_TRIM_FASTP_FASTQC.out.reads
-        ch_for_kraken2_long     = filtered_long_reads
-        FASTQ_TRIM_FASTP_FASTQC.out.reads
+        ch_for_kraken2_short    = ch_short_preprocessed
+        ch_for_kraken2_long     = ch_longreads_filtered
+        ch_short_preprocessed
             .dump(tag: 'fastp')
-            .cross(filtered_long_reads) { it -> it[0].sample }
+            .cross(ch_longreads_filtered) { it -> it[0].sample }
             .map { short_tuple, long_tuple ->
                 def meta_short = short_tuple[0]
                 def short_reads = short_tuple[1]
@@ -268,22 +269,40 @@ workflow BACASS {
             }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
+        ch_for_assembly.ifEmpty{
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  There is nothing to assemble with these settings.\n" +
+                "  Please verify that samples have short and long reads.\n"
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string) }
     } else if ( params.assembly_type == 'short' ) {
-        ch_for_kraken2_short    = FASTQ_TRIM_FASTP_FASTQC.out.reads
+        ch_for_kraken2_short    = ch_short_preprocessed
         ch_for_kraken2_long     = channel.empty()
-        FASTQ_TRIM_FASTP_FASTQC.out.reads
+        ch_short_preprocessed
             .dump(tag: 'fastp')
             .map{ meta,reads -> tuple(meta,reads,[]) }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
+        ch_for_assembly.ifEmpty{
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  There is nothing to assemble with these settings.\n" +
+                "  Please verify that samples have short reads.\n"
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string) }
     } else if ( params.assembly_type == 'long' ) {
         ch_for_kraken2_short    = channel.empty()
-        ch_for_kraken2_long     = filtered_long_reads
-        filtered_long_reads
-            .dump(tag: 'filtered_long_reads')
+        ch_for_kraken2_long     = ch_longreads_filtered
+        ch_longreads_filtered
+            .dump(tag: 'ch_longreads_filtered')
             .map{ meta,lr -> tuple(meta,[],lr) }
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
+        ch_for_assembly.ifEmpty{
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  There is nothing to assemble with these settings.\n" +
+                "  Please verify that samples have long reads.\n"
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string) }
     }
 
     //
@@ -361,7 +380,7 @@ workflow BACASS {
     //
     // MODULE: Miniasm, genome assembly, long reads
     //
-    if ( params.assembly_type != 'short' && ( params.assembler.tokenize(",").contains("miniasm") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") ) ) ) {
+    if ( params.assembler.tokenize(",").contains("miniasm") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") ) ) {
         ch_for_assembly
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
@@ -413,8 +432,6 @@ workflow BACASS {
         )
         ch_assembly = ch_assembly.mix( RACON.out.improved_assembly.dump(tag: 'miniasm') )
         ch_versions = ch_versions.mix( RACON.out.versions )
-    } else if (params.assembly_type == 'short' && params.assembler.tokenize(",").contains("miniasm") ) {
-        exit("Selected assembler Miniasm cannot run on short reads")
     }
 
     //
@@ -649,9 +666,9 @@ workflow BACASS {
     if (!params.skip_kmerfinder) {
         // Set kmerfinder channel based on assembly type
         if( params.assembly_type == 'short' || params.assembly_type == 'hybrid' ) {
-            ch_for_kmerfinder = FASTQ_TRIM_FASTP_FASTQC.out.reads
+            ch_for_kmerfinder = ch_short_preprocessed
         } else if ( params.assembly_type == 'long' ) {
-            ch_for_kmerfinder = filtered_long_reads
+            ch_for_kmerfinder = ch_longreads_filtered
         }
         // RUN kmerfinder subworkflow
         KMERFINDER_SUMMARY_DOWNLOAD (
@@ -679,6 +696,25 @@ workflow BACASS {
         .map{ consensus -> tuple([id:'report'], consensus) }
         .set{ ch_to_quast }
 
+    // First, check if there are multiple distinct samples
+    ch_assembly
+        .map { meta, _consensus -> meta.sample } // Extract sample value
+        .unique()                                // Get only distinct values
+        .collect()                               // Collect all distinct values
+        .filter { sample -> sample.size() > 1 }  // Only proceed if more than 1 distinct value
+        .flatMap { sample -> sample }            // Emit each distinct value separately
+        .set{ ch_multisamples }
+    // If there are multiple samples, make sure they have multiple assemblies
+    ch_assembly
+        .map { meta, file -> [meta.sample, meta, file] }
+        .combine(ch_multisamples)                                                          // When ch_multisamples is empty, nothing will be forwarded
+        .filter { sample_name, meta, files, valid_sample -> sample_name == valid_sample }  // The previous step produced too many combinations, reduce to genuine entries
+        .map { sample_name, metas, files, valid_sample -> [sample_name, metas, files] }
+        .groupTuple(by: 0) // Group by samples
+        .map { sample_name, _meta, files -> [ [id: sample_name], files ] } // Drop meta information
+        .filter { meta, files -> files.size() > 1 } // Only keep samples that have several assemblies
+        .set { ch_to_quast_bysample }
+
     if(params.skip_kmerfinder){
         QUAST(
             ch_to_quast,
@@ -686,10 +722,20 @@ workflow BACASS {
             params.reference_gff ? [[:], reference_gff] : [[:],[]]
         )
         ch_quast_multiqc = QUAST.out.results
+        QUAST_BYSAMPLE(
+            ch_to_quast_bysample,
+            params.reference_fasta ? [[:], reference_fasta] : [[:],[]],
+            params.reference_gff ? [[:], reference_gff] : [[:],[]]
+        )
     } else if (!params.skip_kmerfinder) {
         // Quast runs twice if kmerfinder is allowed.
         QUAST(
             ch_to_quast,
+            [[:],[]],
+            [[:],[]]
+        )
+        QUAST_BYSAMPLE(
+            ch_to_quast_bysample,
             [[:],[]],
             [[:],[]]
         )
