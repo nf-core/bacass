@@ -24,6 +24,7 @@ include { CAT_FASTQ as CAT_FASTQ_LONG           } from '../modules/nf-core/cat/f
 include { PORECHOP_PORECHOP                     } from '../modules/nf-core/porechop/porechop'
 include { AUTOCYCLER_SUBSAMPLE                  } from '../modules/nf-core/autocycler/subsample/main'
 include { UNICYCLER                             } from '../modules/nf-core/unicycler'
+include { MEGAHIT                               } from '../modules/nf-core/megahit/main'
 include { CANU                                  } from '../modules/nf-core/canu'
 include { MINIMAP2_ALIGN                        } from '../modules/nf-core/minimap2/align'
 include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS  } from '../modules/nf-core/minimap2/align'
@@ -327,7 +328,7 @@ workflow BACASS {
     }
 
     //
-    // ASSEMBLY: Unicycler, Canu, Miniasm, Dragonflye, Raven, Flye, Autocycler
+    // ASSEMBLY: Unicycler, Megahit, Canu, Miniasm, Dragonflye, Raven, Flye, Autocycler
     //
     ch_assembly = channel.empty()
 
@@ -349,6 +350,29 @@ workflow BACASS {
         )
         ch_assembly = ch_assembly.mix( UNICYCLER.out.scaffolds.dump(tag: 'unicycler') )
         ch_versions = ch_versions.mix( UNICYCLER.out.versions )
+    }
+
+    //
+    // MODULE: MEGAHIT, genome assembly of short reads
+    //
+    if ( params.assembler.tokenize(",").contains("megahit") ) {
+        ch_for_assembly
+            .map { meta, short_reads, _long_reads ->
+                def new_meta = meta.clone()
+                new_meta.assembler = "megahit"
+                new_meta.id = meta.id + "-megahit"
+                def reads1 = meta.single_end ? short_reads : short_reads[0]
+                def reads2 = meta.single_end ? [] : short_reads[1]
+                [ new_meta, reads1, reads2 ]
+            }
+            .filter { meta, reads1, _reads2 -> !meta.subsample && reads1 } // only non-subsampled samples with short reads
+            .set { ch_for_assembly_megahit }
+
+        MEGAHIT (
+            ch_for_assembly_megahit
+        )
+        ch_assembly = ch_assembly.mix( MEGAHIT.out.contigs.dump(tag: 'megahit') )
+        ch_versions = ch_versions.mix( MEGAHIT.out.versions_megahit )
     }
 
 
