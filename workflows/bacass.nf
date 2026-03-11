@@ -45,6 +45,7 @@ include { BUSCO_BUSCO                           } from '../modules/nf-core/busco
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
 include { FILTLONG                              } from '../modules/nf-core/filtlong'
+include { RASUSA                                } from '../modules/nf-core/rasusa'
 include { LIFTOFF                               } from '../modules/nf-core/liftoff'
 
 //
@@ -248,6 +249,25 @@ workflow BACASS {
             ch_longreads_filtered   = FILTLONG.out.reads
             ch_filtlong_log_multiqc = FILTLONG.out.log
             ch_versions       = ch_versions.mix(FILTLONG.out.versions)
+        }
+    }
+
+    //
+    // MODULE: RASUSA, randomly subsample reads to a target coverage or number of bases.
+    //
+    if ( !params.skip_rasusa ) {
+        if ( params.assembly_type != 'short' ) {
+            filtered_long_reads
+                .branch { meta, reads ->
+                    with_gsize: meta.gsize && meta.gsize != 'NA'
+                    without_gsize: true
+                }
+                .set { ch_rasusa_branch }
+            RASUSA (
+                ch_rasusa_branch.with_gsize
+            )
+            filtered_long_reads = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize)
+            ch_versions = ch_versions.mix(RASUSA.out.versions)
         }
     }
 

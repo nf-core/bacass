@@ -1,0 +1,54 @@
+name: rasusa
+description: Randomly subsample reads to a specified coverage or number of bases.
+keywords:
+  - subsampling
+  - downsampling
+  - nanopore
+  - illumina
+  - fastq
+  - long reads
+  - short reads
+tools:
+  - rasusa:
+      description: |
+        Randomly subsample reads to a specified coverage or number of bases.
+        Supports both coverage-based (requires genome size) and
+        base-count-based subsampling of single-end and paired-end FASTQ reads.
+      homepage: https://github.com/mbhall88/rasusa
+      documentation: https://github.com/mbhall88/rasusa
+      tool_dev_url: https://github.com/mbhall88/rasusa
+      doi: "10.21105/joss.03942"
+      licence: ["MIT"]
+      identifier: biotools:rasusa
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:false ]
+    - reads:
+        type: file
+        description: |
+          List of input FastQ files of size 1 and 2 for single-end and paired-end
+          data, respectively.
+        pattern: "*.{fq,fastq,fq.gz,fastq.gz}"
+output:
+  reads:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*.fastq.gz":
+          type: file
+          description: Subsampled (compressed) FastQ file(s)
+          pattern: "*.fastq.gz"
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+authors:
+  - "@avantonder"
+maintainers:
+  - "@avantonder"
