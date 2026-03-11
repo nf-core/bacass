@@ -1,0 +1,54 @@
+name: dfast
+description: Prokaryotic genome annotation with DFAST
+keywords:
+  - dfast
+  - annotation
+  - prokaryotic
+  - genome
+  - bacteria
+tools:
+  - dfast:
+      description: |
+        DFAST is a flexible prokaryotic genome annotation pipeline for faster genome publication.
+      homepage: https://github.com/nigyta/dfast_core
+      documentation: https://github.com/nigyta/dfast_core
+      tool_dev_url: https://github.com/nigyta/dfast_core
+      doi: "10.1093/bioinformatics/btx713"
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:false ]
+    - fasta:
+        type: file
+        description: Assembly FASTA file to annotate
+        ontologies: []
+  - config:
+      type: file
+      description: Configuration file for DFAST annotation
+output:
+  annotation:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*_results":
+          type: directory
+          description: |
+            DFAST output directory with annotation files (for example genome.gff, protein.faa, statistics.txt).
+          pattern: "*_results/"
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@d4straub"
+  - "@Daniel-VM"
+maintainers:
+  - "@d4straub"
+  - "@Daniel-VM"
