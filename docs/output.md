@@ -147,7 +147,7 @@ The pipeline includes a dedicated step for short and long reads QC as well as co
 
 ## Assembly Output
 
-Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler) or [MEGAHIT](https://github.com/voutcn/megahit) in `short` assembly mode. In `hybrid` mode Unicycler can be used, and for long-read assembly there are also `canu` and `miniasm` available.
+Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler) or [MEGAHIT](https://github.com/voutcn/megahit) in `short` assembly mode. In `hybrid` mode, [Unicycler](https://github.com/rrwick/Unicycler) and [Dragonflye](https://github.com/rpetit3/dragonflye) are available. For long-read assembly, the pipeline supports [Unicycler](https://github.com/rrwick/Unicycler), [Canu](https://github.com/marbl/canu), [Miniasm](https://github.com/lh3/miniasm), [Flye](https://github.com/mikolmogorov/Flye), [Raven](https://github.com/lbcb-sci/raven), [Dragonflye](https://github.com/rpetit3/dragonflye), and [Autocycler](https://github.com/rrwick/Autocycler).
 Unicycler is a pipeline on its own, which at least for Illumina reads mainly acts as a frontend to Spades with added polishing steps.
 
 <details markdown="1">
