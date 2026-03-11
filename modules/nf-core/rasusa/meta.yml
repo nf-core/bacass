@@ -42,6 +42,11 @@ output:
           pattern: "*.fastq.gz"
           ontologies:
             - edam: http://edamontology.org/format_3989 # GZIP format
+  log:
+    - - "*.log":
+          type: file
+          description: RASUSA log file with subsampling statistics
+          pattern: "*.log"
   versions_rasusa:
     - - ${task.process}:
           type: string

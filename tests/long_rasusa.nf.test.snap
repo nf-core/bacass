@@ -169,7 +169,9 @@
                 "trimming",
                 "trimming/longreads",
                 "trimming/longreads/porechop",
-                "trimming/longreads/porechop/TestMe.porechop.log"
+                "trimming/longreads/porechop/TestMe.porechop.log",
+                "trimming/longreads/rasusa",
+                "trimming/longreads/rasusa/TestMe.rasusa.rasusa.log"
             ],
             [
                 "TestMe-unicycler.assembly.gfa.gz:md5,23a7fcda434d9d31bc77c88db004f2f8",
@@ -178,13 +180,14 @@
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
                 "multiqc_citations.yaml:md5,80450f20190a42871cb64f62ae9bec3e",
-                "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
+                "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d",
+                "TestMe.rasusa.rasusa.log:md5,9217a6071de341e49e7c966fcfc56883"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2026-03-11T14:40:01.89142899"
+        "timestamp": "2026-03-11T15:44:15.585146326"
     }
 }

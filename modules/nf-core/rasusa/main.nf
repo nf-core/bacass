@@ -13,6 +13,7 @@ process RASUSA {
 
     output:
     tuple val(meta), path('*.fastq.gz'), emit: reads
+    path '*.log'                       , emit: log
     tuple val("${task.process}"), val('rasusa'), eval('rasusa --version 2>&1 | sed -e "s/rasusa //g"'), emit: versions_rasusa, topic: versions
 
     when:
@@ -28,6 +29,7 @@ process RASUSA {
         --coverage $depth_cutoff \\
         --genome-size $genome_size \\
         --input $reads \\
-        $output
+        $output \\
+        2> ${prefix}.rasusa.log
     """
 }

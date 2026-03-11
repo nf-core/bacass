@@ -255,7 +255,7 @@ workflow BACASS {
     //
     // MODULE: RASUSA, randomly subsample reads to a target coverage or number of bases.
     //
-    if ( !params.skip_rasusa ) {
+    if ( params.rasusa ) {
         if ( params.assembly_type != 'short' ) {
             ch_longreads_filtered
                 .branch { meta, reads ->
@@ -272,6 +272,7 @@ workflow BACASS {
                 params.rasusa_coverage
             )
             ch_longreads_filtered = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize)
+            ch_rasusa_log = RASUSA.out.log
             // TODO: Update version collection when pipeline supports new tuple-based version format
             // ch_versions = ch_versions.mix(RASUSA.out.versions_rasusa)
         }
