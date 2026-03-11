@@ -8,9 +8,9 @@ keywords:
   - download
   - bacteria
 components:
-  - bakta_baktadbdownload
+  - bakta/baktadbdownload
   - untar
-  - bakta_bakta
+  - bakta/bakta
 input:
   - ch_fasta:
       type: file

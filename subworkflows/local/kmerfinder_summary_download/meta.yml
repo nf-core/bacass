@@ -10,10 +10,10 @@ keywords:
   - quast
 components:
   - untar
-  - kmerfinder_kmerfinder
-  - kmerfinder_summary
-  - kmerfinder_find_winner_reference
-  - ncbi_datasets_download
+  - kmerfinder/kmerfinder
+  - kmerfinder/summary
+  - kmerfinder/find/winner/reference
+  - ncbi/datasets/download
 input:
   - reads:
       type: file
