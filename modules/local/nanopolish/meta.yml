@@ -1,0 +1,73 @@
+name: nanopolish
+description: Polish long-read assemblies with Nanopolish using FAST5 signal data
+keywords:
+  - nanopolish
+  - polishing
+  - nanopore
+  - fast5
+  - assembly
+  - consensus
+tools:
+  - nanopolish:
+      description: |
+        Nanopolish improves consensus accuracy of assemblies using Oxford Nanopore reads and signal-level data.
+      homepage: https://github.com/jts/nanopolish
+      documentation: https://nanopolish.readthedocs.io/
+      tool_dev_url: https://github.com/jts/nanopolish
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:true ]
+    - reads:
+        type: string
+        description: |
+          Auxiliary reads value propagated in the tuple for channel compatibility.
+    - longreads:
+        type: file
+        description: Long-read FASTQ file used for polishing
+        ontologies: []
+    - assembly:
+        type: file
+        description: Draft assembly FASTA file to polish
+        ontologies: []
+    - bam:
+        type: file
+        description: BAM alignment of long reads against the draft assembly
+        pattern: "*.bam"
+        ontologies: []
+    - bai:
+        type: file
+        description: BAI index for the BAM alignment
+        pattern: "*.bai"
+        ontologies: []
+    - fast5:
+        type: file
+        description: Directory containing FAST5 files required by nanopolish index
+        ontologies: []
+output:
+  assembly:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:true ]
+      - polished_genome.fa:
+          type: file
+          description: Polished consensus genome FASTA
+          pattern: "polished_genome.fa"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@d4straub"
+  - "@Daniel-VM"
+maintainers:
+  - "@d4straub"
+  - "@Daniel-VM"

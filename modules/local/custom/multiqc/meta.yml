@@ -1,0 +1,158 @@
+name: custom_multiqc
+description: Aggregate pipeline QC outputs into a custom MultiQC report with bacass-specific tables
+keywords:
+  - multiqc
+  - report
+  - qc
+  - summary
+  - visualization
+tools:
+  - multiqc:
+      description: |
+        MultiQC searches a given directory for analysis logs and compiles a single HTML report.
+      homepage: https://multiqc.info/
+      documentation: https://multiqc.info/docs/
+      licence: ["GPL-3.0-or-later"]
+      identifier: biotools:multiqc
+input:
+  - multiqc_config:
+      type: file
+      description: Base YAML configuration for MultiQC
+      pattern: "*.{yml,yaml}"
+      ontologies:
+        - edam: http://edamontology.org/format_3750 # YAML
+  - multiqc_custom_config:
+      type: file
+      description: Optional user-provided MultiQC configuration
+      pattern: "*.{yml,yaml}"
+      ontologies:
+        - edam: http://edamontology.org/format_3750 # YAML
+  - multiqc_logo:
+      type: file
+      description: Optional logo file for MultiQC reports
+      ontologies: []
+  - workflow_summary:
+      type: file
+      description: Workflow summary YAML used in the report
+      pattern: "*.{yml,yaml}"
+      ontologies:
+        - edam: http://edamontology.org/format_3750 # YAML
+  - methods_description:
+      type: file
+      description: Methods description YAML used by MultiQC
+      pattern: "*.{yml,yaml}"
+      ontologies:
+        - edam: http://edamontology.org/format_3750 # YAML
+  - software_versions:
+      type: file
+      description: Collated software versions YAML for MultiQC
+      pattern: "*.{yml,yaml}"
+      ontologies:
+        - edam: http://edamontology.org/format_3750 # YAML
+  - fastqc_logs:
+      type: file
+      description: FastQC raw output files
+      pattern: "fastqc/*"
+      ontologies: []
+  - fastqc_trim_logs:
+      type: file
+      description: FastQC post-trimming output files
+      pattern: "fastqc_trim/*"
+      ontologies: []
+  - fastp_logs:
+      type: file
+      description: FastP output files
+      pattern: "fastp/*"
+      ontologies: []
+  - nanoplot_logs:
+      type: file
+      description: NanoPlot output files
+      pattern: "nanoplot/*"
+      ontologies: []
+  - porechop_logs:
+      type: file
+      description: Porechop output files
+      pattern: "porechop/*"
+      ontologies: []
+  - filtlong_logs:
+      type: file
+      description: Filtlong output files
+      pattern: "filtlong/*"
+      ontologies: []
+  - pycoqc_logs:
+      type: file
+      description: PycoQC output files
+      pattern: "pycoqc/*"
+      ontologies: []
+  - kraken2_short_logs:
+      type: file
+      description: Kraken2 reports for short reads
+      pattern: "kraken2_short/*"
+      ontologies: []
+  - kraken2_long_logs:
+      type: file
+      description: Kraken2 reports for long reads
+      pattern: "kraken2_long/*"
+      ontologies: []
+  - quast_logs:
+      type: file
+      description: QUAST output files
+      pattern: "quast/*"
+      ontologies: []
+  - busco_logs:
+      type: file
+      description: BUSCO output files
+      pattern: "busco/*"
+      ontologies: []
+  - prokka_logs:
+      type: file
+      description: Prokka output files
+      pattern: "prokka/*"
+      ontologies: []
+  - bakta_logs:
+      type: file
+      description: Bakta output files
+      pattern: "bakta/*"
+      ontologies: []
+  - extra_logs:
+      type: file
+      description: Additional custom inputs to be copied into multiqc_data
+      pattern: "extra/*"
+      ontologies: []
+output:
+  report:
+    - "*multiqc_report.html":
+        type: file
+        description: MultiQC HTML report
+        pattern: "*multiqc_report.html"
+        ontologies: []
+  data:
+    - "*_data":
+        type: directory
+        description: MultiQC data directory
+        pattern: "*_data"
+  csv_assembly:
+    - "*_assembly_metrics_mqc.csv":
+        type: file
+        description: Optional custom assembly metrics table in CSV format
+        pattern: "*_assembly_metrics_mqc.csv"
+        ontologies:
+          - edam: http://edamontology.org/format_3752 # CSV
+  plots:
+    - "*_plots":
+        type: directory
+        description: Optional directory with MultiQC plot exports
+        pattern: "*_plots"
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@Daniel-VM"
+  - "@yolandabq"
+  - "@guriaregojo"
+maintainers:
+  - "@Daniel-VM"

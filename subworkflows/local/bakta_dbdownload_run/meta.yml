@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "BAKTA_DBDOWNLOAD_RUN"
+description: Annotate assemblies with Bakta, resolving database input by path, tar extraction, or download
+keywords:
+  - bakta
+  - annotation
+  - database
+  - download
+  - bacteria
+components:
+  - bakta/baktadbdownload
+  - untar
+  - bakta/bakta
+input:
+  - ch_fasta:
+      type: file
+      description: |
+        Structure: [ val(meta), path(fasta) ]
+        Assembly FASTA files to annotate with Bakta.
+  - ch_path_baktadb:
+      type: string
+      description: |
+        Structure: value(path_to_baktadb)
+        Optional path to an existing Bakta database directory or tar.gz archive.
+  - val_baktadb_download:
+      type: boolean
+      description: |
+        Structure: val(baktadb_download)
+        If true and no database path is supplied, download the Bakta database.
+output:
+  - bakta_txt_multiqc:
+      type: file
+      description: |
+        Structure: [ val(meta), path(*.txt) ]
+        Bakta per-sample summary text files used in MultiQC.
+  - versions:
+      type: file
+      description: |
+        Structure: [ path(versions.yml) ]
+        Collated software versions from executed components.
+      pattern: "versions.yml"
+authors:
+  - "@Daniel-VM"
+maintainers:
+  - "@Daniel-VM"
