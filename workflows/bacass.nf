@@ -372,7 +372,6 @@ workflow BACASS {
             ch_for_assembly_megahit
         )
         ch_assembly = ch_assembly.mix( MEGAHIT.out.contigs.dump(tag: 'megahit') )
-        ch_versions = ch_versions.mix( MEGAHIT.out.versions_megahit )
     }
 
 
