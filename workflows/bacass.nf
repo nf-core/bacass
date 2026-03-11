@@ -257,17 +257,23 @@ workflow BACASS {
     //
     if ( !params.skip_rasusa ) {
         if ( params.assembly_type != 'short' ) {
-            filtered_long_reads
+            ch_longreads_filtered
                 .branch { meta, reads ->
                     with_gsize: meta.gsize && meta.gsize != 'NA'
                     without_gsize: true
                 }
                 .set { ch_rasusa_branch }
+
+            ch_rasusa_input = ch_rasusa_branch.with_gsize
+                .map { meta, reads -> tuple(meta, reads, meta.gsize) }
+
             RASUSA (
-                ch_rasusa_branch.with_gsize
+                ch_rasusa_input,
+                params.rasusa_coverage
             )
-            filtered_long_reads = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize)
-            ch_versions = ch_versions.mix(RASUSA.out.versions)
+            ch_longreads_filtered = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize)
+            // TODO: Update version collection when pipeline supports new tuple-based version format
+            // ch_versions = ch_versions.mix(RASUSA.out.versions_rasusa)
         }
     }
 

@@ -3,13 +3,11 @@ nextflow_process {
     name "Test Process RASUSA"
     script "../main.nf"
     process "RASUSA"
-    config "./nextflow.config"
-
     tag "rasusa"
     tag "modules"
     tag "modules_nfcore"
 
-    test("sarscov2 single-end [fastq]") {
+    test("Should run without failures") {
 
         when {
             params {
@@ -17,101 +15,13 @@ nextflow_process {
             }
             process {
                 """
-                input[0] = [
-                    [ id:'test', single_end:true ],
-                    [ file(params.modules_testdata_base_path + 'genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true) ]
-                ]
-                """
-            }
-        }
-
-        then {
-            assertAll(
-                { assert process.success },
-                { assert snapshot(
-                    process.out.reads,
-                    process.out.versions
-                ).match() }
-            )
-        }
-
-    }
-
-    test("sarscov2 paired-end [fastq]") {
-
-        when {
-            params {
-                outdir = "$outputDir"
-            }
-            process {
-                """
-                input[0] = [
-                    [ id:'test', single_end:false ],
-                    [
-                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
-                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
-                    ]
-                ]
-                """
-            }
-        }
-
-        then {
-            assertAll(
-                { assert process.success },
-                { assert snapshot(
-                    process.out.reads,
-                    process.out.versions
-                ).match() }
-            )
-        }
-
-    }
-
-    test("sarscov2 single-end [fastq] - stub") {
-
-        options "-stub"
-
-        when {
-            params {
-                outdir = "$outputDir"
-            }
-            process {
-                """
-                input[0] = [
-                    [ id:'test', single_end:true ],
-                    [ file(params.modules_testdata_base_path + 'genomics/sarscov2/nanopore/fastq/test.fastq.gz', checkIfExists: true) ]
-                ]
-                """
-            }
-        }
-
-        then {
-            assertAll(
-                { assert process.success },
-                { assert snapshot(process.out).match() }
-            )
-        }
-
-    }
-
-    test("sarscov2 paired-end [fastq] - stub") {
-
-        options "-stub"
-
-        when {
-            params {
-                outdir = "$outputDir"
-            }
-            process {
-                """
-                input[0] = [
-                    [ id:'test', single_end:false ],
-                    [
-                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
-                        file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
-                    ]
-                ]
+                input[0] =  [ [ id:'testfile', single_end:false], // meta map
+                                [ file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true),
+                                  file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test_2.fastq.gz', checkIfExists: true)
+                                ],
+                                "1000000b"
+                            ]
+                input[1] = 100
                 """
             }
         }

@@ -136,11 +136,6 @@
                         "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
                         "installed_by": ["modules"]
                     },
-                    "rasusa": {
-                        "branch": "master",
-                        "git_sha": "666652b8e0b08ca3662f4e99a1bc5184a3d23a59",
-                        "installed_by": ["modules"]
-                    },
                     "quast": {
                         "branch": "master",
                         "git_sha": "55cca688337cfaec60e8cd32021bb4cd19f3a501",
@@ -149,6 +144,11 @@
                     "racon": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "rasusa": {
+                        "branch": "master",
+                        "git_sha": "35b7d3eeaccbc0c82fae2ef675b00c028b9282ca",
                         "installed_by": ["modules"]
                     },
                     "raven": {
