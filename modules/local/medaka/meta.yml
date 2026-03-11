@@ -1,0 +1,54 @@
+name: medaka
+description: Polishes long-read genome assemblies with Medaka consensus calling
+keywords:
+  - medaka
+  - polishing
+  - nanopore
+  - assembly
+  - consensus
+tools:
+  - medaka:
+      description: |
+        Medaka performs consensus polishing of assemblies using Oxford Nanopore reads.
+      homepage: https://github.com/nanoporetech/medaka
+      documentation: https://github.com/nanoporetech/medaka
+      tool_dev_url: https://github.com/nanoporetech/medaka
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:true ]
+    - longreads:
+        type: file
+        description: Long-read FASTQ file used for polishing
+        ontologies: []
+    - assembly:
+        type: file
+        description: Draft assembly FASTA file to polish
+        ontologies: []
+output:
+  assembly:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:true ]
+      - "*_polished_genome.fa":
+          type: file
+          description: Polished consensus genome FASTA
+          pattern: "*_polished_genome.fa"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@d4straub"
+  - "@Daniel-VM"
+maintainers:
+  - "@d4straub"
+  - "@Daniel-VM"
