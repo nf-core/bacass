@@ -313,9 +313,7 @@
             ],
             [
                 "ERR044595-megahit.contigs.fa.gz:md5,a9d7fcb909279d9a2f03009105aa33be",
-                "ERR044595-megahit.log:md5,e218b67f41086638c169f3f56c84a6ed",
                 "ERR064912-megahit.contigs.fa.gz:md5,48e9d9a8bf9cdb2f73e40b358a66c263",
-                "ERR064912-megahit.log:md5,18af76496e0d69477541bb251a3fab3e",
                 "mqc_busco_plot_bacteria_odb10_1.yaml:md5,005e6a5903a2319ed2436a7d1a4c5230",
                 "mqc_fastp-insert-size-plot_1.yaml:md5,51ab9ff6bc3fa18d08f051177475ec2e",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,cd86aa098d14b4ad56d2d31599ab0d8e",
@@ -356,7 +354,7 @@
                 "ERR064912.fastp.json:md5,39de6f3e116abb4798df1d748ad9ff63"
             ]
         ],
-        "timestamp": "2026-03-12T10:14:56.831412847",
+        "timestamp": "2026-03-12T10:35:25.495336892",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
