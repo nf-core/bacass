@@ -234,6 +234,31 @@ def validateInputParameters() {
         error(error_string)
     }
 
+    // Check compatibility between assembly_type and selected assembler(s)
+    def selected_assemblers = params.assembler.tokenize(",").collect { it.trim() }.findAll { it }
+    Map<String, Map<String, Boolean>> assembler_capabilities = [
+        unicycler : [short: true,  long: true,  hybrid: true ],
+        canu      : [short: false, long: true,  hybrid: false],
+        dragonflye: [short: false, long: true,  hybrid: true ],
+        flye      : [short: false, long: true,  hybrid: false],
+        miniasm   : [short: false, long: true,  hybrid: false],
+        raven     : [short: false, long: true,  hybrid: false],
+        autocycler: [short: false, long: true,  hybrid: false]
+    ]
+    def incompatible_assemblers = selected_assemblers.findAll { assembler ->
+        !assembler_capabilities.containsKey(assembler) || !assembler_capabilities[assembler][params.assembly_type]
+    }
+    if (incompatible_assemblers) {
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Incompatible assembler(s) for the selected assembly type.\n" +
+            "  assembly_type: ${params.assembly_type}\n" +
+            "  selected: ${selected_assemblers.join(", ")}\n" +
+            "  incompatible: ${incompatible_assemblers.join(", ")}\n" +
+            "  compatible for ${params.assembly_type}: ${compatible_assemblers.findAll { assembler_capabilities[it][params.assembly_type] }.join(", ")}\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
+    }
+
     // Check that assemblers for Autocycler are chosen correctly
     String[] autocycler_compatible_assemblers = [
         "canu","flye","miniasm","raven"
