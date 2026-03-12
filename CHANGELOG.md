@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- [#283](https://github.com/nf-core/bacass/pull/283) Validate `--assembly_type` and `--assembler` compatibility and add dedicated nf-test coverage
 - [#263](https://github.com/nf-core/bacass/pull/263) Update Template to 3.5.1
 - [#264](https://github.com/nf-core/bacass/pull/264) Follow Nextflow strict syntax
 - [#270](https://github.com/nf-core/bacass/pull/270) `--assembler` accepts now also a comma separated list of available assemblers that are all executed in parallel on samples and compared via the QUAST report.
