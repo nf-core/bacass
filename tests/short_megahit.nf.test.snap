@@ -312,10 +312,10 @@
                 "trimming/shortreads/log/ERR064912.fastp.log"
             ],
             [
-                "ERR044595-megahit.contigs.fa.gz:md5,e339ab857ca7c90c2a89b932114e1659",
-                "ERR044595-megahit.log:md5,259a6726e9ffce81af4fe26d7289065e",
-                "ERR064912-megahit.contigs.fa.gz:md5,2dee65d29a833bd1fcbf84dbb04eeb59",
-                "ERR064912-megahit.log:md5,250c0e8be98eb1c105b6d72ceb2d4a29",
+                "ERR044595-megahit.contigs.fa.gz:md5,a9d7fcb909279d9a2f03009105aa33be",
+                "ERR044595-megahit.log:md5,e218b67f41086638c169f3f56c84a6ed",
+                "ERR064912-megahit.contigs.fa.gz:md5,48e9d9a8bf9cdb2f73e40b358a66c263",
+                "ERR064912-megahit.log:md5,18af76496e0d69477541bb251a3fab3e",
                 "mqc_busco_plot_bacteria_odb10_1.yaml:md5,005e6a5903a2319ed2436a7d1a4c5230",
                 "mqc_fastp-insert-size-plot_1.yaml:md5,51ab9ff6bc3fa18d08f051177475ec2e",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,cd86aa098d14b4ad56d2d31599ab0d8e",
@@ -356,7 +356,7 @@
                 "ERR064912.fastp.json:md5,39de6f3e116abb4798df1d748ad9ff63"
             ]
         ],
-        "timestamp": "2026-03-11T15:25:50.820345512",
+        "timestamp": "2026-03-12T10:14:56.831412847",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
