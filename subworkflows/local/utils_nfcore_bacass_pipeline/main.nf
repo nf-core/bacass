@@ -238,6 +238,7 @@ def validateInputParameters() {
     def selected_assemblers = params.assembler.tokenize(",").collect { it.trim() }.findAll { it }
     Map<String, Map<String, Boolean>> assembler_capabilities = [
         unicycler : [short: true,  long: true,  hybrid: true ],
+        megahit   : [short: true,  long: false, hybrid: false],
         canu      : [short: false, long: true,  hybrid: false],
         dragonflye: [short: false, long: true,  hybrid: true ],
         flye      : [short: false, long: true,  hybrid: false],
@@ -249,12 +250,15 @@ def validateInputParameters() {
         !assembler_capabilities.containsKey(assembler) || !assembler_capabilities[assembler][params.assembly_type]
     }
     if (incompatible_assemblers) {
+        def compatible_for_type = compatible_assemblers.findAll { assembler ->
+            assembler_capabilities[assembler]?.get(params.assembly_type) == true
+        }
         def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
             "  Incompatible assembler(s) for the selected assembly type.\n" +
             "  assembly_type: ${params.assembly_type}\n" +
             "  selected: ${selected_assemblers.join(", ")}\n" +
             "  incompatible: ${incompatible_assemblers.join(", ")}\n" +
-            "  compatible for ${params.assembly_type}: ${compatible_assemblers.findAll { assembler_capabilities[it][params.assembly_type] }.join(", ")}\n" +
+            "  compatible for ${params.assembly_type}: ${compatible_for_type.join(", ")}\n" +
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         error(error_string)
     }
