@@ -27,6 +27,7 @@ Prokka/*/*.{gbk,sqn,log,err}
 Prokka/*/*.{faa,ffn,fna,fsa,gff,tbl,tsv,txt}
 QUAST/report/**
 Unicycler/*.unicycler.log
+Megahit/*.log
 DFAST/*/*.{tsv,log,gbk}
 LIFTOFF/*.gff3
 QC_longreads/ToulligQC/**

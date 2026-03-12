@@ -147,7 +147,7 @@ The pipeline includes a dedicated step for short and long reads QC as well as co
 
 ## Assembly Output
 
-Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler) in `short` or `hybrid` assembly modes. For long-read assembly, there are also `canu` and `miniasm` available.
+Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler) or [MEGAHIT](https://github.com/voutcn/megahit) in `short` assembly mode. In `hybrid` mode, [Unicycler](https://github.com/rrwick/Unicycler) and [Dragonflye](https://github.com/rpetit3/dragonflye) are available. For long-read assembly, the pipeline supports [Unicycler](https://github.com/rrwick/Unicycler), [Canu](https://github.com/marbl/canu), [Miniasm](https://github.com/lh3/miniasm), [Flye](https://github.com/mikolmogorov/Flye), [Raven](https://github.com/lbcb-sci/raven), [Dragonflye](https://github.com/rpetit3/dragonflye), and [Autocycler](https://github.com/rrwick/Autocycler).
 Unicycler is a pipeline on its own, which at least for Illumina reads mainly acts as a frontend to Spades with added polishing steps.
 
 <details markdown="1">
@@ -159,6 +159,12 @@ Unicycler is a pipeline on its own, which at least for Illumina reads mainly act
   - `*-unicycler.unicycler.log`: Log file summarizing steps and intermediate results on the Unicycler execution
 
 Check out the [Unicycler documentation](https://github.com/rrwick/Unicycler) for more information on Unicycler output.
+
+- `Megahit/`
+  - `*-megahit.contigs.fa.gz`: Final assembly in FASTA format
+  - `*-megahit.log`: Log file summarizing MEGAHIT execution
+
+Check out the [MEGAHIT documentation](https://github.com/voutcn/megahit) for more information on MEGAHIT output.
 
 - `Canu/`
   - `*-canu.contigs.fasta.gz`: Final assembly in fasta format

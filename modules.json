@@ -100,6 +100,11 @@
                         "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
                         "installed_by": ["modules"]
                     },
+                    "megahit": {
+                        "branch": "master",
+                        "git_sha": "e4f18d1cecc86b39daafe8bf22343b868e696c15",
+                        "installed_by": ["modules"]
+                    },
                     "miniasm": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",

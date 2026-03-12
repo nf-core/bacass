@@ -89,6 +89,9 @@ This pipeline integrates multiple assembler tools that are all activated by defa
 > [!TIP]
 > Autocycler uses several long-read assemblers and combines their results, reducing assembler-specific biases. The assemblers used for Autocycler can be restricted with the [--autocycler_assemblers](https://nf-co.re/bacass/parameters#autocycler_assemblers) parameter.
 
+> [!TIP]
+> [MEGAHIT](https://github.com/voutcn/megahit) is available as a fast and memory-efficient option for short-read assembly. Use `--assembly_type short --assembler megahit`.
+
 > [!NOTE]
 > Dragonflye is a comprehensive pipeline designed for genome assembly of Oxford Nanopore Reads. It facilitates the utilization of Flye (default), Miniasm, and Raven assemblers, along with Racon (default) and Medaka polishers. For more information, visit the [Dragonflye GitHub](https://github.com/rpetit3/dragonflye) repository.
 

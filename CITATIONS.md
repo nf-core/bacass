@@ -32,6 +32,10 @@
 
   > Wick RR, Judd LM, Gorrie CL, Holt KE. Unicycler: Resolving bacterial genome assemblies from short and long sequencing reads. PLoS Comput Biol. 2017 Jun 8;13(6):e1005595. doi: 10.1371/journal.pcbi.1005595. PMID: 28594827; PMCID: PMC5481147.
 
+- [MEGAHIT](https://pubmed.ncbi.nlm.nih.gov/25609793/)
+
+  > Li D, Liu CM, Luo R, Sadakane K, Lam TW. MEGAHIT: an ultra-fast single-node solution for large and complex metagenomics assembly via succinct de Bruijn graph. Bioinformatics. 2015 May 15;31(10):1674-6. doi: 10.1093/bioinformatics/btv033. Epub 2015 Jan 20. PMID: 25609793.
+
 - [Miniasm](https://github.com/lh3/miniasm) with [Racon](https://github.com/isovic/racon)
 
   > Li H. Minimap and miniasm: fast mapping and de novo assembly for noisy long sequences. Bioinformatics. 2016 Jul 15;32(14):2103-10. doi: 10.1093/bioinformatics/btw152. Epub 2016 Mar 19. PMID: 27153593; PMCID: PMC4937194.
