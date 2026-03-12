@@ -181,13 +181,13 @@
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
                 "multiqc_citations.yaml:md5,80450f20190a42871cb64f62ae9bec3e",
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d",
-                "TestMe.rasusa.rasusa.log:md5,9217a6071de341e49e7c966fcfc56883"
+                "TestMe.rasusa.rasusa.log:md5,80fd462c9cb69aea3958edcb0db52f4b"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "25.10.0"
         },
-        "timestamp": "2026-03-11T15:44:15.585146326"
+        "timestamp": "2026-03-12T14:02:48.060802465"
     }
 }
