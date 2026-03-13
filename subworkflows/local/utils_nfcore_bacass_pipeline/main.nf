@@ -144,9 +144,7 @@ workflow PIPELINE_INITIALISATION {
         }
         .map {
             meta, fastqs, longread, fast5 ->
-                def merged_longread = longread.flatten().find { hasInputValue(it) } ?: 'NA'
-                def merged_fast5 = fast5.flatten().find { hasInputValue(it) } ?: 'NA'
-                return [ meta, fastqs.flatten(), merged_longread, merged_fast5 ]
+                return [ meta, fastqs.flatten(), longread, fast5[0] ]
         }
         .set { ch_samplesheet }
 
