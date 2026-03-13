@@ -42,6 +42,7 @@ include { QUAST                                 } from '../modules/nf-core/quast
 include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast'
 include { QUAST as QUAST_BYSAMPLE               } from '../modules/nf-core/quast'
 include { BUSCO_BUSCO                           } from '../modules/nf-core/busco/busco/main'
+include { GTDBTK_CLASSIFYWF                     } from '../modules/nf-core/gtdbtk/classifywf'
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
 include { FILTLONG                              } from '../modules/nf-core/filtlong'
@@ -75,7 +76,7 @@ workflow BACASS {
     main:
 
     // Check input path parameters to see if they exist
-    def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config, params.reference_fasta, params.reference_gff ]
+    def checkPathParamList = [ params.input, params.multiqc_config, params.kraken2db, params.dfast_config, params.reference_fasta, params.reference_gff, params.gtdbtk_db ]
     checkPathParamList.each { param -> if (param) { file(param, checkIfExists: true) } }
 
     if (params.reference_fasta) {
@@ -778,6 +779,13 @@ workflow BACASS {
         }
         .set{ ch_assembly_for_gunzip }
 
+    ch_assembly_uncompressed = ch_assembly
+    if ((!params.skip_annotation && params.annotation_tool in ['prokka', 'bakta']) || !params.skip_gtdbtk) {
+        GUNZIP ( ch_assembly_for_gunzip.gzip )
+        ch_assembly_uncompressed = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
+        ch_versions = ch_versions.mix( GUNZIP.out.versions )
+    }
+
     //
     // MODULE: BUSCO, assess genome assembly completeness
     //
@@ -796,17 +804,40 @@ workflow BACASS {
     }
 
     //
+    // MODULE: GTDB-Tk, taxonomic classification of final assemblies
+    //
+    ch_gtdbtk_summary = channel.empty()
+    if (!params.skip_gtdbtk) {
+        if (!params.gtdbtk_db) {
+            error("GTDB-Tk requires `--gtdbtk_db` when `--skip_gtdbtk false`.")
+        }
+
+        ch_assembly_uncompressed
+            .map { meta, fasta ->
+                def new_meta = meta.clone()
+                def fasta_name = fasta.name.toLowerCase()
+                def extension = fasta_name.endsWith('.fasta') ? 'fasta' : fasta_name.endsWith('.fna') ? 'fna' : 'fa'
+                new_meta.gtdb_ext = extension
+                [ new_meta, [ fasta ] ]
+            }
+            .set { ch_gtdbtk_input }
+
+        GTDBTK_CLASSIFYWF (
+            ch_gtdbtk_input,
+            channel.value([ params.gtdbtk_db_name ?: 'gtdbtk', file(params.gtdbtk_db, checkIfExists: true) ]),
+            params.gtdbtk_use_pplacer_scratch_dir
+        )
+
+        ch_gtdbtk_summary = GTDBTK_CLASSIFYWF.out.summary
+    }
+
+    //
     // MODULE: PROKKA, gene annotation
     //
     ch_prokka_txt_multiqc = channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'prokka' ) {
-        // Uncompress assembly for annotation if necessary
-        GUNZIP ( ch_assembly_for_gunzip.gzip )
-        ch_to_prokka    = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
-        ch_versions     = ch_versions.mix( GUNZIP.out.versions )
-
         PROKKA (
-            ch_to_prokka.filter{ _meta, fasta -> !fasta.isEmpty() },
+            ch_assembly_uncompressed.filter{ _meta, fasta -> !fasta.isEmpty() },
             ch_proteins,
             []
         )
@@ -819,13 +850,8 @@ workflow BACASS {
     //
     ch_bakta_txt_multiqc = channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'bakta' ) {
-        // Uncompress assembly for annotation if necessary
-        GUNZIP ( ch_assembly_for_gunzip.gzip )
-        ch_to_bakta     = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
-        ch_versions     = ch_versions.mix( GUNZIP.out.versions )
-
         BAKTA_DBDOWNLOAD_RUN (
-            ch_to_bakta.filter{ _meta, fasta -> !fasta.isEmpty() },
+            ch_assembly_uncompressed.filter{ _meta, fasta -> !fasta.isEmpty() },
             params.baktadb,
             params.baktadb_download
         )
@@ -939,6 +965,7 @@ workflow BACASS {
 
     emit:
     multiqc_report = CUSTOM_MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    gtdbtk_summary = ch_gtdbtk_summary                  // channel: [ val(meta), path(summary.tsv) ]
     versions       = ch_versions                        // channel: [ path(versions.yml) ]
 
 }
