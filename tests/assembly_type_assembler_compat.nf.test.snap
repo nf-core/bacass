@@ -1,22 +1,31 @@
 {
-    "passes when assembly_type=short and assembler=unicycler": {
+    "passes when assembly_type=auto with long-only samplesheet (stub)": {
         "content": [
             {
-                "CAT_FASTQ_SHORT": {
+                "CAT_FASTQ_LONG": {
                     "cat": 9.5
+                },
+                "FLYE": {
+                    "flye": "2.9.5-b1801"
+                },
+                "NANOPLOT": {
+                    "nanoplot": "1.46.1"
+                },
+                "PORECHOP_PORECHOP": {
+                    "porechop": "0.2.4"
                 },
                 "QUAST": {
                     "quast": "5.3.0"
                 },
-                "UNICYCLER": {
-                    "unicycler": "0.5.1"
+                "TOULLIGQC": {
+                    "toulligqc": "2.7.1"
                 },
                 "Workflow": {
                     "nf-core/bacass": "v2.6.0dev"
                 }
             }
         ],
-        "timestamp": "2026-03-12T09:46:41.11884653",
+        "timestamp": "2026-03-13T11:01:56.986610047",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
