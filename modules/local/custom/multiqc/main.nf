@@ -52,7 +52,7 @@ process CUSTOM_MULTIQC {
 
     ## Avoid the custom Multiqc table when the kmerfinder process is not invoked.
     if grep ">skip_kmerfinder<" workflow_summary_mqc.yaml; then
-        rm *_assembly_metrics_mqc.csv
+        rm -f *_assembly_metrics_mqc.csv
     fi
 
     ## Run multiqc a second time

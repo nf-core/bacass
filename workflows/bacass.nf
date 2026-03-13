@@ -127,7 +127,7 @@ workflow BACASS {
     ch_fastqc_raw_multiqc  = channel.empty()
     ch_fastqc_trim_multiqc = channel.empty()
     ch_fastp_json_multiqc  = channel.empty()
-    if (params.assembly_type in ['short', 'hybrid']) {
+    if (params.assembly_type in ['short', 'hybrid', 'auto']) {
         //
         // MODULE: Concatenate FastQ files from same sample if required
         //
@@ -170,7 +170,7 @@ workflow BACASS {
     ch_porechop_log_multiqc = channel.empty()
     ch_filtlong_log_multiqc = channel.empty()
     ch_longreads_filtered   = channel.empty()
-    if (params.assembly_type in ['long', 'hybrid']) {
+    if (params.assembly_type in ['long', 'hybrid', 'auto']) {
         //
         // MODULE: Concatenate FastQ files from same sample if required
         //
@@ -239,6 +239,23 @@ workflow BACASS {
                 ch_shortreads_for_filtlong = ch_short_preprocessed.join(ch_longreads_concat)   //tuple val(meta), file(sr), file(lr)
             } else if ( params.assembly_type == 'long' ) {
                 ch_shortreads_for_filtlong = ch_longreads_concat.map{ meta, lr -> tuple(meta, [], lr ) }
+            } else if ( params.assembly_type == 'auto' ) {
+                ch_shortreads_for_filtlong = ch_short_preprocessed
+                    .filter { meta, _sr -> meta.assembly_type == 'hybrid' }
+                    .cross(
+                        ch_longreads_concat.filter { meta, _lr -> meta.assembly_type == 'hybrid' }
+                    ) { it -> it[0].sample }
+                    .map { short_tuple, long_tuple ->
+                        def meta_short = short_tuple[0]
+                        def short_reads = short_tuple[1]
+                        def long_reads = long_tuple[1]
+                        [meta_short, short_reads, long_reads]
+                    }
+                    .mix(
+                        ch_longreads_concat
+                            .filter { meta, _lr -> meta.assembly_type == 'long' }
+                            .map { meta, lr -> tuple(meta, [], lr) }
+                    )
             }
 
             FILTLONG (
@@ -304,6 +321,42 @@ workflow BACASS {
                 "  Please verify that samples have long reads.\n"
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             error(error_string) }
+    } else if ( params.assembly_type == 'auto' ) {
+        ch_for_kraken2_short = ch_short_preprocessed
+        ch_for_kraken2_long  = ch_longreads_filtered
+
+        def ch_short_for_assembly = ch_short_preprocessed
+            .filter { meta, _sr -> meta.assembly_type == 'short' }
+            .map { meta, reads -> tuple(meta, reads, []) }
+
+        def ch_long_for_assembly = ch_longreads_filtered
+            .filter { meta, _lr -> meta.assembly_type == 'long' }
+            .map { meta, lr -> tuple(meta, [], lr) }
+
+        def ch_hybrid_for_assembly = ch_short_preprocessed
+            .filter { meta, _sr -> meta.assembly_type == 'hybrid' }
+            .cross(
+                ch_longreads_filtered.filter { meta, _lr -> meta.assembly_type == 'hybrid' }
+            ) { it -> it[0].sample }
+            .map { short_tuple, long_tuple ->
+                def meta_short = short_tuple[0]
+                def short_reads = short_tuple[1]
+                def long_reads = long_tuple[1]
+                [meta_short, short_reads, long_reads]
+            }
+
+        ch_short_for_assembly
+            .mix(ch_long_for_assembly)
+            .mix(ch_hybrid_for_assembly)
+            .dump(tag: 'ch_for_assembly')
+            .set { ch_for_assembly }
+
+        ch_for_assembly.ifEmpty{
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  There is nothing to assemble with these settings.\n" +
+                "  Please verify that samples have short and/or long reads.\n"
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string) }
     }
 
     //
@@ -312,8 +365,10 @@ workflow BACASS {
     if( params.assembler.tokenize(",").contains("autocycler") ) {
         // subsample and transpose to one subset per channel entry
         AUTOCYCLER_SUBSAMPLE (
-            ch_for_assembly.map{ meta, _short_reads, long_reads -> [meta, long_reads] },
-            ch_for_assembly.map { meta, _reads, _lr -> meta.gsize }
+            filterByCompatibleAssemblyTypes(ch_for_assembly, 'autocycler')
+                .map{ meta, _short_reads, long_reads -> [meta, long_reads] },
+            filterByCompatibleAssemblyTypes(ch_for_assembly, 'autocycler')
+                .map { meta, _reads, _lr -> meta.gsize }
         )
         AUTOCYCLER_SUBSAMPLE.out.subsampled_reads // transpose to [ meta, fasta-subset1, fasta-subset2, ... ]
             .transpose() // transpose to [ meta, fasta ]
@@ -331,12 +386,24 @@ workflow BACASS {
     // ASSEMBLY: Unicycler, Megahit, Canu, Miniasm, Dragonflye, Raven, Flye, Autocycler
     //
     ch_assembly = channel.empty()
+    def assembler_sample_type_compatibility = [
+        unicycler : ['short', 'long', 'hybrid'] as Set,
+        canu      : ['long'] as Set,
+        miniasm   : ['long'] as Set,
+        dragonflye: ['long', 'hybrid'] as Set,
+        raven     : ['long'] as Set,
+        flye      : ['long'] as Set,
+        autocycler: ['long'] as Set
+    ]
+    def filterByCompatibleAssemblyTypes = { channel_input, assembler_name ->
+        channel_input.filter { meta, _sr, _lr -> assembler_sample_type_compatibility[assembler_name].contains(meta.assembly_type) }
+    }
 
     //
     // MODULE: Unicycler, genome assembly, nf-core module allows only short, long and hybrid assembly
     //
     if ( params.assembler.tokenize(",").contains("unicycler") ) {
-        ch_for_assembly
+        filterByCompatibleAssemblyTypes(ch_for_assembly, 'unicycler')
             .filter{ meta, sr, lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
             .map{ meta, sr, lr ->
                 def new_meta = meta.clone()
@@ -379,7 +446,7 @@ workflow BACASS {
     // MODULE: Canu, genome assembly, long reads
     //
     if ( params.assembler.tokenize(",").contains("canu") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("canu") ) ) {
-        ch_for_assembly
+        filterByCompatibleAssemblyTypes(ch_for_assembly, 'canu')
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "canu"
@@ -404,7 +471,7 @@ workflow BACASS {
     // MODULE: Miniasm, genome assembly, long reads
     //
     if ( params.assembler.tokenize(",").contains("miniasm") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") ) ) {
-        ch_for_assembly
+        filterByCompatibleAssemblyTypes(ch_for_assembly, 'miniasm')
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "miniasm"
@@ -461,7 +528,7 @@ workflow BACASS {
     // MODULE: Dragonflye, genome assembly of long reads. Moreover, it provides the option for polishing the draft genome using short reads when both short and long reads are available.
     //
     if( params.assembler.tokenize(",").contains("dragonflye") ){
-        ch_for_assembly
+        filterByCompatibleAssemblyTypes(ch_for_assembly, 'dragonflye')
             .map{ meta, short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "dragonflye"
@@ -482,7 +549,7 @@ workflow BACASS {
     // MODULE: Raven, genome assembly of long reads.
     //
     if ( params.assembler.tokenize(",").contains("raven") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("raven") ) ) {
-        ch_for_assembly
+        filterByCompatibleAssemblyTypes(ch_for_assembly, 'raven')
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "raven"
@@ -505,7 +572,7 @@ workflow BACASS {
     // MODULE: Flye, genome assembly of long reads.
     //
     if ( params.assembler.tokenize(",").contains("flye") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("flye") ) ) {
-        ch_for_assembly
+        filterByCompatibleAssemblyTypes(ch_for_assembly, 'flye')
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "flye"
@@ -558,9 +625,10 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Long reads polishing. Uses medaka or Nanopolish (this last requires Fast5 files available in input samplesheet).
     //
-    if ( (params.assembly_type == 'long' && !params.skip_polish) || ( params.assembly_type != 'short' && params.polish_method) ){
+    if ( !params.skip_polish && params.polish_method && params.assembly_type != 'short' ){
         // Set channel for polishing long reads
         ch_for_assembly
+            .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] }
             .filter { meta, sr, lr -> !meta.subsample } // remove any subsamples
             .cross(ch_assembly) { it -> it[0].sample } // merge by meta.sample -> [[ meta, sr, lr ],[ meta, assembly ]]
             .map { for_assembly,assembly ->
@@ -692,6 +760,13 @@ workflow BACASS {
             ch_for_kmerfinder = ch_short_preprocessed
         } else if ( params.assembly_type == 'long' ) {
             ch_for_kmerfinder = ch_longreads_filtered
+        } else if ( params.assembly_type == 'auto' ) {
+            ch_for_kmerfinder = ch_short_preprocessed
+                .filter { meta, _reads -> meta.assembly_type in ['short', 'hybrid'] }
+                .mix(
+                    ch_longreads_filtered
+                        .filter { meta, _reads -> meta.assembly_type == 'long' }
+                )
         }
         // RUN kmerfinder subworkflow
         KMERFINDER_SUMMARY_DOWNLOAD (
@@ -907,38 +982,42 @@ workflow BACASS {
     //
     // MODULE: MultiQC
     //
-    ch_multiqc_config                     = !params.skip_kmerfinder && params.assembly_type ? channel.fromPath("$projectDir/assets/multiqc_config_${params.assembly_type}.yml", checkIfExists: true) : channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    ch_multiqc_custom_config              = params.multiqc_config ? channel.fromPath(params.multiqc_config, checkIfExists: true) : channel.empty()
-    ch_multiqc_logo                       = params.multiqc_logo ? channel.fromPath(params.multiqc_logo, checkIfExists: true) : channel.empty()
-    summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary                   = channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? channel.fromPath(params.multiqc_methods_description, checkIfExists: true) : channel.fromPath("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+    multiqc_report = channel.empty()
+    if ( !params.skip_multiqc ) {
+        ch_multiqc_config                     = !params.skip_kmerfinder && params.assembly_type && params.assembly_type != 'auto' ? channel.fromPath("$projectDir/assets/multiqc_config_${params.assembly_type}.yml", checkIfExists: true) : channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
+        ch_multiqc_custom_config              = params.multiqc_config ? channel.fromPath(params.multiqc_config, checkIfExists: true) : channel.empty()
+        ch_multiqc_logo                       = params.multiqc_logo ? channel.fromPath(params.multiqc_logo, checkIfExists: true) : channel.empty()
+        summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+        ch_workflow_summary                   = channel.value(paramsSummaryMultiqc(summary_params))
+        ch_multiqc_custom_methods_description = params.multiqc_methods_description ? channel.fromPath(params.multiqc_methods_description, checkIfExists: true) : channel.fromPath("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
-    CUSTOM_MULTIQC (
-        ch_multiqc_config.ifEmpty([]),
-        ch_multiqc_custom_config.ifEmpty([]),
-        ch_multiqc_logo.ifEmpty([]),
-        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
-        ch_multiqc_custom_methods_description.ifEmpty([]),
-        ch_collated_versions.ifEmpty([]),
-        ch_fastqc_raw_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_fastqc_trim_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_fastp_json_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_nanoplot_txt_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_porechop_log_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_filtlong_log_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_pycoqc_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_kraken_short_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_kraken_long_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_quast_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_busco_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_prokka_txt_multiqc.collect().ifEmpty([]),
-        ch_bakta_txt_multiqc.collect().ifEmpty([]),
-        ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
-    )
+        CUSTOM_MULTIQC (
+            ch_multiqc_config.ifEmpty([]),
+            ch_multiqc_custom_config.ifEmpty([]),
+            ch_multiqc_logo.ifEmpty([]),
+            ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+            ch_multiqc_custom_methods_description.ifEmpty([]),
+            ch_collated_versions.ifEmpty([]),
+            ch_fastqc_raw_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_fastqc_trim_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_fastp_json_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_nanoplot_txt_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_porechop_log_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_filtlong_log_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_pycoqc_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_kraken_short_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_kraken_long_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_quast_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_busco_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_prokka_txt_multiqc.collect().ifEmpty([]),
+            ch_bakta_txt_multiqc.collect().ifEmpty([]),
+            ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
+        )
+        multiqc_report = CUSTOM_MULTIQC.out.report.toList()
+    }
 
     emit:
-    multiqc_report = CUSTOM_MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report = multiqc_report // channel: /path/to/multiqc_report.html
     versions       = ch_versions                        // channel: [ path(versions.yml) ]
 
 }
