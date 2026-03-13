@@ -93,16 +93,36 @@ workflow PIPELINE_INITIALISATION {
     )
 
     //
+    // Parse samplesheet once so it can be reused for autodetection and channel creation
+    //
+    def parsed_samplesheet = samplesheetToList(input, "${projectDir}/assets/schema_input.json")
+
+    //
+    // Resolve assembly_type automatically from samplesheet if requested
+    //
+    def auto_detected_sample_types = []
+    if (params.assembly_type == 'auto') {
+        def inferred_sample_types = inferAssemblyTypesFromSamplesheet(parsed_samplesheet)
+        def inferred_global_types = inferred_sample_types.values().toSet()
+        auto_detected_sample_types = inferred_global_types.toList().sort()
+
+        if (inferred_global_types.size() == 1) {
+            log.info "Auto-detected '--assembly_type' as '${auto_detected_sample_types.first()}' from samplesheet."
+        } else {
+            log.info "Auto-detected heterogeneous per-sample assembly types: ${auto_detected_sample_types.join(', ')}"
+        }
+    }
+
+    //
     // Custom validation for pipeline parameters
     //
-    validateInputParameters()
+    validateInputParameters(auto_detected_sample_types)
 
     //
     // Create channel from input file provided through params.input
     //
-
     channel
-        .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
+        .fromList(parsed_samplesheet)
         .map {
             meta, fastq_1, fastq_2, longreads, fast5 ->
 
@@ -124,7 +144,9 @@ workflow PIPELINE_INITIALISATION {
         }
         .map {
             meta, fastqs, longread, fast5 ->
-                return [ meta, fastqs.flatten(), longread, fast5[0] ]
+                def merged_longread = longread.flatten().find { hasInputValue(it) } ?: 'NA'
+                def merged_fast5 = fast5.flatten().find { hasInputValue(it) } ?: 'NA'
+                return [ meta, fastqs.flatten(), merged_longread, merged_fast5 ]
         }
         .set { ch_samplesheet }
 
@@ -189,7 +211,7 @@ workflow PIPELINE_COMPLETION {
 //
 // Check and validate pipeline parameters
 //
-def validateInputParameters() {
+def validateInputParameters(auto_detected_sample_types = []) {
     // Add functions here for parameters validation
     // Check Kraken2 dependencies
     if (!params.skip_kraken2 && !params.kraken2db) {
@@ -246,6 +268,7 @@ def validateInputParameters() {
         raven     : [short: false, long: true,  hybrid: false],
         autocycler: [short: false, long: true,  hybrid: false]
     ]
+<<<<<<< HEAD
     def incompatible_assemblers = selected_assemblers.findAll { assembler ->
         !assembler_capabilities.containsKey(assembler) || !assembler_capabilities[assembler][params.assembly_type]
     }
@@ -261,6 +284,48 @@ def validateInputParameters() {
             "  compatible for ${params.assembly_type}: ${compatible_for_type.join(", ")}\n" +
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         error(error_string)
+=======
+    if (params.assembly_type == 'auto') {
+        def detected_types = auto_detected_sample_types.collect { it.toString().trim() }.findAll { it }
+        def uncovered_detected_types = detected_types.findAll { detected_type ->
+            !selected_assemblers.any { assembler ->
+                assembler_capabilities.containsKey(assembler) && assembler_capabilities[assembler][detected_type]
+            }
+        }
+        def invalid_assemblers = selected_assemblers.findAll { assembler ->
+            !assembler_capabilities.containsKey(assembler)
+        }
+        if (invalid_assemblers || uncovered_detected_types) {
+            def incompatible_assemblers = selected_assemblers.findAll { assembler ->
+                !assembler_capabilities.containsKey(assembler) ||
+                    uncovered_detected_types.any { detected_type -> !assembler_capabilities[assembler][detected_type] }
+            }
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Incompatible assembler(s) for '--assembly_type auto'.\n" +
+                "  detected per-sample types: ${detected_types.join(", ")}\n" +
+                "  selected: ${selected_assemblers.join(", ")}\n" +
+                "  incompatible: ${incompatible_assemblers.join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string)
+        }
+    } else {
+        def incompatible_assemblers = selected_assemblers.findAll { assembler ->
+            !assembler_capabilities.containsKey(assembler) || !assembler_capabilities[assembler][params.assembly_type]
+        }
+        if (incompatible_assemblers) {
+            def compatible_for_type = compatible_assemblers.findAll { assembler ->
+                assembler_capabilities[assembler]?.get(params.assembly_type) == true
+            }
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Incompatible assembler(s) for the selected assembly type.\n" +
+                "  assembly_type: ${params.assembly_type}\n" +
+                "  selected: ${selected_assemblers.join(", ")}\n" +
+                "  incompatible: ${incompatible_assemblers.join(", ")}\n" +
+                "  compatible for ${params.assembly_type}: ${compatible_for_type.join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string)
+        }
+>>>>>>> cf0172e (Add auto assembly type detection)
     }
 
     // Check that assemblers for Autocycler are chosen correctly
@@ -279,6 +344,38 @@ def validateInputParameters() {
     }
 }
 
+def hasInputValue(value) {
+    value != null && value.toString().trim() && value.toString().trim().toUpperCase() != 'NA'
+}
+
+def inferSampleAssemblyType(boolean has_short_reads, boolean has_long_reads, String sample_id) {
+    if (has_short_reads && has_long_reads) return 'hybrid'
+    if (has_short_reads) return 'short'
+    if (has_long_reads) return 'long'
+
+    def sample_label = sample_id ?: '<unknown>'
+    def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+        "  Invalid sample '${sample_label}': neither short nor long reads were provided.\n" +
+        "  Please provide R1/R2 and/or LongFastQ in the samplesheet.\n" +
+        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    error(error_string)
+}
+
+def inferAssemblyTypesFromSamplesheet(samplesheet_rows) {
+    def sample_presence = [:].withDefault { [short: false, long: false] }
+
+    samplesheet_rows.each { row ->
+        def (meta, fastq_1, _fastq_2, longreads, _fast5) = row
+        def sample_id = meta.sample
+        sample_presence[sample_id].short = sample_presence[sample_id].short || hasInputValue(fastq_1)
+        sample_presence[sample_id].long = sample_presence[sample_id].long || hasInputValue(longreads)
+    }
+
+    sample_presence.collectEntries { sample_id, presence ->
+        [sample_id, inferSampleAssemblyType(presence.short, presence.long, sample_id)]
+    }
+}
+
 //
 // Validate channels from input samplesheet
 //
@@ -290,7 +387,13 @@ def validateInputSamplesheet(input) {
         error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].sample}")
     }
 
-    return [ metas[0], fastqs, longread, fast5]
+    def sample_id = metas[0].sample
+    def has_short_reads = fastqs.flatten().any { hasInputValue(it) }
+    def has_long_reads = longread.flatten().any { hasInputValue(it) }
+    def sample_assembly_type = inferSampleAssemblyType(has_short_reads, has_long_reads, sample_id)
+    def updated_meta = metas[0] + [assembly_type: sample_assembly_type]
+
+    return [ updated_meta, fastqs, longread, fast5]
 }
 
 //

@@ -19,7 +19,7 @@
                     "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
                     "description": "Path to tab-separated sample sheet",
-                    "help_text": "Path to sample sheet, either tab-separated (.tsv), comma-separated (.csv), or in YAML format (.yml/.yaml), that points to compressed fastq files.\n\nThe sample sheet must have six tab-separated columns/entries with the following headers: \n- `ID` (required): Unique sample IDs, must start with a letter, and can only contain letters, numbers or underscores\n- `R1` (optional): Paths to (forward) reads zipped FastQ files\n- `R2` (optional): Paths to reverse reads zipped FastQ files, required if the data is paired-end\n- `LongFastQ` (optional): Paths to long reads zipped FastQ files\n- `Fast5` (optional): Paths to the directory containing FAST5 files\n- `GenomeSize` (optional): A number (including decimals) ending with 'm', representing genome size.\n\n Please be aware that files will be required based on the chosen assembly type specified with the '--assembly_type' option, which can be set to one of the following values: ['short', 'long', 'hybrid'].`",
+                    "help_text": "Path to sample sheet, either tab-separated (.tsv), comma-separated (.csv), or in YAML format (.yml/.yaml), that points to compressed fastq files.\n\nThe sample sheet must have six tab-separated columns/entries with the following headers: \n- `ID` (required): Unique sample IDs, must start with a letter, and can only contain letters, numbers or underscores\n- `R1` (optional): Paths to (forward) reads zipped FastQ files\n- `R2` (optional): Paths to reverse reads zipped FastQ files, required if the data is paired-end\n- `LongFastQ` (optional): Paths to long reads zipped FastQ files\n- `Fast5` (optional): Paths to the directory containing FAST5 files\n- `GenomeSize` (optional): A number (including decimals) ending with 'm', representing genome size.\n\n Please be aware that files will be required based on the chosen assembly type specified with the '--assembly_type' option, which can be set to one of the following values: ['auto', 'short', 'long', 'hybrid'].`",
                     "fa_icon": "fas fa-dna"
                 },
                 "outdir": {
@@ -137,10 +137,11 @@
                 },
                 "assembly_type": {
                     "type": "string",
+                    "default": "auto",
                     "fa_icon": "fas fa-fingerprint",
-                    "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`.",
+                    "help_text": "This adjusts the type of assembly done with the input data and can be any of `auto`, `long`, `short` or `hybrid`. With `auto`, the assembly type is inferred from the samplesheet.",
                     "description": "Which type of assembly to perform.",
-                    "enum": ["short", "long", "hybrid"]
+                    "enum": ["auto", "short", "long", "hybrid"]
                 },
                 "unicycler_args": {
                     "type": "string",
