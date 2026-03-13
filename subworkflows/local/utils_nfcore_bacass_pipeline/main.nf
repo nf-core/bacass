@@ -235,7 +235,7 @@ def validateInputParameters() {
     }
 
     // Check compatibility between assembly_type and selected assembler(s)
-    def selected_assemblers = params.assembler.tokenize(",").collect { it.trim() }.findAll { it }
+    def selected_assemblers = params.assembler.tokenize(",").collect { v -> v.trim() }.findAll { v -> v }
     Map<String, Map<String, Boolean>> assembler_capabilities = [
         unicycler : [short: true,  long: true,  hybrid: true ],
         megahit   : [short: true,  long: false, hybrid: false],
