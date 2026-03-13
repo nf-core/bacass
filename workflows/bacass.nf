@@ -359,6 +359,20 @@ workflow BACASS {
             error(error_string) }
     }
 
+    def assembler_sample_type_compatibility = [
+        unicycler : ['short', 'long', 'hybrid'] as Set,
+        megahit   : ['short'] as Set,
+        canu      : ['long'] as Set,
+        miniasm   : ['long'] as Set,
+        dragonflye: ['long', 'hybrid'] as Set,
+        raven     : ['long'] as Set,
+        flye      : ['long'] as Set,
+        autocycler: ['long'] as Set
+    ]
+    def filterByCompatibleAssemblyTypes = { channel_input, assembler_name ->
+        channel_input.filter { meta, _sr, _lr -> assembler_sample_type_compatibility[assembler_name].contains(meta.assembly_type) }
+    }
+
     //
     // MODULE: Autocycler, subset long reads for multiple assemblies per sample.
     //
@@ -386,18 +400,6 @@ workflow BACASS {
     // ASSEMBLY: Unicycler, Megahit, Canu, Miniasm, Dragonflye, Raven, Flye, Autocycler
     //
     ch_assembly = channel.empty()
-    def assembler_sample_type_compatibility = [
-        unicycler : ['short', 'long', 'hybrid'] as Set,
-        canu      : ['long'] as Set,
-        miniasm   : ['long'] as Set,
-        dragonflye: ['long', 'hybrid'] as Set,
-        raven     : ['long'] as Set,
-        flye      : ['long'] as Set,
-        autocycler: ['long'] as Set
-    ]
-    def filterByCompatibleAssemblyTypes = { channel_input, assembler_name ->
-        channel_input.filter { meta, _sr, _lr -> assembler_sample_type_compatibility[assembler_name].contains(meta.assembly_type) }
-    }
 
     //
     // MODULE: Unicycler, genome assembly, nf-core module allows only short, long and hybrid assembly
