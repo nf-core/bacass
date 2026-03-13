@@ -51,21 +51,46 @@ nextflow_pipeline {
         }
     }
 
-    test("passes when assembly_type=short and assembler=unicycler") {
+    test("fails when assembly_type=auto with heterogeneous samplesheet and assembler=flye") {
 
         when {
             params {
                 outdir = "$outputDir"
-                input = "https://raw.githubusercontent.com/nf-core/test-datasets/bacass/bacass_short_reseq.tsv"
-                assembly_type = "short"
-                assembler = "unicycler"
+                input = "https://raw.githubusercontent.com/nf-core/test-datasets/bacass/bacass_auto_heterogeneous.tsv"
+                assembly_type = "auto"
+                assembler = "flye"
+                skip_kraken2 = true
+                skip_kmerfinder = true
+            }
+        }
+
+        then {
+            def logs = "${workflow.stdout ?: ''}${workflow.stderr ?: ''}"
+            assertAll(
+                { assert !workflow.success },
+                { assert logs.contains("Incompatible assembler(s) for '--assembly_type auto'.") },
+                { assert logs.contains("detected per-sample types: hybrid, long, short") },
+                { assert logs.contains("incompatible: flye") }
+            )
+        }
+    }
+
+    test("passes when assembly_type=auto with long-only samplesheet (stub)") {
+
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "https://raw.githubusercontent.com/nf-core/test-datasets/bacass/bacass_long_miniasm.tsv"
+                assembly_type = "auto"
+                assembler = "flye"
                 skip_kraken2 = true
                 skip_kmerfinder = true
                 skip_annotation = true
                 skip_busco = true
+                skip_polish = true
                 skip_multiqc = true
-                skip_fastqc = true
-                skip_fastp = true
             }
         }
 
@@ -78,4 +103,5 @@ nextflow_pipeline {
             )
         }
     }
+
 }
