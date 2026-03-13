@@ -268,23 +268,6 @@ def validateInputParameters(auto_detected_sample_types = []) {
         raven     : [short: false, long: true,  hybrid: false],
         autocycler: [short: false, long: true,  hybrid: false]
     ]
-<<<<<<< HEAD
-    def incompatible_assemblers = selected_assemblers.findAll { assembler ->
-        !assembler_capabilities.containsKey(assembler) || !assembler_capabilities[assembler][params.assembly_type]
-    }
-    if (incompatible_assemblers) {
-        def compatible_for_type = compatible_assemblers.findAll { assembler ->
-            assembler_capabilities[assembler]?.get(params.assembly_type) == true
-        }
-        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-            "  Incompatible assembler(s) for the selected assembly type.\n" +
-            "  assembly_type: ${params.assembly_type}\n" +
-            "  selected: ${selected_assemblers.join(", ")}\n" +
-            "  incompatible: ${incompatible_assemblers.join(", ")}\n" +
-            "  compatible for ${params.assembly_type}: ${compatible_for_type.join(", ")}\n" +
-            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        error(error_string)
-=======
     if (params.assembly_type == 'auto') {
         def detected_types = auto_detected_sample_types.collect { it.toString().trim() }.findAll { it }
         def uncovered_detected_types = detected_types.findAll { detected_type ->
@@ -325,7 +308,6 @@ def validateInputParameters(auto_detected_sample_types = []) {
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
             error(error_string)
         }
->>>>>>> cf0172e (Add auto assembly type detection)
     }
 
     // Check that assemblers for Autocycler are chosen correctly
