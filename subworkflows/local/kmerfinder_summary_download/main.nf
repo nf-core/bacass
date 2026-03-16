@@ -74,7 +74,7 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
     // Prepare channel for NCBI_DATASETS_DOWNLOAD
     // Extract base accession from winner file (remove assembly version)
     ch_accessions_for_download = KMERFINDER_FIND_WINNER_REFERENCE.out.winner
-        .map { refmeta, winner_file ->
+        .map { _refmeta, winner_file ->
             def full_accession = winner_file.text.trim()
             // Extract base accession: GCF_002795805.1_ASM279580v1 → GCF_002795805.1
             def base_accession = full_accession.split('_')[0] + '_' + full_accession.split('_')[1]
@@ -91,12 +91,12 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
     ch_reports_byreference
         .map { species, meta, report_txt, fasta ->
             // Extract base accession from the first report to match with downloads
-            def first_line = report_txt[0].text.split('\n').find { !it.startsWith('#') && it.trim() }
+            def first_line = report_txt[0].text.split('\n').find { line -> !line.startsWith('#') && line.trim() }
             def full_accession = first_line ? first_line.split('\t')[0] : null
             def base_accession = full_accession ? full_accession.split('_')[0] + '_' + full_accession.split('_')[1] : null
             return tuple(base_accession, species, meta, report_txt, fasta)
         }
-        .filter { base_accession, species, meta, report_txt, fasta -> base_accession != null }
+        .filter { base_accession, _species, _meta, _report_txt, _fasta -> base_accession != null }
         .join(
             NCBI_DATASETS_DOWNLOAD.out.fna.map { meta, fna -> tuple(meta.id, fna) },
             by: 0
@@ -106,7 +106,7 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
             by: 0
         )
         .map {
-            base_accession, species, meta, report_txt, fasta, fna, gff ->
+            base_accession, _species, meta, _report_txt, fasta, fna, gff ->
                 return tuple([id: base_accession], meta, fasta, fna, gff)
         }
         .set { ch_consensus_byrefseq }

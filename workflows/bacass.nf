@@ -109,15 +109,15 @@ workflow BACASS {
     // reconfigure channels
     ch_input
         .shortreads
-        .filter{ meta, data -> data }
+        .filter{ _meta, data -> data }
         .set { ch_shortreads }
     ch_input
         .longreads
-        .filter{ meta, data -> data }
+        .filter{ _meta, data -> data }
         .set { ch_longreads }
     ch_input
         .fast5
-        .filter{ meta, data -> data }
+        .filter{ _meta, data -> data }
         .set { ch_fast5 }
 
     //
@@ -337,7 +337,7 @@ workflow BACASS {
     //
     if ( params.assembler.tokenize(",").contains("unicycler") ) {
         ch_for_assembly
-            .filter{ meta, sr, lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
+            .filter{ meta, _sr, _lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
             .map{ meta, sr, lr ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "unicycler"
@@ -386,7 +386,7 @@ workflow BACASS {
                 new_meta.id = meta.subsample ? "${meta.id}-${meta.subsample}-canu" : meta.id + "-canu"
                 [ new_meta, long_reads ]
             }
-            .filter { meta, lr ->
+            .filter { meta, _lr ->
                 params.assembler.tokenize(",").contains("autocycler") && !params.assembler.tokenize(",").contains("canu") ? meta.subsample : // if with autocycler and not canu accept only subsamples
                     !params.assembler.tokenize(",").contains("autocycler") && params.assembler.tokenize(",").contains("canu") ? !meta.subsample : true // if without autocycler and with canu reject subsample
             }
@@ -411,7 +411,7 @@ workflow BACASS {
                 new_meta.id = meta.subsample ? "${meta.id}-${meta.subsample}-miniasm" : meta.id + "-miniasm"
                 [ new_meta, long_reads ]
             }
-            .filter { meta, lr ->
+            .filter { meta, _lr ->
                 params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") && params.assembler.tokenize(",").contains("miniasm") ? true : // if with autocycler and miniasm accept all data sets
                     params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") && !params.assembler.tokenize(",").contains("miniasm") ? meta.subsample : // if with autocycler and not miniasm accept only subsamples
                     ( !params.assembler.tokenize(",").contains("autocycler") || !params.autocycler_assemblers.tokenize(",").contains("miniasm") ) && params.assembler.tokenize(",").contains("miniasm") ? !meta.subsample : false // if without autocycler and with miniasm reject subsample
@@ -468,7 +468,7 @@ workflow BACASS {
                 new_meta.id = meta.id + "-dragonflye"
                 [ new_meta, short_reads, long_reads ]
             }
-            .filter{ meta, sr, lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
+            .filter{ meta, _sr, _lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
             .set { ch_for_assembly_dragonflye }
 
         DRAGONFLYE(
@@ -489,7 +489,7 @@ workflow BACASS {
                 new_meta.id = meta.subsample ? "${meta.id}-${meta.subsample}-raven" : meta.id + "-raven"
                 [ new_meta, long_reads ]
             }
-            .filter { meta, lr ->
+            .filter { meta, _lr ->
                 params.assembler.tokenize(",").contains("autocycler") && !params.assembler.tokenize(",").contains("raven") ? meta.subsample : // if with autocycler and not raven accept only subsamples
                     !params.assembler.tokenize(",").contains("autocycler") && params.assembler.tokenize(",").contains("raven") ? !meta.subsample : true // if without autocycler and with raven reject subsample
             }
@@ -512,7 +512,7 @@ workflow BACASS {
                 new_meta.id = meta.subsample ? "${meta.id}-${meta.subsample}-flye" : meta.id + "-flye"
                 [ new_meta, long_reads ]
             }
-            .filter { meta, lr ->
+            .filter { meta, _lr ->
                 params.assembler.tokenize(",").contains("autocycler") && !params.assembler.tokenize(",").contains("flye") ? meta.subsample : // if with autocycler and not flye accept only subsamples
                     !params.assembler.tokenize(",").contains("autocycler") && params.assembler.tokenize(",").contains("flye") ? !meta.subsample : true // if without autocycler and with flye reject subsample
             }
@@ -529,7 +529,7 @@ workflow BACASS {
     //
     if( params.assembler.tokenize(",").contains("autocycler") ){
         ch_assembly
-            .filter{ meta, assembly -> meta.subsample } // only assemblies of subsamples pass, i.e. anything with "meta.subsample"
+            .filter{ meta, _assembly -> meta.subsample } // only assemblies of subsamples pass, i.e. anything with "meta.subsample"
             .map{ meta, assembly ->
                 def new_meta = meta.clone()
                 new_meta.remove("subsample")
@@ -537,7 +537,7 @@ workflow BACASS {
                 new_meta.id = meta.sample + "-autocycler"
                 [ new_meta, assembly ]
             }
-            .filter{ meta, assembly -> assembly.countLines() > 1 } // keep only non-empty assembly files
+            .filter{ _meta, assembly -> assembly.countLines() > 1 } // keep only non-empty assembly files
             .groupTuple() // group to "[ val(meta), [ fasta, fasta, ... ] ]"
             .set { ch_assembly_autocycler }
 
@@ -552,7 +552,7 @@ workflow BACASS {
 
     // clean assemblies from subsamples
     ch_assembly
-        .filter { meta, assembly -> !meta.subsample } // omit subsample assemblies
+        .filter { meta, _assembly -> !meta.subsample } // omit subsample assemblies
         .set { ch_assembly }
 
     //
@@ -561,7 +561,7 @@ workflow BACASS {
     if ( (params.assembly_type == 'long' && !params.skip_polish) || ( params.assembly_type != 'short' && params.polish_method) ){
         // Set channel for polishing long reads
         ch_for_assembly
-            .filter { meta, sr, lr -> !meta.subsample } // remove any subsamples
+            .filter { meta, _sr, _lr -> !meta.subsample } // remove any subsamples
             .cross(ch_assembly) { it -> it[0].sample } // merge by meta.sample -> [[ meta, sr, lr ],[ meta, assembly ]]
             .map { for_assembly,assembly ->
                 def meta_assembly  = assembly[0]
@@ -731,11 +731,11 @@ workflow BACASS {
     ch_assembly
         .map { meta, file -> [meta.sample, meta, file] }
         .combine(ch_multisamples)                                                          // When ch_multisamples is empty, nothing will be forwarded
-        .filter { sample_name, meta, files, valid_sample -> sample_name == valid_sample }  // The previous step produced too many combinations, reduce to genuine entries
-        .map { sample_name, metas, files, valid_sample -> [sample_name, metas, files] }
+        .filter { sample_name, _meta, _files, valid_sample -> sample_name == valid_sample }  // The previous step produced too many combinations, reduce to genuine entries
+        .map { sample_name, metas, files, _valid_sample -> [sample_name, metas, files] }
         .groupTuple(by: 0) // Group by samples
         .map { sample_name, _meta, files -> [ [id: sample_name], files ] } // Drop meta information
-        .filter { meta, files -> files.size() > 1 } // Only keep samples that have several assemblies
+        .filter { _meta, files -> files.size() > 1 } // Only keep samples that have several assemblies
         .set { ch_to_quast_bysample }
 
     if(params.skip_kmerfinder){
