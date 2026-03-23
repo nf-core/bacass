@@ -264,8 +264,9 @@ workflow BACASS {
                 }
                 .set { ch_rasusa_branch }
 
-            ch_rasusa_input = ch_rasusa_branch.with_gsize
+            ch_rasusa_branch.with_gsize
                 .map { meta, reads -> tuple(meta, reads, meta.gsize) }
+                .set { ch_rasusa_input }
 
             RASUSA (
                 ch_rasusa_input,
