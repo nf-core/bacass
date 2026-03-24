@@ -84,6 +84,10 @@
 
   > Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. doi: 10.1186/s13059-019-1891-0.
 
+- [Rasusa](https://doi.org/10.21105/joss.03942)
+
+  > Hall, M.B., (2022). Rasusa: Randomly subsample sequencing reads to a specified coverage. Journal of Open Source Software, 7(69), 3942. doi: 10.21105/joss.03942.
+
 - [MultiQC](https://www.ncbi.nlm.nih.gov/pubmed/27312411/)
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924
 

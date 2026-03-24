@@ -64,7 +64,7 @@ combines reads coming from multiple sequencing runs.
 
 ### Long Read Trimming
 
-This step performs long read trimming on Nanopore input (if provided) using [PoreChop](https://github.com/rrwick/Porechop) or filtering using [Filtlong](https://github.com/rrwick/Filtlong).
+This step performs long read trimming on Nanopore input (if provided) using [PoreChop](https://github.com/rrwick/Porechop) or filtering using [Filtlong](https://github.com/rrwick/Filtlong). Optionally, long reads can be downsampled to a target genome coverage using [Rasusa](https://github.com/mbhall88/rasusa) prior to trimming.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -76,6 +76,10 @@ This step performs long read trimming on Nanopore input (if provided) using [Por
 - `trimming/longreads/filtlong`
   - `*.fastq.gz`: The trimmed FASTQ file
   - `*.log*`: Log file
+
+- `trimming/longreads/rasusa`
+  - `*.fastq.gz`: The downsampled FASTQ file
+  - `*.log*`: Log file with downsampling statistics
 
 </details>
 

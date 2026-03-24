@@ -45,6 +45,7 @@ include { BUSCO_BUSCO                           } from '../modules/nf-core/busco
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
 include { FILTLONG                              } from '../modules/nf-core/filtlong'
+include { RASUSA                                } from '../modules/nf-core/rasusa'
 include { LIFTOFF                               } from '../modules/nf-core/liftoff'
 
 //
@@ -248,6 +249,33 @@ workflow BACASS {
             ch_longreads_filtered   = FILTLONG.out.reads
             ch_filtlong_log_multiqc = FILTLONG.out.log
             ch_versions       = ch_versions.mix(FILTLONG.out.versions)
+        }
+    }
+
+    //
+    // MODULE: RASUSA, randomly subsample reads to a target coverage or number of bases.
+    //
+    if ( params.rasusa ) {
+        if ( params.assembly_type != 'short' ) {
+            ch_longreads_filtered
+                .branch { meta, reads ->
+                    with_gsize: meta.gsize && meta.gsize != 'NA'
+                    without_gsize: true
+                }
+                .set { ch_rasusa_branch }
+
+            ch_rasusa_branch.with_gsize
+                .map { meta, reads -> tuple(meta, reads, meta.gsize) }
+                .set { ch_rasusa_input }
+
+            RASUSA (
+                ch_rasusa_input,
+                params.rasusa_coverage
+            )
+            ch_longreads_filtered = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize)
+            ch_rasusa_log = RASUSA.out.log
+            // TODO: Update version collection when pipeline supports new tuple-based version format
+            // ch_versions = ch_versions.mix(RASUSA.out.versions_rasusa)
         }
     }
 

@@ -146,6 +146,11 @@
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
                         "installed_by": ["modules"]
                     },
+                    "rasusa": {
+                        "branch": "master",
+                        "git_sha": "35b7d3eeaccbc0c82fae2ef675b00c028b9282ca",
+                        "installed_by": ["modules"]
+                    },
                     "raven": {
                         "branch": "master",
                         "git_sha": "6479ace28248469b1231819b66e0572a0af51379",

@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#282](https://github.com/nf-core/bacass/pull/282) Add and integrate MEGAHIT short-read assembler module
 - [#281](https://github.com/nf-core/bacass/pull/281) Add missing `meta.yml` files for local modules and subworkflows
+- [#275](https://github.com/nf-core/bacass/pull/275) Add RASUSA module for random read downsampling of long reads
 - [#266](https://github.com/nf-core/bacass/pull/266) Combined long read assembly with Autocycler is now available, also long read assemblers Flye and Raven were added
 
 ### `Fixed`
