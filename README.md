@@ -27,6 +27,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/bacass/results).
 
+![nf-core-bacass-metro-map](./docs/images/nf-core-bacass-metro-map-nobg.png)
+
 ## Pipeline summary
 
 ### Short Read Assembly
