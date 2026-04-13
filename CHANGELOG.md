@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#288](https://github.com/nf-core/bacass/pull/288) Add metromap for Bacass
 - [#282](https://github.com/nf-core/bacass/pull/282) Add and integrate MEGAHIT short-read assembler module
 - [#281](https://github.com/nf-core/bacass/pull/281) Add missing `meta.yml` files for local modules and subworkflows
 - [#275](https://github.com/nf-core/bacass/pull/275) Add RASUSA module for random read downsampling of long reads
