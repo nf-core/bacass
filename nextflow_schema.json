@@ -91,6 +91,17 @@
                     "type": "integer",
                     "default": 10,
                     "description": "Minimun length for Filtlong to work"
+                },
+                "rasusa": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Use Rasusa to downsample reads to a target coverage",
+                    "fa_icon": "fas fa-compress-arrows-alt"
+                },
+                "rasusa_coverage": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Target coverage for Rasusa read downsampling"
                 }
             }
         },
