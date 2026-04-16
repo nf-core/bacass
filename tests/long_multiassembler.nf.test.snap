@@ -60,7 +60,7 @@
                     "toulligqc": "2.7.1"
                 },
                 "Workflow": {
-                    "nf-core/bacass": "v2.6.0dev"
+                    "nf-core/bacass": "v2.6.0"
                 }
             },
             [
