@@ -18,9 +18,6 @@
                 "MEDAKA": {
                     "medaka": "1.4.3"
                 },
-                "NANOPLOT": {
-                    "nanoplot": "1.46.1"
-                },
                 "PORECHOP_PORECHOP": {
                     "porechop": "0.2.4"
                 },
@@ -31,7 +28,7 @@
                     "quast": "5.3.0"
                 },
                 "TOULLIGQC": {
-                    "toulligqc": "2.7.1"
+                    "toulligqc": "2.8.4"
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -366,10 +363,10 @@
                 "ERR044595.fastp.json:md5,316525c967c7d3ecbc0457526de9cb9b"
             ]
         ],
+        "timestamp": "2026-04-16T13:18:37.111692336",
         "meta": {
-            "nf-test": "0.9.3",
+            "nf-test": "0.9.4",
             "nextflow": "25.10.4"
-        },
-        "timestamp": "2026-02-26T16:36:34.405826989"
+        }
     }
 }
