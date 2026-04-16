@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#294](https://github.com/nf-core/bacass/pull/294) Update toulligqc version prior release
 - [#268](https://github.com/nf-core/bacass/pull/268) Fix test_full profile and refactor kmerfinder subworkflow (NCBI datasets migration)
 
 ### `Dependencies`
@@ -32,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Tool       | Previous version | New version |
 | ---------- | ---------------- | ----------- |
+| ToulligQC  | 2.7.1            | 2.8.4       |
 | Bakta      | 1.9.3            | 1.11.4      |
 | FASTP      | 0.24.0           | 1.0.1       |
 | KRAKEN2    | 2.1.2            | 2.1.6       |
