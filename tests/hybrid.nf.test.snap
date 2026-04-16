@@ -37,7 +37,7 @@
                     "unicycler": "0.5.1"
                 },
                 "Workflow": {
-                    "nf-core/bacass": "v2.6.0dev"
+                    "nf-core/bacass": "v2.6.0"
                 }
             },
             [
