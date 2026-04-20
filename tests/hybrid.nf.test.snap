@@ -18,6 +18,9 @@
                 "MEDAKA": {
                     "medaka": "1.4.3"
                 },
+                "NANOPLOT": {
+                    "nanoplot": "1.46.1"
+                },
                 "PORECHOP_PORECHOP": {
                     "porechop": "0.2.4"
                 },
@@ -363,7 +366,7 @@
                 "ERR044595.fastp.json:md5,316525c967c7d3ecbc0457526de9cb9b"
             ]
         ],
-        "timestamp": "2026-04-16T13:18:37.111692336",
+        "timestamp": "2026-04-20T09:20:26.556998773",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"

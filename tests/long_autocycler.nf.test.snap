@@ -30,6 +30,9 @@
                 "FLYE": {
                     "flye": "2.9.5-b1801"
                 },
+                "NANOPLOT": {
+                    "nanoplot": "1.46.1"
+                },
                 "PORECHOP_PORECHOP": {
                     "porechop": "0.2.4"
                 },
@@ -211,7 +214,7 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-04-16T13:22:30.18103891",
+        "timestamp": "2026-04-20T10:09:41.528146478",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"

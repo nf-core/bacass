@@ -25,6 +25,9 @@
                 "MINIMAP2_CONSENSUS": {
                     "minimap2": "2.24-r1122"
                 },
+                "NANOPLOT": {
+                    "nanoplot": "1.46.1"
+                },
                 "PORECHOP_PORECHOP": {
                     "porechop": "0.2.4"
                 },
@@ -265,7 +268,7 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-04-16T13:09:40.842508623",
+        "timestamp": "2026-04-20T10:43:33.214860127",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
