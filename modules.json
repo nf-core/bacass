@@ -168,7 +168,7 @@
                     },
                     "toulligqc": {
                         "branch": "master",
-                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
+                        "git_sha": "d9137377f4dd6246242829772eb1949b96de1ef0",
                         "installed_by": ["modules"]
                     },
                     "unicycler": {

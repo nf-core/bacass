@@ -34,7 +34,7 @@
                     "racon": "1.4.20"
                 },
                 "TOULLIGQC": {
-                    "toulligqc": "2.7.1"
+                    "toulligqc": "2.8.4"
                 },
                 "Workflow": {
                     "nf-core/bacass": "v2.6.0"
@@ -188,10 +188,10 @@
                 "multiqc_nanostat.yaml:md5,851c9a0693d1fc482d620fed8824ed9c"
             ]
         ],
+        "timestamp": "2026-04-20T10:45:49.016183337",
         "meta": {
-            "nf-test": "0.9.3",
+            "nf-test": "0.9.4",
             "nextflow": "25.10.4"
-        },
-        "timestamp": "2026-02-26T16:00:39.410102073"
+        }
     }
 }

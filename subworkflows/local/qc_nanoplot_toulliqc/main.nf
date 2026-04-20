@@ -39,14 +39,12 @@ workflow QC_NANOPLOT_TOULLIGQC {
     toulligqc_report_html   = channel.empty()
     toulligqc_plots_html    = channel.empty()
     toulligqc_plotly_js     = channel.empty()
-    toulligqc_version       = channel.empty()
     if (!skip_toulligqc) {
         TOULLIGQC ( ch_fastq )
         toulligqc_report_data  = TOULLIGQC.out.report_data
         toulligqc_report_html  = TOULLIGQC.out.report_html
         toulligqc_plots_html   = TOULLIGQC.out.plots_html
         toulligqc_plotly_js    = TOULLIGQC.out.plotly_js
-        toulligqc_version      = TOULLIGQC.out.versions
     }
 
     emit:
@@ -60,5 +58,4 @@ workflow QC_NANOPLOT_TOULLIGQC {
     toulligqc_report_html
     toulligqc_plots_html
     toulligqc_plotly_js
-    toulligqc_version
 }

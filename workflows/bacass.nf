@@ -205,7 +205,6 @@ workflow BACASS {
         )
         ch_nanoplot_txt_multiqc = QC_NANOPLOT_TOULLIGQC.out.nanoplot_txt
         ch_versions = ch_versions.mix(QC_NANOPLOT_TOULLIGQC.out.nanoplot_version)
-        ch_versions = ch_versions.mix(QC_NANOPLOT_TOULLIGQC.out.toulligqc_version)
 
         //
         // MODULE: PYCOQC, quality check for nanopore reads and Quality/Length Plots

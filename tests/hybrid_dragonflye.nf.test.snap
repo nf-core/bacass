@@ -34,7 +34,7 @@
                     "quast": "5.3.0"
                 },
                 "TOULLIGQC": {
-                    "toulligqc": "2.7.1"
+                    "toulligqc": "2.8.4"
                 },
                 "Workflow": {
                     "nf-core/bacass": "v2.6.0"
@@ -362,10 +362,10 @@
                 "A1403KPN.fastp.json:md5,af1a7e6610168cc6df5b1df62adac9fc"
             ]
         ],
+        "timestamp": "2026-04-20T09:40:51.127882486",
         "meta": {
-            "nf-test": "0.9.3",
+            "nf-test": "0.9.4",
             "nextflow": "25.10.4"
-        },
-        "timestamp": "2026-02-26T17:24:50.157440822"
+        }
     }
 }
