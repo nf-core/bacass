@@ -27,7 +27,7 @@
                     "flye": "2.9.5-b1801"
                 },
                 "MEDAKA": {
-                    "medaka": "1.4.3"
+                    "medaka": "2.2.1"
                 },
                 "MINIASM": {
                     "miniasm": "0.3-r179"
@@ -302,7 +302,7 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-04-20T11:04:25.25647931",
+        "timestamp": "2026-04-21T14:04:10.730135368",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
