@@ -14,7 +14,7 @@
                     "pigz": 2.8
                 },
                 "MEDAKA": {
-                    "medaka": "1.4.3"
+                    "medaka": "2.2.1"
                 },
                 "MINIASM": {
                     "miniasm": "0.3-r179"
@@ -249,7 +249,7 @@
                 "TestMe-miniasm.consensus.fasta.gz:md5,4899e7b112077d045ecaf13daae4ae4a",
                 "TestMe-miniasm.fasta.gz:md5,cfde74bc269a51162851d9ae7c76207b",
                 "TestMe_longreads.txt:md5,4c2a95acdff03caa1524a5328c6ab2f5",
-                "mqc_busco_plot_bacteria_odb10_1.yaml:md5,a134ce0ac8b0de671eb0efb6c78cbf38",
+                "mqc_busco_plot_bacteria_odb10_1.yaml:md5,eb1ce276ec11dcc7661c95d9e487c4a9",
                 "mqc_kraken-top-n-plot_Class.yaml:md5,057a9ddcdb8a79e6c0fd5cfb0c0f94c9",
                 "mqc_kraken-top-n-plot_Domain.yaml:md5,5ebcf9c11acdaa3f6153d668a1485907",
                 "mqc_kraken-top-n-plot_Family.yaml:md5,0aa80d49818b340c9663f4867402d75b",
@@ -262,13 +262,13 @@
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
-                "multiqc_busco.yaml:md5,c2283dc1f748e960f08b804e66f75321",
+                "multiqc_busco.yaml:md5,80cbacbe3f46293d66993f021291602b",
                 "multiqc_citations.yaml:md5,683ec25d002e4678ebfdee6cfe8f1930",
                 "multiqc_kraken.yaml:md5,2579a276fcd6e51c35b361fd803d6d0b",
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-04-20T10:43:33.214860127",
+        "timestamp": "2026-04-21T13:42:59.301236762",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"

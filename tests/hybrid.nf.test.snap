@@ -16,7 +16,7 @@
                     "fastqc": "0.12.1"
                 },
                 "MEDAKA": {
-                    "medaka": "1.4.3"
+                    "medaka": "2.2.1"
                 },
                 "NANOPLOT": {
                     "nanoplot": "1.46.1"
@@ -366,7 +366,7 @@
                 "ERR044595.fastp.json:md5,316525c967c7d3ecbc0457526de9cb9b"
             ]
         ],
-        "timestamp": "2026-04-20T09:20:26.556998773",
+        "timestamp": "2026-04-21T12:29:34.072358379",
         "meta": {
             "nf-test": "0.9.4",
             "nextflow": "25.10.4"
