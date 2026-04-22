@@ -830,7 +830,6 @@ workflow BACASS {
         // Uncompress assembly for annotation if necessary
         GUNZIP ( ch_assembly_for_gunzip.gzip )
         ch_to_prokka    = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
-        ch_versions     = ch_versions.mix( GUNZIP.out.versions )
 
         PROKKA (
             ch_to_prokka.filter{ _meta, fasta -> !fasta.isEmpty() },
@@ -849,7 +848,6 @@ workflow BACASS {
         // Uncompress assembly for annotation if necessary
         GUNZIP ( ch_assembly_for_gunzip.gzip )
         ch_to_bakta     = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
-        ch_versions     = ch_versions.mix( GUNZIP.out.versions )
 
         BAKTA_DBDOWNLOAD_RUN (
             ch_to_bakta.filter{ _meta, fasta -> !fasta.isEmpty() },
