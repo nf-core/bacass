@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- [#299](https://github.com/nf-core/bacass/pull/299) Update GunZip and Dfast version to prevent conda issues in 2.6.0 release AND Fix precommit gitCI test
 - [#297](https://github.com/nf-core/bacass/pull/297) fix conda enviroment dependencies by updating medaka prior release.
 - [#284](https://github.com/nf-core/bacass/pull/264) Resolve Nextflow strict syntax warnings
 - [#283](https://github.com/nf-core/bacass/pull/283) Validate `--assembly_type` and `--assembler` compatibility and add dedicated nf-test coverage
@@ -35,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Tool       | Previous version | New version |
 | ---------- | ---------------- | ----------- |
+| Dfast      | 1.3.2            | 1.3.9       |
+| GunZip     | 1.1              | 1.13        |
 | Medaka     | 1.4.3-0          | 2.2.1       |
 | ToulligQC  | 2.7.1            | 2.8.4       |
 | Bakta      | 1.9.3            | 1.11.4      |
