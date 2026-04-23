@@ -19,7 +19,7 @@
                     "fastqc": "0.12.1"
                 },
                 "GUNZIP": {
-                    "gunzip": 1.1
+                    "gunzip": 1.13
                 },
                 "PROKKA": {
                     "prokka": "1.14.6"
@@ -375,9 +375,9 @@
                 "ERR064912.fastp.json:md5,39de6f3e116abb4798df1d748ad9ff63"
             ]
         ],
-        "timestamp": "2026-02-27T09:21:54.593403173",
+        "timestamp": "2026-04-22T15:35:12.071927747",
         "meta": {
-            "nf-test": "0.9.3",
+            "nf-test": "0.9.4",
             "nextflow": "25.10.4"
         }
     }

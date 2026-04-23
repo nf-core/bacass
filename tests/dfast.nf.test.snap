@@ -7,7 +7,7 @@
                     "busco": "5.8.3"
                 },
                 "DFAST": {
-                    "dfast": "1.3.2"
+                    "dfast": "1.3.9"
                 },
                 "FASTP": {
                     "fastp": "1.0.1"
@@ -344,7 +344,7 @@
             ],
             [
                 "cds.fna:md5,a89fa3c0d5cda0ac5642e74c7bacdc30",
-                "mss.ann:md5,d5169fdb6f8cbe3ef208e433081a1c0f",
+                "mss.ann:md5,ab98c53a890cbe0e53cf6e4250ef0ade",
                 "mss.fasta:md5,1bf85e7b183c1444fbc5d45bcd571dc2",
                 "genome.embl:md5,33ef3f8c496dfd37ce37636f9c0c39bf",
                 "genome.fna:md5,1c193d50e732c5bf9ddbbcde8b135107",
@@ -353,7 +353,7 @@
                 "rna.fna:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "statistics.txt:md5,77d29429ac7a3ba432ffa982e1032586",
                 "cds.fna:md5,d7da7066d58352c8004410997256e8e0",
-                "mss.ann:md5,0b37decf849fdce96563e7583dc5470a",
+                "mss.ann:md5,b2016085e02a467bb7ba80d942b429fe",
                 "mss.fasta:md5,d0be5dd3e5e75508d2b32a46d3885b5c",
                 "genome.embl:md5,599a96b923da1b421fd7a6a6a5dba744",
                 "genome.fna:md5,4104e9a00f4c697be999a0f94421b99e",
@@ -405,9 +405,9 @@
                 "ERR064912.fastp.json:md5,39de6f3e116abb4798df1d748ad9ff63"
             ]
         ],
-        "timestamp": "2026-02-27T09:56:11.396258986",
+        "timestamp": "2026-04-23T10:04:14.225873818",
         "meta": {
-            "nf-test": "0.9.3",
+            "nf-test": "0.9.4",
             "nextflow": "25.10.4"
         }
     }
