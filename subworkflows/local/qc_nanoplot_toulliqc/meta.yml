@@ -73,12 +73,6 @@ output:
       description: |
         Structure: [ val(meta), path(*/images/plotly.min.js) ]
         Plotly JavaScript bundle emitted by ToulligQC.
-  - toulligqc_version:
-      type: file
-      description: |
-        Structure: [ path(versions.yml) ]
-        Software versions emitted by the ToulligQC module.
-      pattern: "versions.yml"
 authors:
   - "@Daniel-VM"
   - "@d4straub"

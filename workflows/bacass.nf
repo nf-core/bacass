@@ -273,8 +273,6 @@ workflow BACASS {
             )
             ch_longreads_filtered = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize)
             ch_rasusa_log = RASUSA.out.log
-            // TODO: Update version collection when pipeline supports new tuple-based version format
-            // ch_versions = ch_versions.mix(RASUSA.out.versions_rasusa)
         }
     }
 

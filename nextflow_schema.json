@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/bacass/main/nextflow_schema.json",
+    "$id": "https://raw.githubusercontent.com/nf-core/bacass/master/nextflow_schema.json",
     "title": "nf-core/bacass pipeline parameters",
     "description": "Simple bacterial assembly and annotation",
     "type": "object",
