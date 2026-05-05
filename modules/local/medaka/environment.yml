@@ -2,4 +2,4 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - medaka=1.4.3-0
+  - bioconda::medaka=2.2.1

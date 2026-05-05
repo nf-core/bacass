@@ -80,6 +80,21 @@ outdir: './results/'
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).
 
+### Choosing the right assembler
+
+Assemblers have often specific biases originating from their specific implementation. Assembler performance is often sample and context dependent. Therefore, it can be of advantage to compare the outcome of several tools.
+
+This pipeline integrates multiple assembler tools that are all activated by default, allowing a comparison and choice based on the results. However, that can lead to unwanted overhead. The assemblers applied to the data can be restricted with the [--assembler](https://nf-co.re/bacass/parameters/#assembler) parameter.
+
+> [!TIP]
+> Autocycler uses several long-read assemblers and combines their results, reducing assembler-specific biases. The assemblers used for Autocycler can be restricted with the [--autocycler_assemblers](https://nf-co.re/bacass/parameters#autocycler_assemblers) parameter.
+
+> [!TIP]
+> [MEGAHIT](https://github.com/voutcn/megahit) is available as a fast and memory-efficient option for short-read assembly. Use `--assembly_type short --assembler megahit`.
+
+> [!NOTE]
+> Dragonflye is a comprehensive pipeline designed for genome assembly of Oxford Nanopore Reads. It facilitates the utilization of Flye (default), Miniasm, and Raven assemblers, along with Racon (default) and Medaka polishers. For more information, visit the [Dragonflye GitHub](https://github.com/rpetit3/dragonflye) repository.
+
 ### Updating the pipeline
 
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
@@ -134,7 +149,7 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
 - `shifter`
   - A generic configuration profile to be used with [Shifter](https://nersc.gitlab.io/development/shifter/how-to-use/)
 - `charliecloud`
-  - A generic configuration profile to be used with [Charliecloud](https://hpc.github.io/charliecloud/)
+  - A generic configuration profile to be used with [Charliecloud](https://charliecloud.io/)
 - `apptainer`
   - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
 - `wave`

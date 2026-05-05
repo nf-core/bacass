@@ -25,7 +25,6 @@ import csv
 import pickle
 import os
 
-
 #################
 ### FUNCTIONS ###
 #################

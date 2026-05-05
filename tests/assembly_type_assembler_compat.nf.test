@@ -1,0 +1,81 @@
+nextflow_pipeline {
+
+    name "Test assembly_type and assembler compatibility validation"
+    script "../main.nf"
+    tag "pipeline"
+    profile "test"
+
+    test("fails when assembly_type=short and assembler=canu") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                assembly_type = "short"
+                assembler = "canu"
+                skip_kraken2 = true
+                skip_kmerfinder = true
+            }
+        }
+
+        then {
+            def logs = "${workflow.stdout ?: ''}${workflow.stderr ?: ''}"
+            assertAll(
+                { assert !workflow.success },
+                { assert logs.contains("Incompatible assembler(s) for the selected assembly type.") },
+                { assert logs.contains("assembly_type: short") },
+                { assert logs.contains("incompatible: canu") }
+            )
+        }
+    }
+
+    test("fails when assembly_type=hybrid and assembler=flye") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                assembly_type = "hybrid"
+                assembler = "flye"
+                skip_kraken2 = true
+                skip_kmerfinder = true
+            }
+        }
+
+        then {
+            def logs = "${workflow.stdout ?: ''}${workflow.stderr ?: ''}"
+            assertAll(
+                { assert !workflow.success },
+                { assert logs.contains("Incompatible assembler(s) for the selected assembly type.") },
+                { assert logs.contains("assembly_type: hybrid") },
+                { assert logs.contains("incompatible: flye") }
+            )
+        }
+    }
+
+    test("passes when assembly_type=short and assembler=unicycler") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "https://raw.githubusercontent.com/nf-core/test-datasets/bacass/bacass_short_reseq.tsv"
+                assembly_type = "short"
+                assembler = "unicycler"
+                skip_kraken2 = true
+                skip_kmerfinder = true
+                skip_annotation = true
+                skip_busco = true
+                skip_multiqc = true
+                skip_fastqc = true
+                skip_fastp = true
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_bacass_software_mqc_versions.yml")
+                ).match() }
+            )
+        }
+    }
+}

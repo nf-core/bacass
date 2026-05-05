@@ -1,5 +1,6 @@
+name: dfast
 channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::dfast=1.3.2
+  - bioconda::dfast=1.3.9

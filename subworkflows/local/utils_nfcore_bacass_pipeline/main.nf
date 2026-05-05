@@ -11,6 +11,7 @@
 include { UTILS_NFSCHEMA_PLUGIN     } from '../../nf-core/utils_nfschema_plugin'
 include { paramsSummaryMap          } from 'plugin/nf-schema'
 include { samplesheetToList         } from 'plugin/nf-schema'
+include { paramsHelp                } from 'plugin/nf-schema'
 include { completionEmail           } from '../../nf-core/utils_nfcore_pipeline'
 include { completionSummary         } from '../../nf-core/utils_nfcore_pipeline'
 include { imNotification            } from '../../nf-core/utils_nfcore_pipeline'
@@ -28,14 +29,17 @@ workflow PIPELINE_INITIALISATION {
     take:
     version           // boolean: Display version and exit
     validate_params   // boolean: Boolean whether to validate parameters against the schema at runtime
-    monochrome_logs   // boolean: Do not use coloured log outputs
+    _monochrome_logs  // boolean: Do not use coloured log outputs
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
-    input             //  string: Path to input samplesheet
+    input            //  string: Path to input samplesheet
+    help              // boolean: Display help message and exit
+    help_full         // boolean: Show the full help message
+    show_hidden       // boolean: Show hidden parameters in the help message
 
     main:
 
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     //
     // Print version and exit if required and dump pipeline parameters to JSON file
@@ -50,10 +54,35 @@ workflow PIPELINE_INITIALISATION {
     //
     // Validate parameters and generate parameter summary to stdout
     //
+    before_text = """
+-\033[2m----------------------------------------------------\033[0m-
+                                        \033[0;32m,--.\033[0;30m/\033[0;32m,-.\033[0m
+\033[0;34m        ___     __   __   __   ___     \033[0;32m/,-._.--~\'\033[0m
+\033[0;34m  |\\ | |__  __ /  ` /  \\ |__) |__         \033[0;33m}  {\033[0m
+\033[0;34m  | \\| |       \\__, \\__/ |  \\ |___     \033[0;32m\\`-._,-`-,\033[0m
+                                        \033[0;32m`._,._,\'\033[0m
+\033[0;35m  nf-core/bacass ${workflow.manifest.version}\033[0m
+-\033[2m----------------------------------------------------\033[0m-
+"""
+    after_text = """${workflow.manifest.doi ? "\n* The pipeline\n" : ""}${workflow.manifest.doi.tokenize(",").collect { doi -> "    https://doi.org/${doi.trim().replace('https://doi.org/','')}"}.join("\n")}${workflow.manifest.doi ? "\n" : ""}
+* The nf-core framework
+    https://doi.org/10.1038/s41587-020-0439-x
+
+* Software dependencies
+    https://github.com/nf-core/bacass/blob/master/CITATIONS.md
+"""
+    command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
+
     UTILS_NFSCHEMA_PLUGIN (
         workflow,
         validate_params,
-        null
+        null,
+        help,
+        help_full,
+        show_hidden,
+        before_text,
+        after_text,
+        command
     )
 
     //
@@ -72,8 +101,8 @@ workflow PIPELINE_INITIALISATION {
     // Create channel from input file provided through params.input
     //
 
-    Channel
-        .fromList(samplesheetToList(params.input, "${projectDir}/assets/schema_input.json"))
+    channel
+        .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
         .map {
             meta, fastq_1, fastq_2, longreads, fast5 ->
 
@@ -84,9 +113,9 @@ workflow PIPELINE_INITIALISATION {
             def resolved_fast5      = resolveFilePath(fast5)
 
             if (!resolved_fastq_2 || resolved_fastq_2 == 'NA') {
-                return [ meta.id, meta + [ single_end:true ], [ resolved_fastq_1 ], resolved_longreads, resolved_fast5 ]
+                return [ meta.sample, meta + [ single_end:true ], [ resolved_fastq_1 ], resolved_longreads, resolved_fast5 ]
             } else {
-                return [ meta.id, meta + [ single_end:false ], [ resolved_fastq_1, resolved_fastq_2 ], resolved_longreads, resolved_fast5 ]
+                return [ meta.sample, meta + [ single_end:false ], [ resolved_fastq_1, resolved_fastq_2 ], resolved_longreads, resolved_fast5 ]
             }
         }
         .groupTuple()
@@ -191,6 +220,63 @@ def validateInputParameters() {
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         error(error_string)
     }
+
+    // Check that assemblers are chosen correctly
+    String[] compatible_assemblers = [
+        "autocycler","canu","dragonflye","flye","megahit","miniasm","raven","unicycler"
+    ]
+    if ( params.assembler.tokenize(",").findAll { e -> compatible_assemblers.contains( e ) }.size() != params.assembler.tokenize(",").size() ) {
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+        "  Incompatible assembler specified.\n" +
+        "  Please use for '--assembler' a comma separated list of available assemblers.\n" +
+        "  Compatible assemblers: ${compatible_assemblers.join(", ")}\n" +
+        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
+    }
+
+    // Check compatibility between assembly_type and selected assembler(s)
+    def selected_assemblers = params.assembler.tokenize(",").collect { v -> v.trim() }.findAll { v -> v }
+    Map<String, Map<String, Boolean>> assembler_capabilities = [
+        unicycler : [short: true,  long: true,  hybrid: true ],
+        megahit   : [short: true,  long: false, hybrid: false],
+        canu      : [short: false, long: true,  hybrid: false],
+        dragonflye: [short: false, long: true,  hybrid: true ],
+        flye      : [short: false, long: true,  hybrid: false],
+        miniasm   : [short: false, long: true,  hybrid: false],
+        raven     : [short: false, long: true,  hybrid: false],
+        autocycler: [short: false, long: true,  hybrid: false]
+    ]
+    def incompatible_assemblers = selected_assemblers.findAll { assembler ->
+        !assembler_capabilities.containsKey(assembler) || !assembler_capabilities[assembler][params.assembly_type]
+    }
+    if (incompatible_assemblers) {
+        def compatible_for_type = compatible_assemblers.findAll { assembler ->
+            assembler_capabilities[assembler]?.get(params.assembly_type) == true
+        }
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Incompatible assembler(s) for the selected assembly type.\n" +
+            "  assembly_type: ${params.assembly_type}\n" +
+            "  selected: ${selected_assemblers.join(", ")}\n" +
+            "  incompatible: ${incompatible_assemblers.join(", ")}\n" +
+            "  compatible for ${params.assembly_type}: ${compatible_for_type.join(", ")}\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
+    }
+
+    // Check that assemblers for Autocycler are chosen correctly
+    String[] autocycler_compatible_assemblers = [
+        "canu","flye","miniasm","raven"
+    ]
+    if ( params.assembler.tokenize(",").contains("autocycler") ){
+        if ( params.autocycler_assemblers.tokenize(",").findAll { e -> autocycler_compatible_assemblers.contains( e ) }.size() != params.autocycler_assemblers.tokenize(",").size() ) {
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Incompatible assemblers for Autocycler specified.\n" +
+            "  Please use for '--autocycler_assemblers' a comma separated list of compatible longread assemblers.\n" +
+            "  Compatible assemblers: ${autocycler_compatible_assemblers.join(", ")}\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string)
+        }
+    }
 }
 
 //
@@ -201,7 +287,7 @@ def validateInputSamplesheet(input) {
     // Check that multiple runs of the same sample are of the same datatype i.e. single-end / paired-end
     def endedness_ok = metas.collect{ meta -> meta.single_end }.unique().size == 1
     if (!endedness_ok) {
-        error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].id}")
+        error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].sample}")
     }
 
     return [ metas[0], fastqs, longread, fast5]
@@ -237,10 +323,14 @@ def toolCitationText() {
             "Kraken2 (Derrick E. Wood et al. 2019)",
             "Kmerfinder (Larsen et al. 2014)",
             "Unicycler (Ryan R Wick et al. 2017)",
+            "MEGAHIT (Li D et al. 2015)",
             "Minimap & Miniasm (Heng Li 2016)",
             "Dragonflye (Robert A Petit III )",
             "Racon (Vaser R et al. 2017)",
             "Canu (Sergey Koren et al. 2017)",
+            "Flye (Mikhail Kolmogorov et al. 2020)",
+            "Raven (Rayan Vaser & Mile Sikic 2021)",
+            "Autocycler (Ryan R Wick et al. 2025)",
             "Medaka (Heng Li)",
             "Nanopolish (Loman 2015)",
             "Quast (Alexey Gurevich et al. 2013)",
@@ -265,10 +355,14 @@ def toolBibliographyText() {
             "<li>Wood, D.E., Lu, J. & Langmead, B. Improved metagenomic analysis with Kraken 2. Genome Biol 20, 257 (2019). https://doi.org/10.1186/s13059-019-1891-0</li>",
             "<li>RBenchmarking of Methods for Genomic Taxonomy. Larsen MV, Cosentino S, Lukjancenko O, Saputra D, Rasmussen S, Hasman H, Sicheritz-Pontén T, Aarestrup FM, Ussery DW, Lund O. J Clin Microbiol. 2014 Feb 26.</li>",
             "<li>Wick RR, Judd LM, Gorrie CL, Holt KE. Unicycler: Resolving bacterial genome assemblies from short and long sequencing reads. PLoS Comput Biol. 2017 Jun 8;13(6):e1005595. doi: 10.1371/journal.pcbi.1005595.</li>",
+            "<li>Li D, Liu CM, Luo R, Sadakane K, Lam TW. MEGAHIT: an ultra-fast single-node solution for large and complex metagenomics assembly via succinct de Bruijn graph. Bioinformatics. 2015 May 15;31(10):1674-6. doi: 10.1093/bioinformatics/btv033.</li>",
             "<li>Heng Li, Minimap and miniasm: fast mapping and de novo assembly for noisy long sequences, Bioinformatics, Volume 32, Issue 14, July 2016, Pages 2103–2110, https://doi.org/10.1093/bioinformatics/btw152</li>",
             "<li>Petit III, R. A. dragonflye: assemble bacterial isolate genomes from Nanopore reads (Version 1.1.2). https://github.com/rpetit3/dragonflye</li>",
             "<li>Vaser R, Sović I, Nagarajan N, Šikić M. Fast and accurate de novo genome assembly from long uncorrected reads. Genome Res. 2017 May;27(5):737-746. doi: 10.1101/gr.214270.116.</li>",
             "<li>Koren S, Walenz BP, Berlin K, Miller JR, Bergman NH, Phillippy AM. Canu: scalable and accurate long-read assembly via adaptive k-mer weighting and repeat separation. Genome Res. 2017 May;27(5):722-736. doi: 10.1101/gr.215087.116.</li>",
+            "<li>Kolmogorov M, Bickhart DM, Behsaz B, Gurevich A, Rayko M, Shin SB, Kuhn K, Yuan J, Polevikov E, Smith TPL, Pevzner PA. metaFlye: scalable long-read metagenome assembly using repeat graphs. Nat Methods. 2020 Nov;17(11):1103-1110. doi: 10.1038/s41592-020-00971-x.</li>",
+            "<li>Vaser R, Šikić M. Time- and memory-efficient genome assembly with Raven. Nat Comput Sci. 2021;1:332-336. doi: 10.1038/s43588-021-00073-4.</li>",
+            "<li>Wick RR, Howden BP, Stinear TP. Autocycler: long-read consensus assembly for bacterial genomes. Bioinformatics. 2025;41(9):btaf474. doi: 10.1093/bioinformatics/btaf474.</li>",
             "<li>Medaka: Sequence correction provided by ONT Research. https://github.com/nanoporetech/medaka,</li>",
             "<li>Loman, N., Quick, J. & Simpson, J. A complete bacterial genome assembled de novo using only nanopore sequencing data. Nat Methods 12, 733–735 (2015). https://doi.org/10.1038/nmeth.3444</li>",
             "<li>Gurevich A, Saveliev V, Vyahhi N, Tesler G. QUAST: quality assessment tool for genome assemblies. Bioinformatics. 2013 Apr 15;29(8):1072-5. doi: 10.1093/bioinformatics/btt086. Epub 2013 Feb 19.</li>",

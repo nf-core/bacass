@@ -3,7 +3,55 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.5.0 nf-core/bacass: "Blue Mercury Sturgeon" 2025/07/23
+## v2.6.0 nf-core/bacass - "Crimson Titanium Seahorse" 2026/05/05
+
+### `Changed`
+
+- [#299](https://github.com/nf-core/bacass/pull/299) Update GunZip and Dfast version to prevent conda issues in 2.6.0 release AND Fix precommit gitCI test
+- [#297](https://github.com/nf-core/bacass/pull/297) fix conda enviroment dependencies by updating medaka prior release.
+- [#284](https://github.com/nf-core/bacass/pull/264) Resolve Nextflow strict syntax warnings
+- [#283](https://github.com/nf-core/bacass/pull/283) Validate `--assembly_type` and `--assembler` compatibility and add dedicated nf-test coverage
+- [#263](https://github.com/nf-core/bacass/pull/263) Update Template to 3.5.1
+- [#264](https://github.com/nf-core/bacass/pull/264) Follow Nextflow strict syntax
+- [#270](https://github.com/nf-core/bacass/pull/270) `--assembler` accepts now also a comma separated list of available assemblers that are all executed in parallel on samples and compared via the QUAST report.
+- [#272](https://github.com/nf-core/bacass/pull/272) All available assemblers are now active by default.
+
+### `Added`
+
+- [#288](https://github.com/nf-core/bacass/pull/288) Add metromap for Bacass
+- [#282](https://github.com/nf-core/bacass/pull/282) Add and integrate MEGAHIT short-read assembler module
+- [#281](https://github.com/nf-core/bacass/pull/281) Add missing `meta.yml` files for local modules and subworkflows
+- [#275](https://github.com/nf-core/bacass/pull/275) Add RASUSA module for random read downsampling of long reads
+- [#266](https://github.com/nf-core/bacass/pull/266) Combined long read assembly with Autocycler is now available, also long read assemblers Flye and Raven were added
+
+### `Fixed`
+
+- [#303](https://github.com/nf-core/bacass/pull/303) Fixed prokka process in nf-test with conda - fix for 2.6.0 release
+- [#298](https://github.com/nf-core/bacass/pull/298) Fix conda env issues in Porechop and MultiQC_custom before release
+- [#294](https://github.com/nf-core/bacass/pull/294) Update toulligqc version prior release
+- [#268](https://github.com/nf-core/bacass/pull/268) Fix test_full profile and refactor kmerfinder subworkflow (NCBI datasets migration)
+
+### `Dependencies`
+
+- [#264](https://github.com/nf-core/bacass/pull/264) Update some nf-core subworkflows and modules
+
+| Tool       | Previous version | New version |
+| ---------- | ---------------- | ----------- |
+| Dfast      | 1.3.2            | 1.3.9       |
+| GunZip     | 1.1              | 1.13        |
+| Medaka     | 1.4.3-0          | 2.2.1       |
+| ToulligQC  | 2.7.1            | 2.8.4       |
+| Bakta      | 1.9.3            | 1.11.4      |
+| FASTP      | 0.24.0           | 1.0.1       |
+| KRAKEN2    | 2.1.2            | 2.1.6       |
+| QUAST      | 5.2.0            | 5.3.0       |
+| Flye       |                  | 2.9.5       |
+| Raven      |                  | 1.6.1       |
+| Autocycler |                  | 0.5.2       |
+
+### `Deprecated`
+
+## v2.5.0 nf-core/bacass: "Blue Mercury Sturgeon" 2025/10/17
 
 ### `Changed`
 

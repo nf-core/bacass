@@ -32,6 +32,10 @@
 
   > Wick RR, Judd LM, Gorrie CL, Holt KE. Unicycler: Resolving bacterial genome assemblies from short and long sequencing reads. PLoS Comput Biol. 2017 Jun 8;13(6):e1005595. doi: 10.1371/journal.pcbi.1005595. PMID: 28594827; PMCID: PMC5481147.
 
+- [MEGAHIT](https://pubmed.ncbi.nlm.nih.gov/25609793/)
+
+  > Li D, Liu CM, Luo R, Sadakane K, Lam TW. MEGAHIT: an ultra-fast single-node solution for large and complex metagenomics assembly via succinct de Bruijn graph. Bioinformatics. 2015 May 15;31(10):1674-6. doi: 10.1093/bioinformatics/btv033. Epub 2015 Jan 20. PMID: 25609793.
+
 - [Miniasm](https://github.com/lh3/miniasm) with [Racon](https://github.com/isovic/racon)
 
   > Li H. Minimap and miniasm: fast mapping and de novo assembly for noisy long sequences. Bioinformatics. 2016 Jul 15;32(14):2103-10. doi: 10.1093/bioinformatics/btw152. Epub 2016 Mar 19. PMID: 27153593; PMCID: PMC4937194.
@@ -39,6 +43,18 @@
 - [Canu](https://pubmed.ncbi.nlm.nih.gov/28298431/)
 
   > Koren S, Walenz BP, Berlin K, Miller JR, Bergman NH, Phillippy AM. Canu: scalable and accurate long-read assembly via adaptive k-mer weighting and repeat separation. Genome Res. 2017 May;27(5):722-736. doi: 10.1101/gr.215087.116. Epub 2017 Mar 15. PMID: 28298431; PMCID: PMC5411767.
+
+- [Flye](https://pubmed.ncbi.nlm.nih.gov/33020656/)
+
+  > Kolmogorov M, Bickhart DM, Behsaz B, Gurevich A, Rayko M, Shin SB, Kuhn K, Yuan J, Polevikov E, Smith TPL, Pevzner PA. metaFlye: scalable long-read metagenome assembly using repeat graphs. Nat Methods. 2020 Nov;17(11):1103-1110. doi: 10.1038/s41592-020-00971-x. Epub 2020 Oct 5. PMID: 33020656; PMCID: PMC10699202.
+
+- [Raven](https://doi.org/10.1038/s43588-021-00073-4)
+
+  > Vaser, R., Šikić, M. Time- and memory-efficient genome assembly with Raven. Nat Comput Sci 1, 332–336 (2021). https://doi.org/10.1038/s43588-021-00073-4
+
+- [Autocycler](https://pubmed.ncbi.nlm.nih.gov/40875535/)
+
+  > Wick RR, Howden BP, Stinear TP. Autocycler: long-read consensus assembly for bacterial genomes. Bioinformatics. 2025 Sep 1;41(9):btaf474. doi: 10.1093/bioinformatics/btaf474. PMID: 40875535; PMCID: PMC12460055.
 
 - [QUAST](https://pubmed.ncbi.nlm.nih.gov/23422339/)
 
@@ -67,6 +83,10 @@
 - [Kraken2](https://doi.org/10.1186/s13059-019-1891-0)
 
   > Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. doi: 10.1186/s13059-019-1891-0.
+
+- [Rasusa](https://doi.org/10.21105/joss.03942)
+
+  > Hall, M.B., (2022). Rasusa: Randomly subsample sequencing reads to a specified coverage. Journal of Open Source Software, 7(69), 3942. doi: 10.21105/joss.03942.
 
 - [MultiQC](https://www.ncbi.nlm.nih.gov/pubmed/27312411/)
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924

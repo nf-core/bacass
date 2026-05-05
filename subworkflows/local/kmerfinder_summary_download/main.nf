@@ -1,34 +1,34 @@
 //
 // Kmerfinder subworkflow for species identification & QC
 //
-include { UNTAR                         } from '../../../modules/nf-core/untar'
-include { KMERFINDER_KMERFINDER         } from '../../../modules/local/kmerfinder/kmerfinder'
-include { KMERFINDER_SUMMARY            } from '../../../modules/local/kmerfinder/summary'
-include { KMERFINDER_DOWNLOAD_REFERENCE } from '../../../modules/local/kmerfinder/download_reference'
+include { UNTAR                            } from '../../../modules/nf-core/untar'
+include { KMERFINDER_KMERFINDER            } from '../../../modules/local/kmerfinder/kmerfinder'
+include { KMERFINDER_SUMMARY               } from '../../../modules/local/kmerfinder/summary'
+include { KMERFINDER_FIND_WINNER_REFERENCE } from '../../../modules/local/kmerfinder/find_winner_reference'
+include { NCBI_DATASETS_DOWNLOAD           } from '../../../modules/local/ncbi_datasets_download'
 
 workflow KMERFINDER_SUMMARY_DOWNLOAD {
     take:
     reads                   // channel: [ meta, reads ]
-    consensus               // channel: [ meta, consensus ]
+    ch_assembly             // channel: [ meta, assembly ]
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions = channel.empty()
 
     // Prepare kmerfinder database
-    ch_kmerfinderdb           = file(params.kmerfinderdb, checkIfExists: true)
+    ch_kmerfinderdb = file(params.kmerfinderdb, checkIfExists: true)
 
     if ( ch_kmerfinderdb.name.endsWith('.gz') ) {
         UNTAR ( [[ id: ch_kmerfinderdb.getSimpleName() ], ch_kmerfinderdb] )
-        ch_kmerfinderdb_untar = UNTAR.out.untar.map{ meta, file -> file }
-
+        ch_kmerfinderdb_untar = UNTAR.out.untar.map{ _meta, file -> file }
         ch_versions = ch_versions.mix(UNTAR.out.versions)
     } else {
-        ch_kmerfinderdb_untar = Channel.fromPath(ch_kmerfinderdb)
+        ch_kmerfinderdb_untar = channel.fromPath(ch_kmerfinderdb)
     }
     ch_kmerfinderdb_untar = ch_kmerfinderdb_untar.map { it -> it.toAbsolutePath() }
 
     KMERFINDER_KMERFINDER (
-        reads,    // Channel: [ meta, reads ]
+        reads,    // channel: [ meta, reads ]
         ch_kmerfinderdb_untar.collect(),
         'bacteria'           // Val: 'tax_group'
     )
@@ -38,41 +38,76 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
 
     // MODULE: Kmerfinder summary report. Generates a csv report file collecting all sample references.
     KMERFINDER_SUMMARY (
-        ch_kmerfinder_report.map{ meta, report -> report }.collect()
+        ch_kmerfinder_report.map{ _meta, report -> report }.collect()
     )
     ch_summary_yaml     = KMERFINDER_SUMMARY.out.yaml
     ch_versions         = ch_versions.mix(KMERFINDER_SUMMARY.out.versions)
 
-    // SUBWORKFLOW:  Create a channel to organize assemblies and reports based on the identified Kmerfinder reference.
+    // SUBWORKFLOW: Create a channel to organize assemblies and reports based on the identified Kmerfinder reference.
     ch_kmerfinder_json
         .join(ch_kmerfinder_report, by:0)
-        .join(consensus, by:0)
+        .cross(ch_assembly) { it -> it[0].sample } // merge by meta.sample -> [[ meta, report_json, report_txt ],[ meta, assembly ]]
+            .map { kmerfinder, assembly ->
+                def meta              = assembly[0]
+                def kmerfinder_json   = kmerfinder[1]
+                def kmerfinder_report = kmerfinder[2]
+                def assembly_fasta    = assembly[1]
+                [ meta, kmerfinder_json, kmerfinder_report, assembly_fasta ] }
         .map{
             meta, report_json, report_txt, fasta ->
-                species_hits = report_json.splitJson(path:"kmerfinder.results.species_hits").value
-                def specie = species_hits.size() > 0 ? species_hits.get(0)["Species"] : "Unknown Species"
-
-                return tuple(specie, meta, report_txt, fasta)
+                def species_hits = report_json.splitJson(path:"kmerfinder.results.species_hits").value
+                def species = species_hits.size() > 0 ? species_hits.get(0)["Species"] : "Unknown Species"
+                [ species, meta, report_txt, fasta ]
         }
         .groupTuple(by:0) // Group by the "Species" field
         .set { ch_reports_byreference }
 
-    // SUBWORKFLOW: For each species target, this subworkflow collects reference genome assemblies ('GCF*') and subsequently downloads the best matching reference assembly.
-    KMERFINDER_DOWNLOAD_REFERENCE (
+    // MODULE: Find the winner reference for each species
+    KMERFINDER_FIND_WINNER_REFERENCE (
         ch_reports_byreference
-            .map{ specie, meta, report_txt, fasta-> tuple(specie, report_txt) }
-            .filter{ specie, report_txt -> specie != "Unknown Species" }
+            .map{ species, _meta, report_txt, _fasta ->
+                [ species, report_txt ] }
+            .filter{ species, _report_txt -> species != "Unknown Species" }
     )
-    ch_versions = ch_versions.mix(KMERFINDER_DOWNLOAD_REFERENCE.out.versions)
+    ch_versions = ch_versions.mix(KMERFINDER_FIND_WINNER_REFERENCE.out.versions)
+
+    // Prepare channel for NCBI_DATASETS_DOWNLOAD
+    // Extract base accession from winner file (remove assembly version)
+    ch_accessions_for_download = KMERFINDER_FIND_WINNER_REFERENCE.out.winner
+        .map { _refmeta, winner_file ->
+            def full_accession = winner_file.text.trim()
+            // Extract base accession: GCF_002795805.1_ASM279580v1 → GCF_002795805.1
+            def base_accession = full_accession.split('_')[0] + '_' + full_accession.split('_')[1]
+            return tuple([id: base_accession], base_accession)
+        }
+
+    // MODULE: Download reference genomes using NCBI datasets CLI
+    NCBI_DATASETS_DOWNLOAD (
+        ch_accessions_for_download
+    )
+    ch_versions = ch_versions.mix(NCBI_DATASETS_DOWNLOAD.out.versions)
 
     // Organize sample assemblies into channels based on their corresponding reference files.
     ch_reports_byreference
-        .join(KMERFINDER_DOWNLOAD_REFERENCE.out.fna)
-        .join(KMERFINDER_DOWNLOAD_REFERENCE.out.gff)
-        .join(KMERFINDER_DOWNLOAD_REFERENCE.out.winner)
+        .map { species, meta, report_txt, fasta ->
+            // Extract base accession from the first report to match with downloads
+            def first_line = report_txt[0].text.split('\n').find { line -> !line.startsWith('#') && line.trim() }
+            def full_accession = first_line ? first_line.split('\t')[0] : null
+            def base_accession = full_accession ? full_accession.split('_')[0] + '_' + full_accession.split('_')[1] : null
+            return tuple(base_accession, species, meta, report_txt, fasta)
+        }
+        .filter { base_accession, _species, _meta, _report_txt, _fasta -> base_accession != null }
+        .join(
+            NCBI_DATASETS_DOWNLOAD.out.fna.map { meta, fna -> tuple(meta.id, fna) },
+            by: 0
+        )
+        .join(
+            NCBI_DATASETS_DOWNLOAD.out.gff.map { meta, gff -> tuple(meta.id, gff) },
+            by: 0
+        )
         .map {
-            specie, meta, report_txt, fasta, fna, gff, winner_id ->
-                return tuple([id: winner_id.getBaseName()], meta, fasta, fna, gff)
+            base_accession, _species, meta, _report_txt, fasta, fna, gff ->
+                return tuple([id: base_accession], meta, fasta, fna, gff)
         }
         .set { ch_consensus_byrefseq }
 

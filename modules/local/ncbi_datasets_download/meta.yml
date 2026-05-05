@@ -1,0 +1,67 @@
+name: ncbi_datasets_download
+description: Download reference genome FASTA and GFF files from NCBI Datasets by accession
+keywords:
+  - ncbi
+  - datasets
+  - download
+  - reference
+  - fasta
+  - gff
+tools:
+  - ncbi-datasets-cli:
+      description: |
+        NCBI Datasets command-line tool for downloading genome data packages by accession.
+      homepage: https://www.ncbi.nlm.nih.gov/datasets/docs/v2/
+      documentation: https://www.ncbi.nlm.nih.gov/datasets/docs/v2/command-line-tools/using-dataformat/
+      licence: ["Public-Domain"]
+  - unzip:
+      description: |
+        Unzip is used to extract selected files from the downloaded NCBI datasets archive.
+      homepage: https://infozip.sourceforge.net/UnZip.html
+      documentation: https://linux.die.net/man/1/unzip
+      licence: ["Info-ZIP"]
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing reference metadata
+          e.g. [ id:'GCF_000001405.40' ]
+    - accession:
+        type: string
+        description: NCBI genome accession to download
+output:
+  fna:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing reference metadata
+            e.g. [ id:'GCF_000001405.40' ]
+      - "*.fna":
+          type: file
+          description: Downloaded genomic FASTA file from NCBI Datasets
+          pattern: "*.fna"
+          ontologies:
+            - edam: http://edamontology.org/format_1929 # FASTA
+  gff:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing reference metadata
+            e.g. [ id:'GCF_000001405.40' ]
+      - "*.gff":
+          type: file
+          description: Downloaded genomic annotation GFF file from NCBI Datasets
+          pattern: "*.gff"
+          ontologies:
+            - edam: http://edamontology.org/format_2305 # GFF
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@Daniel-VM"
+maintainers:
+  - "@Daniel-VM"

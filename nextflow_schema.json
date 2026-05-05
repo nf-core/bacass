@@ -91,6 +91,17 @@
                     "type": "integer",
                     "default": 10,
                     "description": "Minimun length for Filtlong to work"
+                },
+                "rasusa": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Use Rasusa to downsample reads to a target coverage",
+                    "fa_icon": "fas fa-compress-arrows-alt"
+                },
+                "rasusa_coverage": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Target coverage for Rasusa read downsampling"
                 }
             }
         },
@@ -109,7 +120,7 @@
                 },
                 "kmerfinderdb": {
                     "type": "string",
-                    "description": "Path to the Kmerfinder bacteria database (ie: '/path_to/kmerfinder/bacteria/ or '/path_to/kmerfinder/bacteria.tar.gz'). Only taxonomic group 'bacteria' is allowed. See database installation (guidelines)[https://bitbucket.org/genomicepidemiology/kmerfinder_db/src/master/] for details. The latest version can be downloaded from the KmerFinder Database FTP site  or directly during pipeline execution with. Example:\n\n```--kmerfinderdb 'ftp://ftp.cbs.dtu.dk/public/CGE/databases/KmerFinder/version/latest/bacteria.tar.gz'```\n(Note: Downloading the KmerFinder database (~30GB) via FTP can be time-consuming. It's recommended to pre-download the database and provide the *.tar.gz file using this parameter instead of URL site.).\nAn older version is available on (Zenodo)[https://zenodo.org/records/13447056/files/20190108_kmerfinder_stable_dirs.tar.gz]."
+                    "description": "Path to the KmerFinder bacteria database (e.g. `/path_to/kmerfinder/`, `/path_to/kmerfinder/bacteria/` or `/path_to/kmerfinder/bacteria.tar.gz`). Only taxonomic group `bacteria` is supported. If a directory is provided, the pipeline auto-detects whether it already includes the `bacteria/` level. See installation guidelines: [https://bitbucket.org/genomicepidemiology/kmerfinder_db/src/master/](https://bitbucket.org/genomicepidemiology/kmerfinder_db/src/master/). Example: `--kmerfinderdb 'ftp://ftp.cbs.dtu.dk/public/CGE/databases/KmerFinder/version/latest/bacteria.tar.gz'` (FTP download is ~30GB and can be slow; prefer pre-downloading and passing a local `.tar.gz`). Older version: [https://zenodo.org/records/13447056/files/20190108_kmerfinder_stable_dirs.tar.gz](https://zenodo.org/records/13447056/files/20190108_kmerfinder_stable_dirs.tar.gz)."
                 },
                 "reference_fasta": {
                     "type": "string",
@@ -130,10 +141,10 @@
             "properties": {
                 "assembler": {
                     "type": "string",
-                    "default": "unicycler",
+                    "default": "autocycler,canu,dragonflye,flye,megahit,miniasm,unicycler,raven",
                     "fa_icon": "fas fa-puzzle-piece",
-                    "description": "The assembler to use for assembly. Use the appropriate assembler according to the chosen assembly_type. Refer to the README.md for further clarification.",
-                    "enum": ["unicycler", "canu", "miniasm", "dragonflye"]
+                    "description": "The assembler(s) to use for assembly.",
+                    "help_text": "Use the appropriate assembler(s) according to the chosen assembly_type. Can be one or multiple of the available assemblers (e.g. unicycler, megahit, canu, miniasm, dragonflye, autocycler, raven, flye, ...) as comma separated string (e.g. `-- assembler \"megahit,unicycler\"`)."
                 },
                 "assembly_type": {
                     "type": "string",
@@ -151,7 +162,7 @@
                 "canu_mode": {
                     "type": "string",
                     "enum": ["-pacbio", "-nanopore", "-pacbio-hifi", "null"],
-                    "description": "Allowed technologies for long read assembly."
+                    "description": "Allowed technologies for long read assembly with CANU."
                 },
                 "canu_args": {
                     "type": "string",
@@ -162,6 +173,45 @@
                     "type": "string",
                     "description": "Extra arguments for [Dragonflye](https://github.com/rpetit3/dragonflye#usage)",
                     "help_text": "This advanced option allows you to add extra arguments to Dragonflye (e.g.: `\"--gsize 2.4m\"`). For those arguments with no values/options associated (e.g.: `\"--nopolish\"` or `\"--nofilter\"`...) you need to add an extra space at the begining of the input string to params.dragonflye_args. Example: `--params.dragonflye_args ' --nopolish'`"
+                },
+                "megahit_args": {
+                    "type": "string",
+                    "description": "Extra arguments for [MEGAHIT](https://github.com/voutcn/megahit#usage)",
+                    "help_text": "This advanced option allows you to pass extra arguments to MEGAHIT for short-read assembly (e.g. `\"--min-contig-len 500\"`)."
+                },
+                "autocycler_assemblers": {
+                    "type": "string",
+                    "default": "canu,flye,miniasm,raven",
+                    "description": "What assemblers to use for autocycler",
+                    "help_text": "Comma separated string of assemblers. For example 'canu,flye,raven'. Allowed is any subset and combination of canu, flye, raven, miniasm ..."
+                },
+                "autocycler_subsample_count": {
+                    "type": "integer",
+                    "default": 4,
+                    "description": "Number of subsets to assemble."
+                },
+                "autocycler_subsample_mindepth": {
+                    "type": "integer",
+                    "default": 25,
+                    "description": "Minimum depth for subsets to assemble."
+                },
+                "autocycler_cluster_args": {
+                    "type": "string",
+                    "description": "Arguments to autocycler cluster.",
+                    "help_text": "--cutoff <CUTOFF>: cutoff distance threshold for hierarchical clustering [default: 0.2]; --min_assemblies <MIN_ASSEMBLIES>: exclude clusters with fewer than this many assemblies [default: automatic]; --max_contigs <MAX_CONTIGS>: refuse to run if mean contigs per assembly exceeds this value [default: 25]."
+                },
+                "flye_mode": {
+                    "type": "string",
+                    "default": "--nano-raw",
+                    "enum": [
+                        "--pacbio-raw",
+                        "--pacbio-corr",
+                        "--pacbio-hifi",
+                        "--nano-raw",
+                        "--nano-corr",
+                        "--nano-hq"
+                    ],
+                    "description": "Allowed technologies for long read assembly with Flye."
                 }
             }
         },
@@ -211,7 +261,7 @@
                     "fa_icon": "fas fa-hotdog",
                     "description": "Which assembly polishing method to use.",
                     "help_text": "Can be used to define which polishing method is used by default for long reads.",
-                    "enum": ["medaka", "nanopolish"]
+                    "enum": ["medaka", "nanopolish", "none"]
                 }
             }
         },
@@ -455,6 +505,18 @@
                     "fa_icon": "far calendar",
                     "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
+                },
+                "help": {
+                    "type": ["boolean", "string"],
+                    "description": "Display the help message."
+                },
+                "help_full": {
+                    "type": "boolean",
+                    "description": "Display the full detailed help message."
+                },
+                "show_hidden": {
+                    "type": "boolean",
+                    "description": "Display hidden parameters in the help message (only works when --help or --help_full are provided)."
                 }
             }
         }

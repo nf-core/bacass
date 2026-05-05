@@ -64,7 +64,7 @@ combines reads coming from multiple sequencing runs.
 
 ### Long Read Trimming
 
-This step performs long read trimming on Nanopore input (if provided) using [PoreChop](https://github.com/rrwick/Porechop) or filtering using [Filtlong](https://github.com/rrwick/Filtlong).
+This step performs long read trimming on Nanopore input (if provided) using [PoreChop](https://github.com/rrwick/Porechop) or filtering using [Filtlong](https://github.com/rrwick/Filtlong). Optionally, long reads can be downsampled to a target genome coverage using [Rasusa](https://github.com/mbhall88/rasusa) prior to trimming.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -76,6 +76,10 @@ This step performs long read trimming on Nanopore input (if provided) using [Por
 - `trimming/longreads/filtlong`
   - `*.fastq.gz`: The trimmed FASTQ file
   - `*.log*`: Log file
+
+- `trimming/longreads/rasusa`
+  - `*.fastq.gz`: The downsampled FASTQ file
+  - `*.log*`: Log file with downsampling statistics
 
 </details>
 
@@ -147,36 +151,61 @@ The pipeline includes a dedicated step for short and long reads QC as well as co
 
 ## Assembly Output
 
-Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler) in `short` or `hybrid` assembly modes. For long-read assembly, there are also `canu` and `miniasm` available.
+Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler) or [MEGAHIT](https://github.com/voutcn/megahit) in `short` assembly mode. In `hybrid` mode, [Unicycler](https://github.com/rrwick/Unicycler) and [Dragonflye](https://github.com/rpetit3/dragonflye) are available. For long-read assembly, the pipeline supports [Unicycler](https://github.com/rrwick/Unicycler), [Canu](https://github.com/marbl/canu), [Miniasm](https://github.com/lh3/miniasm), [Flye](https://github.com/mikolmogorov/Flye), [Raven](https://github.com/lbcb-sci/raven), [Dragonflye](https://github.com/rpetit3/dragonflye), and [Autocycler](https://github.com/rrwick/Autocycler).
 Unicycler is a pipeline on its own, which at least for Illumina reads mainly acts as a frontend to Spades with added polishing steps.
 
 <details markdown="1">
 <summary>Output files</summary>
 
 - `Unicycler/`
-  - `*.scaffolds.fa`: Final assembly in fasta format
-  - `*.assembly.gfa`: Final assembly in Graphical Fragment Assembly (GFA) format
-  - `*.unicycler.log`: Log file summarizing steps and intermediate results on the Unicycler execution
+  - `*-unicycler.scaffolds.fa`: Final assembly in fasta format
+  - `*-unicycler.assembly.gfa`: Final assembly in Graphical Fragment Assembly (GFA) format
+  - `*-unicycler.unicycler.log`: Log file summarizing steps and intermediate results on the Unicycler execution
 
 Check out the [Unicycler documentation](https://github.com/rrwick/Unicycler) for more information on Unicycler output.
 
+- `Megahit/`
+  - `*-megahit.contigs.fa.gz`: Final assembly in FASTA format
+  - `*-megahit.log`: Log file summarizing MEGAHIT execution
+
+Check out the [MEGAHIT documentation](https://github.com/voutcn/megahit) for more information on MEGAHIT output.
+
 - `Canu/`
-  - `*.contigs.fasta.gz`: Final assembly in fasta format
-  - `*.report`: Log file summarizing steps and intermediate results
+  - `*-canu.contigs.fasta.gz`: Final assembly in fasta format
+  - `*-canu.report`: Log file summarizing steps and intermediate results
 
 Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.html) for more information on Canu output.
 
 - `Miniasm/`
-  - `*.fasta.gz`: Assembly in Fasta format
-  - `*_assembly_consensus.fasta.gz`: Consensus assembly in fasta format (polished by Racon)
+  - `*-miniasm.fasta.gz`: Assembly in Fasta format
+  - `*-miniasm.consensus.fasta.gz`: Consensus assembly in fasta format (polished by Racon)
 
 Check out the [Miniasm documentation](https://github.com/lh3/miniasm) for more information on Miniasm output.
 
+- `Flye/`
+  - `*-flye.assembly.fasta.gz`: Assembly in Fasta format
+
+Check out the [Flye documentation](https://github.com/mikolmogorov/Flye) for more information on Flye output.
+
+- `Raven/`
+  - `*-raven.fasta.gz`: Assembly in Fasta format
+
+Check out the [Raven documentation](https://github.com/lbcb-sci/raven) for more information on Raven output.
+
 - `Dragonflye/`
-  - `*.contigs.fa`: Assembly in Fasta format
-  - `*.dragonflye.log`: Log file containing the report of the dragonflye process
+  - `*-dragonflye.fa`: Assembly in Fasta format
+  - `*-dragonflye.dragonflye.log`: Log file containing the report of the dragonflye process
 
 Checkout the [Dragonflye](https://github.com/rpetit3/dragonflye) documentation for more information of the Dragonflye output.
+
+- `Autocycler/`
+  - `<assembler>/<sample>-<subset>-<assembler>*.fasta.gz`: Assembly of `assembler` and `sample` of `subset`. Also includes other assembler-specific files as detailed above.
+- `Autocycler/combine/`
+  - `<sample>-autocycler/consensus_assembly.fasta`: Assembly of `sample` in Fasta format
+  - `<sample>-autocycler/consensus_assembly.gfa`: Assembly of `sample` in Graphical Fragment Assembly (GFA) format
+  - `<sample>-autocycler/consensus_assembly.yaml`: Assembly statistics of `sample` in yaml format
+
+Checkout the [Autocycler](https://github.com/rrwick/Autocycler) documentation for more information of the Autocycler output.
 
 </details>
 
@@ -215,9 +244,9 @@ It also runs [BUSCO](https://busco.ezlab.org/), a software which assess genome q
   - `report.html`: QUAST assembly QC as HTML report
   - `report.pdf`: QUAST assembly QC as pdf
 - `busco/`: BUSCO reports
-  - `<SampleName>_<stage>-<BuscoLineage>-busco/`: BUSCO output folder, please refer to BUSCO documentation for details.
-  - `<SampleName>_<stage>-<BuscoLineage>-busco.batch_summary.txt`: BUSCO batch summary output
-  - `short_summary.specific.<SampleName>_<stage>.{txt,json}`: BUSCO short summaries in txt and json format
+  - `<AssemblyName>_<stage>-<BuscoLineage>-busco/`: BUSCO output folder, please refer to BUSCO documentation for details.
+  - `<AssemblyName>_<stage>-<BuscoLineage>-busco.batch_summary.txt`: BUSCO batch summary output
+  - `short_summary.specific.<AssemblyName>_<stage>.{txt,json}`: BUSCO short summaries in txt and json format
 
 ![QUAST QC](images/quast.png)
 

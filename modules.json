@@ -5,14 +5,44 @@
         "https://github.com/nf-core/modules.git": {
             "modules": {
                 "nf-core": {
+                    "autocycler/cluster": {
+                        "branch": "master",
+                        "git_sha": "55492bb796dc15d32db2673fc3f269b8cb24dcb2",
+                        "installed_by": ["fasta_consensus_autocycler"]
+                    },
+                    "autocycler/combine": {
+                        "branch": "master",
+                        "git_sha": "55492bb796dc15d32db2673fc3f269b8cb24dcb2",
+                        "installed_by": ["fasta_consensus_autocycler"]
+                    },
+                    "autocycler/compress": {
+                        "branch": "master",
+                        "git_sha": "55492bb796dc15d32db2673fc3f269b8cb24dcb2",
+                        "installed_by": ["fasta_consensus_autocycler"]
+                    },
+                    "autocycler/resolve": {
+                        "branch": "master",
+                        "git_sha": "55492bb796dc15d32db2673fc3f269b8cb24dcb2",
+                        "installed_by": ["fasta_consensus_autocycler"]
+                    },
+                    "autocycler/subsample": {
+                        "branch": "master",
+                        "git_sha": "55492bb796dc15d32db2673fc3f269b8cb24dcb2",
+                        "installed_by": ["modules"]
+                    },
+                    "autocycler/trim": {
+                        "branch": "master",
+                        "git_sha": "55492bb796dc15d32db2673fc3f269b8cb24dcb2",
+                        "installed_by": ["fasta_consensus_autocycler"]
+                    },
                     "bakta/bakta": {
                         "branch": "master",
-                        "git_sha": "9d0f89b445e1f5b2fb30476f4be9a8b519c07846",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"]
                     },
                     "bakta/baktadbdownload": {
                         "branch": "master",
-                        "git_sha": "7c06e6820fa3918bc28a040e794f8a2b39fabadb",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"]
                     },
                     "busco/busco": {
@@ -27,7 +57,7 @@
                     },
                     "cat/fastq": {
                         "branch": "master",
-                        "git_sha": "1ceaa8ba4d0fd886dbca0e545815d905b7407de7",
+                        "git_sha": "cf735af4433f2dc8e410f67012dff824ef9990eb",
                         "installed_by": ["modules"]
                     },
                     "dragonflye": {
@@ -37,12 +67,12 @@
                     },
                     "fastp": {
                         "branch": "master",
-                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "git_sha": "b8f1de0ac853ae5b56c63450d47438f899c553d0",
                         "installed_by": ["fastq_trim_fastp_fastqc", "modules"]
                     },
                     "fastqc": {
                         "branch": "master",
-                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "git_sha": "5bdb098216aaf5df9c3b6343e6204cd932503c16",
                         "installed_by": ["fastq_trim_fastp_fastqc"]
                     },
                     "filtlong": {
@@ -50,19 +80,29 @@
                         "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
                         "installed_by": ["modules"]
                     },
+                    "flye": {
+                        "branch": "master",
+                        "git_sha": "1ab453187e9eada07bdd98609ce770971bfe86e4",
+                        "installed_by": ["modules"]
+                    },
                     "gunzip": {
                         "branch": "master",
-                        "git_sha": "3a5fef109d113b4997c9822198664ca5f2716208",
+                        "git_sha": "96c57dfd98a0641886a67bd449fe33ee2ec0e374",
                         "installed_by": ["modules"]
                     },
                     "kraken2/kraken2": {
                         "branch": "master",
-                        "git_sha": "653218e79ffa76fde20319e9062f8b8da5cf7555",
+                        "git_sha": "71a39f3598935d64ffd65f0960e4d2d4a42ab778",
                         "installed_by": ["modules"]
                     },
                     "liftoff": {
                         "branch": "master",
                         "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "installed_by": ["modules"]
+                    },
+                    "megahit": {
+                        "branch": "master",
+                        "git_sha": "e4f18d1cecc86b39daafe8bf22343b868e696c15",
                         "installed_by": ["modules"]
                     },
                     "miniasm": {
@@ -77,7 +117,7 @@
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "git_sha": "af27af1be706e6a2bb8fe454175b0cdf77f47b49",
                         "installed_by": ["modules"]
                     },
                     "nanoplot": {
@@ -88,22 +128,33 @@
                     },
                     "porechop/porechop": {
                         "branch": "master",
-                        "git_sha": "1d68c7f248d1a480c5959548a9234602b771199e",
+                        "git_sha": "e753770db613ce014b3c4bc94f6cba443427b726",
                         "installed_by": ["modules"]
                     },
                     "prokka": {
                         "branch": "master",
-                        "git_sha": "49ebda931c36c2b282f7958d00e1236b751f1031",
-                        "installed_by": ["modules"]
+                        "git_sha": "41dfa3f7c0ffabb96a6a813fe321c6d1cc5b6e46",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/prokka/prokka.diff"
                     },
                     "quast": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "55cca688337cfaec60e8cd32021bb4cd19f3a501",
                         "installed_by": ["modules"]
                     },
                     "racon": {
                         "branch": "master",
                         "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "installed_by": ["modules"]
+                    },
+                    "rasusa": {
+                        "branch": "master",
+                        "git_sha": "35b7d3eeaccbc0c82fae2ef675b00c028b9282ca",
+                        "installed_by": ["modules"]
+                    },
+                    "raven": {
+                        "branch": "master",
+                        "git_sha": "6479ace28248469b1231819b66e0572a0af51379",
                         "installed_by": ["modules"]
                     },
                     "samtools/index": {
@@ -118,7 +169,7 @@
                     },
                     "toulligqc": {
                         "branch": "master",
-                        "git_sha": "f1ac3c70ce013f9b48ad2cf3a6e0f551a49c7d01",
+                        "git_sha": "d9137377f4dd6246242829772eb1949b96de1ef0",
                         "installed_by": ["modules"]
                     },
                     "unicycler": {
@@ -135,24 +186,29 @@
             },
             "subworkflows": {
                 "nf-core": {
+                    "fasta_consensus_autocycler": {
+                        "branch": "master",
+                        "git_sha": "08cd59454a0718a98b68ea0e6c4e5927a07003d1",
+                        "installed_by": ["subworkflows"]
+                    },
                     "fastq_trim_fastp_fastqc": {
                         "branch": "master",
-                        "git_sha": "c2f0680e61bf5311cb199eab17427558d3549688",
+                        "git_sha": "b8f1de0ac853ae5b56c63450d47438f899c553d0",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nextflow_pipeline": {
                         "branch": "master",
-                        "git_sha": "c2b22d85f30a706a3073387f30380704fcae013b",
+                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nfcore_pipeline": {
                         "branch": "master",
-                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
+                        "git_sha": "271e7fc14eb1320364416d996fb077421f3faed2",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nfschema_plugin": {
                         "branch": "master",
-                        "git_sha": "2fd2cd6d0e7b273747f32e465fdc6bcc3ae0814e",
+                        "git_sha": "fdc08b8b1ae74f56686ce21f7ea11ad11990ce57",
                         "installed_by": ["subworkflows"]
                     }
                 }
