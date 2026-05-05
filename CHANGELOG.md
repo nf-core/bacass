@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.6.0 nf-core/bacass - "Crimson Titanium Seahorse" 2026/04/22
+## v2.6.0 nf-core/bacass - "Crimson Titanium Seahorse" 2026/05/05
 
 ### `Changed`
 
@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#303](https://github.com/nf-core/bacass/pull/303) Fixed prokka process in nf-test with conda - fix for 2.6.0 release
 - [#298](https://github.com/nf-core/bacass/pull/298) Fix conda env issues in Porechop and MultiQC_custom before release
 - [#294](https://github.com/nf-core/bacass/pull/294) Update toulligqc version prior release
 - [#268](https://github.com/nf-core/bacass/pull/268) Fix test_full profile and refactor kmerfinder subworkflow (NCBI datasets migration)
