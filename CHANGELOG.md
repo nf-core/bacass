@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 
 - [#305](https://github.com/nf-core/bacass/pull/305) Allow sample name to be a sequence of integers
+- [#305](https://github.com/nf-core/bacass/pull/305) Fix(kmerfinder): use explicit taxonomy file priority instead of alphabetical order
 
 ### `Dependencies`
 
