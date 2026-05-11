@@ -8,7 +8,7 @@
         "type": "object",
         "properties": {
             "ID": {
-                "type": "string",
+                "type": ["string", "number", "integer"],
                 "pattern": "^\\S+$",
                 "unique": false,
                 "errorMessage": "Sample name must be provided and cannot contain spaces",
