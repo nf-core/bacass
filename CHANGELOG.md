@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.6.1 nf-core/bacass - "Crimson Titanium Seahorse" 2026/05/11
+
+### `Changed`
+
+### `Added`
+
+### `Fixed`
+
+- [#305](https://github.com/nf-core/bacass/pull/305) Fix(kmerfinder): use explicit taxonomy file priority instead of alphabetical order
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.6.0 nf-core/bacass - "Crimson Titanium Seahorse" 2026/05/05
 
 ### `Changed`
