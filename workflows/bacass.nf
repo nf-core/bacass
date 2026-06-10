@@ -43,6 +43,7 @@ include { QUAST as QUAST_BYREFSEQID             } from '../modules/nf-core/quast
 include { QUAST as QUAST_BYSAMPLE               } from '../modules/nf-core/quast'
 include { BUSCO_BUSCO                           } from '../modules/nf-core/busco/busco/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
+include { GUNZIP as GUNZIP_BAKTA                } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
 include { FILTLONG                              } from '../modules/nf-core/filtlong'
 include { RASUSA                                } from '../modules/nf-core/rasusa'
@@ -835,7 +836,6 @@ workflow BACASS {
             []
         )
         ch_prokka_txt_multiqc   = PROKKA.out.txt.map{ _meta, prokka_txt -> [ prokka_txt ]}
-        ch_versions             = ch_versions.mix(PROKKA.out.versions)
     }
 
     //
@@ -844,8 +844,8 @@ workflow BACASS {
     ch_bakta_txt_multiqc = channel.empty()
     if ( !params.skip_annotation && params.annotation_tool == 'bakta' ) {
         // Uncompress assembly for annotation if necessary
-        GUNZIP ( ch_assembly_for_gunzip.gzip )
-        ch_to_bakta     = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
+        GUNZIP_BAKTA ( ch_assembly_for_gunzip.gzip )
+        ch_to_bakta     = ch_assembly_for_gunzip.skip.mix( GUNZIP_BAKTA.out.gunzip )
 
         BAKTA_DBDOWNLOAD_RUN (
             ch_to_bakta.filter{ _meta, fasta -> !fasta.isEmpty() },
