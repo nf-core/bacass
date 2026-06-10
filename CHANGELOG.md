@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#305](https://github.com/nf-core/bacass/pull/305) Fix(kmerfinder): use explicit taxonomy file priority instead of alphabetical order
 - [#309](https://github.com/nf-core/bacass/pull/309) Update version and fix gunzip prokka versions 2b9b
+- [#309](https://github.com/nf-core/bacass/pull/309) Fix git CI resource limits
 
 ### `Dependencies`
 
