@@ -10,7 +10,7 @@
 //
 include { PYCOQC                    } from '../modules/local/pycoqc'
 include { NANOPOLISH                } from '../modules/local/nanopolish'
-include { MEDAKA                    } from '../modules/local/medaka'
+include { MEDAKA                    } from '../modules/nf-core/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2/db_preparation'
 include { DFAST                     } from '../modules/local/dfast'
 include { CUSTOM_MULTIQC            } from '../modules/local/custom/multiqc'
@@ -611,7 +611,6 @@ workflow BACASS {
             //
             MEDAKA ( ch_polish_long_medaka )
             ch_assembly = MEDAKA.out.assembly
-            ch_versions = ch_versions.mix(MEDAKA.out.versions)
         } else if (params.polish_method == 'nanopolish') {
             ch_polish_long
                 .map{ meta, lr, assembly ->

@@ -16,6 +16,7 @@ run_modules:
   - pycoqc
   - kraken2
   - quast
+  - busco
   - prokka
   - bakta
 
@@ -63,6 +64,11 @@ module_order:
       info: "This section of the report shows Quast QC results for assembled genomes with Unicycler."
       path_filters:
         - "./quast/*/report.tsv"
+  - busco:
+      name: "ASSEMBLY QC: BUSCO"
+      info: "This section of the report shows BUSCO completeness results for assembled genomes."
+      path_filters:
+        - "./busco/*"
   - prokka:
       name: "ANNOTATION: Prokka"
       info: "This section of the report shows Prokka annotation results for reads after adapter trimming and quality trimming."
@@ -87,6 +93,8 @@ report_section_order:
     after: general_stats
   quast:
     after: general_stats
+  busco:
+    after: quast
   prokka:
     before: nf-core-bacass-methods-description
   bakta:
