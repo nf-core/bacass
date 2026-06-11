@@ -49,7 +49,7 @@ jobs:
         env:
           NFT_VER: ${{ env.NFT_VER }}
         with:
-          max_shards: 12
+          max_shards: 15
 
       - name: debug
         run: |
@@ -63,6 +63,7 @@ jobs:
     runs-on: # use self-hosted runners
       - runs-on=${{ github.run_id }}-nf-test
       - runner=4cpu-linux-x64
+      - volume=40gb
     strategy:
       fail-fast: false
       matrix:
