@@ -44,6 +44,7 @@ include { QUAST as QUAST_BYSAMPLE               } from '../modules/nf-core/quast
 include { BUSCO_BUSCO                           } from '../modules/nf-core/busco/busco/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { GUNZIP as GUNZIP_BAKTA                } from '../modules/nf-core/gunzip'
+include { GUNZIP as GUNZIP_MEDAKA               } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
 include { FILTLONG                              } from '../modules/nf-core/filtlong'
 include { RASUSA                                } from '../modules/nf-core/rasusa'
@@ -606,10 +607,30 @@ workflow BACASS {
                 }
                 .set { ch_polish_long_medaka }
 
+            ch_polish_long_medaka
+                .branch { _meta, _lr, assembly ->
+                    gzip: assembly.name.endsWith('.gz')
+                    skip: true
+                }
+                .set { ch_polish_long_medaka_for_gunzip }
+
+            GUNZIP_MEDAKA (
+                ch_polish_long_medaka_for_gunzip.gzip.map { meta, _lr, assembly -> tuple(meta, assembly) }
+            )
+
+            ch_polish_long_medaka_reads = ch_polish_long_medaka_for_gunzip.gzip.map { meta, lr, _assembly -> tuple(meta, lr) }
+
+            ch_polish_long_medaka_input = ch_polish_long_medaka_for_gunzip.skip.mix(
+                GUNZIP_MEDAKA.out.gunzip
+                    .join(ch_polish_long_medaka_reads)
+                    .map { meta, assembly, lr -> tuple(meta, lr, assembly) }
+            )
+            ch_polish_long_medaka_input.view()
+
             //
             // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
             //
-            MEDAKA ( ch_polish_long_medaka )
+            MEDAKA ( ch_polish_long_medaka_input )
             ch_assembly = MEDAKA.out.assembly
         } else if (params.polish_method == 'nanopolish') {
             ch_polish_long
