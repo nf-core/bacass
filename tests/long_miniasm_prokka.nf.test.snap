@@ -1,13 +1,19 @@
 {
     "-profile test_long_miniasm_prokka": {
         "content": [
-            12,
+            14,
             {
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
                 },
+                "GUNZIP": {
+                    "gunzip": 1.13
+                },
+                "GUNZIP_MEDAKA": {
+                    "gunzip": 1.13
+                },
                 "MEDAKA": {
-                    "medaka": "2.2.1"
+                    "medaka": "1.4.4"
                 },
                 "MINIASM": {
                     "miniasm": "0.3-r179"
@@ -42,7 +48,7 @@
             },
             [
                 "Medaka",
-                "Medaka/TestMe-miniasm-medaka_polished_genome.fa",
+                "Medaka/TestMe-miniasm-medaka_polished_genome.fa.gz",
                 "Miniasm",
                 "Miniasm/TestMe-miniasm.consensus.fasta.gz",
                 "Miniasm/TestMe-miniasm.fasta.gz",
@@ -92,6 +98,10 @@
                 "busco/TestMe-miniasm-medaka-bacteria_odb10-busco/TestMe-miniasm-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_11.fna",
                 "busco/TestMe-miniasm-medaka-bacteria_odb10-busco/TestMe-miniasm-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_11_err.log",
                 "busco/TestMe-miniasm-medaka-bacteria_odb10-busco/TestMe-miniasm-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_11_out.log",
+                "busco/TestMe-miniasm-medaka-bacteria_odb10-busco/TestMe-miniasm-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_4.faa",
+                "busco/TestMe-miniasm-medaka-bacteria_odb10-busco/TestMe-miniasm-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_4.fna",
+                "busco/TestMe-miniasm-medaka-bacteria_odb10-busco/TestMe-miniasm-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_4_err.log",
+                "busco/TestMe-miniasm-medaka-bacteria_odb10-busco/TestMe-miniasm-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_meta_code_4_out.log",
                 "busco/TestMe-miniasm-medaka-bacteria_odb10-busco/TestMe-miniasm-medaka_polished_genome.fa/run_bacteria_odb10",
                 "busco/TestMe-miniasm-medaka-bacteria_odb10-busco/TestMe-miniasm-medaka_polished_genome.fa/run_bacteria_odb10/.bbtools_output",
                 "busco/TestMe-miniasm-medaka-bacteria_odb10-busco/TestMe-miniasm-medaka_polished_genome.fa/run_bacteria_odb10/.bbtools_output/.checkpoint",
@@ -184,9 +194,9 @@
                 "multiqc_nanostat.yaml:md5,851c9a0693d1fc482d620fed8824ed9c"
             ]
         ],
-        "timestamp": "2026-04-21T13:45:42.069399465",
+        "timestamp": "2026-07-14T14:55:50.414200242",
         "meta": {
-            "nf-test": "0.9.4",
+            "nf-test": "0.9.5",
             "nextflow": "25.10.4"
         }
     }

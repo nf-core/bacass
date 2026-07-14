@@ -1,7 +1,7 @@
 {
     "-profile test_hybrid": {
         "content": [
-            12,
+            14,
             {
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
@@ -15,8 +15,14 @@
                 "FASTQC_TRIM": {
                     "fastqc": "0.12.1"
                 },
+                "GUNZIP": {
+                    "gunzip": 1.13
+                },
+                "GUNZIP_MEDAKA": {
+                    "gunzip": 1.13
+                },
                 "MEDAKA": {
-                    "medaka": "2.2.1"
+                    "medaka": "1.4.4"
                 },
                 "NANOPLOT": {
                     "nanoplot": "1.46.1"
@@ -51,7 +57,7 @@
                 "FastQC/trim/ERR044595_1_fastqc.html",
                 "FastQC/trim/ERR044595_2_fastqc.html",
                 "Medaka",
-                "Medaka/ERR044595-unicycler-medaka_polished_genome.fa",
+                "Medaka/ERR044595-unicycler-medaka_polished_genome.fa.gz",
                 "Prokka",
                 "Prokka/ERR044595-unicycler-medaka",
                 "QC_longreads",
@@ -366,9 +372,9 @@
                 "ERR044595.fastp.json:md5,316525c967c7d3ecbc0457526de9cb9b"
             ]
         ],
-        "timestamp": "2026-04-21T12:29:34.072358379",
+        "timestamp": "2026-07-14T13:59:05.526670702",
         "meta": {
-            "nf-test": "0.9.4",
+            "nf-test": "0.9.5",
             "nextflow": "25.10.4"
         }
     }

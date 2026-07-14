@@ -590,11 +590,13 @@ workflow BACASS {
         ch_for_assembly
             .filter { meta, _sr, _lr -> !meta.subsample } // remove any subsamples
             .cross(ch_assembly) { it -> it[0].sample } // merge by meta.sample -> [[ meta, sr, lr ],[ meta, assembly ]]
-            .map { for_assembly,assembly ->
+            .map { for_assembly, assembly ->
                 def meta_assembly  = assembly[0]
                 def long_reads     = for_assembly[2]
                 def fasta_assembly = assembly[1]
-                [ meta_assembly, long_reads, fasta_assembly ] }
+                fasta_assembly = fasta_assembly instanceof List ? fasta_assembly[0] : fasta_assembly
+                [ meta_assembly, long_reads, fasta_assembly ]
+            }
             .set { ch_polish_long } // channel: [ val(meta), path(lr), path(fasta) ]
 
         if (params.polish_method == 'medaka'){

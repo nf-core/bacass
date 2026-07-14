@@ -1,7 +1,7 @@
 {
     "-profile test_hybrid_dragonflye": {
         "content": [
-            12,
+            13,
             {
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
@@ -18,8 +18,11 @@
                 "FASTQC_TRIM": {
                     "fastqc": "0.12.1"
                 },
+                "GUNZIP": {
+                    "gunzip": 1.13
+                },
                 "MEDAKA": {
-                    "medaka": "2.2.1"
+                    "medaka": "1.4.4"
                 },
                 "NANOPLOT": {
                     "nanoplot": "1.46.1"
@@ -55,7 +58,7 @@
                 "FastQC/trim/A1403KPN_1_fastqc.html",
                 "FastQC/trim/A1403KPN_2_fastqc.html",
                 "Medaka",
-                "Medaka/A1403KPN-dragonflye-medaka_polished_genome.fa",
+                "Medaka/A1403KPN-dragonflye-medaka_polished_genome.fa.gz",
                 "Prokka",
                 "Prokka/A1403KPN-dragonflye-medaka",
                 "QC_longreads",
@@ -362,9 +365,9 @@
                 "A1403KPN.fastp.json:md5,af1a7e6610168cc6df5b1df62adac9fc"
             ]
         ],
-        "timestamp": "2026-04-21T12:47:02.003428579",
+        "timestamp": "2026-07-14T15:48:51.721763625",
         "meta": {
-            "nf-test": "0.9.4",
+            "nf-test": "0.9.5",
             "nextflow": "25.10.4"
         }
     }
