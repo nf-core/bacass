@@ -625,7 +625,6 @@ workflow BACASS {
                     .join(ch_polish_long_medaka_reads)
                     .map { meta, assembly, lr -> tuple(meta, lr, assembly) }
             )
-            ch_polish_long_medaka_input.view()
 
             //
             // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
