@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- [#310](https://github.com/nf-core/bacass/pull/310) Replace local Medaka module with nf-core module 
+- [#310](https://github.com/nf-core/bacass/pull/310) Replace local Medaka module with nf-core module
 
 ### `Added`
 
