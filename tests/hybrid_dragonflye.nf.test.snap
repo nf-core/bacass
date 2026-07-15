@@ -22,7 +22,7 @@
                     "gunzip": 1.13
                 },
                 "MEDAKA": {
-                    "medaka": "1.4.4"
+                    "medaka": "2.2.2"
                 },
                 "NANOPLOT": {
                     "nanoplot": "1.46.1"
