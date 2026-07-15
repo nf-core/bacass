@@ -247,7 +247,7 @@ It also runs [BUSCO](https://busco.ezlab.org/), a software which assess genome q
 - `busco/`: BUSCO reports
   - `<SampleName>-<Assembler>-<PolishingMethod>-<BuscoLineage>-busco.batch_summary.txt`: BUSCO batch summary
   - `<SampleName>-<Assembler>-<PolishingMethod>-<BuscoLineage>-busco.log`: BUSCO execution log.
-  - `short_summary.specific.<BuscoLineage>.<SampleName>-<Assembler>-<AssemblyFileName>.txt`: BUSCO short  summary in text format.
+  - `short_summary.specific.<BuscoLineage>.<SampleName>-<Assembler>-<AssemblyFileName>.txt`: BUSCO short summary in text format.
   - `short_summary.specific.<BuscoLineage>.<SampleName>-<Assembler>-<AssemblyFileName>.json`: BUSCO short summary in JSON format.
 
 ![QUAST QC](images/quast.png)
