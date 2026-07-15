@@ -26,8 +26,14 @@
                 "FLYE": {
                     "flye": "2.9.5-b1801"
                 },
+                "GUNZIP": {
+                    "gunzip": 1.13
+                },
+                "GUNZIP_MEDAKA": {
+                    "gunzip": 1.13
+                },
                 "MEDAKA": {
-                    "medaka": "2.2.1"
+                    "medaka": "2.2.2"
                 },
                 "MINIASM": {
                     "miniasm": "0.3-r179"
@@ -77,9 +83,9 @@
                 "Autocycler/combine/TestMe-autocycler/consensus_assembly.gfa",
                 "Autocycler/combine/TestMe-autocycler/consensus_assembly.yaml",
                 "Medaka",
-                "Medaka/TestMe-autocycler-medaka_polished_genome.fa",
-                "Medaka/TestMe-miniasm-medaka_polished_genome.fa",
-                "Medaka/TestMe-raven-medaka_polished_genome.fa",
+                "Medaka/TestMe-autocycler-medaka_polished_genome.fa.gz",
+                "Medaka/TestMe-miniasm-medaka_polished_genome.fa.gz",
+                "Medaka/TestMe-raven-medaka_polished_genome.fa.gz",
                 "Miniasm",
                 "Miniasm/TestMe-miniasm.consensus.fasta.gz",
                 "Miniasm/TestMe-miniasm.fasta.gz",
@@ -302,9 +308,9 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-04-21T14:04:10.730135368",
+        "timestamp": "2026-07-14T15:13:52.19386823",
         "meta": {
-            "nf-test": "0.9.4",
+            "nf-test": "0.9.5",
             "nextflow": "25.10.4"
         }
     }

@@ -3,11 +3,15 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.7.0dev nf-core/bacass - [date]
+## v2.7.0dev nf-core/bacass - (date)
 
 ### `Changed`
 
+- [#310](https://github.com/nf-core/bacass/pull/310) Use nf-core Medaka, add BUSCO to MultiQC, and fix Dragonflye channels
+
 ### `Added`
+
+- [#310](https://github.com/nf-core/bacass/pull/310) Add BUSCO output to MultiQC
 
 ### `Fixed`
 
@@ -28,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#309](https://github.com/nf-core/bacass/pull/309) Fix git CI resource limits
 
 ### `Dependencies`
+
+| Tool   | Previous version | New version |
+| ------ | ---------------- | ----------- |
+| Medaka | 2.2.1            | 2.2.2       |
 
 ### `Deprecated`
 

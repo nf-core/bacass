@@ -1,7 +1,7 @@
 {
     "-profile test_long_dragonflye": {
         "content": [
-            9,
+            10,
             {
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
@@ -9,8 +9,11 @@
                 "DRAGONFLYE": {
                     "dragonflye": "1.2.1"
                 },
+                "GUNZIP": {
+                    "gunzip": 1.13
+                },
                 "MEDAKA": {
-                    "medaka": "2.2.1"
+                    "medaka": "2.2.2"
                 },
                 "NANOPLOT": {
                     "nanoplot": "1.46.1"
@@ -37,7 +40,7 @@
                 "Dragonflye/TestMe-dragonflye.fa",
                 "Dragonflye/TestMe-dragonflye.reoriented.fa",
                 "Medaka",
-                "Medaka/TestMe-dragonflye-medaka_polished_genome.fa",
+                "Medaka/TestMe-dragonflye-medaka_polished_genome.fa.gz",
                 "Prokka",
                 "Prokka/TestMe-dragonflye-medaka",
                 "QC_longreads",
@@ -176,9 +179,9 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-04-21T13:26:00.545455209",
+        "timestamp": "2026-07-14T16:04:37.212978121",
         "meta": {
-            "nf-test": "0.9.4",
+            "nf-test": "0.9.5",
             "nextflow": "25.10.4"
         }
     }

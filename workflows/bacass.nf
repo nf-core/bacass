@@ -10,7 +10,7 @@
 //
 include { PYCOQC                    } from '../modules/local/pycoqc'
 include { NANOPOLISH                } from '../modules/local/nanopolish'
-include { MEDAKA                    } from '../modules/local/medaka'
+include { MEDAKA                    } from '../modules/nf-core/medaka'
 include { KRAKEN2_DB_PREPARATION    } from '../modules/local/kraken2/db_preparation'
 include { DFAST                     } from '../modules/local/dfast'
 include { CUSTOM_MULTIQC            } from '../modules/local/custom/multiqc'
@@ -44,6 +44,7 @@ include { QUAST as QUAST_BYSAMPLE               } from '../modules/nf-core/quast
 include { BUSCO_BUSCO                           } from '../modules/nf-core/busco/busco/main'
 include { GUNZIP                                } from '../modules/nf-core/gunzip'
 include { GUNZIP as GUNZIP_BAKTA                } from '../modules/nf-core/gunzip'
+include { GUNZIP as GUNZIP_MEDAKA               } from '../modules/nf-core/gunzip'
 include { PROKKA                                } from '../modules/nf-core/prokka'
 include { FILTLONG                              } from '../modules/nf-core/filtlong'
 include { RASUSA                                } from '../modules/nf-core/rasusa'
@@ -589,11 +590,13 @@ workflow BACASS {
         ch_for_assembly
             .filter { meta, _sr, _lr -> !meta.subsample } // remove any subsamples
             .cross(ch_assembly) { it -> it[0].sample } // merge by meta.sample -> [[ meta, sr, lr ],[ meta, assembly ]]
-            .map { for_assembly,assembly ->
+            .map { for_assembly, assembly ->
                 def meta_assembly  = assembly[0]
                 def long_reads     = for_assembly[2]
                 def fasta_assembly = assembly[1]
-                [ meta_assembly, long_reads, fasta_assembly ] }
+                fasta_assembly = fasta_assembly instanceof List ? fasta_assembly[0] : fasta_assembly
+                [ meta_assembly, long_reads, fasta_assembly ]
+            }
             .set { ch_polish_long } // channel: [ val(meta), path(lr), path(fasta) ]
 
         if (params.polish_method == 'medaka'){
@@ -606,12 +609,30 @@ workflow BACASS {
                 }
                 .set { ch_polish_long_medaka }
 
+            ch_polish_long_medaka
+                .branch { _meta, _lr, assembly ->
+                    gzip: assembly.name.endsWith('.gz')
+                    skip: true
+                }
+                .set { ch_polish_long_medaka_for_gunzip }
+
+            GUNZIP_MEDAKA (
+                ch_polish_long_medaka_for_gunzip.gzip.map { meta, _lr, assembly -> tuple(meta, assembly) }
+            )
+
+            ch_polish_long_medaka_reads = ch_polish_long_medaka_for_gunzip.gzip.map { meta, lr, _assembly -> tuple(meta, lr) }
+
+            ch_polish_long_medaka_input = ch_polish_long_medaka_for_gunzip.skip.mix(
+                GUNZIP_MEDAKA.out.gunzip
+                    .join(ch_polish_long_medaka_reads)
+                    .map { meta, assembly, lr -> tuple(meta, lr, assembly) }
+            )
+
             //
             // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
             //
-            MEDAKA ( ch_polish_long_medaka )
+            MEDAKA ( ch_polish_long_medaka_input )
             ch_assembly = MEDAKA.out.assembly
-            ch_versions = ch_versions.mix(MEDAKA.out.versions)
         } else if (params.polish_method == 'nanopolish') {
             ch_polish_long
                 .map{ meta, lr, assembly ->

@@ -100,6 +100,11 @@
                         "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
                         "installed_by": ["modules"]
                     },
+                    "medaka": {
+                        "branch": "master",
+                        "git_sha": "13c499c244bf0e46ec222ae4fcb4074cf5eef1fe",
+                        "installed_by": ["modules"]
+                    },
                     "megahit": {
                         "branch": "master",
                         "git_sha": "e4f18d1cecc86b39daafe8bf22343b868e696c15",

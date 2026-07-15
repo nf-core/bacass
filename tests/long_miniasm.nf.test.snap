@@ -1,10 +1,16 @@
 {
     "-profile test_long_miniasm": {
         "content": [
-            14,
+            16,
             {
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
+                },
+                "GUNZIP": {
+                    "gunzip": 1.13
+                },
+                "GUNZIP_MEDAKA": {
+                    "gunzip": 1.13
                 },
                 "KRAKEN2_DB_PREPARATION": {
                     "tar": null
@@ -14,7 +20,7 @@
                     "pigz": 2.8
                 },
                 "MEDAKA": {
-                    "medaka": "2.2.1"
+                    "medaka": "2.2.2"
                 },
                 "MINIASM": {
                     "miniasm": "0.3-r179"
@@ -49,7 +55,7 @@
             },
             [
                 "Medaka",
-                "Medaka/TestMe-miniasm-medaka_polished_genome.fa",
+                "Medaka/TestMe-miniasm-medaka_polished_genome.fa.gz",
                 "Miniasm",
                 "Miniasm/TestMe-miniasm.consensus.fasta.gz",
                 "Miniasm/TestMe-miniasm.fasta.gz",
@@ -268,10 +274,10 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-04-21T13:42:59.301236762",
+        "timestamp": "2026-07-15T13:09:20.235676354",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
         }
     }
 }

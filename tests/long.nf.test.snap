@@ -1,13 +1,19 @@
 {
     "-profile test_long": {
         "content": [
-            9,
+            11,
             {
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
                 },
+                "GUNZIP": {
+                    "gunzip": 1.13
+                },
+                "GUNZIP_MEDAKA": {
+                    "gunzip": 1.13
+                },
                 "MEDAKA": {
-                    "medaka": "2.2.1"
+                    "medaka": "2.2.2"
                 },
                 "NANOPLOT": {
                     "nanoplot": "1.46.1"
@@ -33,7 +39,7 @@
             },
             [
                 "Medaka",
-                "Medaka/TestMe-unicycler-medaka_polished_genome.fa",
+                "Medaka/TestMe-unicycler-medaka_polished_genome.fa.gz",
                 "Prokka",
                 "Prokka/TestMe-unicycler-medaka",
                 "QC_longreads",
@@ -178,9 +184,9 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-04-21T12:52:41.530666226",
+        "timestamp": "2026-07-14T14:12:44.447032679",
         "meta": {
-            "nf-test": "0.9.4",
+            "nf-test": "0.9.5",
             "nextflow": "25.10.4"
         }
     }
