@@ -102,7 +102,7 @@
                     },
                     "medaka": {
                         "branch": "master",
-                        "git_sha": "36cd6ae607669767657ff5167dc6cc0508a5f349",
+                        "git_sha": "13c499c244bf0e46ec222ae4fcb4074cf5eef1fe",
                         "installed_by": ["modules"]
                     },
                     "megahit": {

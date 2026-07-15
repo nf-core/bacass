@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- [#310](https://github.com/nf-core/bacass/pull/310) Replace local Medaka module with nf-core module
+- [#310](https://github.com/nf-core/bacass/pull/310) Use nf-core Medaka, add BUSCO to MultiQC, and fix Dragonflye channels
 
 ### `Added`
 
@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#309](https://github.com/nf-core/bacass/pull/309) Fix git CI resource limits
 
 ### `Dependencies`
+
+| Tool   | Previous version | New version |
+| ------ | ---------------- | ----------- |
+| Medaka | 2.2.1            | 2.2.2       |
 
 ### `Deprecated`
 
