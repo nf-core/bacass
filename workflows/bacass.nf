@@ -238,7 +238,7 @@ workflow BACASS {
         //
         if ( params.long_reads_filtering == 'porechop' ) {
             PORECHOP_PORECHOP (
-                ch_longreads_concat.dump(tag: 'longreads')
+                ch_longreads_concat.dump(tag: 'longreads_concat')
             )
             ch_longreads_filtered   = PORECHOP_PORECHOP.out.reads
             ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
@@ -249,15 +249,26 @@ workflow BACASS {
         // MODULE: FILTLONG, filtering long reads by quality. It can take a set of long reads and produce a smaller, better subset.
         //
         if ( params.long_reads_filtering == 'filtlong' ) {
-            ch_shortreads_for_filtlong = channel.empty()
-            if (params.assembly_type == 'hybrid') {
-                ch_shortreads_for_filtlong = ch_short_preprocessed.join(ch_longreads_concat)   //tuple val(meta), file(sr), file(lr)
-            } else if ( params.assembly_type == 'long' ) {
-                ch_shortreads_for_filtlong = ch_longreads_concat.map{ meta, lr -> tuple(meta, [], lr ) }
-            }
+            def ch_filtlong_hybrid = ch_short_preprocessed
+                .cross(ch_longreads_concat) { it[0].sample }
+                .map { short_tuple, long_tuple ->
+                    def meta        = short_tuple[0]
+                    def short_reads = short_tuple[1]
+                    def long_reads  = long_tuple[1]
+                    tuple(meta, short_reads, long_reads)
+                }
+
+            def ch_filtlong_long = ch_longreads_concat
+                .map { meta, lr -> tuple(meta, [], lr) }
+
+            ch_shortreads_for_filtlong = params.assembly_type == 'hybrid' ? ch_filtlong_hybrid :
+                params.assembly_type == 'long' ? ch_filtlong_long :
+                ch_filtlong_hybrid
+                    .filter { meta, _sr, _lr -> meta.assembly_type == 'hybrid' }
+                    .mix(ch_filtlong_long.filter { meta, _sr, _lr -> meta.assembly_type == 'long' })
 
             FILTLONG (
-                ch_shortreads_for_filtlong
+                ch_shortreads_for_filtlong.dump(tag:'reads_for_filtlong')
             )
 
             ch_longreads_filtered   = FILTLONG.out.reads
@@ -269,7 +280,7 @@ workflow BACASS {
     // MODULE: RASUSA, randomly subsample reads to a target coverage or number of bases.
     //
     if ( params.rasusa ) {
-        if ( params.assembly_type != 'short' ) {
+        if ( params.assembly_type != 'short' ) { // In 'auto' mode, only samples with long reads will be in ch_longreads_filtered
             ch_longreads_filtered
                 .branch { meta, reads ->
                     with_gsize: meta.gsize && meta.gsize != 'NA'
@@ -278,11 +289,14 @@ workflow BACASS {
                 .set { ch_rasusa_branch }
 
             ch_rasusa_branch.with_gsize
-                .map { meta, reads -> tuple(meta, reads, meta.gsize) }
+                .map { meta, reads ->
+                    def rasusa_meta = meta + [single_end: true]
+                    tuple(rasusa_meta, reads, meta.gsize)
+                }
                 .set { ch_rasusa_input }
 
             RASUSA (
-                ch_rasusa_input,
+                ch_rasusa_input.dump(tag:'rasusa_input'),
                 params.rasusa_coverage
             )
             ch_longreads_filtered = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize)
