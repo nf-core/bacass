@@ -63,6 +63,8 @@ include { paramsSummaryMap                      } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
+include { detectAssemblyType                    } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
+include { normaliseInputFiles                   } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,9 +97,9 @@ workflow BACASS {
     //
     def criteria = multiMapCriteria {
         meta, fastqs, long_fastq, fast5 ->
-            shortreads: fastqs[0]       != 'NA' ? tuple(meta, fastqs)    : tuple(meta, [])
-            longreads:  long_fastq      != 'NA' ? tuple(meta,long_fastq) : tuple(meta, [])
-            fast5:      fast5           != 'NA' ? tuple(meta, fast5)     : tuple(meta, [])
+            shortreads: fastqs     ? tuple(meta, fastqs)     : tuple(meta, [])
+            longreads:  long_fastq ? tuple(meta, long_fastq) : tuple(meta, [])
+            fast5:      fast5      ? tuple(meta, fast5[0])   : tuple(meta, [])
     }
     ch_proteins = params.prokka_proteins ? channel.fromPath(params.prokka_proteins, checkIfExists: true)  : []
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
@@ -105,7 +107,16 @@ workflow BACASS {
         .map { meta, fastqs, long_fastq, fast5  ->
             def new_meta = meta + [id: meta.sample] // add "meta.id" !
             new_meta.subsample = false
-            return [ new_meta, fastqs, long_fastq, fast5  ] }
+            def short_read_files = normaliseInputFiles(fastqs)
+            def long_read_files  = normaliseInputFiles(long_fastq)
+            def fast5_files      = normaliseInputFiles(fast5)
+            // Annotate per-sample assembly type
+            if (params.assembly_type == 'auto') {
+                new_meta.assembly_type = detectAssemblyType(short_read_files, long_read_files)
+            } else {
+                new_meta.assembly_type = params.assembly_type
+            }
+            return [ new_meta, short_read_files, long_read_files, fast5_files  ] }
         .multiMap (criteria)
         .set { ch_input }
 
@@ -113,10 +124,12 @@ workflow BACASS {
     ch_input
         .shortreads
         .filter{ _meta, data -> data }
+        .dump(tag: 'shortreads')
         .set { ch_shortreads }
     ch_input
         .longreads
         .filter{ _meta, data -> data }
+        .dump(tag: 'longreads')
         .set { ch_longreads }
     ch_input
         .fast5
@@ -130,7 +143,7 @@ workflow BACASS {
     ch_fastqc_raw_multiqc  = channel.empty()
     ch_fastqc_trim_multiqc = channel.empty()
     ch_fastp_json_multiqc  = channel.empty()
-    if (params.assembly_type in ['short', 'hybrid']) {
+    if (params.assembly_type in ['short', 'hybrid', 'auto']) {
         //
         // MODULE: Concatenate FastQ files from same sample if required
         //
@@ -173,7 +186,7 @@ workflow BACASS {
     ch_porechop_log_multiqc = channel.empty()
     ch_filtlong_log_multiqc = channel.empty()
     ch_longreads_filtered   = channel.empty()
-    if (params.assembly_type in ['long', 'hybrid']) {
+    if (params.assembly_type in ['long', 'hybrid', 'auto']) {
         //
         // MODULE: Concatenate FastQ files from same sample if required
         //
