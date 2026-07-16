@@ -149,9 +149,9 @@
                 "assembly_type": {
                     "type": "string",
                     "fa_icon": "fas fa-fingerprint",
-                    "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`.",
+                    "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short`, `hybrid`, or `auto`. When set to `auto`, each sample's assembly type is determined by the reads provided in the samplesheet.",
                     "description": "Which type of assembly to perform.",
-                    "enum": ["short", "long", "hybrid"]
+                    "enum": ["short", "long", "hybrid", "auto"]
                 },
                 "unicycler_args": {
                     "type": "string",
