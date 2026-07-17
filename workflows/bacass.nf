@@ -159,6 +159,7 @@ workflow BACASS {
         )
         ch_shortreads_concat = CAT_FASTQ_SHORT.out.reads
             .mix( ch_shortreads_fastqs.single )
+            .dump(tag: 'shortreads_concat')
 
         //
         // SUBWORKFLOW: Short reads QC and trim adapters
@@ -171,7 +172,7 @@ workflow BACASS {
             params.skip_fastp,
             params.skip_fastqc
         )
-        ch_short_preprocessed   = FASTQ_TRIM_FASTP_FASTQC.out.reads
+        ch_short_preprocessed   = FASTQ_TRIM_FASTP_FASTQC.out.reads.dump(tag: 'shortreads_preprocessed')
         ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
         ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
         ch_fastp_json_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
@@ -209,6 +210,7 @@ workflow BACASS {
         )
         ch_longreads_concat = CAT_FASTQ_LONG.out.reads
             .mix( ch_longreads_fastqs.single )
+            .dump(tag: 'longreads_concat')
 
         //
         // SUBWORKFLOW: quality check for nanopore reads with Nanoplot and ToulligQC
@@ -238,9 +240,9 @@ workflow BACASS {
         //
         if ( params.long_reads_filtering == 'porechop' ) {
             PORECHOP_PORECHOP (
-                ch_longreads_concat.dump(tag: 'longreads_concat')
+                ch_longreads_concat
             )
-            ch_longreads_filtered   = PORECHOP_PORECHOP.out.reads
+            ch_longreads_filtered   = PORECHOP_PORECHOP.out.reads.dump(tag: 'longreads_filtered')
             ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
             ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
         }
@@ -261,6 +263,7 @@ workflow BACASS {
             def ch_filtlong_long = ch_longreads_concat
                 .map { meta, lr -> tuple(meta, [], lr) }
 
+            // Decide which channel should be sent to filtlong
             ch_shortreads_for_filtlong = params.assembly_type == 'hybrid' ? ch_filtlong_hybrid :
                 params.assembly_type == 'long' ? ch_filtlong_long :
                 ch_filtlong_hybrid
@@ -271,7 +274,7 @@ workflow BACASS {
                 ch_shortreads_for_filtlong.dump(tag:'reads_for_filtlong')
             )
 
-            ch_longreads_filtered   = FILTLONG.out.reads
+            ch_longreads_filtered   = FILTLONG.out.reads.dump(tag: 'longreads_filtered')
             ch_filtlong_log_multiqc = FILTLONG.out.log
         }
     }
@@ -299,105 +302,73 @@ workflow BACASS {
                 ch_rasusa_input.dump(tag:'rasusa_input'),
                 params.rasusa_coverage
             )
-            ch_longreads_filtered = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize)
+            ch_longreads_filtered = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize).dump(tag: 'longreads_filtered')
             ch_rasusa_log = RASUSA.out.log
         }
     }
 
-
     //
-    // Join channels for assemblers. As samples have the same meta data, we can simply use join() to merge the channels based on this. If we only have one of the channels we insert 'NAs' which are not used in the unicycler process then subsequently, in case of short or long read only assembly.
-    // Prepare channel for Kraken2
+    // Prepare channels for assemblers and Kraken2.
+    // Assemblers always receive tuple(meta, short_reads_or_empty, long_reads_or_empty).
     //
-    if(params.assembly_type == 'hybrid'){
-        ch_for_kraken2_short    = ch_short_preprocessed
-        ch_for_kraken2_long     = ch_longreads_filtered
-        ch_short_preprocessed
-            .dump(tag: 'fastp')
-            .cross(ch_longreads_filtered) { it -> it[0].sample }
-            .map { short_tuple, long_tuple ->
-                def meta_short = short_tuple[0]
-                def short_reads = short_tuple[1]
-                def long_reads = long_tuple[1]
-                [meta_short, short_reads, long_reads]
-            }
+    ch_for_assembly_hybrid = ch_short_preprocessed
+        .cross(ch_longreads_filtered) { it[0].sample }
+        .map { short_tuple, long_tuple ->
+            def meta        = short_tuple[0]
+            def short_reads = short_tuple[1]
+            def long_reads  = long_tuple[1]
+            tuple(meta, short_reads, long_reads)
+        }
+
+    ch_for_assembly_short = ch_short_preprocessed
+        .map { meta, reads -> tuple(meta, reads, []) }
+
+    ch_for_assembly_long = ch_longreads_filtered
+        .map { meta, reads -> tuple(meta, [], reads) }
+
+    if (params.assembly_type == 'hybrid') {
+        ch_for_kraken2_short = ch_short_preprocessed
+        ch_for_kraken2_long  = ch_longreads_filtered
+        ch_for_assembly_hybrid
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
-        ch_for_assembly.ifEmpty{
-            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  There is nothing to assemble with these settings.\n" +
-                "  Please verify that samples have short and long reads.\n"
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            error(error_string) }
-    } else if ( params.assembly_type == 'short' ) {
-        ch_for_kraken2_short    = ch_short_preprocessed
-        ch_for_kraken2_long     = channel.empty()
-        ch_short_preprocessed
-            .dump(tag: 'fastp')
-            .map{ meta,reads -> tuple(meta,reads,[]) }
+    } else if (params.assembly_type == 'short') {
+        ch_for_kraken2_short = ch_short_preprocessed
+        ch_for_kraken2_long  = channel.empty()
+        ch_for_assembly_short
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
-        ch_for_assembly.ifEmpty{
-            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  There is nothing to assemble with these settings.\n" +
-                "  Please verify that samples have short reads.\n"
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            error(error_string) }
-    } else if ( params.assembly_type == 'long' ) {
-        ch_for_kraken2_short    = channel.empty()
-        ch_for_kraken2_long     = ch_longreads_filtered
-        ch_longreads_filtered
-            .dump(tag: 'ch_longreads_filtered')
-            .map{ meta,lr -> tuple(meta,[],lr) }
+    } else if (params.assembly_type == 'long') {
+        ch_for_kraken2_short = channel.empty()
+        ch_for_kraken2_long  = ch_longreads_filtered
+        ch_for_assembly_long
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
-        ch_for_assembly.ifEmpty{
-            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  There is nothing to assemble with these settings.\n" +
-                "  Please verify that samples have long reads.\n"
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            error(error_string) }
-    } else if ( params.assembly_type == 'auto' ) {
-        // In auto mode QC/preprocessing stays split by read type, but assemblers receive
-        // one canonical tuple per sample: [ meta, short_reads_or_empty, long_reads_or_empty ].
-        ch_for_kraken2_short    = ch_short_preprocessed
-        ch_for_kraken2_long     = ch_longreads_filtered
+    } else if (params.assembly_type == 'auto') {
+        ch_for_kraken2_short = ch_short_preprocessed
+        ch_for_kraken2_long  = ch_longreads_filtered
 
-        // Hybrid samples: merge short and long reads by sample after both preprocessing branches.
-        def ch_auto_hybrid = ch_short_preprocessed
-            .filter { meta, _reads -> meta.assembly_type == 'hybrid' }
-            .cross(
-                ch_longreads_filtered.filter { meta, _lr -> meta.assembly_type == 'hybrid' }
-            ) { it[0].sample }
-            .map { short_tuple, long_tuple ->
-                def meta        = short_tuple[0]
-                def short_reads = short_tuple[1]
-                def long_reads  = long_tuple[1]
-                tuple(meta, short_reads, long_reads)
-            }
-
-        // Short-only samples
-        def ch_auto_short = ch_short_preprocessed
-            .filter { meta, _reads -> meta.assembly_type == 'short' }
-            .map { meta, reads -> tuple(meta, reads, []) }
-
-        // Long-only samples
-        def ch_auto_long = ch_longreads_filtered
-            .filter { meta, _lr -> meta.assembly_type == 'long' }
-            .map { meta, lr -> tuple(meta, [], lr) }
-
-        ch_auto_hybrid
-            .mix(ch_auto_short, ch_auto_long)
+        ch_for_assembly_hybrid
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'hybrid' }
+            .dump(tag: 'auto_assembly_hybrid')
+            .mix(
+                ch_for_assembly_short
+                    .filter { meta, _sr, _lr -> meta.assembly_type == 'short' }
+                    .dump(tag: 'auto_assembly_short'),
+                ch_for_assembly_long
+                    .filter { meta, _sr, _lr -> meta.assembly_type == 'long' }
+                    .dump(tag: 'auto_assembly_long')
+            )
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
-
-        ch_for_assembly.ifEmpty{
-            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  There is nothing to assemble with these settings.\n" +
-                "  Please verify that samples have at least short or long reads.\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            error(error_string) }
     }
+
+    ch_for_assembly.ifEmpty{
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  There is nothing to assemble with these settings.\n" +
+            "  Please verify that samples have reads compatible with --assembly_type ${params.assembly_type}.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string) }
 
     //
     // MODULE: Autocycler, subset long reads for multiple assemblies per sample.
@@ -476,7 +447,7 @@ workflow BACASS {
     // MODULE: Canu, genome assembly, long reads
     //
     if ( params.assembler.tokenize(",").contains("canu") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("canu") ) ) {
-        ch_for_assembly
+        ch_for_assembly_canu_candidates = ch_for_assembly
             .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] } // canu needs long reads
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
@@ -488,7 +459,18 @@ workflow BACASS {
                 params.assembler.tokenize(",").contains("autocycler") && !params.assembler.tokenize(",").contains("canu") ? meta.subsample : // if with autocycler and not canu accept only subsamples
                     !params.assembler.tokenize(",").contains("autocycler") && params.assembler.tokenize(",").contains("canu") ? !meta.subsample : true // if without autocycler and with canu reject subsample
             }
+
+        ch_for_assembly_canu_candidates
+            .filter { meta, _lr ->
+                if (!meta.gsize || meta.gsize == 'NA') {
+                    log.warn "Skipping Canu for sample '${meta.sample}' because genome size is required. Please add a valid 'gsize' value to the samplesheet and rerun the pipeline with -resume."
+                    return false
+                }
+                return true
+            }
+            .dump(tag: 'canu_input')
             .set { ch_for_assembly_canu }
+
         CANU (
             ch_for_assembly_canu,
             params.canu_mode,
@@ -500,6 +482,7 @@ workflow BACASS {
     //
     // MODULE: Miniasm, genome assembly, long reads
     //
+    // TODO: this can be subworkflow
     if ( params.assembler.tokenize(",").contains("miniasm") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") ) ) {
         ch_for_assembly
             .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] } // miniasm needs long reads
@@ -507,17 +490,18 @@ workflow BACASS {
                 def new_meta = meta.clone()
                 new_meta.assembler = "miniasm"
                 new_meta.id = meta.subsample ? "${meta.id}-${meta.subsample}-miniasm" : meta.id + "-miniasm"
-                [ new_meta, long_reads ]
+                tuple(new_meta, long_reads)
             }
             .filter { meta, _lr ->
                 params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") && params.assembler.tokenize(",").contains("miniasm") ? true : // if with autocycler and miniasm accept all data sets
                     params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") && !params.assembler.tokenize(",").contains("miniasm") ? meta.subsample : // if with autocycler and not miniasm accept only subsamples
                     ( !params.assembler.tokenize(",").contains("autocycler") || !params.autocycler_assemblers.tokenize(",").contains("miniasm") ) && params.assembler.tokenize(",").contains("miniasm") ? !meta.subsample : false // if without autocycler and with miniasm reject subsample
             }
-            .set { ch_for_assembly_miniasm }
+            .dump(tag: 'miniasm_longreads')
+            .set { ch_miniasm_longreads }
 
         MINIMAP2_ALIGN (
-            ch_for_assembly_miniasm,
+            ch_miniasm_longreads,
             [[:],[]],
             false,
             false,
@@ -525,7 +509,7 @@ workflow BACASS {
         )
         ch_versions = ch_versions.mix(MINIMAP2_ALIGN.out.versions)
 
-        ch_for_assembly_miniasm
+        ch_miniasm_longreads
             .join(MINIMAP2_ALIGN.out.paf)
             .set { ch_for_miniasm }
 
@@ -534,7 +518,7 @@ workflow BACASS {
         )
 
         MINIMAP2_CONSENSUS (
-            ch_for_assembly_miniasm,
+            ch_miniasm_longreads,
             MINIASM.out.assembly,
             false,
             false,
@@ -542,9 +526,11 @@ workflow BACASS {
         )
         ch_versions = ch_versions.mix(MINIMAP2_CONSENSUS.out.versions)
 
-        ch_for_assembly_miniasm
+        ch_miniasm_longreads
             .join(MINIASM.out.assembly)
             .join(MINIMAP2_CONSENSUS.out.paf)
+            .map { meta, long_reads, assembly, paf -> tuple(meta, long_reads, assembly, paf) }
+            .dump(tag: 'racon_input')
             .set{ ch_for_racon }
 
         RACON (
