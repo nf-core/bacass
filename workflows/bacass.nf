@@ -517,17 +517,27 @@ workflow BACASS {
             ch_for_miniasm
         )
 
+        ch_miniasm_longreads
+            .join(MINIASM.out.assembly)
+            .set { ch_miniasm_for_consensus }
+
+        ch_miniasm_for_consensus
+            .multiMap { meta, long_reads, assembly ->
+                reads: tuple(meta, long_reads)
+                assembly: tuple(meta, assembly)
+            }
+            .set { ch_miniasm_consensus_input }
+
         MINIMAP2_CONSENSUS (
-            ch_miniasm_longreads,
-            MINIASM.out.assembly,
+            ch_miniasm_consensus_input.reads,
+            ch_miniasm_consensus_input.assembly,
             false,
             false,
             false
         )
         ch_versions = ch_versions.mix(MINIMAP2_CONSENSUS.out.versions)
 
-        ch_miniasm_longreads
-            .join(MINIASM.out.assembly)
+        ch_miniasm_for_consensus
             .join(MINIMAP2_CONSENSUS.out.paf)
             .map { meta, long_reads, assembly, paf -> tuple(meta, long_reads, assembly, paf) }
             .dump(tag: 'racon_input')
