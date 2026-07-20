@@ -762,6 +762,13 @@ workflow BACASS {
         }
     }
 
+    ch_assembly
+        .map { meta, assembly ->
+            def fasta = assembly instanceof List ? assembly[0] : assembly
+            tuple(meta, fasta)
+        }
+        .set { ch_assembly }
+
     //
     // MODULE: Kraken2, QC for sample purity
     //
