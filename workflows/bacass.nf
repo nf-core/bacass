@@ -1041,32 +1041,34 @@ workflow BACASS {
     ch_workflow_summary                   = channel.value(paramsSummaryMultiqc(summary_params))
     ch_multiqc_custom_methods_description = params.multiqc_methods_description ? channel.fromPath(params.multiqc_methods_description, checkIfExists: true) : channel.fromPath("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
 
-    CUSTOM_MULTIQC (
-        ch_multiqc_config.ifEmpty([]),
-        ch_multiqc_custom_config.ifEmpty([]),
-        ch_multiqc_logo.ifEmpty([]),
-        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
-        ch_multiqc_custom_methods_description.ifEmpty([]),
-        ch_collated_versions.ifEmpty([]),
-        ch_fastqc_raw_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_fastqc_trim_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_fastp_json_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_nanoplot_txt_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_porechop_log_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_filtlong_log_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_pycoqc_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_kraken_short_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_kraken_long_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_quast_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_busco_multiqc.collect{it -> it[1]}.ifEmpty([]),
-        ch_prokka_txt_multiqc.collect().ifEmpty([]),
-        ch_bakta_txt_multiqc.collect().ifEmpty([]),
-        ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
-    )
+        CUSTOM_MULTIQC (
+            ch_multiqc_config.ifEmpty([]),
+            ch_multiqc_custom_config.ifEmpty([]),
+            ch_multiqc_logo.ifEmpty([]),
+            ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+            ch_multiqc_custom_methods_description.ifEmpty([]),
+            ch_collated_versions.ifEmpty([]),
+            ch_fastqc_raw_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_fastqc_trim_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_fastp_json_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_nanoplot_txt_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_porechop_log_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_filtlong_log_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_pycoqc_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_kraken_short_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_kraken_long_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_quast_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_busco_multiqc.collect{it -> it[1]}.ifEmpty([]),
+            ch_prokka_txt_multiqc.collect().ifEmpty([]),
+            ch_bakta_txt_multiqc.collect().ifEmpty([]),
+            ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
+        )
+        ch_multiqc_report = CUSTOM_MULTIQC.out.report.toList()
+    }
 
     emit:
-    multiqc_report = CUSTOM_MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                        // channel: [ path(versions.yml) ]
+    multiqc_report = ch_multiqc_report // channel: /path/to/multiqc_report.html
+    versions       = ch_versions       // channel: [ path(versions.yml) ]
 
 }
 
