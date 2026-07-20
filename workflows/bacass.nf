@@ -935,7 +935,7 @@ workflow BACASS {
         ch_to_prokka    = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
 
         PROKKA (
-            ch_to_prokka.filter{ _meta, fasta -> !fasta.isEmpty() },
+            ch_to_prokka.filter{ _meta, fasta -> workflow.commandLine.contains('-stub-run') || !fasta.isEmpty() },
             ch_proteins,
             []
         )
@@ -952,7 +952,7 @@ workflow BACASS {
         ch_to_bakta     = ch_assembly_for_gunzip.skip.mix( GUNZIP_BAKTA.out.gunzip )
 
         BAKTA_DBDOWNLOAD_RUN (
-            ch_to_bakta.filter{ _meta, fasta -> !fasta.isEmpty() },
+            ch_to_bakta.filter{ _meta, fasta -> workflow.commandLine.contains('-stub-run') || !fasta.isEmpty() },
             params.baktadb,
             params.baktadb_download
         )
