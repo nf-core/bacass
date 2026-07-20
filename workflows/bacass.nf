@@ -374,9 +374,9 @@ workflow BACASS {
     // MODULE: Autocycler, subset long reads for multiple assemblies per sample.
     //
     if( params.assembler.tokenize(",").contains("autocycler") ) {
-        // subsample and transpose to one subset per channel entry (only for samples with long reads)
+        // subsample and transpose to one subset per channel entry (only for long-read assemblies)
         def ch_for_autocycler_subsample = ch_for_assembly
-            .filter { meta, _sr, lr -> !meta.subsample && meta.assembly_type in ['long', 'hybrid'] && lr }
+            .filter { meta, _sr, lr -> !meta.subsample && meta.assembly_type == 'long' && lr }
         AUTOCYCLER_SUBSAMPLE (
             ch_for_autocycler_subsample.map{ meta, _short_reads, long_reads -> [meta, long_reads] },
             ch_for_autocycler_subsample.map { meta, _reads, _lr -> meta.gsize }
@@ -424,7 +424,7 @@ workflow BACASS {
     //
     if ( params.assembler.tokenize(",").contains("megahit") ) {
         ch_for_assembly
-            .filter { meta, _sr, _lr -> meta.assembly_type in ['short', 'hybrid'] } // megahit needs short reads
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'short' } // megahit is short-read only
             .map { meta, short_reads, _long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "megahit"
@@ -448,7 +448,7 @@ workflow BACASS {
     //
     if ( params.assembler.tokenize(",").contains("canu") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("canu") ) ) {
         ch_for_assembly_canu_candidates = ch_for_assembly
-            .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] } // canu needs long reads
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'long' } // canu is long-read only
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "canu"
@@ -485,7 +485,7 @@ workflow BACASS {
     // TODO: this can be subworkflow
     if ( params.assembler.tokenize(",").contains("miniasm") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") ) ) {
         ch_for_assembly
-            .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] } // miniasm needs long reads
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'long' } // miniasm is long-read only
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "miniasm"
@@ -544,7 +544,7 @@ workflow BACASS {
     //
     if( params.assembler.tokenize(",").contains("dragonflye") ){
         ch_for_assembly
-            .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] } // dragonflye needs long reads
+            .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] } // dragonflye supports long and hybrid assemblies
             .map{ meta, short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "dragonflye"
@@ -566,7 +566,7 @@ workflow BACASS {
     //
     if ( params.assembler.tokenize(",").contains("raven") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("raven") ) ) {
         ch_for_assembly
-            .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] } // raven needs long reads
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'long' } // raven is long-read only
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "raven"
@@ -590,7 +590,7 @@ workflow BACASS {
     //
     if ( params.assembler.tokenize(",").contains("flye") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("flye") ) ) {
         ch_for_assembly
-            .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] } // flye needs long reads
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'long' } // flye is long-read only
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "flye"
@@ -643,11 +643,11 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Long reads polishing. Uses medaka or Nanopolish (this last requires Fast5 files available in input samplesheet).
     //
-    if ( (params.assembly_type in ['long', 'auto'] && !params.skip_polish) || ( params.assembly_type != 'short' && params.polish_method) ){
-        // Set channel for polishing long reads (in auto mode, only polish samples with long reads)
+    if ( params.assembly_type in ['long', 'auto'] && !params.skip_polish && params.polish_method ){
+        // Set channel for polishing long-read assemblies only.
         ch_for_assembly
             .filter { meta, _sr, _lr -> !meta.subsample } // remove any subsamples
-            .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] } // only polish samples with long reads
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'long' }
             .cross(ch_assembly) { it -> it[0].sample } // merge by meta.sample -> [[ meta, sr, lr ],[ meta, assembly ]]
             .map { for_assembly, assembly ->
                 def meta_assembly  = assembly[0]
