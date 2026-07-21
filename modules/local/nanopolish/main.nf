@@ -39,4 +39,14 @@ process NANOPOLISH {
         nanopolish: \$( nanopolish --version | sed -e "s/nanopolish version //g" | head -n 1 )
     END_VERSIONS
     """
+
+    stub:
+    """
+    touch polished_genome.fa
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        nanopolish: 0.14.0
+    END_VERSIONS
+    """
 }
