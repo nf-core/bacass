@@ -153,7 +153,7 @@
                     },
                     "rasusa": {
                         "branch": "master",
-                        "git_sha": "35b7d3eeaccbc0c82fae2ef675b00c028b9282ca",
+                        "git_sha": "157ed9432d12a18a40e308dcd0a7a0b2a0245d2e",
                         "installed_by": ["modules"]
                     },
                     "raven": {
