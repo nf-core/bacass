@@ -77,7 +77,7 @@
                     },
                     "filtlong": {
                         "branch": "master",
-                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "git_sha": "83819fff250f4fe6747fd8855fb3039eea22e5b7",
                         "installed_by": ["modules"]
                     },
                     "flye": {
