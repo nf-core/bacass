@@ -249,7 +249,6 @@ workflow BACASS {
 
             ch_longreads_filtered   = FILTLONG.out.reads
             ch_filtlong_log_multiqc = FILTLONG.out.log
-            ch_versions       = ch_versions.mix(FILTLONG.out.versions)
         }
     }
 
@@ -424,7 +423,6 @@ workflow BACASS {
             ch_for_assembly_canu.map { meta, _lr -> meta.gsize }
         )
         ch_assembly = ch_assembly.mix( CANU.out.assembly.dump(tag: 'canu') )
-        ch_versions = ch_versions.mix(CANU.out.versions)
     }
 
     //
@@ -461,7 +459,6 @@ workflow BACASS {
         MINIASM (
             ch_for_miniasm
         )
-        ch_versions = ch_versions.mix(MINIASM.out.versions)
 
         MINIMAP2_CONSENSUS (
             ch_for_assembly_miniasm,
@@ -481,7 +478,6 @@ workflow BACASS {
             ch_for_racon
         )
         ch_assembly = ch_assembly.mix( RACON.out.improved_assembly.dump(tag: 'miniasm') )
-        ch_versions = ch_versions.mix( RACON.out.versions )
     }
 
     //
