@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Dependencies`
 
+
+| Tool      | Previous version | New version |
+| --------- | ---------------- | ----------- |
+| Canu      | 2.2              | 2.3         |
+| Medaka    | 2.2.1            | 2.2.2       |
+
 ### `Deprecated`
 
 ## v2.6.1 nf-core/bacass - "Crimson Titanium Seahorse" 2026/06/10
