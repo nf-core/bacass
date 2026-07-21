@@ -25,7 +25,9 @@
                     "busco": "5.8.3"
                 },
                 "CANU": {
-                    "canu": 2.2
+                    "canu": 2.3,
+                    "minimap2": "2.28-r1209",
+                    "samtools": 1.21
                 },
                 "FLYE": {
                     "flye": "2.9.5-b1801"
@@ -201,10 +203,10 @@
                 "trimming/longreads/porechop/TestMe.porechop.log"
             ],
             [
-                "TestMe-sample_01-canu.contigs.fasta.gz:md5,5641902b2036ef9112717dd8bb85d03e",
-                "TestMe-sample_01-canu.report:md5,900c5d6d7b25a9964ea7185e6490aa8e",
-                "TestMe-sample_02-canu.contigs.fasta.gz:md5,03a2c41c6920c9ea32e4c78689af1e93",
-                "TestMe-sample_02-canu.report:md5,678b45447750cee97b9418e3135f7a6d",
+                "TestMe-sample_01-canu.contigs.fasta.gz:md5,360b56cc871c90d34fc9929b6bb2cb2a",
+                "TestMe-sample_01-canu.report:md5,31f81ef95c077b438191e8e130d4fdab",
+                "TestMe-sample_02-canu.contigs.fasta.gz:md5,943a9a83d17c86fc0530b4ba8a938491",
+                "TestMe-sample_02-canu.report:md5,7b6bf347ac0c4dddd4fa938f824bedbe",
                 "TestMe-sample_01-raven.fasta.gz:md5,ebc67e9f0a5e5e8b20e23f90901139e2",
                 "TestMe-sample_02-raven.fasta.gz:md5,5fdfaf522526c9142bb9f62986726ca5",
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
@@ -214,10 +216,10 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-04-20T10:09:41.528146478",
+        "timestamp": "2026-07-21T14:40:35.472521483",
         "meta": {
-            "nf-test": "0.9.4",
-            "nextflow": "25.10.4"
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
         }
     }
 }

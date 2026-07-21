@@ -57,8 +57,8 @@
                 "Medaka",
                 "Medaka/TestMe-miniasm-medaka_polished_genome.fa.gz",
                 "Miniasm",
-                "Miniasm/TestMe-miniasm.consensus.fasta.gz",
                 "Miniasm/TestMe-miniasm.fasta.gz",
+                "Miniasm/TestMe-miniasm_assembly_consensus.fasta.gz",
                 "Prokka",
                 "Prokka/TestMe-miniasm-medaka",
                 "QC_longreads",
@@ -252,8 +252,8 @@
                 "trimming/longreads/porechop/TestMe.porechop.log"
             ],
             [
-                "TestMe-miniasm.consensus.fasta.gz:md5,4899e7b112077d045ecaf13daae4ae4a",
                 "TestMe-miniasm.fasta.gz:md5,cfde74bc269a51162851d9ae7c76207b",
+                "TestMe-miniasm_assembly_consensus.fasta.gz:md5,4899e7b112077d045ecaf13daae4ae4a",
                 "TestMe_longreads.txt:md5,4c2a95acdff03caa1524a5328c6ab2f5",
                 "mqc_busco_plot_bacteria_odb10_1.yaml:md5,eb1ce276ec11dcc7661c95d9e487c4a9",
                 "mqc_kraken-top-n-plot_Class.yaml:md5,057a9ddcdb8a79e6c0fd5cfb0c0f94c9",
@@ -274,7 +274,7 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-07-15T13:09:20.235676354",
+        "timestamp": "2026-07-21T15:14:25.063330142",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
