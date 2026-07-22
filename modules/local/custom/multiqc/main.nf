@@ -16,7 +16,7 @@ process CUSTOM_MULTIQC {
     path ('fastqc/*')
     path ('fastqc_trim/*')
     path ('fastp/*')
-    path ('nanoplot/*')
+    path ('nanoplot??/*')
     path ('porechop/*')
     path ('filtlong/*')
     path ('pycoqc/*')
@@ -57,6 +57,20 @@ process CUSTOM_MULTIQC {
 
     ## Run multiqc a second time
     multiqc -f $args $custom_config .
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        multiqc: \$( multiqc --version | sed -e "s/multiqc, version //g" )
+    END_VERSIONS
+    """
+
+    stub:
+    """
+    touch multiqc_report.html
+
+    mkdir -p multiqc_data
+    touch multiqc_data/multiqc_data.json
+    touch multiqc_data/multiqc_sources.yaml
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -44,4 +44,34 @@ process KMERFINDER_KMERFINDER {
         kmerfinder: \$(echo "${kmerfinder_version}")
     END_VERSIONS
     """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    def kmerfinder_version = "3.0.2"
+    """
+    cat <<-END_REPORT > ${prefix}_results.txt
+    GCF_000000000.1_ASM000000v1\t1\t100.00\t100.00\tStub species
+    END_REPORT
+
+    cat <<-END_JSON > ${prefix}_data.json
+    {
+      "kmerfinder": {
+        "results": {
+          "species_hits": [
+            {
+              "value": {
+                "Species": "Stub species"
+              }
+            }
+          ]
+        }
+      }
+    }
+    END_JSON
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        kmerfinder: \$(echo "${kmerfinder_version}")
+    END_VERSIONS
+    """
 }

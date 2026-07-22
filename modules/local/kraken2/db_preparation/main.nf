@@ -29,4 +29,15 @@ process KRAKEN2_DB_PREPARATION {
         tar: \$(tar --version | sed -n 's/^tar (GNU tar) \$([0-9.]*\$).*/\$1/p')
     END_VERSIONS
     """
+
+    stub:
+    """
+    mkdir database
+    touch database/hash.k2d
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        tar: \$(tar --version | sed -n 's/^tar (GNU tar) \$([0-9.]*\$).*/\$1/p')
+    END_VERSIONS
+    """
 }

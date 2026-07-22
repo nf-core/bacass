@@ -1,0 +1,21 @@
+Changes in component 'nf-core/unicycler'
+'modules/nf-core/unicycler/environment.yml' is unchanged
+'modules/nf-core/unicycler/meta.yml' is unchanged
+Changes in 'unicycler/main.nf':
+--- modules/nf-core/unicycler/main.nf
++++ modules/nf-core/unicycler/main.nf
+@@ -48,8 +48,8 @@
+     def prefix = task.ext.prefix ?: "${meta.id}"
+     """
+
+-    cat "" | gzip > ${prefix}.scaffolds.fa.gz
+-    cat "" | gzip >  ${prefix}.assembly.gfa.gz
++    echo "" | gzip > ${prefix}.scaffolds.fa.gz
++    echo "" | gzip > ${prefix}.assembly.gfa.gz
+     touch ${prefix}.unicycler.log
+
+     cat <<-END_VERSIONS > versions.yml
+
+'modules/nf-core/unicycler/tests/main.nf.test' is unchanged
+'modules/nf-core/unicycler/tests/main.nf.test.snap' is unchanged
+************************************************************

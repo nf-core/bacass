@@ -27,4 +27,23 @@ process KMERFINDER_SUMMARY {
         python: \$(python --version | awk '{print \$2}')
     END_VERSIONS
     """
+
+    stub:
+    """
+    cat <<-END_CSV > kmerfinder_summary.csv
+    sample_name,species,accession
+    stub,Stub species,GCF_000000000.1_ASM000000v1
+    END_CSV
+
+    cat <<-END_YAML > kmerfinder_summary.yaml
+    stub:
+      species: Stub species
+      accession: GCF_000000000.1_ASM000000v1
+    END_YAML
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | awk '{print \$2}')
+    END_VERSIONS
+    """
 }

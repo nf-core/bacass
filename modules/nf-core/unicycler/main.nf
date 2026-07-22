@@ -3,7 +3,7 @@ process UNICYCLER {
     label 'process_high'
 
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/2b/2b9f404e2169ea74161d63d24f55d6339dc98c3745bf2442e425d5a673617fca/data' :
         'community.wave.seqera.io/library/unicycler:0.5.1--b9d21c454db1e56b' }"
 
@@ -48,8 +48,8 @@ process UNICYCLER {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
 
-    cat "" | gzip > ${prefix}.scaffolds.fa.gz
-    cat "" | gzip >  ${prefix}.assembly.gfa.gz
+    echo "" | gzip > ${prefix}.scaffolds.fa.gz
+    echo "" | gzip > ${prefix}.assembly.gfa.gz
     touch ${prefix}.unicycler.log
 
     cat <<-END_VERSIONS > versions.yml

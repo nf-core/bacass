@@ -87,8 +87,8 @@
                 "Medaka/TestMe-miniasm-medaka_polished_genome.fa.gz",
                 "Medaka/TestMe-raven-medaka_polished_genome.fa.gz",
                 "Miniasm",
-                "Miniasm/TestMe-miniasm.consensus.fasta.gz",
                 "Miniasm/TestMe-miniasm.fasta.gz",
+                "Miniasm/TestMe-miniasm_assembly_consensus.fasta.gz",
                 "Prokka",
                 "Prokka/TestMe-autocycler-medaka",
                 "Prokka/TestMe-miniasm-medaka",
@@ -298,8 +298,8 @@
             [
                 "TestMe-sample_01-raven.fasta.gz:md5,ebc67e9f0a5e5e8b20e23f90901139e2",
                 "TestMe-sample_02-raven.fasta.gz:md5,5fdfaf522526c9142bb9f62986726ca5",
-                "TestMe-miniasm.consensus.fasta.gz:md5,4899e7b112077d045ecaf13daae4ae4a",
                 "TestMe-miniasm.fasta.gz:md5,cfde74bc269a51162851d9ae7c76207b",
+                "TestMe-miniasm_assembly_consensus.fasta.gz:md5,4899e7b112077d045ecaf13daae4ae4a",
                 "TestMe-raven.fasta.gz:md5,5236a351461c22c5c6ca1f86cbd13f10",
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
@@ -308,10 +308,10 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-07-14T15:13:52.19386823",
+        "timestamp": "2026-07-21T15:36:09.827423332",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "25.10.4"
+            "nextflow": "26.04.6"
         }
     }
 }
