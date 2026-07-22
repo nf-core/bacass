@@ -153,6 +153,12 @@
                     "description": "Which type of assembly to perform.",
                     "enum": ["short", "long", "hybrid", "auto"]
                 },
+                "assembly_type_prefix": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Prefix sample IDs in output files with the assembly type.",
+                    "help_text": "When enabled, output sample IDs are prefixed with `short-`, `long-`, or `hybrid-`. In `--assembly_type auto` mode, the prefix is based on the per-sample assembly type detected from the samplesheet. In explicit `short`, `long`, or `hybrid` mode, the selected assembly type is used. Existing `short_`, `short-`, `long_`, `long-`, `hybrid_`, or `hybrid-` prefixes in the samplesheet ID are normalised to the detected/selected prefix to avoid duplicated labels. Disable this option to keep the original samplesheet IDs in output names."
+                },
                 "unicycler_args": {
                     "type": "string",
                     "fa_icon": "fas fa-bicycle",
