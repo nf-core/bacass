@@ -33,7 +33,7 @@ combines reads coming from multiple sequencing runs.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `trimming/shortreads/`
+- `reads_qc/shortreads/fastp/trimmed_reads/`
   - `*.fastp.fastq.gz`: The trimmed/modified/unmerged fastq reads
 
 </details>
@@ -54,7 +54,7 @@ combines reads coming from multiple sequencing runs.
 <details markdown="1">
 <summary>Output files</summary>
 
-- `FastQC/`
+- `reads_qc/shortreads/fastqc/raw/`
   - `*.html`: FastQC report containing quality metrics.
   - `*.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
@@ -69,15 +69,15 @@ This step performs long read trimming on Nanopore input (if provided) using [Por
 <details markdown="1">
 <summary>Output files</summary>
 
-- `trimming/longreads/porechop`
+- `reads_qc/longreads/porechop/`
   - `*.fastq.gz`: The trimmed FASTQ file
   - `*.log*`: Log file
 
-- `trimming/longreads/filtlong`
+- `reads_qc/longreads/filtlong/`
   - `*.fastq.gz`: The trimmed FASTQ file
   - `*.log*`: Log file
 
-- `trimming/longreads/rasusa`
+- `reads_qc/longreads/rasusa/`
   - `*.fastq.gz`: The downsampled FASTQ file
   - `*.log*`: Log file with downsampling statistics
 
@@ -92,13 +92,13 @@ Please refer to the documentation of [NanoPlot](https://github.com/wdecoster/Nan
 <details markdown="1">
 <summary>Output files</summary>
 
-- `QC_Longreads/NanoPlot`: Various plots in HTML and PNG format
+- `reads_qc/longreads/nanoplot/`: Various plots in HTML and PNG format
 
-- `QC_Longreads/PycoQC`
+- `reads_qc/longreads/pycoqc/`
   - `*_pycoqc.html`: QC report in HTML format
   - `*_pycoqc.json`: QC report in JSON format
 
-- QC_Longreads/ToulligQC
+- `reads_qc/longreads/toulligqc/`
   - `*/report.html`: QC report in HTML format
 
 Example plot from Nanoplot:
@@ -123,8 +123,9 @@ multiple species. If you like to visualize the report, try
 <details markdown="1">
 <summary>Output files</summary>
 
-- `Kraken2/`
+- `taxonomy/kraken2/shortreads/`
   - `*.kraken2.report.txt`: Classification of short reads in the Kraken(1) report format.
+- `taxonomy/kraken2/longreads/`
   - `*_longreads.kraken2.report.txt`: Classification of long reads in the Kraken(1) report format.
 
 See [webpage](http://ccb.jhu.edu/software/kraken/MANUAL.html#sample-reports) for more details.
@@ -142,9 +143,9 @@ The pipeline includes a dedicated step for short and long reads QC as well as co
 <details markdown="1">
 <summary>Output files</summary>
 
-- `Kmerfinder/{ID}/`
+- `taxonomy/kmerfinder/{ID}/`
   - `*_results.txt`: Kmerfinder report table containing reads QC results and taxonomic information.
-- `Kmerfinder/`
+- `taxonomy/kmerfinder/`
   - `kmerfinder_summary.csv`: A CSV file containing the most relevant results of all samples analyzed with Kmerfinder.
 
 </details>
@@ -157,50 +158,50 @@ Unicycler is a pipeline on its own, which at least for Illumina reads mainly act
 <details markdown="1">
 <summary>Output files</summary>
 
-- `Unicycler/`
+- `assembly/unicycler/`
   - `*-unicycler.scaffolds.fa`: Final assembly in fasta format
   - `*-unicycler.assembly.gfa`: Final assembly in Graphical Fragment Assembly (GFA) format
   - `*-unicycler.unicycler.log`: Log file summarizing steps and intermediate results on the Unicycler execution
 
 Check out the [Unicycler documentation](https://github.com/rrwick/Unicycler) for more information on Unicycler output.
 
-- `Megahit/`
+- `assembly/megahit/`
   - `*-megahit.contigs.fa.gz`: Final assembly in FASTA format
   - `*-megahit.log`: Log file summarizing MEGAHIT execution
 
 Check out the [MEGAHIT documentation](https://github.com/voutcn/megahit) for more information on MEGAHIT output.
 
-- `Canu/`
+- `assembly/canu/`
   - `*-canu.contigs.fasta.gz`: Final assembly in fasta format
   - `*-canu.report`: Log file summarizing steps and intermediate results
 
 Check out the [Canu documentation](https://canu.readthedocs.io/en/latest/index.html) for more information on Canu output.
 
-- `Miniasm/`
+- `assembly/miniasm/`
   - `*-miniasm.fasta.gz`: Assembly in Fasta format
   - `*-miniasm.consensus.fasta.gz`: Consensus assembly in fasta format (polished by Racon)
 
 Check out the [Miniasm documentation](https://github.com/lh3/miniasm) for more information on Miniasm output.
 
-- `Flye/`
+- `assembly/flye/`
   - `*-flye.assembly.fasta.gz`: Assembly in Fasta format
 
 Check out the [Flye documentation](https://github.com/mikolmogorov/Flye) for more information on Flye output.
 
-- `Raven/`
+- `assembly/raven/`
   - `*-raven.fasta.gz`: Assembly in Fasta format
 
 Check out the [Raven documentation](https://github.com/lbcb-sci/raven) for more information on Raven output.
 
-- `Dragonflye/`
+- `assembly/dragonflye/`
   - `*-dragonflye.fa`: Assembly in Fasta format
   - `*-dragonflye.dragonflye.log`: Log file containing the report of the dragonflye process
 
 Checkout the [Dragonflye](https://github.com/rpetit3/dragonflye) documentation for more information of the Dragonflye output.
 
-- `Autocycler/`
+- `assembly/autocycler/`
   - `<assembler>/<sample>-<subset>-<assembler>*.fasta.gz`: Assembly of `assembler` and `sample` of `subset`. Also includes other assembler-specific files as detailed above.
-- `Autocycler/combine/`
+- `assembly/autocycler/combine/`
   - `<sample>-autocycler/consensus_assembly.fasta`: Assembly of `sample` in Fasta format
   - `<sample>-autocycler/consensus_assembly.gfa`: Assembly of `sample` in Graphical Fragment Assembly (GFA) format
   - `<sample>-autocycler/consensus_assembly.yaml`: Assembly statistics of `sample` in yaml format
@@ -216,14 +217,14 @@ Long reads assemblies can be polished using [Medaka](https://github.com/nanopore
 <details markdown="1">
 <summary>Output files</summary>
 
-- `Medaka/*_polished_genome.fa`
+- `assembly/polishing/medaka/*_polished_genome.fa`
   - `*_polished_genome.fa`: Polished consensus assembly in fasta format
   - `calls_to_draft.bam`: Alignment in bam format
   - `calls_to_draft.bam.bai`: Index of alignment
   - `consensus.fasta.gaps_in_draft_coords.bed`
   - `consensus_probs.hdf`
 
-- `Nanopolish/`
+- `assembly/polishing/nanopolish/`
   - `polished_genome.fa`: Polished consensus assembly in fasta format
 
 </details>
@@ -236,7 +237,7 @@ It also runs [BUSCO](https://busco.ezlab.org/), a software which assess genome q
 <details markdown="1">
 <summary>Output files</summary>
 
-- `QUAST/report/`
+- `assembly_qc/quast/report/`
   - `icarus.html`: QUAST's contig browser as HTML
   - `report.html`: QUAST assembly QC as HTML report
   - `report.pdf`: QUAST assembly QC as pdf
@@ -244,7 +245,7 @@ It also runs [BUSCO](https://busco.ezlab.org/), a software which assess genome q
   - `report.html`: QUAST assembly QC as HTML report
   - `report.pdf`: QUAST assembly QC as pdf
 
-- `busco/`: BUSCO reports
+- `assembly_qc/busco/`: BUSCO reports
   - `<SampleName>-<Assembler>-<PolishingMethod>-<BuscoLineage>-busco.batch_summary.txt`: BUSCO batch summary
   - `<SampleName>-<Assembler>-<PolishingMethod>-<BuscoLineage>-busco.log`: BUSCO execution log.
   - `short_summary.specific.<BuscoLineage>.<SampleName>-<Assembler>-<AssemblyFileName>.txt`: BUSCO short summary in text format.
@@ -263,7 +264,7 @@ By default, the assembly is annotated with [Prokka](https://github.com/tseemann/
 <details markdown="1">
 <summary>Output files</summary>
 
-- `Prokka/{ID}/`
+- `annotation/prokka/{ID}/`
   - `*.gff`: Annotation in gff format
   - `*.txt`: Annotation in text format
   - `*.faa`: Protein sequences in fasta format
@@ -272,19 +273,19 @@ See [Prokka's documentation](https://github.com/tseemann/prokka#output-files) fo
 
 ![Prokka annotation](images/prokka.png)
 
-- `Bakta/{ID}/`
+- `annotation/bakta/{ID}/`
   - `*.gff3`: Annotations in gff3 format
   - `*.txt`: Summary in txt format
   - `*.faa`: CDS/sORF amino acid sequences in fasta format
 
 See [Baktas's documentation](https://github.com/oschwengers/bakta#output) for a full description of all output files.
 
-- `DFAST/{ID}_results/`
+- `annotation/dfast/{ID}_results/`
   - `genome.gff`: Annotation in gff format
   - `statistics.txt`: Annotation statistics in text format
   - `protein.faa`: Protein sequences in fasta format
 
-- `LIFTOFF/`
+- `annotation/liftoff/`
   - `{ID}.gff3`: Annotation in gff format
   - `{ID}.polished.gff3`: Polished lifted annotations in gff format
   - `{ID}.unmapped.txt`: Unmapped reference annotations
