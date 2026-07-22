@@ -63,6 +63,7 @@ include { paramsSummaryMap                      } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
+include { buildAssemblyTypeSampleId             } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
 include { detectAssemblyType                    } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
 include { normaliseInputFiles                   } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
 
@@ -105,7 +106,7 @@ workflow BACASS {
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     ch_samplesheet
         .map { meta, fastqs, long_fastq, fast5  ->
-            def new_meta = meta + [id: meta.sample] // add "meta.id" !
+            def new_meta = meta.clone()
             new_meta.subsample = false
             def short_read_files = normaliseInputFiles(fastqs)
             def long_read_files  = normaliseInputFiles(long_fastq)
@@ -116,6 +117,7 @@ workflow BACASS {
             } else {
                 new_meta.assembly_type = params.assembly_type
             }
+            new_meta.id = params.assembly_type_prefix ? buildAssemblyTypeSampleId(meta.sample, new_meta.assembly_type) : meta.sample
             return [ new_meta, short_read_files, long_read_files, fast5_files  ] }
         .multiMap (criteria)
         .set { ch_input }
@@ -629,7 +631,7 @@ workflow BACASS {
                 def new_meta = meta.clone()
                 new_meta.remove("subsample")
                 new_meta.assembler = "autocycler"
-                new_meta.id = meta.sample + "-autocycler"
+                new_meta.id = meta.id + "-autocycler"
                 [ new_meta, assembly ]
             }
             .filter{ _meta, assembly -> assembly.countLines() > 1 } // keep only non-empty assembly files

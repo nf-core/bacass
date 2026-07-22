@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#310](https://github.com/nf-core/bacass/pull/310) Add BUSCO output to MultiQC
 - [#314](https://github.com/nf-core/bacass/pull/314) Add stub support for modules used in stub-run testing
+- [#314](https://github.com/nf-core/bacass/pull/314) Add `--assembly_type_prefix` to label output sample IDs with the selected or detected assembly type.
 
 ### `Fixed`
 
