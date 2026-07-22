@@ -787,12 +787,12 @@ workflow BACASS {
             params.reference_fasta ? [[:], reference_fasta] : [[:],[]],
             params.reference_gff ? [[:], reference_gff] : [[:],[]]
         )
-        ch_quast_multiqc = QUAST.out.results
         QUAST_BYSAMPLE(
             ch_to_quast_bysample,
             params.reference_fasta ? [[:], reference_fasta] : [[:],[]],
             params.reference_gff ? [[:], reference_gff] : [[:],[]]
         )
+        ch_quast_multiqc = QUAST.out.results
     } else if (!params.skip_kmerfinder) {
         // Quast runs twice if kmerfinder is allowed.
         QUAST(
@@ -810,7 +810,7 @@ workflow BACASS {
             ch_to_quast_byrefseq.map{ refmeta, _consensus, ref_fasta, _ref_gff -> tuple( refmeta, ref_fasta)},
             ch_to_quast_byrefseq.map{ refmeta, _consensus, _ref_fasta, ref_gff -> tuple( refmeta, ref_gff)}
         )
-        ch_quast_multiqc = QUAST_BYREFSEQID.out.results
+        ch_quast_multiqc = QUAST.out.results
     }
 
     // Check assemblies that require further processing for gene annotation
