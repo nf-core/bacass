@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
-- [#291](https://github.com/nf-core/bacass/pull/291) Fix BUSCO `busco_downloads` publish error when lineage database is downloaded at runtime
+- [#291](https://github.com/nf-core/bacass/pull/291) Fix BUSCO `busco_downloads` publish errors and publish only summary/log files
 
 ### `Dependencies`
 
