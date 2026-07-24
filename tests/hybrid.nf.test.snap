@@ -87,38 +87,8 @@
                 "Unicycler/ERR044595-unicycler.scaffolds.fa.gz",
                 "Unicycler/ERR044595-unicycler.unicycler.log",
                 "busco",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco",
                 "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco.batch_summary.txt",
                 "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco.log",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/logs",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/logs/bbtools_err.log",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/logs/bbtools_out.log",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/logs/hmmsearch_err.log",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/logs/hmmsearch_out.log",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/logs/prodigal_err.log",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/logs/prodigal_out.log",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/prodigal_output",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/prodigal_output/.checkpoint",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/prodigal_output/predicted_genes",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/prodigal_output/predicted_genes/predicted.faa",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/prodigal_output/predicted_genes/predicted.fna",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_single_code_11.faa",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_single_code_11.fna",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_single_code_11_err.log",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/prodigal_output/predicted_genes/tmp/prodigal_mode_single_code_11_out.log",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/run_bacteria_odb10",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/run_bacteria_odb10/.bbtools_output",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/run_bacteria_odb10/.bbtools_output/.checkpoint",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/run_bacteria_odb10/busco_sequences",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/run_bacteria_odb10/full_table.tsv",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/run_bacteria_odb10/hmmer_output",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/run_bacteria_odb10/missing_busco_list.tsv",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/run_bacteria_odb10/short_summary.json",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/ERR044595-unicycler-medaka_polished_genome.fa/run_bacteria_odb10/short_summary.txt",
-                "busco/ERR044595-unicycler-medaka-bacteria_odb10-busco/logs",
-                "busco/busco_downloads",
                 "busco/short_summary.specific.bacteria_odb10.ERR044595-unicycler-medaka_polished_genome.fa.json",
                 "busco/short_summary.specific.bacteria_odb10.ERR044595-unicycler-medaka_polished_genome.fa.txt",
                 "multiqc",
@@ -372,10 +342,10 @@
                 "ERR044595.fastp.json:md5,316525c967c7d3ecbc0457526de9cb9b"
             ]
         ],
-        "timestamp": "2026-07-14T13:59:05.526670702",
+        "timestamp": "2026-07-23T17:11:26.335481903",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "25.10.4"
+            "nextflow": "26.04.6"
         }
     }
 }
