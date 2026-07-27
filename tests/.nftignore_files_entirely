@@ -3,7 +3,14 @@ pipeline_info/*.{html,json,txt}
 busco/busco_downloads/**
 busco/**/busco_sequences/**
 busco/**/hmmer_output/**
+assembly_qc/busco/busco_downloads/**
+assembly_qc/busco/**/busco_sequences/**
+assembly_qc/busco/**/hmmer_output/**
 QC_longreads/ToulligQC/**
 QC_longreads/NanoPlot/**
+reads_qc/longreads/toulligqc/**
+reads_qc/longreads/nanoplot/**
 Prokka/*/*.{gbk,sqn,log,err}
 Prokka/*/*.{faa,ffn,fna,fsa,gff,tbl,tsv,txt}
+annotation/prokka/*/*.{gbk,sqn,log,err}
+annotation/prokka/*/*.{faa,ffn,fna,fsa,gff,tbl,tsv,txt}
