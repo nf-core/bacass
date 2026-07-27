@@ -243,10 +243,12 @@ It also runs [BUSCO](https://busco.ezlab.org/), a software which assess genome q
   - `icarus.html`: QUAST's contig browser as HTML
   - `report.html`: QUAST assembly QC as HTML report
   - `report.pdf`: QUAST assembly QC as pdf
+
 - `busco/`: BUSCO reports
-  - `<AssemblyName>_<stage>-<BuscoLineage>-busco/`: BUSCO output folder, please refer to BUSCO documentation for details.
-  - `<AssemblyName>_<stage>-<BuscoLineage>-busco.batch_summary.txt`: BUSCO batch summary output
-  - `short_summary.specific.<AssemblyName>_<stage>.{txt,json}`: BUSCO short summaries in txt and json format
+  - `<SampleName>-<Assembler>-<PolishingMethod>-<BuscoLineage>-busco.batch_summary.txt`: BUSCO batch summary
+  - `<SampleName>-<Assembler>-<PolishingMethod>-<BuscoLineage>-busco.log`: BUSCO execution log.
+  - `short_summary.specific.<BuscoLineage>.<SampleName>-<Assembler>-<AssemblyFileName>.txt`: BUSCO short summary in text format.
+  - `short_summary.specific.<BuscoLineage>.<SampleName>-<Assembler>-<AssemblyFileName>.json`: BUSCO short summary in JSON format.
 
 ![QUAST QC](images/quast.png)
 
