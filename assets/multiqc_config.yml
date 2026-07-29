@@ -82,6 +82,10 @@ module_order:
         - "./bakta/*.txt"
 
 report_section_order:
+  sample_summary_assembly_metrics:
+    order: 1000
+  assembly_comparison_metrics:
+    order: 999
   nf-core-bacass-methods-description:
     order: -1000
   software_versions:

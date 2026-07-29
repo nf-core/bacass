@@ -134,7 +134,7 @@ SAMPLE_HEADER_CONFIG = {
         "format": "{:,.2f}",
     },
     "Best assembly genome fraction (%)": {
-        "description": "Genome fraction percentage for the assembly with the highest N50",
+        "description": "Genome fraction percentage for the assembly with the highest N50. This requires QUAST to run with a reference genome.",
         "format": "{:,.2f}",
     },
 }
@@ -170,7 +170,7 @@ ASSEMBLY_HEADER_CONFIG = {
         "format": "{:,.2f}",
     },
     "# Genome fraction (%)": {
-        "description": "Genome fraction percentage calculated by QUAST",
+        "description": "Genome fraction percentage calculated by QUAST. This is only available when QUAST runs with a reference genome.",
         "format": "{:,.2f}",
     },
 }
@@ -203,6 +203,14 @@ def parse_args(args=None):
         dest="OUT_PREFIX",
         default="summary",
         help="Output prefix (default: 'summary').",
+    )
+    parser.add_argument(
+        "-qd",
+        "--quast_dir",
+        type=str,
+        dest="QUAST_DIR",
+        default="quast",
+        help="Directory containing QUAST report folders staged for MultiQC. (default: 'quast').",
     )
     return parser.parse_args(args)
 
@@ -296,6 +304,10 @@ def split_assembly_id(assembly_id):
     return assembly_id, "unknown"
 
 
+def assembly_match_key(assembly_id):
+    return split_assembly_id(assembly_id)
+
+
 def set_metric(rows, key, field, value):
     if key not in rows:
         rows[key] = {}
@@ -382,6 +394,50 @@ def load_assembly_rows(multiqc_data_dir, assembly_type):
         }
 
     return assembly_rows
+
+
+def read_quast_report_tsv(report_tsv):
+    with open(report_tsv, newline="") as file_handle:
+        reader = csv.reader(file_handle, delimiter="\t")
+        rows = list(reader)
+    if not rows or rows[0][0] != "Assembly":
+        return {}
+
+    assemblies = rows[0][1:]
+    metrics_by_assembly = {assembly: {} for assembly in assemblies}
+    for row in rows[1:]:
+        if not row:
+            continue
+        metric = row[0]
+        for assembly, value in zip(assemblies, row[1:]):
+            metrics_by_assembly[assembly][metric] = clean_value(value)
+    return metrics_by_assembly
+
+
+def find_quast_reports(quast_dir):
+    if not quast_dir or not os.path.isdir(quast_dir):
+        return []
+    report_paths = []
+    for root, _dirs, files in os.walk(quast_dir):
+        if "report.tsv" in files:
+            report_paths.append(os.path.join(root, "report.tsv"))
+    return sorted(report_paths)
+
+
+def add_reference_quast_metrics(assembly_rows, quast_dir):
+    rows_by_sample_assembler = {
+        assembly_match_key(assembly_id): row for assembly_id, row in assembly_rows.items()
+    }
+
+    for report_tsv in find_quast_reports(quast_dir):
+        for assembly_id, metrics in read_quast_report_tsv(report_tsv).items():
+            genome_fraction = metrics.get("Genome fraction (%)")
+            if clean_value(genome_fraction) == "NA":
+                continue
+            sample, assembler = split_assembly_id(assembly_id)
+            row = rows_by_sample_assembler.get((sample, assembler))
+            if row:
+                row["# Genome fraction (%)"] = clean_value(genome_fraction)
 
 
 def add_best_assembly_metrics(sample_rows, assembly_rows):
@@ -475,6 +531,7 @@ def main(args=None):
 
     sample_rows = load_sample_rows(args.MULTIQC_DATA_DIR, args.ASSEMBLY_TYPE)
     assembly_rows = load_assembly_rows(args.MULTIQC_DATA_DIR, args.ASSEMBLY_TYPE)
+    add_reference_quast_metrics(assembly_rows, args.QUAST_DIR)
     add_best_assembly_metrics(sample_rows, assembly_rows)
 
     write_table(
