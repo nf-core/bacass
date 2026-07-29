@@ -282,7 +282,6 @@
                 "ERR064912-unicycler.assembly.gfa.gz:md5,01faaeca29910ae15e49dd355dda556a",
                 "ERR064912-unicycler.scaffolds.fa.gz:md5,0965953c184cd27da1550b757d7911c7",
                 "mqc_busco_plot_bacteria_odb10_1.yaml:md5,7146b9e6b6a1266fd6d8477ef35694c5",
-                "mqc_fastp-insert-size-plot_1.yaml:md5,ae5c1aba2a5c093bac867c08f3538de1",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,cd86aa098d14b4ad56d2d31599ab0d8e",
                 "mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,397256e935c62fe43ff1fbdc6c99a3d9",
                 "mqc_fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,6dedcc7e38b446b26951578ba690b638",
@@ -314,14 +313,11 @@
                 "mqc_fastqc_sequence_length_distribution_plot_1.yaml:md5,d16e95add43c6734c4f07dcfddd80ea4",
                 "multiqc_busco.yaml:md5,8b163b7bf3862fced714140230bb3fd7",
                 "multiqc_citations.yaml:md5,0842be95dd6c2081198f682f370c7f0a",
-                "multiqc_fastp.yaml:md5,ef4f026525505fddac570e8065546b33",
                 "multiqc_fastqc.yaml:md5,4c4e1b713139eef4b82e3aa9e6dbaca2",
-                "multiqc_fastqc_1.yaml:md5,c49034e44bd4443a60839d4b2c17aa2b",
-                "ERR044595.fastp.json:md5,3ec0f7d22fa8768b25f831ef2724995b",
-                "ERR064912.fastp.json:md5,7bca416c54de357e3032d7a0469a0b94"
+                "multiqc_fastqc_1.yaml:md5,c49034e44bd4443a60839d4b2c17aa2b"
             ]
         ],
-        "timestamp": "2026-07-27T14:52:55.791081066",
+        "timestamp": "2026-07-29T10:03:14.910120651",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

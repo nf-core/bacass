@@ -299,7 +299,6 @@
                 "reads_qc/shortreads/fastqc/trimmed/A1403KPN_2_fastqc.html"
             ],
             [
-                "mqc_fastp-insert-size-plot_1.yaml:md5,29d643b4a7c9a2afda8589373d914e03",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,b44852244e0643016e4b83c6bd507ac3",
                 "mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,f1a231f0f1df726c86132da8866be0a8",
                 "mqc_fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,2c7ca4a5b5dba818d6dec811a2a2a4e0",
@@ -333,14 +332,12 @@
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,5e89ca1f45fb6876b58ddbb20b86ea77",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,34e8d91183bd582532ac654e8e287945",
                 "multiqc_citations.yaml:md5,c1962a840fe1cf1698fbdeb8953601ed",
-                "multiqc_fastp.yaml:md5,ae64517a1232376a0f1d2b52e57e90ed",
                 "multiqc_fastqc.yaml:md5,a0b5fd24bb745bb77511c1962086fcf0",
                 "multiqc_fastqc_1.yaml:md5,daf5f34bdacbbc207f86fc95768ce9a2",
-                "multiqc_nanostat.yaml:md5,cff0c79f74776d0e8c451e87bb332d2d",
-                "A1403KPN.fastp.json:md5,310ba75299364edb3c5cc25ce56d47cb"
+                "multiqc_nanostat.yaml:md5,cff0c79f74776d0e8c451e87bb332d2d"
             ]
         ],
-        "timestamp": "2026-07-27T15:26:12.481192913",
+        "timestamp": "2026-07-29T10:14:35.781215103",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
