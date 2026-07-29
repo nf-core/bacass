@@ -810,7 +810,7 @@ workflow BACASS {
             ch_to_quast_byrefseq.map{ refmeta, _consensus, ref_fasta, _ref_gff -> tuple( refmeta, ref_fasta)},
             ch_to_quast_byrefseq.map{ refmeta, _consensus, _ref_fasta, ref_gff -> tuple( refmeta, ref_gff)}
         )
-        ch_quast_multiqc = QUAST.out.results
+        ch_quast_multiqc = QUAST.out.results.mix(QUAST_BYREFSEQID.out.results)
     }
 
     // Check assemblies that require further processing for gene annotation

@@ -111,14 +111,14 @@ SAMPLE_HEADER_CONFIG = {
         "format": "{:,.2f}",
     },
     "Best assembler": {
-        "description": "Assembler with the highest N50 for this sample",
+        "description": "Assembler selected by ranking assemblies from the same sample by QUAST N50. Ties keep the first assembly encountered.",
     },
     "Best assembly # contigs": {
-        "description": "Number of contigs for the assembly with the highest N50",
+        "description": "Number of contigs for the assembly selected by highest QUAST N50",
         "format": "{:,.0f}",
     },
     "Best assembly largest contig": {
-        "description": "Largest contig for the assembly with the highest N50",
+        "description": "Largest contig for the assembly selected by highest QUAST N50",
         "format": "{:,.0f}",
     },
     "Best assembly N50": {
@@ -126,15 +126,15 @@ SAMPLE_HEADER_CONFIG = {
         "format": "{:,.0f}",
     },
     "Best assembly total length": {
-        "description": "Total length for the assembly with the highest N50",
+        "description": "Total length for the assembly selected by highest QUAST N50",
         "format": "{:,.0f}",
     },
     "Best assembly GC (%)": {
-        "description": "GC percentage for the assembly with the highest N50",
+        "description": "GC percentage for the assembly selected by highest QUAST N50",
         "format": "{:,.2f}",
     },
     "Best assembly genome fraction (%)": {
-        "description": "Genome fraction percentage for the assembly with the highest N50. This requires QUAST to run with a reference genome.",
+        "description": "Genome fraction percentage for the assembly selected by highest QUAST N50. This requires QUAST to run with a reference genome.",
         "format": "{:,.2f}",
     },
 }
@@ -261,6 +261,10 @@ def mapped_value(data, selector):
     if isinstance(selector, (list, tuple)):
         return nested_value(data, selector)
     return first_tag(data, selector)
+
+
+def kmerfinder_was_run(multiqc_data_dir):
+    return os.path.exists(os.path.join(multiqc_data_dir, "multiqc_kmerfinder.yaml"))
 
 
 def clean_value(value):
@@ -418,7 +422,7 @@ def find_quast_reports(quast_dir):
     if not quast_dir or not os.path.isdir(quast_dir):
         return []
     report_paths = []
-    for root, _dirs, files in os.walk(quast_dir):
+    for root, _dirs, files in os.walk(quast_dir, followlinks=True):
         if "report.tsv" in files:
             report_paths.append(os.path.join(root, "report.tsv"))
     return sorted(report_paths)
@@ -466,6 +470,15 @@ def add_best_assembly_metrics(sample_rows, assembly_rows):
         sample_rows[sample]["Best assembly genome fraction (%)"] = assembly_row[
             "# Genome fraction (%)"
         ]
+
+
+def table_fields(include_reference_metrics):
+    sample_fields = list(SAMPLE_FIELDS)
+    assembly_fields = list(ASSEMBLY_FIELDS)
+    if not include_reference_metrics:
+        sample_fields.remove("Best assembly genome fraction (%)")
+        assembly_fields.remove("# Genome fraction (%)")
+    return sample_fields, assembly_fields
 
 
 def write_csv(rows, fields, key_header, out_file):
@@ -531,12 +544,15 @@ def main(args=None):
 
     sample_rows = load_sample_rows(args.MULTIQC_DATA_DIR, args.ASSEMBLY_TYPE)
     assembly_rows = load_assembly_rows(args.MULTIQC_DATA_DIR, args.ASSEMBLY_TYPE)
-    add_reference_quast_metrics(assembly_rows, args.QUAST_DIR)
+    include_reference_metrics = kmerfinder_was_run(args.MULTIQC_DATA_DIR)
+    if include_reference_metrics:
+        add_reference_quast_metrics(assembly_rows, args.QUAST_DIR)
     add_best_assembly_metrics(sample_rows, assembly_rows)
+    sample_fields, assembly_fields = table_fields(include_reference_metrics)
 
     write_table(
         rows=sample_rows,
-        fields=SAMPLE_FIELDS,
+        fields=sample_fields,
         key_header="Sample",
         csv_file=args.OUT_PREFIX + "_sample_assembly_metrics.csv",
         yaml_file=args.OUT_PREFIX + "_sample_assembly_metrics_mqc.yaml",
@@ -547,7 +563,7 @@ def main(args=None):
     )
     write_table(
         rows=assembly_rows,
-        fields=ASSEMBLY_FIELDS,
+        fields=assembly_fields,
         key_header="Assembly",
         csv_file=args.OUT_PREFIX + "_comparison_assembly_metrics.csv",
         yaml_file=args.OUT_PREFIX + "_comparison_assembly_metrics_mqc.yaml",
