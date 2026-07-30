@@ -629,9 +629,14 @@ workflow BACASS {
             .filter{ meta, _assembly -> meta.subsample } // only assemblies of subsamples pass, i.e. anything with "meta.subsample"
             .map{ meta, assembly ->
                 def new_meta = meta.clone()
+                def base_id = meta.id
+                if (meta.subsample && meta.assembler) {
+                    def assembly_suffix = "-${meta.subsample}-${meta.assembler}"
+                    base_id = base_id.endsWith(assembly_suffix) ? base_id[0..<(base_id.size() - assembly_suffix.size())] : base_id
+                }
                 new_meta.remove("subsample")
                 new_meta.assembler = "autocycler"
-                new_meta.id = meta.id + "-autocycler"
+                new_meta.id = base_id + "-autocycler"
                 [ new_meta, assembly ]
             }
             .filter{ _meta, assembly -> assembly.countLines() > 1 } // keep only non-empty assembly files
@@ -656,6 +661,8 @@ workflow BACASS {
     // SUBWORKFLOW: Long reads polishing. Uses medaka or Nanopolish (this last requires Fast5 files available in input samplesheet).
     //
     if ( params.assembly_type in ['long', 'auto'] && !params.skip_polish && params.polish_method ){
+        ch_assembly_without_polished_long = ch_assembly.filter { meta, _assembly -> meta.assembly_type != 'long' }
+
         // Set channel for polishing long-read assemblies only.
         ch_for_assembly
             .filter { meta, _sr, _lr -> !meta.subsample } // remove any subsamples
@@ -703,7 +710,7 @@ workflow BACASS {
             // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
             //
             MEDAKA ( ch_polish_long_medaka_input )
-            ch_assembly = MEDAKA.out.assembly
+            ch_assembly = ch_assembly_without_polished_long.mix(MEDAKA.out.assembly)
         } else if (params.polish_method == 'nanopolish') {
             ch_polish_long
                 .map{ meta, lr, assembly ->
@@ -758,7 +765,7 @@ workflow BACASS {
                 NANOPOLISH (
                     ch_for_nanopolish.dump(tag: 'into_nanopolish')
                 )
-                ch_assembly = NANOPOLISH.out.assembly
+                ch_assembly = ch_assembly_without_polished_long.mix(NANOPOLISH.out.assembly)
                 ch_versions = ch_versions.mix( NANOPOLISH.out.versions )
             }
         }
