@@ -18,7 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#314](https://github.com/nf-core/bacass/pull/314) Add stub support for modules used in stub-run testing
 - [#315](https://github.com/nf-core/bacass/pull/314) Add an automatic assembly mode based on each sample’s read type
 
-
 ### `Fixed`
 
 - [#291](https://github.com/nf-core/bacass/pull/291) Fix BUSCO `busco_downloads` publish errors and publish only summary/log files
