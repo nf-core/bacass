@@ -163,7 +163,7 @@
                     "type": "string",
                     "fa_icon": "fas fa-bicycle",
                     "description": "Extra arguments for Unicycler",
-                    "help_text": "This advanced option allows you to pass extra arguments to Unicycler (e.g. `\"--mode conservative\"` or `\"--no_correct\"`). For this to work you need to quote the arguments and add at least one space."
+                    "help_text": "This advanced option allows you to pass extra arguments to Unicycler (e.g. `\"--mode conservative\"` or `\"--mode bold --kmers 51\"`). For this to work you need to quote the arguments and add at least one space."
                 },
                 "canu_mode": {
                     "type": "string",
