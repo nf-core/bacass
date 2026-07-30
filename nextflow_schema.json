@@ -148,9 +148,10 @@
                 },
                 "assembly_type": {
                     "type": "string",
+                    "default": "auto",
                     "fa_icon": "fas fa-fingerprint",
-                    "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short`, `hybrid`, or `auto`. When set to `auto`, each sample's assembly type is determined by the reads provided in the samplesheet.",
-                    "description": "Which type of assembly to perform.",
+                    "help_text": "Controls how samples are routed for genome assembly. Use `short`, `long`, or `hybrid` to force the same assembly mode for all samples. Use `auto` to infer the assembly mode independently for each sample from the reads provided in the samplesheet: short-read only samples are treated as `short`, long-read only samples as `long`, and samples with both short and long reads as `hybrid`. Assemblers are then run only for compatible sample and assembly-mode combinations.",
+                    "description": "Assembly mode to use for all samples, or per-sample autodetection when set to `auto`.",
                     "enum": ["short", "long", "hybrid", "auto"]
                 },
                 "assembly_type_prefix": {
