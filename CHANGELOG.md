@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#316](https://github.com/nf-core/bacass/pull/316) Reorganize result output directories
 - [#317](https://github.com/nf-core/bacass/pull/317) Improve MultiQC assembly summary tables
 - [#324](https://github.com/nf-core/bacass/pull/324) Improved kmerfinder_summary_download subworkflow for correct reference matching
+- [#315](https://github.com/nf-core/bacass/pull/314) Replace MultiQC general statistics with custom tables better suited to the new `assembly_mode` and multi-assembler strategy
+- [#315](https://github.com/nf-core/bacass/pull/314) Skip Canu when `gsize` is missing
 
 ### `Added`
 
@@ -21,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 
 - [#291](https://github.com/nf-core/bacass/pull/291) Fix BUSCO `busco_downloads` publish errors and publish only summary/log files
+- [#315](https://github.com/nf-core/bacass/pull/314) Fix Medaka nf-test to avoid launching polishing when `skip_polish=true`
 
 ### `Dependencies`
 
