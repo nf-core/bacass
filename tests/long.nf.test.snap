@@ -1,19 +1,13 @@
 {
     "-profile test_long": {
         "content": [
-            11,
+            9,
             {
                 "BUSCO_BUSCO": {
                     "busco": "5.8.3"
                 },
                 "GUNZIP": {
                     "gunzip": 1.13
-                },
-                "GUNZIP_MEDAKA": {
-                    "gunzip": 1.13
-                },
-                "MEDAKA": {
-                    "medaka": "2.2.2"
                 },
                 "NANOPLOT": {
                     "nanoplot": "1.46.1"
@@ -40,29 +34,26 @@
             [
                 "annotation",
                 "annotation/prokka",
-                "annotation/prokka/TestMe-unicycler-medaka",
+                "annotation/prokka/long-TestMe-unicycler",
                 "assembly",
-                "assembly/polishing",
-                "assembly/polishing/medaka",
-                "assembly/polishing/medaka/TestMe-unicycler-medaka_polished_genome.fa.gz",
                 "assembly/unicycler",
-                "assembly/unicycler/TestMe-unicycler.assembly.gfa.gz",
-                "assembly/unicycler/TestMe-unicycler.scaffolds.fa.gz",
-                "assembly/unicycler/TestMe-unicycler.unicycler.log",
+                "assembly/unicycler/long-TestMe-unicycler.assembly.gfa.gz",
+                "assembly/unicycler/long-TestMe-unicycler.scaffolds.fa.gz",
+                "assembly/unicycler/long-TestMe-unicycler.unicycler.log",
                 "assembly_qc",
                 "assembly_qc/busco",
-                "assembly_qc/busco/TestMe-unicycler-medaka-bacteria_odb10-busco.batch_summary.txt",
-                "assembly_qc/busco/TestMe-unicycler-medaka-bacteria_odb10-busco.log",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.TestMe-unicycler-medaka_polished_genome.fa.json",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.TestMe-unicycler-medaka_polished_genome.fa.txt",
+                "assembly_qc/busco/long-TestMe-unicycler-bacteria_odb10-busco.batch_summary.txt",
+                "assembly_qc/busco/long-TestMe-unicycler-bacteria_odb10-busco.log",
+                "assembly_qc/busco/short_summary.specific.bacteria_odb10.long-TestMe-unicycler.scaffolds.fa.json",
+                "assembly_qc/busco/short_summary.specific.bacteria_odb10.long-TestMe-unicycler.scaffolds.fa.txt",
                 "assembly_qc/quast",
                 "assembly_qc/quast/overall",
                 "assembly_qc/quast/overall/report",
                 "assembly_qc/quast/overall/report/basic_stats",
                 "assembly_qc/quast/overall/report/basic_stats/GC_content_plot.pdf",
                 "assembly_qc/quast/overall/report/basic_stats/Nx_plot.pdf",
-                "assembly_qc/quast/overall/report/basic_stats/TestMe-unicycler-medaka_polished_genome_GC_content_plot.pdf",
                 "assembly_qc/quast/overall/report/basic_stats/cumulative_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/long-TestMe-unicycler.scaffolds_GC_content_plot.pdf",
                 "assembly_qc/quast/overall/report/icarus.html",
                 "assembly_qc/quast/overall/report/icarus_viewers",
                 "assembly_qc/quast/overall/report/icarus_viewers/contig_size_viewer.html",
@@ -84,13 +75,14 @@
                 "multiqc/multiqc_data/mqc_prokka_plot_1.yaml",
                 "multiqc/multiqc_data/mqc_quast_num_contigs_1.yaml",
                 "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_assembly_comparison_metrics-plot.yaml",
                 "multiqc/multiqc_data/multiqc_busco.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
-                "multiqc/multiqc_data/multiqc_general_stats.yaml",
                 "multiqc/multiqc_data/multiqc_nanostat.yaml",
                 "multiqc/multiqc_data/multiqc_prokka.yaml",
                 "multiqc/multiqc_data/multiqc_quast.yaml",
+                "multiqc/multiqc_data/multiqc_sample_summary_assembly_metrics-plot.yaml",
                 "multiqc/multiqc_data/multiqc_software_versions.yaml",
                 "multiqc/multiqc_data/multiqc_sources.yaml",
                 "multiqc/multiqc_data/porechop.yaml",
@@ -135,26 +127,28 @@
                 "multiqc/multiqc_plots/svg/mqc_quast_num_contigs_1.svg",
                 "multiqc/multiqc_plots/svg/mqc_quast_num_contigs_1_pc.svg",
                 "multiqc/multiqc_report.html",
+                "multiqc/summary_comparison_assembly_metrics.csv",
+                "multiqc/summary_sample_assembly_metrics.csv",
                 "pipeline_info",
                 "pipeline_info/nf_core_bacass_software_mqc_versions.yml",
                 "reads_qc",
                 "reads_qc/longreads",
                 "reads_qc/longreads/nanoplot",
                 "reads_qc/longreads/porechop",
-                "reads_qc/longreads/porechop/TestMe.porechop.log",
+                "reads_qc/longreads/porechop/long-TestMe.porechop.log",
                 "reads_qc/longreads/toulligqc"
             ],
             [
-                "TestMe-unicycler.assembly.gfa.gz:md5,23a7fcda434d9d31bc77c88db004f2f8",
-                "TestMe-unicycler.scaffolds.fa.gz:md5,0f8a3007f245df1870c892ed11a60f94",
+                "long-TestMe-unicycler.assembly.gfa.gz:md5,23a7fcda434d9d31bc77c88db004f2f8",
+                "long-TestMe-unicycler.scaffolds.fa.gz:md5,0f8a3007f245df1870c892ed11a60f94",
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
                 "multiqc_citations.yaml:md5,80450f20190a42871cb64f62ae9bec3e",
-                "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
+                "multiqc_nanostat.yaml:md5,d4ad35da0e3cdb74a1ab8dbfe22ebf04"
             ]
         ],
-        "timestamp": "2026-07-27T15:30:06.886206298",
+        "timestamp": "2026-07-31T10:10:22.797034786",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
