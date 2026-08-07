@@ -244,14 +244,13 @@
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
-                "multiqc_busco.yaml:md5,22a47c187e105497b1ac1075f951bf11",
                 "multiqc_citations.yaml:md5,683ec25d002e4678ebfdee6cfe8f1930",
                 "multiqc_kraken.yaml:md5,b398217b5f5de45c9061f5295332b817",
                 "multiqc_nanostat.yaml:md5,d4ad35da0e3cdb74a1ab8dbfe22ebf04",
                 "long-TestMe_longreads.kraken2.report.txt:md5,4c2a95acdff03caa1524a5328c6ab2f5"
             ]
         ],
-        "timestamp": "2026-07-31T10:03:44.619327719",
+        "timestamp": "2026-08-07T12:57:45.745013354",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

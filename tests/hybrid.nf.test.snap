@@ -301,14 +301,13 @@
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,29573e9fc6174bb91352b0b9f248335f",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,844b018c7434ca59c893901eef530de8",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,e6cced8fc844dabd795ba0dfa6ec0e64",
-                "multiqc_busco.yaml:md5,cde4cbc5eefefcf5251122bb83d11b53",
                 "multiqc_citations.yaml:md5,c1962a840fe1cf1698fbdeb8953601ed",
                 "multiqc_fastqc.yaml:md5,6426381984018f0bd78075c8a15fb0a0",
                 "multiqc_fastqc_1.yaml:md5,62a78334fafb59e924139522b49721d3",
                 "multiqc_nanostat.yaml:md5,b3f0b69626b623ed337e0a99688d99b8"
             ]
         ],
-        "timestamp": "2026-07-31T09:57:48.096623243",
+        "timestamp": "2026-08-07T12:51:58.833465109",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

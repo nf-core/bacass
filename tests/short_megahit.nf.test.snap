@@ -260,13 +260,12 @@
                 "reads_qc/shortreads/fastqc/trimmed/short-ERR064912_2_fastqc.html"
             ],
             [
-                "multiqc_busco.yaml:md5,436c886a5687e7ca79585d33d23eaae6",
                 "multiqc_citations.yaml:md5,e46f6ed003947fe967edd4674a82d4c6",
                 "multiqc_fastqc.yaml:md5,df71ccd6bf8c3afc34bab236a66de4ee",
                 "multiqc_fastqc_1.yaml:md5,97a9e08230505c268503584151b0591f"
             ]
         ],
-        "timestamp": "2026-07-31T10:23:27.07937534",
+        "timestamp": "2026-08-07T13:17:23.162283885",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
