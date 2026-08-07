@@ -284,13 +284,12 @@
                 "short-ERR044595-unicycler.scaffolds.fa.gz:md5,3c81208e9d26de4aa1b2a7fcda7e7c1f",
                 "short-ERR064912-unicycler.assembly.gfa.gz:md5,01faaeca29910ae15e49dd355dda556a",
                 "short-ERR064912-unicycler.scaffolds.fa.gz:md5,0965953c184cd27da1550b757d7911c7",
-                "multiqc_busco.yaml:md5,be1aaee702e6d992b1e82394f5eb06dc",
                 "multiqc_citations.yaml:md5,0842be95dd6c2081198f682f370c7f0a",
                 "multiqc_fastqc.yaml:md5,df71ccd6bf8c3afc34bab236a66de4ee",
                 "multiqc_fastqc_1.yaml:md5,97a9e08230505c268503584151b0591f"
             ]
         ],
-        "timestamp": "2026-07-31T10:09:04.492822187",
+        "timestamp": "2026-08-07T13:02:56.090701276",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
