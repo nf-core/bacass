@@ -207,9 +207,6 @@
                 "reads_qc/longreads/toulligqc"
             ],
             [
-                "consensus_assembly.fasta:md5,692a506544b981315d0375de3d0332ea",
-                "consensus_assembly.gfa:md5,7824a9bbafa2eb6bc675a4db4ad9682f",
-                "consensus_assembly.yaml:md5,a2d73ba6c9bbb1828852976ef679d298",
                 "long-TestMe-sample_01-raven.fasta.gz:md5,ebc67e9f0a5e5e8b20e23f90901139e2",
                 "long-TestMe-sample_02-raven.fasta.gz:md5,5fdfaf522526c9142bb9f62986726ca5",
                 "long-TestMe-miniasm.fasta.gz:md5,cfde74bc269a51162851d9ae7c76207b",
@@ -222,7 +219,7 @@
                 "multiqc_nanostat.yaml:md5,d4ad35da0e3cdb74a1ab8dbfe22ebf04"
             ]
         ],
-        "timestamp": "2026-07-31T10:29:22.93241569",
+        "timestamp": "2026-08-07T10:46:23.688494741",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
