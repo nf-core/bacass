@@ -180,11 +180,11 @@
                 "reads_qc/longreads/toulligqc"
             ],
             [
-                "TestMe-sample_01-raven.fasta.gz:md5,ebc67e9f0a5e5e8b20e23f90901139e2",
-                "TestMe-sample_02-raven.fasta.gz:md5,5fdfaf522526c9142bb9f62986726ca5",
-                "TestMe-miniasm.fasta.gz:md5,cfde74bc269a51162851d9ae7c76207b",
-                "TestMe-miniasm_assembly_consensus.fasta.gz:md5,4899e7b112077d045ecaf13daae4ae4a",
-                "TestMe-raven.fasta.gz:md5,5236a351461c22c5c6ca1f86cbd13f10",
+                "long-TestMe-sample_01-raven.fasta.gz:md5,ebc67e9f0a5e5e8b20e23f90901139e2",
+                "long-TestMe-sample_02-raven.fasta.gz:md5,5fdfaf522526c9142bb9f62986726ca5",
+                "long-TestMe-miniasm.fasta.gz:md5,cfde74bc269a51162851d9ae7c76207b",
+                "long-TestMe-miniasm_assembly_consensus.fasta.gz:md5,4899e7b112077d045ecaf13daae4ae4a",
+                "long-TestMe-raven.fasta.gz:md5,5236a351461c22c5c6ca1f86cbd13f10",
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
