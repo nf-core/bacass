@@ -6,7 +6,7 @@
 
 ## Introduction
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated or tab-separated file with 6 columns, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
@@ -43,10 +43,10 @@ An [example samplesheet](../assets/samplesheet.tsv) has been provided with the p
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/bacass --input samplesheet.tsv --outdir results  -profile docker --assembly_type 'short' --skip_kraken2
+nextflow run nf-core/bacass --input samplesheet.tsv --outdir results -profile docker
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+This will launch the pipeline with the `docker` configuration profile. By default, `--assembly_type auto` detects whether each sample contains short reads, long reads, or both, and routes it only to compatible assemblers. See below for more information about profiles.
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -84,7 +84,7 @@ You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-c
 
 Assemblers have often specific biases originating from their specific implementation. Assembler performance is often sample and context dependent. Therefore, it can be of advantage to compare the outcome of several tools.
 
-This pipeline integrates multiple assembler tools that are all activated by default, allowing a comparison and choice based on the results. However, that can lead to unwanted overhead. The assemblers applied to the data can be restricted with the [--assembler](https://nf-co.re/bacass/parameters/#assembler) parameter.
+This pipeline integrates multiple assembler tools that are all activated by default, allowing a comparison and choice based on the results. With the default `--assembly_type auto`, each sample is routed only to assemblers compatible with its detected read type. The assemblers applied to the data can be restricted with the [--assembler](https://nf-co.re/bacass/parameters/#assembler) parameter to reduce runtime.
 
 > [!TIP]
 > Autocycler uses several long-read assemblers and combines their results, reducing assembler-specific biases. The assemblers used for Autocycler can be restricted with the [--autocycler_assemblers](https://nf-co.re/bacass/parameters#autocycler_assemblers) parameter.

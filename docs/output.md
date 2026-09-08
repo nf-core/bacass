@@ -155,6 +155,8 @@ The pipeline includes a dedicated step for short and long reads QC as well as co
 Trimmed reads are assembled with [Unicycler](https://github.com/rrwick/Unicycler) or [MEGAHIT](https://github.com/voutcn/megahit) in `short` assembly mode. In `hybrid` mode, [Unicycler](https://github.com/rrwick/Unicycler) and [Dragonflye](https://github.com/rpetit3/dragonflye) are available. For long-read assembly, the pipeline supports [Unicycler](https://github.com/rrwick/Unicycler), [Canu](https://github.com/marbl/canu), [Miniasm](https://github.com/lh3/miniasm), [Flye](https://github.com/mikolmogorov/Flye), [Raven](https://github.com/lbcb-sci/raven), [Dragonflye](https://github.com/rpetit3/dragonflye), and [Autocycler](https://github.com/rrwick/Autocycler).
 Unicycler is a pipeline on its own, which at least for Illumina reads mainly acts as a frontend to Spades with added polishing steps.
 
+With the default `--assembly_type auto`, bacass detects the read type for each sample and runs only compatible assemblers. Output sample IDs are prefixed with `short-`, `long-`, or `hybrid-` by default; this can be disabled with `--assembly_type_prefix false`.
+
 <details markdown="1">
 <summary>Output files</summary>
 
