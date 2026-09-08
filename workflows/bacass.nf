@@ -712,8 +712,30 @@ workflow BACASS {
             MEDAKA ( ch_polish_long_medaka_input )
             ch_assembly = ch_assembly_without_polished_long.mix(MEDAKA.out.assembly)
         } else if (params.polish_method == 'nanopolish') {
+            //
+            // Nanopolish requires FAST5 files. Split long-read assemblies by FAST5
+            // availability so samples without FAST5 are kept unpolished instead of
+            // being silently dropped from downstream QC/annotation.
+            //
+            def ch_fast5_samples = ch_fast5.map { meta, _fast5 -> meta.sample }.unique().toList()
             ch_polish_long
-                .map{ meta, lr, assembly ->
+                .combine( ch_fast5_samples )
+                .branch { meta, _lr, _assembly, fast5_samples ->
+                    with_fast5:    fast5_samples.contains(meta.sample)
+                    without_fast5: true
+                }
+                .set { ch_polish_long_split }
+
+            // Retain unpolished long-read assemblies for samples lacking FAST5 and warn the user.
+            ch_polish_long_split.without_fast5
+                .map { meta, _lr, assembly, _fast5_samples ->
+                    log.warn "Skipping Nanopolish for sample '${meta.sample}' because no FAST5 files were provided. The unpolished long-read assembly is retained. Supply FAST5 files or use '--polish_method medaka'."
+                    [ meta, assembly ]
+                }
+                .set { ch_nanopolish_unpolished }
+
+            ch_polish_long_split.with_fast5
+                .map{ meta, lr, assembly, _fast5_samples ->
                     def new_meta = meta.clone()
                     new_meta.polish = "nanopolish"
                     new_meta.id = meta.id + "-nanopolish"
@@ -721,53 +743,48 @@ workflow BACASS {
                 }
                 .set { ch_polish_long_nanopolish }
             //
-            // MODULE: Nanopolish, polishes assembly using FAST5 files
+            // MODULE: Minimap2 polish
             //
-            if (!ch_fast5){
-                log.error "ERROR: FAST5 files are required for Nanopolish but none were provided. Please supply FAST5 files or choose another polishing method. Available options are: medaka, nanopolish"
-            } else {
-                //
-                // MODULE: Minimap2 polish
-                //
-                MINIMAP2_POLISH (
-                    ch_polish_long_nanopolish.map { meta, lr, _fasta -> tuple(meta, lr) },
-                    ch_polish_long_nanopolish.map { meta, _lr, fasta -> tuple(meta, fasta) },
-                    true,
-                    false,
-                    false
-                )
-                ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions)
-                //
-                // MODULE: Samtools index
-                //
-                SAMTOOLS_INDEX (
-                    MINIMAP2_POLISH.out.bam.dump(tag: 'samtools_sort')
-                )
-                ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
-                //
-                // MODULE: Nanopolish
-                //
-                ch_polish_long_nanopolish                     // tuple val(meta), file(longreads), file(assembly)
-                    .join( MINIMAP2_POLISH.out.bam )          // tuple val(meta), file(bam)
-                    .join( SAMTOOLS_INDEX.out.bai )           // tuple val(meta), file(bai)
-                    .cross( ch_fast5 ) { it -> it[0].sample } // tuple val(meta), file(fast5) // meta differs here and needs a join on meta.sample!
-                    .map { input_tuple, fast5_tuple ->
-                        def meta       = input_tuple[0]
-                        def long_reads = input_tuple[1]
-                        def assembly   = input_tuple[2]
-                        def bam        = input_tuple[3]
-                        def bai        = input_tuple[4]
-                        def fast5      = fast5_tuple[1]
-                        [meta, long_reads, assembly, bam, bai, fast5]
-                    }
-                    .set { ch_for_nanopolish }        // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
-                // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
-                NANOPOLISH (
-                    ch_for_nanopolish.dump(tag: 'into_nanopolish')
-                )
-                ch_assembly = ch_assembly_without_polished_long.mix(NANOPOLISH.out.assembly)
-                ch_versions = ch_versions.mix( NANOPOLISH.out.versions )
-            }
+            MINIMAP2_POLISH (
+                ch_polish_long_nanopolish.map { meta, lr, _fasta -> tuple(meta, lr) },
+                ch_polish_long_nanopolish.map { meta, _lr, fasta -> tuple(meta, fasta) },
+                true,
+                false,
+                false
+            )
+            ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions)
+            //
+            // MODULE: Samtools index
+            //
+            SAMTOOLS_INDEX (
+                MINIMAP2_POLISH.out.bam.dump(tag: 'samtools_sort')
+            )
+            ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
+            //
+            // MODULE: Nanopolish
+            //
+            ch_polish_long_nanopolish                     // tuple val(meta), file(longreads), file(assembly)
+                .join( MINIMAP2_POLISH.out.bam )          // tuple val(meta), file(bam)
+                .join( SAMTOOLS_INDEX.out.bai )           // tuple val(meta), file(bai)
+                .cross( ch_fast5 ) { it -> it[0].sample } // tuple val(meta), file(fast5) // meta differs here and needs a join on meta.sample!
+                .map { input_tuple, fast5_tuple ->
+                    def meta       = input_tuple[0]
+                    def long_reads = input_tuple[1]
+                    def assembly   = input_tuple[2]
+                    def bam        = input_tuple[3]
+                    def bai        = input_tuple[4]
+                    def fast5      = fast5_tuple[1]
+                    [meta, long_reads, assembly, bam, bai, fast5]
+                }
+                .set { ch_for_nanopolish }        // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
+            // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
+            NANOPOLISH (
+                ch_for_nanopolish.dump(tag: 'into_nanopolish')
+            )
+            ch_assembly = ch_assembly_without_polished_long
+                .mix(NANOPOLISH.out.assembly)
+                .mix(ch_nanopolish_unpolished)
+            ch_versions = ch_versions.mix( NANOPOLISH.out.versions )
         }
     }
 
