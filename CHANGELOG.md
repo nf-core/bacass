@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#326](https://github.com/nf-core/bacass/pull/326) Fix/busco ci network stability
 - [#315](https://github.com/nf-core/bacass/pull/315) Replace MultiQC general statistics with custom tables better suited to the new `assembly_mode` and multi-assembler strategy
 - [#315](https://github.com/nf-core/bacass/pull/315) Skip Canu when `gsize` is missing
+- [#315](https://github.com/nf-core/bacass/pull/315) Default `--assembly_type` is now `auto` (per-sample detection) and `--assembler` defaults to all assemblers, so each sample runs only the assemblers compatible with its detected read type
 
 ### `Added`
 
