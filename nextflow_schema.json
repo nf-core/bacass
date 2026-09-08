@@ -148,16 +148,23 @@
                 },
                 "assembly_type": {
                     "type": "string",
+                    "default": "auto",
                     "fa_icon": "fas fa-fingerprint",
-                    "help_text": "This adjusts the type of assembly done with the input data and can be any of `long`, `short` or `hybrid`.",
-                    "description": "Which type of assembly to perform.",
-                    "enum": ["short", "long", "hybrid"]
+                    "help_text": "Controls how samples are routed for genome assembly. Use `short`, `long`, or `hybrid` to force the same assembly mode for all samples. Use `auto` to infer the assembly mode independently for each sample from the reads provided in the samplesheet: short-read only samples are treated as `short`, long-read only samples as `long`, and samples with both short and long reads as `hybrid`. Assemblers are then run only for compatible sample and assembly-mode combinations.",
+                    "description": "Assembly mode to use for all samples, or per-sample autodetection when set to `auto`.",
+                    "enum": ["short", "long", "hybrid", "auto"]
+                },
+                "assembly_type_prefix": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Prefix sample IDs in output files with the assembly type.",
+                    "help_text": "When enabled, output sample IDs are prefixed with `short-`, `long-`, or `hybrid-`. In `--assembly_type auto` mode, the prefix is based on the per-sample assembly type detected from the samplesheet. In explicit `short`, `long`, or `hybrid` mode, the selected assembly type is used. Existing `short_`, `short-`, `long_`, `long-`, `hybrid_`, or `hybrid-` prefixes in the samplesheet ID are normalised to the detected/selected prefix to avoid duplicated labels. Disable this option to keep the original samplesheet IDs in output names."
                 },
                 "unicycler_args": {
                     "type": "string",
                     "fa_icon": "fas fa-bicycle",
                     "description": "Extra arguments for Unicycler",
-                    "help_text": "This advanced option allows you to pass extra arguments to Unicycler (e.g. `\"--mode conservative\"` or `\"--no_correct\"`). For this to work you need to quote the arguments and add at least one space."
+                    "help_text": "This advanced option allows you to pass extra arguments to Unicycler (e.g. `\"--mode conservative\"` or `\"--mode bold --kmers 51\"`). For this to work you need to quote the arguments and add at least one space."
                 },
                 "canu_mode": {
                     "type": "string",

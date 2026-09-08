@@ -1,11 +1,8 @@
 {
-    "-profile test_hybrid": {
+    "-profile test_auto": {
         "content": [
-            12,
+            35,
             {
-                "BUSCO_BUSCO": {
-                    "busco": "5.8.3"
-                },
                 "FASTP": {
                     "fastp": "1.0.1"
                 },
@@ -15,8 +12,20 @@
                 "FASTQC_TRIM": {
                     "fastqc": "0.12.1"
                 },
+                "FLYE": {
+                    "flye": "2.9.5-b1801"
+                },
                 "GUNZIP": {
                     "gunzip": 1.13
+                },
+                "GUNZIP_MEDAKA": {
+                    "gunzip": 1.13
+                },
+                "MEDAKA": {
+                    "medaka": "2.2.2"
+                },
+                "MEGAHIT": {
+                    "megahit": "1.2.9"
                 },
                 "NANOPLOT": {
                     "nanoplot": "1.46.1"
@@ -28,6 +37,9 @@
                     "prokka": "1.14.6"
                 },
                 "QUAST": {
+                    "quast": "5.3.0"
+                },
+                "QUAST_BYSAMPLE": {
                     "quast": "5.3.0"
                 },
                 "TOULLIGQC": {
@@ -44,17 +56,31 @@
                 "annotation",
                 "annotation/prokka",
                 "annotation/prokka/hybrid-ERR044595-unicycler",
+                "annotation/prokka/long-TestMe-flye-medaka",
+                "annotation/prokka/long-TestMe-unicycler-medaka",
+                "annotation/prokka/short-ERR044595-megahit",
+                "annotation/prokka/short-ERR044595-unicycler",
                 "assembly",
+                "assembly/flye",
+                "assembly/flye/long-TestMe-flye.assembly.fasta.gz",
+                "assembly/megahit",
+                "assembly/megahit/short-ERR044595-megahit.contigs.fa.gz",
+                "assembly/megahit/short-ERR044595-megahit.log",
+                "assembly/polishing",
+                "assembly/polishing/medaka",
+                "assembly/polishing/medaka/long-TestMe-flye-medaka_polished_genome.fa.gz",
+                "assembly/polishing/medaka/long-TestMe-unicycler-medaka_polished_genome.fa.gz",
                 "assembly/unicycler",
                 "assembly/unicycler/hybrid-ERR044595-unicycler.assembly.gfa.gz",
                 "assembly/unicycler/hybrid-ERR044595-unicycler.scaffolds.fa.gz",
                 "assembly/unicycler/hybrid-ERR044595-unicycler.unicycler.log",
+                "assembly/unicycler/long-TestMe-unicycler.assembly.gfa.gz",
+                "assembly/unicycler/long-TestMe-unicycler.scaffolds.fa.gz",
+                "assembly/unicycler/long-TestMe-unicycler.unicycler.log",
+                "assembly/unicycler/short-ERR044595-unicycler.assembly.gfa.gz",
+                "assembly/unicycler/short-ERR044595-unicycler.scaffolds.fa.gz",
+                "assembly/unicycler/short-ERR044595-unicycler.unicycler.log",
                 "assembly_qc",
-                "assembly_qc/busco",
-                "assembly_qc/busco/hybrid-ERR044595-unicycler-bacteria_odb10-busco.batch_summary.txt",
-                "assembly_qc/busco/hybrid-ERR044595-unicycler-bacteria_odb10-busco.log",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.hybrid-ERR044595-unicycler.scaffolds.fa.json",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.hybrid-ERR044595-unicycler.scaffolds.fa.txt",
                 "assembly_qc/quast",
                 "assembly_qc/quast/overall",
                 "assembly_qc/quast/overall/report",
@@ -63,6 +89,10 @@
                 "assembly_qc/quast/overall/report/basic_stats/Nx_plot.pdf",
                 "assembly_qc/quast/overall/report/basic_stats/cumulative_plot.pdf",
                 "assembly_qc/quast/overall/report/basic_stats/hybrid-ERR044595-unicycler.scaffolds_GC_content_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/long-TestMe-flye-medaka_polished_genome_GC_content_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/long-TestMe-unicycler-medaka_polished_genome_GC_content_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/short-ERR044595-megahit.contigs_GC_content_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/short-ERR044595-unicycler.scaffolds_GC_content_plot.pdf",
                 "assembly_qc/quast/overall/report/icarus.html",
                 "assembly_qc/quast/overall/report/icarus_viewers",
                 "assembly_qc/quast/overall/report/icarus_viewers/contig_size_viewer.html",
@@ -75,9 +105,47 @@
                 "assembly_qc/quast/overall/report/transposed_report.tex",
                 "assembly_qc/quast/overall/report/transposed_report.tsv",
                 "assembly_qc/quast/overall/report/transposed_report.txt",
+                "assembly_qc/quast/per_sample",
+                "assembly_qc/quast/per_sample/long_TestMe",
+                "assembly_qc/quast/per_sample/long_TestMe/basic_stats",
+                "assembly_qc/quast/per_sample/long_TestMe/basic_stats/GC_content_plot.pdf",
+                "assembly_qc/quast/per_sample/long_TestMe/basic_stats/Nx_plot.pdf",
+                "assembly_qc/quast/per_sample/long_TestMe/basic_stats/cumulative_plot.pdf",
+                "assembly_qc/quast/per_sample/long_TestMe/basic_stats/long-TestMe-flye-medaka_polished_genome_GC_content_plot.pdf",
+                "assembly_qc/quast/per_sample/long_TestMe/basic_stats/long-TestMe-unicycler-medaka_polished_genome_GC_content_plot.pdf",
+                "assembly_qc/quast/per_sample/long_TestMe/icarus.html",
+                "assembly_qc/quast/per_sample/long_TestMe/icarus_viewers",
+                "assembly_qc/quast/per_sample/long_TestMe/icarus_viewers/contig_size_viewer.html",
+                "assembly_qc/quast/per_sample/long_TestMe/quast.log",
+                "assembly_qc/quast/per_sample/long_TestMe/report.html",
+                "assembly_qc/quast/per_sample/long_TestMe/report.pdf",
+                "assembly_qc/quast/per_sample/long_TestMe/report.tex",
+                "assembly_qc/quast/per_sample/long_TestMe/report.tsv",
+                "assembly_qc/quast/per_sample/long_TestMe/report.txt",
+                "assembly_qc/quast/per_sample/long_TestMe/transposed_report.tex",
+                "assembly_qc/quast/per_sample/long_TestMe/transposed_report.tsv",
+                "assembly_qc/quast/per_sample/long_TestMe/transposed_report.txt",
+                "assembly_qc/quast/per_sample/short_ERR044595",
+                "assembly_qc/quast/per_sample/short_ERR044595/basic_stats",
+                "assembly_qc/quast/per_sample/short_ERR044595/basic_stats/GC_content_plot.pdf",
+                "assembly_qc/quast/per_sample/short_ERR044595/basic_stats/Nx_plot.pdf",
+                "assembly_qc/quast/per_sample/short_ERR044595/basic_stats/cumulative_plot.pdf",
+                "assembly_qc/quast/per_sample/short_ERR044595/basic_stats/short-ERR044595-megahit.contigs_GC_content_plot.pdf",
+                "assembly_qc/quast/per_sample/short_ERR044595/basic_stats/short-ERR044595-unicycler.scaffolds_GC_content_plot.pdf",
+                "assembly_qc/quast/per_sample/short_ERR044595/icarus.html",
+                "assembly_qc/quast/per_sample/short_ERR044595/icarus_viewers",
+                "assembly_qc/quast/per_sample/short_ERR044595/icarus_viewers/contig_size_viewer.html",
+                "assembly_qc/quast/per_sample/short_ERR044595/quast.log",
+                "assembly_qc/quast/per_sample/short_ERR044595/report.html",
+                "assembly_qc/quast/per_sample/short_ERR044595/report.pdf",
+                "assembly_qc/quast/per_sample/short_ERR044595/report.tex",
+                "assembly_qc/quast/per_sample/short_ERR044595/report.tsv",
+                "assembly_qc/quast/per_sample/short_ERR044595/report.txt",
+                "assembly_qc/quast/per_sample/short_ERR044595/transposed_report.tex",
+                "assembly_qc/quast/per_sample/short_ERR044595/transposed_report.tsv",
+                "assembly_qc/quast/per_sample/short_ERR044595/transposed_report.txt",
                 "multiqc",
                 "multiqc/multiqc_data",
-                "multiqc/multiqc_data/mqc_busco_plot_bacteria_odb10_1.yaml",
                 "multiqc/multiqc_data/mqc_fastp-insert-size-plot_1.yaml",
                 "multiqc/multiqc_data/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml",
                 "multiqc/multiqc_data/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml",
@@ -115,7 +183,6 @@
                 "multiqc/multiqc_data/mqc_quast_num_contigs_1.yaml",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc_assembly_comparison_metrics-plot.yaml",
-                "multiqc/multiqc_data/multiqc_busco.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
                 "multiqc/multiqc_data/multiqc_fastp.yaml",
@@ -130,8 +197,6 @@
                 "multiqc/multiqc_data/porechop.yaml",
                 "multiqc/multiqc_plots",
                 "multiqc/multiqc_plots/pdf",
-                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1.pdf",
-                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1_pc.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_fastp-insert-size-plot_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.pdf",
@@ -176,8 +241,6 @@
                 "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1_pc.pdf",
                 "multiqc/multiqc_plots/png",
-                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1.png",
-                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1_pc.png",
                 "multiqc/multiqc_plots/png/mqc_fastp-insert-size-plot_1.png",
                 "multiqc/multiqc_plots/png/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.png",
                 "multiqc/multiqc_plots/png/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.png",
@@ -222,8 +285,6 @@
                 "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1.png",
                 "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1_pc.png",
                 "multiqc/multiqc_plots/svg",
-                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1.svg",
-                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1_pc.svg",
                 "multiqc/multiqc_plots/svg/mqc_fastp-insert-size-plot_1.svg",
                 "multiqc/multiqc_plots/svg/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.svg",
                 "multiqc/multiqc_plots/svg/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.svg",
@@ -277,37 +338,51 @@
                 "reads_qc/longreads/nanoplot",
                 "reads_qc/longreads/porechop",
                 "reads_qc/longreads/porechop/hybrid-ERR044595.porechop.log",
+                "reads_qc/longreads/porechop/long-TestMe.porechop.log",
                 "reads_qc/longreads/toulligqc",
                 "reads_qc/shortreads",
                 "reads_qc/shortreads/fastp",
                 "reads_qc/shortreads/fastp/logs",
                 "reads_qc/shortreads/fastp/logs/hybrid-ERR044595.fastp.log",
+                "reads_qc/shortreads/fastp/logs/short-ERR044595.fastp.log",
                 "reads_qc/shortreads/fastp/reports",
                 "reads_qc/shortreads/fastp/reports/hybrid-ERR044595.fastp.html",
                 "reads_qc/shortreads/fastp/reports/hybrid-ERR044595.fastp.json",
+                "reads_qc/shortreads/fastp/reports/short-ERR044595.fastp.html",
+                "reads_qc/shortreads/fastp/reports/short-ERR044595.fastp.json",
                 "reads_qc/shortreads/fastqc",
                 "reads_qc/shortreads/fastqc/raw",
                 "reads_qc/shortreads/fastqc/raw/hybrid-ERR044595_1_fastqc.html",
                 "reads_qc/shortreads/fastqc/raw/hybrid-ERR044595_1_fastqc.zip",
                 "reads_qc/shortreads/fastqc/raw/hybrid-ERR044595_2_fastqc.html",
                 "reads_qc/shortreads/fastqc/raw/hybrid-ERR044595_2_fastqc.zip",
+                "reads_qc/shortreads/fastqc/raw/short-ERR044595_1_fastqc.html",
+                "reads_qc/shortreads/fastqc/raw/short-ERR044595_1_fastqc.zip",
+                "reads_qc/shortreads/fastqc/raw/short-ERR044595_2_fastqc.html",
+                "reads_qc/shortreads/fastqc/raw/short-ERR044595_2_fastqc.zip",
                 "reads_qc/shortreads/fastqc/trimmed",
                 "reads_qc/shortreads/fastqc/trimmed/hybrid-ERR044595_1_fastqc.html",
-                "reads_qc/shortreads/fastqc/trimmed/hybrid-ERR044595_2_fastqc.html"
+                "reads_qc/shortreads/fastqc/trimmed/hybrid-ERR044595_2_fastqc.html",
+                "reads_qc/shortreads/fastqc/trimmed/short-ERR044595_1_fastqc.html",
+                "reads_qc/shortreads/fastqc/trimmed/short-ERR044595_2_fastqc.html"
             ],
             [
-                "hybrid-ERR044595-unicycler.assembly.gfa.gz:md5,3558ea16e8397970aa6dff03ebea7886",
-                "hybrid-ERR044595-unicycler.scaffolds.fa.gz:md5,7854e8c8e26f21d7acfeaca4a872f7ea",
-                "mqc_porechop-endtrim-barplot_1.yaml:md5,29573e9fc6174bb91352b0b9f248335f",
-                "mqc_porechop-middlesplit-barplot_1.yaml:md5,844b018c7434ca59c893901eef530de8",
-                "mqc_porechop-starttrim-barplot_1.yaml:md5,e6cced8fc844dabd795ba0dfa6ec0e64",
-                "multiqc_citations.yaml:md5,c1962a840fe1cf1698fbdeb8953601ed",
-                "multiqc_fastqc.yaml:md5,6426381984018f0bd78075c8a15fb0a0",
-                "multiqc_fastqc_1.yaml:md5,62a78334fafb59e924139522b49721d3",
-                "multiqc_nanostat.yaml:md5,b3f0b69626b623ed337e0a99688d99b8"
+                "hybrid-ERR044595-unicycler.assembly.gfa.gz:md5,8c9245236a6a732e59727ed7fb83b2e0",
+                "hybrid-ERR044595-unicycler.scaffolds.fa.gz:md5,356119ddeeb478b50ceb00f6e6325c8d",
+                "long-TestMe-unicycler.assembly.gfa.gz:md5,23a7fcda434d9d31bc77c88db004f2f8",
+                "long-TestMe-unicycler.scaffolds.fa.gz:md5,0f8a3007f245df1870c892ed11a60f94",
+                "short-ERR044595-unicycler.assembly.gfa.gz:md5,8c9245236a6a732e59727ed7fb83b2e0",
+                "short-ERR044595-unicycler.scaffolds.fa.gz:md5,356119ddeeb478b50ceb00f6e6325c8d",
+                "mqc_porechop-endtrim-barplot_1.yaml:md5,0b49a95a973d71bb3922d7ca7290b8f6",
+                "mqc_porechop-middlesplit-barplot_1.yaml:md5,d435044fff3ea60feb619f77c2bbdfc1",
+                "mqc_porechop-starttrim-barplot_1.yaml:md5,382999761397928a8dbbee833005e77f",
+                "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
+                "multiqc_fastqc.yaml:md5,5801716f9e8cf32d724c99ffaaa8bf40",
+                "multiqc_fastqc_1.yaml:md5,b70bf9bd9a9df5aef59decee1ea255bc",
+                "multiqc_nanostat.yaml:md5,e4f6c5933553d8c9f695a4a2c835cb15"
             ]
         ],
-        "timestamp": "2026-08-07T12:51:58.833465109",
+        "timestamp": "2026-09-08T18:06:35.706643685",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

@@ -46,6 +46,17 @@ SAMPLE_FIELDS = [
     "Best assembly genome fraction (%)",
 ]
 
+KMERFINDER_FIELDS = [
+    "# Best hit (KmerFinder)",
+    "# Best hit assembly ID (KmerFinder)",
+    "# Best hit query coverage (KmerFinder)",
+    "# Best hit depth (KmerFinder)",
+    "# Second hit (KmerFinder)",
+    "# Second hit assembly ID (KmerFinder)",
+    "# Second hit query coverage (KmerFinder)",
+    "# Second hit depth (KmerFinder)",
+]
+
 ASSEMBLY_FIELDS = [
     "Sample",
     "Assembly type",
@@ -472,10 +483,11 @@ def add_best_assembly_metrics(sample_rows, assembly_rows):
         ]
 
 
-def table_fields(include_reference_metrics):
+def table_fields(include_kmerfinder_metrics):
     sample_fields = list(SAMPLE_FIELDS)
     assembly_fields = list(ASSEMBLY_FIELDS)
-    if not include_reference_metrics:
+    if not include_kmerfinder_metrics:
+        sample_fields = [field for field in sample_fields if field not in KMERFINDER_FIELDS]
         sample_fields.remove("Best assembly genome fraction (%)")
         assembly_fields.remove("# Genome fraction (%)")
     return sample_fields, assembly_fields
@@ -558,7 +570,7 @@ def main(args=None):
         yaml_file=args.OUT_PREFIX + "_sample_assembly_metrics_mqc.yaml",
         section_id="sample_summary_assembly_metrics",
         section_name="Sample summary",
-        description="One row per sample with read QC, KmerFinder taxonomy and the best assembly by N50.",
+        description="One row per sample with read QC, optional KmerFinder taxonomy and the best assembly by N50.",
         header_config=SAMPLE_HEADER_CONFIG,
     )
     write_table(

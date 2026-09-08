@@ -63,6 +63,9 @@ include { paramsSummaryMap                      } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
+include { buildAssemblyTypeSampleId             } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
+include { detectAssemblyType                    } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
+include { normaliseInputFiles                   } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,17 +98,27 @@ workflow BACASS {
     //
     def criteria = multiMapCriteria {
         meta, fastqs, long_fastq, fast5 ->
-            shortreads: fastqs[0]       != 'NA' ? tuple(meta, fastqs)    : tuple(meta, [])
-            longreads:  long_fastq      != 'NA' ? tuple(meta,long_fastq) : tuple(meta, [])
-            fast5:      fast5           != 'NA' ? tuple(meta, fast5)     : tuple(meta, [])
+            shortreads: fastqs     ? tuple(meta, fastqs)     : tuple(meta, [])
+            longreads:  long_fastq ? tuple(meta, long_fastq) : tuple(meta, [])
+            fast5:      fast5      ? tuple(meta, fast5[0])   : tuple(meta, [])
     }
     ch_proteins = params.prokka_proteins ? channel.fromPath(params.prokka_proteins, checkIfExists: true)  : []
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     ch_samplesheet
         .map { meta, fastqs, long_fastq, fast5  ->
-            def new_meta = meta + [id: meta.sample] // add "meta.id" !
+            def new_meta = meta.clone()
             new_meta.subsample = false
-            return [ new_meta, fastqs, long_fastq, fast5  ] }
+            def short_read_files = normaliseInputFiles(fastqs)
+            def long_read_files  = normaliseInputFiles(long_fastq)
+            def fast5_files      = normaliseInputFiles(fast5)
+            // Annotate per-sample assembly type
+            if (params.assembly_type == 'auto') {
+                new_meta.assembly_type = detectAssemblyType(short_read_files, long_read_files)
+            } else {
+                new_meta.assembly_type = params.assembly_type
+            }
+            new_meta.id = params.assembly_type_prefix ? buildAssemblyTypeSampleId(meta.sample, new_meta.assembly_type) : meta.sample
+            return [ new_meta, short_read_files, long_read_files, fast5_files  ] }
         .multiMap (criteria)
         .set { ch_input }
 
@@ -113,10 +126,12 @@ workflow BACASS {
     ch_input
         .shortreads
         .filter{ _meta, data -> data }
+        .dump(tag: 'shortreads')
         .set { ch_shortreads }
     ch_input
         .longreads
         .filter{ _meta, data -> data }
+        .dump(tag: 'longreads')
         .set { ch_longreads }
     ch_input
         .fast5
@@ -130,7 +145,7 @@ workflow BACASS {
     ch_fastqc_raw_multiqc  = channel.empty()
     ch_fastqc_trim_multiqc = channel.empty()
     ch_fastp_json_multiqc  = channel.empty()
-    if (params.assembly_type in ['short', 'hybrid']) {
+    if (params.assembly_type in ['short', 'hybrid', 'auto']) {
         //
         // MODULE: Concatenate FastQ files from same sample if required
         //
@@ -146,6 +161,7 @@ workflow BACASS {
         )
         ch_shortreads_concat = CAT_FASTQ_SHORT.out.reads
             .mix( ch_shortreads_fastqs.single )
+            .dump(tag: 'shortreads_concat')
 
         //
         // SUBWORKFLOW: Short reads QC and trim adapters
@@ -158,7 +174,7 @@ workflow BACASS {
             params.skip_fastp,
             params.skip_fastqc
         )
-        ch_short_preprocessed   = FASTQ_TRIM_FASTP_FASTQC.out.reads
+        ch_short_preprocessed   = FASTQ_TRIM_FASTP_FASTQC.out.reads.dump(tag: 'shortreads_preprocessed')
         ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
         ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
         ch_fastp_json_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
@@ -173,7 +189,7 @@ workflow BACASS {
     ch_porechop_log_multiqc = channel.empty()
     ch_filtlong_log_multiqc = channel.empty()
     ch_longreads_filtered   = channel.empty()
-    if (params.assembly_type in ['long', 'hybrid']) {
+    if (params.assembly_type in ['long', 'hybrid', 'auto']) {
         //
         // MODULE: Concatenate FastQ files from same sample if required
         //
@@ -196,6 +212,7 @@ workflow BACASS {
         )
         ch_longreads_concat = CAT_FASTQ_LONG.out.reads
             .mix( ch_longreads_fastqs.single )
+            .dump(tag: 'longreads_concat')
 
         //
         // SUBWORKFLOW: quality check for nanopore reads with Nanoplot and ToulligQC
@@ -225,9 +242,9 @@ workflow BACASS {
         //
         if ( params.long_reads_filtering == 'porechop' ) {
             PORECHOP_PORECHOP (
-                ch_longreads_concat.dump(tag: 'longreads')
+                ch_longreads_concat
             )
-            ch_longreads_filtered   = PORECHOP_PORECHOP.out.reads
+            ch_longreads_filtered   = PORECHOP_PORECHOP.out.reads.dump(tag: 'longreads_filtered')
             ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
             ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
         }
@@ -236,18 +253,30 @@ workflow BACASS {
         // MODULE: FILTLONG, filtering long reads by quality. It can take a set of long reads and produce a smaller, better subset.
         //
         if ( params.long_reads_filtering == 'filtlong' ) {
-            ch_shortreads_for_filtlong = channel.empty()
-            if (params.assembly_type == 'hybrid') {
-                ch_shortreads_for_filtlong = ch_short_preprocessed.join(ch_longreads_concat)   //tuple val(meta), file(sr), file(lr)
-            } else if ( params.assembly_type == 'long' ) {
-                ch_shortreads_for_filtlong = ch_longreads_concat.map{ meta, lr -> tuple(meta, [], lr ) }
-            }
+            def ch_filtlong_hybrid = ch_short_preprocessed
+                .cross(ch_longreads_concat) { it[0].sample }
+                .map { short_tuple, long_tuple ->
+                    def meta        = short_tuple[0]
+                    def short_reads = short_tuple[1]
+                    def long_reads  = long_tuple[1]
+                    tuple(meta, short_reads, long_reads)
+                }
+
+            def ch_filtlong_long = ch_longreads_concat
+                .map { meta, lr -> tuple(meta, [], lr) }
+
+            // Decide which channel should be sent to filtlong
+            ch_shortreads_for_filtlong = params.assembly_type == 'hybrid' ? ch_filtlong_hybrid :
+                params.assembly_type == 'long' ? ch_filtlong_long :
+                ch_filtlong_hybrid
+                    .filter { meta, _sr, _lr -> meta.assembly_type == 'hybrid' }
+                    .mix(ch_filtlong_long.filter { meta, _sr, _lr -> meta.assembly_type == 'long' })
 
             FILTLONG (
-                ch_shortreads_for_filtlong
+                ch_shortreads_for_filtlong.dump(tag:'reads_for_filtlong')
             )
 
-            ch_longreads_filtered   = FILTLONG.out.reads
+            ch_longreads_filtered   = FILTLONG.out.reads.dump(tag: 'longreads_filtered')
             ch_filtlong_log_multiqc = FILTLONG.out.log
         }
     }
@@ -256,7 +285,7 @@ workflow BACASS {
     // MODULE: RASUSA, randomly subsample reads to a target coverage or number of bases.
     //
     if ( params.rasusa ) {
-        if ( params.assembly_type != 'short' ) {
+        if ( params.assembly_type != 'short' ) { // In 'auto' mode, only samples with long reads will be in ch_longreads_filtered
             ch_longreads_filtered
                 .branch { meta, reads ->
                     with_gsize: meta.gsize && meta.gsize != 'NA'
@@ -265,81 +294,94 @@ workflow BACASS {
                 .set { ch_rasusa_branch }
 
             ch_rasusa_branch.with_gsize
-                .map { meta, reads -> tuple(meta, reads, meta.gsize) }
+                .map { meta, reads ->
+                    def rasusa_meta = meta + [single_end: true]
+                    tuple(rasusa_meta, reads, meta.gsize)
+                }
                 .set { ch_rasusa_input }
 
             RASUSA (
-                ch_rasusa_input,
+                ch_rasusa_input.dump(tag:'rasusa_input'),
                 params.rasusa_coverage
             )
-            ch_longreads_filtered = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize)
+            ch_longreads_filtered = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize).dump(tag: 'longreads_filtered')
             ch_rasusa_log = RASUSA.out.log
         }
     }
 
+    //
+    // Prepare channels for assemblers and Kraken2.
+    // Assemblers always receive tuple(meta, short_reads_or_empty, long_reads_or_empty).
+    //
+    ch_for_assembly_hybrid = ch_short_preprocessed
+        .cross(ch_longreads_filtered) { it[0].sample }
+        .map { short_tuple, long_tuple ->
+            def meta        = short_tuple[0]
+            def short_reads = short_tuple[1]
+            def long_reads  = long_tuple[1]
+            tuple(meta, short_reads, long_reads)
+        }
 
-    //
-    // Join channels for assemblers. As samples have the same meta data, we can simply use join() to merge the channels based on this. If we only have one of the channels we insert 'NAs' which are not used in the unicycler process then subsequently, in case of short or long read only assembly.
-    // Prepare channel for Kraken2
-    //
-    if(params.assembly_type == 'hybrid'){
-        ch_for_kraken2_short    = ch_short_preprocessed
-        ch_for_kraken2_long     = ch_longreads_filtered
-        ch_short_preprocessed
-            .dump(tag: 'fastp')
-            .cross(ch_longreads_filtered) { it -> it[0].sample }
-            .map { short_tuple, long_tuple ->
-                def meta_short = short_tuple[0]
-                def short_reads = short_tuple[1]
-                def long_reads = long_tuple[1]
-                [meta_short, short_reads, long_reads]
-            }
+    ch_for_assembly_short = ch_short_preprocessed
+        .map { meta, reads -> tuple(meta, reads, []) }
+
+    ch_for_assembly_long = ch_longreads_filtered
+        .map { meta, reads -> tuple(meta, [], reads) }
+
+    if (params.assembly_type == 'hybrid') {
+        ch_for_kraken2_short = ch_short_preprocessed
+        ch_for_kraken2_long  = ch_longreads_filtered
+        ch_for_assembly_hybrid
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
-        ch_for_assembly.ifEmpty{
-            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  There is nothing to assemble with these settings.\n" +
-                "  Please verify that samples have short and long reads.\n"
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            error(error_string) }
-    } else if ( params.assembly_type == 'short' ) {
-        ch_for_kraken2_short    = ch_short_preprocessed
-        ch_for_kraken2_long     = channel.empty()
-        ch_short_preprocessed
-            .dump(tag: 'fastp')
-            .map{ meta,reads -> tuple(meta,reads,[]) }
+    } else if (params.assembly_type == 'short') {
+        ch_for_kraken2_short = ch_short_preprocessed
+        ch_for_kraken2_long  = channel.empty()
+        ch_for_assembly_short
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
-        ch_for_assembly.ifEmpty{
-            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  There is nothing to assemble with these settings.\n" +
-                "  Please verify that samples have short reads.\n"
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            error(error_string) }
-    } else if ( params.assembly_type == 'long' ) {
-        ch_for_kraken2_short    = channel.empty()
-        ch_for_kraken2_long     = ch_longreads_filtered
-        ch_longreads_filtered
-            .dump(tag: 'ch_longreads_filtered')
-            .map{ meta,lr -> tuple(meta,[],lr) }
+    } else if (params.assembly_type == 'long') {
+        ch_for_kraken2_short = channel.empty()
+        ch_for_kraken2_long  = ch_longreads_filtered
+        ch_for_assembly_long
             .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
-        ch_for_assembly.ifEmpty{
-            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-                "  There is nothing to assemble with these settings.\n" +
-                "  Please verify that samples have long reads.\n"
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            error(error_string) }
+    } else if (params.assembly_type == 'auto') {
+        ch_for_kraken2_short = ch_short_preprocessed
+        ch_for_kraken2_long  = ch_longreads_filtered
+
+        ch_for_assembly_hybrid
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'hybrid' }
+            .dump(tag: 'auto_assembly_hybrid')
+            .mix(
+                ch_for_assembly_short
+                    .filter { meta, _sr, _lr -> meta.assembly_type == 'short' }
+                    .dump(tag: 'auto_assembly_short'),
+                ch_for_assembly_long
+                    .filter { meta, _sr, _lr -> meta.assembly_type == 'long' }
+                    .dump(tag: 'auto_assembly_long')
+            )
+            .dump(tag: 'ch_for_assembly')
+            .set { ch_for_assembly }
     }
+
+    ch_for_assembly.ifEmpty{
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  There is nothing to assemble with these settings.\n" +
+            "  Please verify that samples have reads compatible with --assembly_type ${params.assembly_type}.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string) }
 
     //
     // MODULE: Autocycler, subset long reads for multiple assemblies per sample.
     //
     if( params.assembler.tokenize(",").contains("autocycler") ) {
-        // subsample and transpose to one subset per channel entry
+        // subsample and transpose to one subset per channel entry (only for long-read assemblies)
+        def ch_for_autocycler_subsample = ch_for_assembly
+            .filter { meta, _sr, lr -> !meta.subsample && meta.assembly_type == 'long' && lr }
         AUTOCYCLER_SUBSAMPLE (
-            ch_for_assembly.map{ meta, _short_reads, long_reads -> [meta, long_reads] },
-            ch_for_assembly.map { meta, _reads, _lr -> meta.gsize }
+            ch_for_autocycler_subsample.map{ meta, _short_reads, long_reads -> [meta, long_reads] },
+            ch_for_autocycler_subsample.map { meta, _reads, _lr -> meta.gsize }
         )
         AUTOCYCLER_SUBSAMPLE.out.subsampled_reads // transpose to [ meta, fasta-subset1, fasta-subset2, ... ]
             .transpose() // transpose to [ meta, fasta ]
@@ -364,6 +406,7 @@ workflow BACASS {
     if ( params.assembler.tokenize(",").contains("unicycler") ) {
         ch_for_assembly
             .filter{ meta, _sr, _lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
+            .filter{ meta, _sr, _lr -> meta.assembly_type in ['short', 'long', 'hybrid'] } // unicycler supports all types
             .map{ meta, sr, lr ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "unicycler"
@@ -383,6 +426,7 @@ workflow BACASS {
     //
     if ( params.assembler.tokenize(",").contains("megahit") ) {
         ch_for_assembly
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'short' } // megahit is short-read only
             .map { meta, short_reads, _long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "megahit"
@@ -405,7 +449,8 @@ workflow BACASS {
     // MODULE: Canu, genome assembly, long reads
     //
     if ( params.assembler.tokenize(",").contains("canu") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("canu") ) ) {
-        ch_for_assembly
+        ch_for_assembly_canu_candidates = ch_for_assembly
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'long' } // canu is long-read only
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "canu"
@@ -416,7 +461,18 @@ workflow BACASS {
                 params.assembler.tokenize(",").contains("autocycler") && !params.assembler.tokenize(",").contains("canu") ? meta.subsample : // if with autocycler and not canu accept only subsamples
                     !params.assembler.tokenize(",").contains("autocycler") && params.assembler.tokenize(",").contains("canu") ? !meta.subsample : true // if without autocycler and with canu reject subsample
             }
+
+        ch_for_assembly_canu_candidates
+            .filter { meta, _lr ->
+                if (!meta.gsize || meta.gsize == 'NA') {
+                    log.warn "Skipping Canu for sample '${meta.sample}' because genome size is required. Please add a valid 'gsize' value to the samplesheet and rerun the pipeline with -resume."
+                    return false
+                }
+                return true
+            }
+            .dump(tag: 'canu_input')
             .set { ch_for_assembly_canu }
+
         CANU (
             ch_for_assembly_canu,
             params.canu_mode,
@@ -428,23 +484,26 @@ workflow BACASS {
     //
     // MODULE: Miniasm, genome assembly, long reads
     //
+    // TODO: this can be subworkflow
     if ( params.assembler.tokenize(",").contains("miniasm") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") ) ) {
         ch_for_assembly
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'long' } // miniasm is long-read only
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "miniasm"
                 new_meta.id = meta.subsample ? "${meta.id}-${meta.subsample}-miniasm" : meta.id + "-miniasm"
-                [ new_meta, long_reads ]
+                tuple(new_meta, long_reads)
             }
             .filter { meta, _lr ->
                 params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") && params.assembler.tokenize(",").contains("miniasm") ? true : // if with autocycler and miniasm accept all data sets
                     params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") && !params.assembler.tokenize(",").contains("miniasm") ? meta.subsample : // if with autocycler and not miniasm accept only subsamples
                     ( !params.assembler.tokenize(",").contains("autocycler") || !params.autocycler_assemblers.tokenize(",").contains("miniasm") ) && params.assembler.tokenize(",").contains("miniasm") ? !meta.subsample : false // if without autocycler and with miniasm reject subsample
             }
-            .set { ch_for_assembly_miniasm }
+            .dump(tag: 'miniasm_longreads')
+            .set { ch_miniasm_longreads }
 
         MINIMAP2_ALIGN (
-            ch_for_assembly_miniasm,
+            ch_miniasm_longreads,
             [[:],[]],
             false,
             false,
@@ -452,7 +511,7 @@ workflow BACASS {
         )
         ch_versions = ch_versions.mix(MINIMAP2_ALIGN.out.versions)
 
-        ch_for_assembly_miniasm
+        ch_miniasm_longreads
             .join(MINIMAP2_ALIGN.out.paf)
             .set { ch_for_miniasm }
 
@@ -460,18 +519,30 @@ workflow BACASS {
             ch_for_miniasm
         )
 
+        ch_miniasm_longreads
+            .join(MINIASM.out.assembly)
+            .set { ch_miniasm_for_consensus }
+
+        ch_miniasm_for_consensus
+            .multiMap { meta, long_reads, assembly ->
+                reads: tuple(meta, long_reads)
+                assembly: tuple(meta, assembly)
+            }
+            .set { ch_miniasm_consensus_input }
+
         MINIMAP2_CONSENSUS (
-            ch_for_assembly_miniasm,
-            MINIASM.out.assembly,
+            ch_miniasm_consensus_input.reads,
+            ch_miniasm_consensus_input.assembly,
             false,
             false,
             false
         )
         ch_versions = ch_versions.mix(MINIMAP2_CONSENSUS.out.versions)
 
-        ch_for_assembly_miniasm
-            .join(MINIASM.out.assembly)
+        ch_miniasm_for_consensus
             .join(MINIMAP2_CONSENSUS.out.paf)
+            .map { meta, long_reads, assembly, paf -> tuple(meta, long_reads, assembly, paf) }
+            .dump(tag: 'racon_input')
             .set{ ch_for_racon }
 
         RACON (
@@ -485,6 +556,7 @@ workflow BACASS {
     //
     if( params.assembler.tokenize(",").contains("dragonflye") ){
         ch_for_assembly
+            .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] } // dragonflye supports long and hybrid assemblies
             .map{ meta, short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "dragonflye"
@@ -506,6 +578,7 @@ workflow BACASS {
     //
     if ( params.assembler.tokenize(",").contains("raven") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("raven") ) ) {
         ch_for_assembly
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'long' } // raven is long-read only
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "raven"
@@ -529,6 +602,7 @@ workflow BACASS {
     //
     if ( params.assembler.tokenize(",").contains("flye") || ( params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("flye") ) ) {
         ch_for_assembly
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'long' } // flye is long-read only
             .map{ meta, _short_reads, long_reads ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "flye"
@@ -555,9 +629,14 @@ workflow BACASS {
             .filter{ meta, _assembly -> meta.subsample } // only assemblies of subsamples pass, i.e. anything with "meta.subsample"
             .map{ meta, assembly ->
                 def new_meta = meta.clone()
+                def base_id = meta.id
+                if (meta.subsample && meta.assembler) {
+                    def assembly_suffix = "-${meta.subsample}-${meta.assembler}"
+                    base_id = base_id.endsWith(assembly_suffix) ? base_id[0..<(base_id.size() - assembly_suffix.size())] : base_id
+                }
                 new_meta.remove("subsample")
                 new_meta.assembler = "autocycler"
-                new_meta.id = meta.sample + "-autocycler"
+                new_meta.id = base_id + "-autocycler"
                 [ new_meta, assembly ]
             }
             .filter{ _meta, assembly -> assembly.countLines() > 1 } // keep only non-empty assembly files
@@ -581,10 +660,13 @@ workflow BACASS {
     //
     // SUBWORKFLOW: Long reads polishing. Uses medaka or Nanopolish (this last requires Fast5 files available in input samplesheet).
     //
-    if ( (params.assembly_type == 'long' && !params.skip_polish) || ( params.assembly_type != 'short' && params.polish_method) ){
-        // Set channel for polishing long reads
+    if ( params.assembly_type in ['long', 'auto'] && !params.skip_polish && params.polish_method ){
+        ch_assembly_without_polished_long = ch_assembly.filter { meta, _assembly -> meta.assembly_type != 'long' }
+
+        // Set channel for polishing long-read assemblies only.
         ch_for_assembly
             .filter { meta, _sr, _lr -> !meta.subsample } // remove any subsamples
+            .filter { meta, _sr, _lr -> meta.assembly_type == 'long' }
             .cross(ch_assembly) { it -> it[0].sample } // merge by meta.sample -> [[ meta, sr, lr ],[ meta, assembly ]]
             .map { for_assembly, assembly ->
                 def meta_assembly  = assembly[0]
@@ -628,10 +710,32 @@ workflow BACASS {
             // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
             //
             MEDAKA ( ch_polish_long_medaka_input )
-            ch_assembly = MEDAKA.out.assembly
+            ch_assembly = ch_assembly_without_polished_long.mix(MEDAKA.out.assembly)
         } else if (params.polish_method == 'nanopolish') {
+            //
+            // Nanopolish requires FAST5 files. Split long-read assemblies by FAST5
+            // availability so samples without FAST5 are kept unpolished instead of
+            // being silently dropped from downstream QC/annotation.
+            //
+            def ch_fast5_samples = ch_fast5.map { meta, _fast5 -> meta.sample }.unique().toList()
             ch_polish_long
-                .map{ meta, lr, assembly ->
+                .combine( ch_fast5_samples )
+                .branch { meta, _lr, _assembly, fast5_samples ->
+                    with_fast5:    fast5_samples.contains(meta.sample)
+                    without_fast5: true
+                }
+                .set { ch_polish_long_split }
+
+            // Retain unpolished long-read assemblies for samples lacking FAST5 and warn the user.
+            ch_polish_long_split.without_fast5
+                .map { meta, _lr, assembly, _fast5_samples ->
+                    log.warn "Skipping Nanopolish for sample '${meta.sample}' because no FAST5 files were provided. The unpolished long-read assembly is retained. Supply FAST5 files or use '--polish_method medaka'."
+                    [ meta, assembly ]
+                }
+                .set { ch_nanopolish_unpolished }
+
+            ch_polish_long_split.with_fast5
+                .map{ meta, lr, assembly, _fast5_samples ->
                     def new_meta = meta.clone()
                     new_meta.polish = "nanopolish"
                     new_meta.id = meta.id + "-nanopolish"
@@ -639,55 +743,57 @@ workflow BACASS {
                 }
                 .set { ch_polish_long_nanopolish }
             //
-            // MODULE: Nanopolish, polishes assembly using FAST5 files
+            // MODULE: Minimap2 polish
             //
-            if (!ch_fast5){
-                log.error "ERROR: FAST5 files are required for Nanopolish but none were provided. Please supply FAST5 files or choose another polishing method. Available options are: medaka, nanopolish"
-            } else {
-                //
-                // MODULE: Minimap2 polish
-                //
-                MINIMAP2_POLISH (
-                    ch_polish_long_nanopolish.map { meta, lr, _fasta -> tuple(meta, lr) },
-                    ch_polish_long_nanopolish.map { meta, _lr, fasta -> tuple(meta, fasta) },
-                    true,
-                    false,
-                    false
-                )
-                ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions)
-                //
-                // MODULE: Samtools index
-                //
-                SAMTOOLS_INDEX (
-                    MINIMAP2_POLISH.out.bam.dump(tag: 'samtools_sort')
-                )
-                ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
-                //
-                // MODULE: Nanopolish
-                //
-                ch_polish_long_nanopolish                     // tuple val(meta), file(longreads), file(assembly)
-                    .join( MINIMAP2_POLISH.out.bam )          // tuple val(meta), file(bam)
-                    .join( SAMTOOLS_INDEX.out.bai )           // tuple val(meta), file(bai)
-                    .cross( ch_fast5 ) { it -> it[0].sample } // tuple val(meta), file(fast5) // meta differs here and needs a join on meta.sample!
-                    .map { input_tuple, fast5_tuple ->
-                        def meta       = input_tuple[0]
-                        def long_reads = input_tuple[1]
-                        def assembly   = input_tuple[2]
-                        def bam        = input_tuple[3]
-                        def bai        = input_tuple[4]
-                        def fast5      = fast5_tuple[1]
-                        [meta, long_reads, assembly, bam, bai, fast5]
-                    }
-                    .set { ch_for_nanopolish }        // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
-                // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
-                NANOPOLISH (
-                    ch_for_nanopolish.dump(tag: 'into_nanopolish')
-                )
-                ch_assembly = NANOPOLISH.out.assembly
-                ch_versions = ch_versions.mix( NANOPOLISH.out.versions )
-            }
+            MINIMAP2_POLISH (
+                ch_polish_long_nanopolish.map { meta, lr, _fasta -> tuple(meta, lr) },
+                ch_polish_long_nanopolish.map { meta, _lr, fasta -> tuple(meta, fasta) },
+                true,
+                false,
+                false
+            )
+            ch_versions = ch_versions.mix(MINIMAP2_POLISH.out.versions)
+            //
+            // MODULE: Samtools index
+            //
+            SAMTOOLS_INDEX (
+                MINIMAP2_POLISH.out.bam.dump(tag: 'samtools_sort')
+            )
+            ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions)
+            //
+            // MODULE: Nanopolish
+            //
+            ch_polish_long_nanopolish                     // tuple val(meta), file(longreads), file(assembly)
+                .join( MINIMAP2_POLISH.out.bam )          // tuple val(meta), file(bam)
+                .join( SAMTOOLS_INDEX.out.bai )           // tuple val(meta), file(bai)
+                .cross( ch_fast5 ) { it -> it[0].sample } // tuple val(meta), file(fast5) // meta differs here and needs a join on meta.sample!
+                .map { input_tuple, fast5_tuple ->
+                    def meta       = input_tuple[0]
+                    def long_reads = input_tuple[1]
+                    def assembly   = input_tuple[2]
+                    def bam        = input_tuple[3]
+                    def bai        = input_tuple[4]
+                    def fast5      = fast5_tuple[1]
+                    [meta, long_reads, assembly, bam, bai, fast5]
+                }
+                .set { ch_for_nanopolish }        // tuple val(meta), val(reads), file(longreads), file(assembly), file(bam), file(bai), file(fast5)
+            // TODO: 'nanopolish index' couldn't be tested. No fast5 provided in test datasets.
+            NANOPOLISH (
+                ch_for_nanopolish.dump(tag: 'into_nanopolish')
+            )
+            ch_assembly = ch_assembly_without_polished_long
+                .mix(NANOPOLISH.out.assembly)
+                .mix(ch_nanopolish_unpolished)
+            ch_versions = ch_versions.mix( NANOPOLISH.out.versions )
         }
     }
+
+    ch_assembly
+        .map { meta, assembly ->
+            def fasta = assembly instanceof List ? assembly[0] : assembly
+            tuple(meta, fasta)
+        }
+        .set { ch_assembly }
 
     //
     // MODULE: Kraken2, QC for sample purity
@@ -735,6 +841,13 @@ workflow BACASS {
             ch_for_kmerfinder = ch_short_preprocessed
         } else if ( params.assembly_type == 'long' ) {
             ch_for_kmerfinder = ch_longreads_filtered
+        } else if ( params.assembly_type == 'auto' ) {
+            // In auto mode, use short reads for samples that have them, long reads for long-only samples
+            ch_for_kmerfinder = ch_for_kraken2_short
+                .filter { meta, _reads -> meta.assembly_type in ['short', 'hybrid'] }
+                .mix(
+                    ch_for_kraken2_long.filter { meta, _lr -> meta.assembly_type == 'long' }
+                )
         }
         // RUN kmerfinder subworkflow
         KMERFINDER_SUMMARY_DOWNLOAD (
@@ -848,7 +961,7 @@ workflow BACASS {
         ch_to_prokka    = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
 
         PROKKA (
-            ch_to_prokka.filter{ _meta, fasta -> !fasta.isEmpty() },
+            ch_to_prokka.filter{ _meta, fasta -> workflow.commandLine.contains('-stub-run') || !fasta.isEmpty() },
             ch_proteins,
             []
         )
@@ -865,7 +978,7 @@ workflow BACASS {
         ch_to_bakta     = ch_assembly_for_gunzip.skip.mix( GUNZIP_BAKTA.out.gunzip )
 
         BAKTA_DBDOWNLOAD_RUN (
-            ch_to_bakta.filter{ _meta, fasta -> !fasta.isEmpty() },
+            ch_to_bakta.filter{ _meta, fasta -> workflow.commandLine.contains('-stub-run') || !fasta.isEmpty() },
             params.baktadb,
             params.baktadb_download
         )
@@ -976,10 +1089,11 @@ workflow BACASS {
         ch_bakta_txt_multiqc.collect().ifEmpty([]),
         ch_kmerfinder_multiqc.collectFile(name: 'multiqc_kmerfinder.yaml').ifEmpty([]),
     )
+    ch_multiqc_report = CUSTOM_MULTIQC.out.report.toList()
 
     emit:
-    multiqc_report = CUSTOM_MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                        // channel: [ path(versions.yml) ]
+    multiqc_report = ch_multiqc_report // channel: /path/to/multiqc_report.html
+    versions       = ch_versions       // channel: [ path(versions.yml) ]
 
 }
 

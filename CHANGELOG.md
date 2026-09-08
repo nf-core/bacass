@@ -10,16 +10,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#310](https://github.com/nf-core/bacass/pull/310) Use nf-core Medaka, add BUSCO to MultiQC, and fix Dragonflye channels
 - [#316](https://github.com/nf-core/bacass/pull/316) Reorganize result output directories
 - [#317](https://github.com/nf-core/bacass/pull/317) Improve MultiQC assembly summary tables
+- [#315](https://github.com/nf-core/bacass/pull/315) Replace MultiQC general statistics with custom tables better suited to the new `assembly_mode` and multi-assembler strategy
+- [#315](https://github.com/nf-core/bacass/pull/315) Skip Canu when `gsize` is missing
 - [#324](https://github.com/nf-core/bacass/pull/324) Improved kmerfinder_summary_download subworkflow for correct reference matching
+- [#315](https://github.com/nf-core/bacass/pull/315) Default `--assembly_type` is now `auto` (per-sample detection) and `--assembler` defaults to all assemblers, so each sample runs only the assemblers compatible with its detected read type
 
 ### `Added`
 
 - [#310](https://github.com/nf-core/bacass/pull/310) Add BUSCO output to MultiQC
 - [#314](https://github.com/nf-core/bacass/pull/314) Add stub support for modules used in stub-run testing
+- [#315](https://github.com/nf-core/bacass/pull/315) Add an automatic assembly mode based on each sample’s read type
 
 ### `Fixed`
 
 - [#291](https://github.com/nf-core/bacass/pull/291) Fix BUSCO `busco_downloads` publish errors and publish only summary/log files
+- [#315](https://github.com/nf-core/bacass/pull/315) Fix Medaka nf-test to avoid launching polishing when `skip_polish=true`
 
 ### `Dependencies`
 
