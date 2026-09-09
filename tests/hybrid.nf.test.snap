@@ -1,11 +1,8 @@
 {
     "-profile test_hybrid": {
         "content": [
-            14,
+            13,
             {
-                "BUSCO_BUSCO": {
-                    "busco": "5.8.3"
-                },
                 "FASTP": {
                     "fastp": "1.0.1"
                 },
@@ -59,11 +56,6 @@
                 "assembly/unicycler/ERR044595-unicycler.scaffolds.fa.gz",
                 "assembly/unicycler/ERR044595-unicycler.unicycler.log",
                 "assembly_qc",
-                "assembly_qc/busco",
-                "assembly_qc/busco/ERR044595-unicycler-medaka-bacteria_odb10-busco.batch_summary.txt",
-                "assembly_qc/busco/ERR044595-unicycler-medaka-bacteria_odb10-busco.log",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.ERR044595-unicycler-medaka_polished_genome.fa.json",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.ERR044595-unicycler-medaka_polished_genome.fa.txt",
                 "assembly_qc/quast",
                 "assembly_qc/quast/overall",
                 "assembly_qc/quast/overall/report",
@@ -86,7 +78,6 @@
                 "assembly_qc/quast/overall/report/transposed_report.txt",
                 "multiqc",
                 "multiqc/multiqc_data",
-                "multiqc/multiqc_data/mqc_busco_plot_bacteria_odb10_1.yaml",
                 "multiqc/multiqc_data/mqc_fastp-insert-size-plot_1.yaml",
                 "multiqc/multiqc_data/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml",
                 "multiqc/multiqc_data/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml",
@@ -123,7 +114,6 @@
                 "multiqc/multiqc_data/mqc_prokka_plot_1.yaml",
                 "multiqc/multiqc_data/mqc_quast_num_contigs_1.yaml",
                 "multiqc/multiqc_data/multiqc.log",
-                "multiqc/multiqc_data/multiqc_busco.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
                 "multiqc/multiqc_data/multiqc_fastp.yaml",
@@ -138,8 +128,6 @@
                 "multiqc/multiqc_data/porechop.yaml",
                 "multiqc/multiqc_plots",
                 "multiqc/multiqc_plots/pdf",
-                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1.pdf",
-                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1_pc.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_fastp-insert-size-plot_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.pdf",
@@ -184,8 +172,6 @@
                 "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1_pc.pdf",
                 "multiqc/multiqc_plots/png",
-                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1.png",
-                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1_pc.png",
                 "multiqc/multiqc_plots/png/mqc_fastp-insert-size-plot_1.png",
                 "multiqc/multiqc_plots/png/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.png",
                 "multiqc/multiqc_plots/png/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.png",
@@ -230,8 +216,6 @@
                 "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1.png",
                 "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1_pc.png",
                 "multiqc/multiqc_plots/svg",
-                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1.svg",
-                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1_pc.svg",
                 "multiqc/multiqc_plots/svg/mqc_fastp-insert-size-plot_1.svg",
                 "multiqc/multiqc_plots/svg/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.svg",
                 "multiqc/multiqc_plots/svg/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.svg",
@@ -304,7 +288,6 @@
             [
                 "ERR044595-unicycler.assembly.gfa.gz:md5,3558ea16e8397970aa6dff03ebea7886",
                 "ERR044595-unicycler.scaffolds.fa.gz:md5,7854e8c8e26f21d7acfeaca4a872f7ea",
-                "mqc_busco_plot_bacteria_odb10_1.yaml:md5,99d0407ce5880df4e743de055e7e38ac",
                 "mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,0c73aa10fb2b99452fab3bb9abb2e7ad",
                 "mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,5626ca743bfabb3807408bd4b3624c92",
                 "mqc_fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,68a603c9baf36de5202dc08d04f6bc75",
@@ -337,14 +320,13 @@
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,29573e9fc6174bb91352b0b9f248335f",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,844b018c7434ca59c893901eef530de8",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,e6cced8fc844dabd795ba0dfa6ec0e64",
-                "multiqc_busco.yaml:md5,9c5468ba29a50927c55fe6fdc9f08e55",
-                "multiqc_citations.yaml:md5,c1962a840fe1cf1698fbdeb8953601ed",
+                "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
                 "multiqc_fastqc.yaml:md5,68dcba3602303c17700845789c5228fb",
                 "multiqc_fastqc_1.yaml:md5,74f3e473f28a113f93f22dbe95a29274",
                 "multiqc_nanostat.yaml:md5,bf3d441612c2ffddcf3065777c889d7d"
             ]
         ],
-        "timestamp": "2026-07-29T09:54:49.282274838",
+        "timestamp": "2026-09-09T10:56:08.754624474",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

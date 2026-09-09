@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#316](https://github.com/nf-core/bacass/pull/316) Reorganize result output directories
 - [#317](https://github.com/nf-core/bacass/pull/317) Improve MultiQC assembly summary tables
 - [#324](https://github.com/nf-core/bacass/pull/324) Improved kmerfinder_summary_download subworkflow for correct reference matching
+- [#326](https://github.com/nf-core/bacass/pull/326) Fix/busco ci network stability
 
 ### `Added`
 
