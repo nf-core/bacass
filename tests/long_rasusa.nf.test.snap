@@ -1,11 +1,8 @@
 {
     "-profile test_long_rasusa": {
         "content": [
-            12,
+            11,
             {
-                "BUSCO_BUSCO": {
-                    "busco": "5.8.3"
-                },
                 "GUNZIP": {
                     "gunzip": 1.13
                 },
@@ -53,11 +50,6 @@
                 "assembly/unicycler/TestMe-unicycler.scaffolds.fa.gz",
                 "assembly/unicycler/TestMe-unicycler.unicycler.log",
                 "assembly_qc",
-                "assembly_qc/busco",
-                "assembly_qc/busco/TestMe-unicycler-medaka-bacteria_odb10-busco.batch_summary.txt",
-                "assembly_qc/busco/TestMe-unicycler-medaka-bacteria_odb10-busco.log",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.TestMe-unicycler-medaka_polished_genome.fa.json",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.TestMe-unicycler-medaka_polished_genome.fa.txt",
                 "assembly_qc/quast",
                 "assembly_qc/quast/overall",
                 "assembly_qc/quast/overall/report",
@@ -80,14 +72,12 @@
                 "assembly_qc/quast/overall/report/transposed_report.txt",
                 "multiqc",
                 "multiqc/multiqc_data",
-                "multiqc/multiqc_data/mqc_busco_plot_bacteria_odb10_1.yaml",
                 "multiqc/multiqc_data/mqc_porechop-endtrim-barplot_1.yaml",
                 "multiqc/multiqc_data/mqc_porechop-middlesplit-barplot_1.yaml",
                 "multiqc/multiqc_data/mqc_porechop-starttrim-barplot_1.yaml",
                 "multiqc/multiqc_data/mqc_prokka_plot_1.yaml",
                 "multiqc/multiqc_data/mqc_quast_num_contigs_1.yaml",
                 "multiqc/multiqc_data/multiqc.log",
-                "multiqc/multiqc_data/multiqc_busco.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
                 "multiqc/multiqc_data/multiqc_general_stats.yaml",
@@ -99,8 +89,6 @@
                 "multiqc/multiqc_data/porechop.yaml",
                 "multiqc/multiqc_plots",
                 "multiqc/multiqc_plots/pdf",
-                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1.pdf",
-                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1_pc.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_porechop-endtrim-barplot_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_porechop-endtrim-barplot_1_pc.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_porechop-middlesplit-barplot_1.pdf",
@@ -112,8 +100,6 @@
                 "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1_pc.pdf",
                 "multiqc/multiqc_plots/png",
-                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1.png",
-                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1_pc.png",
                 "multiqc/multiqc_plots/png/mqc_porechop-endtrim-barplot_1.png",
                 "multiqc/multiqc_plots/png/mqc_porechop-endtrim-barplot_1_pc.png",
                 "multiqc/multiqc_plots/png/mqc_porechop-middlesplit-barplot_1.png",
@@ -125,8 +111,6 @@
                 "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1.png",
                 "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1_pc.png",
                 "multiqc/multiqc_plots/svg",
-                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1.svg",
-                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1_pc.svg",
                 "multiqc/multiqc_plots/svg/mqc_porechop-endtrim-barplot_1.svg",
                 "multiqc/multiqc_plots/svg/mqc_porechop-endtrim-barplot_1_pc.svg",
                 "multiqc/multiqc_plots/svg/mqc_porechop-middlesplit-barplot_1.svg",
@@ -154,11 +138,11 @@
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
-                "multiqc_citations.yaml:md5,80450f20190a42871cb64f62ae9bec3e",
+                "multiqc_citations.yaml:md5,389ae569c7527f217109c5de88f4c7a0",
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-07-27T16:42:44.51355281",
+        "timestamp": "2026-09-09T12:39:17.606016351",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

@@ -1,11 +1,8 @@
 {
     "-profile test_long_miniasm": {
         "content": [
-            16,
+            15,
             {
-                "BUSCO_BUSCO": {
-                    "busco": "5.8.3"
-                },
                 "GUNZIP": {
                     "gunzip": 1.13
                 },
@@ -65,11 +62,6 @@
                 "assembly/polishing/medaka",
                 "assembly/polishing/medaka/TestMe-miniasm-medaka_polished_genome.fa.gz",
                 "assembly_qc",
-                "assembly_qc/busco",
-                "assembly_qc/busco/TestMe-miniasm-medaka-bacteria_odb10-busco.batch_summary.txt",
-                "assembly_qc/busco/TestMe-miniasm-medaka-bacteria_odb10-busco.log",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.TestMe-miniasm-medaka_polished_genome.fa.json",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.TestMe-miniasm-medaka_polished_genome.fa.txt",
                 "assembly_qc/quast",
                 "assembly_qc/quast/overall",
                 "assembly_qc/quast/overall/report",
@@ -92,7 +84,6 @@
                 "assembly_qc/quast/overall/report/transposed_report.txt",
                 "multiqc",
                 "multiqc/multiqc_data",
-                "multiqc/multiqc_data/mqc_busco_plot_bacteria_odb10_1.yaml",
                 "multiqc/multiqc_data/mqc_kraken-top-n-plot_Class.yaml",
                 "multiqc/multiqc_data/mqc_kraken-top-n-plot_Domain.yaml",
                 "multiqc/multiqc_data/mqc_kraken-top-n-plot_Family.yaml",
@@ -108,7 +99,6 @@
                 "multiqc/multiqc_data/mqc_prokka_plot_1.yaml",
                 "multiqc/multiqc_data/mqc_quast_num_contigs_1.yaml",
                 "multiqc/multiqc_data/multiqc.log",
-                "multiqc/multiqc_data/multiqc_busco.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
                 "multiqc/multiqc_data/multiqc_general_stats.yaml",
@@ -121,8 +111,6 @@
                 "multiqc/multiqc_data/porechop.yaml",
                 "multiqc/multiqc_plots",
                 "multiqc/multiqc_plots/pdf",
-                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1.pdf",
-                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1_pc.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_kraken-top-n-plot_Class.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_kraken-top-n-plot_Class_pc.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_kraken-top-n-plot_Domain.pdf",
@@ -152,8 +140,6 @@
                 "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1_pc.pdf",
                 "multiqc/multiqc_plots/png",
-                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1.png",
-                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1_pc.png",
                 "multiqc/multiqc_plots/png/mqc_kraken-top-n-plot_Class.png",
                 "multiqc/multiqc_plots/png/mqc_kraken-top-n-plot_Class_pc.png",
                 "multiqc/multiqc_plots/png/mqc_kraken-top-n-plot_Domain.png",
@@ -183,8 +169,6 @@
                 "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1.png",
                 "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1_pc.png",
                 "multiqc/multiqc_plots/svg",
-                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1.svg",
-                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1_pc.svg",
                 "multiqc/multiqc_plots/svg/mqc_kraken-top-n-plot_Class.svg",
                 "multiqc/multiqc_plots/svg/mqc_kraken-top-n-plot_Class_pc.svg",
                 "multiqc/multiqc_plots/svg/mqc_kraken-top-n-plot_Domain.svg",
@@ -229,7 +213,6 @@
             [
                 "TestMe-miniasm.fasta.gz:md5,cfde74bc269a51162851d9ae7c76207b",
                 "TestMe-miniasm_assembly_consensus.fasta.gz:md5,4899e7b112077d045ecaf13daae4ae4a",
-                "mqc_busco_plot_bacteria_odb10_1.yaml:md5,eb1ce276ec11dcc7661c95d9e487c4a9",
                 "mqc_kraken-top-n-plot_Class.yaml:md5,057a9ddcdb8a79e6c0fd5cfb0c0f94c9",
                 "mqc_kraken-top-n-plot_Domain.yaml:md5,5ebcf9c11acdaa3f6153d668a1485907",
                 "mqc_kraken-top-n-plot_Family.yaml:md5,0aa80d49818b340c9663f4867402d75b",
@@ -242,14 +225,13 @@
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
-                "multiqc_busco.yaml:md5,80cbacbe3f46293d66993f021291602b",
-                "multiqc_citations.yaml:md5,683ec25d002e4678ebfdee6cfe8f1930",
+                "multiqc_citations.yaml:md5,39184731ae65903be446f425a59a2127",
                 "multiqc_kraken.yaml:md5,2579a276fcd6e51c35b361fd803d6d0b",
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d",
                 "TestMe_longreads.kraken2.report.txt:md5,4c2a95acdff03caa1524a5328c6ab2f5"
             ]
         ],
-        "timestamp": "2026-07-27T16:19:48.829882068",
+        "timestamp": "2026-09-09T12:12:20.377687843",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

@@ -1,11 +1,8 @@
 {
     "-profile test_hybrid_dragonflye": {
         "content": [
-            13,
+            12,
             {
-                "BUSCO_BUSCO": {
-                    "busco": "5.8.3"
-                },
                 "DRAGONFLYE": {
                     "dragonflye": "1.2.1"
                 },
@@ -56,11 +53,6 @@
                 "assembly/polishing/medaka",
                 "assembly/polishing/medaka/A1403KPN-dragonflye-medaka_polished_genome.fa.gz",
                 "assembly_qc",
-                "assembly_qc/busco",
-                "assembly_qc/busco/A1403KPN-dragonflye-medaka-bacteria_odb10-busco.batch_summary.txt",
-                "assembly_qc/busco/A1403KPN-dragonflye-medaka-bacteria_odb10-busco.log",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.A1403KPN-dragonflye-medaka_polished_genome.fa.json",
-                "assembly_qc/busco/short_summary.specific.bacteria_odb10.A1403KPN-dragonflye-medaka_polished_genome.fa.txt",
                 "assembly_qc/quast",
                 "assembly_qc/quast/overall",
                 "assembly_qc/quast/overall/report",
@@ -83,7 +75,6 @@
                 "assembly_qc/quast/overall/report/transposed_report.txt",
                 "multiqc",
                 "multiqc/multiqc_data",
-                "multiqc/multiqc_data/mqc_busco_plot_bacteria_odb10_1.yaml",
                 "multiqc/multiqc_data/mqc_fastp-insert-size-plot_1.yaml",
                 "multiqc/multiqc_data/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.yaml",
                 "multiqc/multiqc_data/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml",
@@ -120,7 +111,6 @@
                 "multiqc/multiqc_data/mqc_prokka_plot_1.yaml",
                 "multiqc/multiqc_data/mqc_quast_num_contigs_1.yaml",
                 "multiqc/multiqc_data/multiqc.log",
-                "multiqc/multiqc_data/multiqc_busco.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
                 "multiqc/multiqc_data/multiqc_fastp.yaml",
@@ -135,8 +125,6 @@
                 "multiqc/multiqc_data/porechop.yaml",
                 "multiqc/multiqc_plots",
                 "multiqc/multiqc_plots/pdf",
-                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1.pdf",
-                "multiqc/multiqc_plots/pdf/mqc_busco_plot_bacteria_odb10_1_pc.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_fastp-insert-size-plot_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.pdf",
@@ -181,8 +169,6 @@
                 "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1.pdf",
                 "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1_pc.pdf",
                 "multiqc/multiqc_plots/png",
-                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1.png",
-                "multiqc/multiqc_plots/png/mqc_busco_plot_bacteria_odb10_1_pc.png",
                 "multiqc/multiqc_plots/png/mqc_fastp-insert-size-plot_1.png",
                 "multiqc/multiqc_plots/png/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.png",
                 "multiqc/multiqc_plots/png/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.png",
@@ -227,8 +213,6 @@
                 "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1.png",
                 "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1_pc.png",
                 "multiqc/multiqc_plots/svg",
-                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1.svg",
-                "multiqc/multiqc_plots/svg/mqc_busco_plot_bacteria_odb10_1_pc.svg",
                 "multiqc/multiqc_plots/svg/mqc_fastp-insert-size-plot_1.svg",
                 "multiqc/multiqc_plots/svg/mqc_fastp-seq-content-gc-plot_Read_1_After_filtering.svg",
                 "multiqc/multiqc_plots/svg/mqc_fastp-seq-content-gc-plot_Read_1_Before_filtering.svg",
@@ -331,13 +315,13 @@
                 "mqc_porechop-endtrim-barplot_1.yaml:md5,a6396edf17f4e4ed9954cda933af2b7b",
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,5e89ca1f45fb6876b58ddbb20b86ea77",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,34e8d91183bd582532ac654e8e287945",
-                "multiqc_citations.yaml:md5,c1962a840fe1cf1698fbdeb8953601ed",
+                "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
                 "multiqc_fastqc.yaml:md5,a0b5fd24bb745bb77511c1962086fcf0",
                 "multiqc_fastqc_1.yaml:md5,daf5f34bdacbbc207f86fc95768ce9a2",
                 "multiqc_nanostat.yaml:md5,cff0c79f74776d0e8c451e87bb332d2d"
             ]
         ],
-        "timestamp": "2026-07-29T10:14:35.781215103",
+        "timestamp": "2026-09-09T11:13:10.779080481",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
