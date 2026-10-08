@@ -379,6 +379,13 @@ workflow BACASS {
         // subsample and transpose to one subset per channel entry (only for long-read assemblies)
         def ch_for_autocycler_subsample = ch_for_assembly
             .filter { meta, _sr, lr -> !meta.subsample && meta.assembly_type == 'long' && lr }
+            .filter { meta, _sr, _lr ->
+                if (!meta.gsize || meta.gsize == 'NA') {
+                    log.warn "Skipping Autocycler for sample '${meta.sample}' because genome size is required. Please add a valid 'gsize' value to the samplesheet and rerun the pipeline with -resume."
+                    return false
+                }
+                return true
+            }
         AUTOCYCLER_SUBSAMPLE (
             ch_for_autocycler_subsample.map{ meta, _short_reads, long_reads -> [meta, long_reads] },
             ch_for_autocycler_subsample.map { meta, _reads, _lr -> meta.gsize }
@@ -652,9 +659,17 @@ workflow BACASS {
             .set { ch_assembly }
     }
 
-    // clean assemblies from subsamples
+    // Clean assemblies from subsamples and fail if no selected assembler produced output.
     ch_assembly
         .filter { meta, _assembly -> !meta.subsample } // omit subsample assemblies
+        .ifEmpty {
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  No assemblies were generated with the selected assemblers.\n" +
+                "  Check that at least one selected assembler supports the detected assembly type\n" +
+                "  for each sample, and that required inputs such as genome size are available.\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string)
+        }
         .set { ch_assembly }
 
     //
