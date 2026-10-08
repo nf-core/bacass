@@ -72,7 +72,7 @@
                 "anyOf": [
                     {
                         "type": ["string", "null"],
-                        "pattern": "(\\b\\d+\\.\\d+m\\b|NA)"
+                        "pattern": "(\\b\\d+\\.\\d+k\\b|\\b\\d+\\.\\d+m\\b|NA)"
                     },
                     {
                         "type": "string",

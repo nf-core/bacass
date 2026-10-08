@@ -82,6 +82,10 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
             def base_accession = full_accession.split('_')[0] + '_' + full_accession.split('_')[1]
             return tuple(species, base_accession)
         }
+        .set { ch_winner_base_accession }
+
+    ch_accessions_for_download = ch_winner_base_accession
+        .map { _refmeta, base_accession -> tuple([id: base_accession], base_accession) }
 
     // Prepare channel for NCBI_DATASETS_DOWNLOAD.
     ch_accessions_for_download = ch_winner_references

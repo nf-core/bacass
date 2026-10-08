@@ -11,10 +11,17 @@ multiqc/multiqc_report.html
 multiqc/multiqc_data/mqc_prokka_plot_1.yaml
 multiqc/multiqc_data/multiqc_prokka.yaml
 multiqc/multiqc_data/multiqc_general_stats.yaml
+multiqc/multiqc_data/mqc_busco_plot_*.yaml
+multiqc/multiqc_data/mqc_fastp*.yaml
+multiqc/multiqc_data/mqc_fastqc*_plot*.yaml
 multiqc/multiqc_data/mqc_quast_num_contigs_1.yaml
 multiqc/multiqc_data/multiqc_quast.yaml
+multiqc/multiqc_data/multiqc_assembly_comparison_metrics-plot.yaml
+multiqc/multiqc_data/multiqc_sample_summary_assembly_metrics-plot.yaml
+multiqc/multiqc_data/multiqc_busco.yaml
+multiqc/summary_comparison_assembly_metrics.csv
+multiqc/summary_sample_assembly_metrics.csv
 multiqc/multiqc_data/porechop.yaml
-multiqc/multiqc_data/mqc_fastp-insert-size-plot_1.yaml
 multiqc/multiqc_data/multiqc_fastp.yaml
 fastqc/*_fastqc.{html,zip}
 FastQC/raw/*.{html,zip}
@@ -46,6 +53,7 @@ Unicycler/*.unicycler.log
 Megahit/*.log
 assembly/unicycler/*.unicycler.log
 assembly/megahit/*
+assembly/flye/*
 DFAST/*/*.{tsv,log,gbk}
 LIFTOFF/*.gff3
 annotation/dfast/*/*.{tsv,log,gbk}
