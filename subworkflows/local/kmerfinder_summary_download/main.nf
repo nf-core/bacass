@@ -71,15 +71,21 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
     )
     ch_versions = ch_versions.mix(KMERFINDER_FIND_WINNER_REFERENCE.out.versions)
 
-    // Prepare channel for NCBI_DATASETS_DOWNLOAD
-    // Extract base accession from winner file (remove assembly version)
-    ch_accessions_for_download = KMERFINDER_FIND_WINNER_REFERENCE.out.winner
-        .map { _refmeta, winner_file ->
+    // Preserve the winner selected for each species. This key must also be used
+    // when associating the downloaded reference with the sample assemblies.
+    // Deriving an accession from an arbitrary report in the species group can
+    // select a different reference and leave the downstream joins empty.
+    ch_winner_references = KMERFINDER_FIND_WINNER_REFERENCE.out.winner
+        .map { species, winner_file ->
             def full_accession = winner_file.text.trim()
             // Extract base accession: GCF_002795805.1_ASM279580v1 → GCF_002795805.1
             def base_accession = full_accession.split('_')[0] + '_' + full_accession.split('_')[1]
-            return tuple([id: base_accession], base_accession)
+            return tuple(species, base_accession)
         }
+
+    // Prepare channel for NCBI_DATASETS_DOWNLOAD.
+    ch_accessions_for_download = ch_winner_references
+        .map { _species, base_accession -> tuple([id: base_accession], base_accession) }
 
     // MODULE: Download reference genomes using NCBI datasets CLI
     NCBI_DATASETS_DOWNLOAD (
@@ -87,16 +93,10 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
     )
     ch_versions = ch_versions.mix(NCBI_DATASETS_DOWNLOAD.out.versions)
 
-    // Organize sample assemblies into channels based on their corresponding reference files.
-    ch_reports_byreference
-        .map { species, meta, report_txt, fasta ->
-            // Extract base accession from the first report to match with downloads
-            def first_line = report_txt[0].text.split('\n').find { line -> !line.startsWith('#') && line.trim() }
-            def full_accession = first_line ? first_line.split('\t')[0] : null
-            def base_accession = full_accession ? full_accession.split('_')[0] + '_' + full_accession.split('_')[1] : null
-            return tuple(base_accession, species, meta, report_txt, fasta)
-        }
-        .filter { base_accession, _species, _meta, _report_txt, _fasta -> base_accession != null }
+    // Associate each species with the reference selected by
+    // KMERFINDER_FIND_WINNER_REFERENCE and its downloaded files.
+    ch_winner_references
+        .map { species, base_accession -> tuple(base_accession, species) }
         .join(
             NCBI_DATASETS_DOWNLOAD.out.fna.map { meta, fna -> tuple(meta.id, fna) },
             by: 0
@@ -106,8 +106,17 @@ workflow KMERFINDER_SUMMARY_DOWNLOAD {
             by: 0
         )
         .map {
-            base_accession, _species, meta, _report_txt, fasta, fna, gff ->
-                return tuple([id: base_accession], meta, fasta, fna, gff)
+            base_accession, species, fna, gff ->
+                return tuple(species, [id: base_accession], fna, gff)
+        }
+        .set { ch_reference_by_species }
+
+    // Add every assembly in a species group to that species' selected reference.
+    ch_reports_byreference
+        .join(ch_reference_by_species, by: 0)
+        .map {
+            _species, meta, _report_txt, fasta, refmeta, fna, gff ->
+                return tuple(refmeta, meta, fasta, fna, gff)
         }
         .set { ch_consensus_byrefseq }
 
