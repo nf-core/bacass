@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [#291](https://github.com/nf-core/bacass/pull/291) Fix BUSCO `busco_downloads` publish errors and publish only summary/log files
 - [#315](https://github.com/nf-core/bacass/pull/315) Fix Medaka nf-test to avoid launching polishing when `skip_polish=true`
+- [#315](https://github.com/nf-core/bacass/pull/315) Restore Medaka and Nanopolish polishing for hybrid assemblies while respecting `--skip_polish`
 
 ### `Dependencies`
 

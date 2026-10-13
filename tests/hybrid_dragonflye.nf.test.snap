@@ -1,7 +1,7 @@
 {
     "-profile test_hybrid_dragonflye": {
         "content": [
-            10,
+            12,
             {
                 "DRAGONFLYE": {
                     "dragonflye": "1.2.1"
@@ -14,6 +14,12 @@
                 },
                 "FASTQC_TRIM": {
                     "fastqc": "0.12.1"
+                },
+                "GUNZIP": {
+                    "gunzip": 1.13
+                },
+                "MEDAKA": {
+                    "medaka": "2.2.2"
                 },
                 "NANOPLOT": {
                     "nanoplot": "1.46.1"
@@ -37,12 +43,15 @@
             [
                 "annotation",
                 "annotation/prokka",
-                "annotation/prokka/hybrid-A1403KPN-dragonflye",
+                "annotation/prokka/hybrid-A1403KPN-dragonflye-medaka",
                 "assembly",
                 "assembly/dragonflye",
                 "assembly/dragonflye/hybrid-A1403KPN-dragonflye.dragonflye.log",
                 "assembly/dragonflye/hybrid-A1403KPN-dragonflye.fa",
                 "assembly/dragonflye/hybrid-A1403KPN-dragonflye.reoriented.fa",
+                "assembly/polishing",
+                "assembly/polishing/medaka",
+                "assembly/polishing/medaka/hybrid-A1403KPN-dragonflye-medaka_polished_genome.fa.gz",
                 "assembly_qc",
                 "assembly_qc/quast",
                 "assembly_qc/quast/overall",
@@ -51,7 +60,7 @@
                 "assembly_qc/quast/overall/report/basic_stats/GC_content_plot.pdf",
                 "assembly_qc/quast/overall/report/basic_stats/Nx_plot.pdf",
                 "assembly_qc/quast/overall/report/basic_stats/cumulative_plot.pdf",
-                "assembly_qc/quast/overall/report/basic_stats/hybrid-A1403KPN-dragonflye_GC_content_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/hybrid-A1403KPN-dragonflye-medaka_polished_genome_GC_content_plot.pdf",
                 "assembly_qc/quast/overall/report/icarus.html",
                 "assembly_qc/quast/overall/report/icarus_viewers",
                 "assembly_qc/quast/overall/report/icarus_viewers/contig_size_viewer.html",
@@ -286,7 +295,7 @@
                 "multiqc_nanostat.yaml:md5,2618984253f47169138fbe6439490e9d"
             ]
         ],
-        "timestamp": "2026-10-08T11:41:48.978414783",
+        "timestamp": "2026-10-13T11:07:39.941957099",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

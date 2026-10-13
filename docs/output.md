@@ -214,7 +214,7 @@ Checkout the [Autocycler](https://github.com/rrwick/Autocycler) documentation fo
 
 ### Polished assemblies
 
-Long reads assemblies can be polished using [Medaka](https://github.com/nanoporetech/medaka) or [NanoPolish](https://github.com/jts/nanopolish) with Fast5 files.
+Assemblies that include ONT long reads, including hybrid assemblies, can be polished using [Medaka](https://github.com/nanoporetech/medaka) or [NanoPolish](https://github.com/jts/nanopolish). Nanopolish requires Fast5 files.
 
 <details markdown="1">
 <summary>Output files</summary>

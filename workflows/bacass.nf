@@ -673,15 +673,17 @@ workflow BACASS {
         .set { ch_assembly }
 
     //
-    // SUBWORKFLOW: Long reads polishing. Uses medaka or Nanopolish (this last requires Fast5 files available in input samplesheet).
+    // SUBWORKFLOW: ONT read polishing. Uses Medaka or Nanopolish (the latter requires Fast5 files).
     //
-    if ( params.assembly_type in ['long', 'auto'] && !params.skip_polish && params.polish_method ){
-        ch_assembly_without_polished_long = ch_assembly.filter { meta, _assembly -> meta.assembly_type != 'long' }
+    if ( params.assembly_type != 'short' && !params.skip_polish && params.polish_method ){
+        // TODO: Evaluate the optimal polishing strategy for hybrid assemblies separately.
+        // Keep the established behavior of polishing ONT-containing assemblies for now.
+        ch_assembly_without_polishing = ch_assembly.filter { meta, _assembly -> !(meta.assembly_type in ['long', 'hybrid']) }
 
-        // Set channel for polishing long-read assemblies only.
+        // Set channel for assemblies that include ONT reads.
         ch_for_assembly
             .filter { meta, _sr, _lr -> !meta.subsample } // remove any subsamples
-            .filter { meta, _sr, _lr -> meta.assembly_type == 'long' }
+            .filter { meta, _sr, _lr -> meta.assembly_type in ['long', 'hybrid'] }
             .cross(ch_assembly) { it -> it[0].sample } // merge by meta.sample -> [[ meta, sr, lr ],[ meta, assembly ]]
             .map { for_assembly, assembly ->
                 def meta_assembly  = assembly[0]
@@ -725,7 +727,7 @@ workflow BACASS {
             // MODULE: Medaka, polishes assembly - should take either miniasm, canu, or unicycler consensus sequence
             //
             MEDAKA ( ch_polish_long_medaka_input )
-            ch_assembly = ch_assembly_without_polished_long.mix(MEDAKA.out.assembly)
+            ch_assembly = ch_assembly_without_polishing.mix(MEDAKA.out.assembly)
         } else if (params.polish_method == 'nanopolish') {
             //
             // Nanopolish requires FAST5 files. Split long-read assemblies by FAST5
@@ -741,10 +743,10 @@ workflow BACASS {
                 }
                 .set { ch_polish_long_split }
 
-            // Retain unpolished long-read assemblies for samples lacking FAST5 and warn the user.
+            // Retain unpolished ONT-containing assemblies for samples lacking FAST5 and warn the user.
             ch_polish_long_split.without_fast5
                 .map { meta, _lr, assembly, _fast5_samples ->
-                    log.warn "Skipping Nanopolish for sample '${meta.sample}' because no FAST5 files were provided. The unpolished long-read assembly is retained. Supply FAST5 files or use '--polish_method medaka'."
+                    log.warn "Skipping Nanopolish for sample '${meta.sample}' because no FAST5 files were provided. The unpolished assembly is retained. Supply FAST5 files or use '--polish_method medaka'."
                     [ meta, assembly ]
                 }
                 .set { ch_nanopolish_unpolished }
@@ -796,7 +798,7 @@ workflow BACASS {
             NANOPOLISH (
                 ch_for_nanopolish.dump(tag: 'into_nanopolish')
             )
-            ch_assembly = ch_assembly_without_polished_long
+            ch_assembly = ch_assembly_without_polishing
                 .mix(NANOPOLISH.out.assembly)
                 .mix(ch_nanopolish_unpolished)
             ch_versions = ch_versions.mix( NANOPOLISH.out.versions )

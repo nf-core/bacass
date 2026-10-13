@@ -267,7 +267,7 @@
                     "default": "medaka",
                     "fa_icon": "fas fa-hotdog",
                     "description": "Which assembly polishing method to use.",
-                    "help_text": "Can be used to define which polishing method is used by default for long reads.",
+                    "help_text": "Defines the polishing method for assemblies that include ONT long reads.",
                     "enum": ["medaka", "nanopolish", "none"]
                 }
             }
@@ -356,7 +356,7 @@
                 "skip_polish": {
                     "type": "boolean",
                     "fa_icon": "fas fa-forward",
-                    "description": "Skip polishing the long-read assembly with fast5 input. Will not affect short/hybrid assemblies."
+                    "description": "Skip Medaka or Nanopolish polishing for long-read and hybrid assemblies."
                 },
                 "skip_multiqc": {
                     "type": "boolean",
