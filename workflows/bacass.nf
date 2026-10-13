@@ -126,12 +126,10 @@ workflow BACASS {
     ch_input
         .shortreads
         .filter{ _meta, data -> data }
-        .dump(tag: 'shortreads')
         .set { ch_shortreads }
     ch_input
         .longreads
         .filter{ _meta, data -> data }
-        .dump(tag: 'longreads')
         .set { ch_longreads }
     ch_input
         .fast5
@@ -161,7 +159,6 @@ workflow BACASS {
         )
         ch_shortreads_concat = CAT_FASTQ_SHORT.out.reads
             .mix( ch_shortreads_fastqs.single )
-            .dump(tag: 'shortreads_concat')
 
         //
         // SUBWORKFLOW: Short reads QC and trim adapters
@@ -174,7 +171,7 @@ workflow BACASS {
             params.skip_fastp,
             params.skip_fastqc
         )
-        ch_short_preprocessed   = FASTQ_TRIM_FASTP_FASTQC.out.reads.dump(tag: 'shortreads_preprocessed')
+        ch_short_preprocessed   = FASTQ_TRIM_FASTP_FASTQC.out.reads
         ch_fastqc_raw_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip
         ch_fastqc_trim_multiqc  = FASTQ_TRIM_FASTP_FASTQC.out.fastqc_trim_zip
         ch_fastp_json_multiqc   = FASTQ_TRIM_FASTP_FASTQC.out.trim_json
@@ -212,7 +209,6 @@ workflow BACASS {
         )
         ch_longreads_concat = CAT_FASTQ_LONG.out.reads
             .mix( ch_longreads_fastqs.single )
-            .dump(tag: 'longreads_concat')
 
         //
         // SUBWORKFLOW: quality check for nanopore reads with Nanoplot and ToulligQC
@@ -244,7 +240,7 @@ workflow BACASS {
             PORECHOP_PORECHOP (
                 ch_longreads_concat
             )
-            ch_longreads_filtered   = PORECHOP_PORECHOP.out.reads.dump(tag: 'longreads_filtered')
+            ch_longreads_filtered   = PORECHOP_PORECHOP.out.reads
             ch_porechop_log_multiqc = PORECHOP_PORECHOP.out.log
             ch_versions = ch_versions.mix( PORECHOP_PORECHOP.out.versions )
         }
@@ -273,10 +269,10 @@ workflow BACASS {
                     .mix(ch_filtlong_long.filter { meta, _sr, _lr -> meta.assembly_type == 'long' })
 
             FILTLONG (
-                ch_shortreads_for_filtlong.dump(tag:'reads_for_filtlong')
+                ch_shortreads_for_filtlong
             )
 
-            ch_longreads_filtered   = FILTLONG.out.reads.dump(tag: 'longreads_filtered')
+            ch_longreads_filtered   = FILTLONG.out.reads
             ch_filtlong_log_multiqc = FILTLONG.out.log
         }
     }
@@ -301,10 +297,10 @@ workflow BACASS {
                 .set { ch_rasusa_input }
 
             RASUSA (
-                ch_rasusa_input.dump(tag:'rasusa_input'),
+                ch_rasusa_input,
                 params.rasusa_coverage
             )
-            ch_longreads_filtered = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize).dump(tag: 'longreads_filtered')
+            ch_longreads_filtered = RASUSA.out.reads.mix(ch_rasusa_branch.without_gsize)
             ch_rasusa_log = RASUSA.out.log
         }
     }
@@ -352,16 +348,12 @@ workflow BACASS {
 
         ch_for_assembly_hybrid
             .filter { meta, _sr, _lr -> meta.assembly_type == 'hybrid' }
-            .dump(tag: 'auto_assembly_hybrid')
             .mix(
                 ch_for_assembly_short
-                    .filter { meta, _sr, _lr -> meta.assembly_type == 'short' }
-                    .dump(tag: 'auto_assembly_short'),
+                    .filter { meta, _sr, _lr -> meta.assembly_type == 'short' },
                 ch_for_assembly_long
                     .filter { meta, _sr, _lr -> meta.assembly_type == 'long' }
-                    .dump(tag: 'auto_assembly_long')
             )
-            .dump(tag: 'ch_for_assembly')
             .set { ch_for_assembly }
     }
 
@@ -477,7 +469,6 @@ workflow BACASS {
                 }
                 return true
             }
-            .dump(tag: 'canu_input')
             .set { ch_for_assembly_canu }
 
         CANU (
@@ -506,7 +497,6 @@ workflow BACASS {
                     params.assembler.tokenize(",").contains("autocycler") && params.autocycler_assemblers.tokenize(",").contains("miniasm") && !params.assembler.tokenize(",").contains("miniasm") ? meta.subsample : // if with autocycler and not miniasm accept only subsamples
                     ( !params.assembler.tokenize(",").contains("autocycler") || !params.autocycler_assemblers.tokenize(",").contains("miniasm") ) && params.assembler.tokenize(",").contains("miniasm") ? !meta.subsample : false // if without autocycler and with miniasm reject subsample
             }
-            .dump(tag: 'miniasm_longreads')
             .set { ch_miniasm_longreads }
 
         MINIMAP2_ALIGN (
@@ -549,7 +539,6 @@ workflow BACASS {
         ch_miniasm_for_consensus
             .join(MINIMAP2_CONSENSUS.out.paf)
             .map { meta, long_reads, assembly, paf -> tuple(meta, long_reads, assembly, paf) }
-            .dump(tag: 'racon_input')
             .set{ ch_for_racon }
 
         RACON (
