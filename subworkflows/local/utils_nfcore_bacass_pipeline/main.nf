@@ -326,15 +326,6 @@ def normaliseInputFiles(value) {
 }
 
 //
-// Build output sample IDs with an assembly-type prefix.
-//
-def buildAssemblyTypeSampleId(sample, assembly_type) {
-    def sample_name = sample.toString()
-    sample_name = sample_name.replaceFirst(/^(short|long|hybrid)[_-]/, '')
-    return "${assembly_type}-${sample_name}"
-}
-
-//
 // Detect assembly type for a sample based on available inputs.
 // Returns 'short', 'long', or 'hybrid'.
 //

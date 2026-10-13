@@ -28,12 +28,12 @@
             [
                 "annotation",
                 "annotation/prokka",
-                "annotation/prokka/long-TestMe-dragonflye",
+                "annotation/prokka/TestMe-dragonflye",
                 "assembly",
                 "assembly/dragonflye",
-                "assembly/dragonflye/long-TestMe-dragonflye.dragonflye.log",
-                "assembly/dragonflye/long-TestMe-dragonflye.fa",
-                "assembly/dragonflye/long-TestMe-dragonflye.reoriented.fa",
+                "assembly/dragonflye/TestMe-dragonflye.dragonflye.log",
+                "assembly/dragonflye/TestMe-dragonflye.fa",
+                "assembly/dragonflye/TestMe-dragonflye.reoriented.fa",
                 "assembly_qc",
                 "assembly_qc/quast",
                 "assembly_qc/quast/overall",
@@ -41,8 +41,8 @@
                 "assembly_qc/quast/overall/report/basic_stats",
                 "assembly_qc/quast/overall/report/basic_stats/GC_content_plot.pdf",
                 "assembly_qc/quast/overall/report/basic_stats/Nx_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/TestMe-dragonflye_GC_content_plot.pdf",
                 "assembly_qc/quast/overall/report/basic_stats/cumulative_plot.pdf",
-                "assembly_qc/quast/overall/report/basic_stats/long-TestMe-dragonflye_GC_content_plot.pdf",
                 "assembly_qc/quast/overall/report/icarus.html",
                 "assembly_qc/quast/overall/report/icarus_viewers",
                 "assembly_qc/quast/overall/report/icarus_viewers/contig_size_viewer.html",
@@ -116,7 +116,7 @@
                 "reads_qc/longreads",
                 "reads_qc/longreads/nanoplot",
                 "reads_qc/longreads/porechop",
-                "reads_qc/longreads/porechop/long-TestMe.porechop.log",
+                "reads_qc/longreads/porechop/TestMe.porechop.log",
                 "reads_qc/longreads/toulligqc"
             ],
             [
@@ -124,10 +124,10 @@
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
                 "multiqc_citations.yaml:md5,389ae569c7527f217109c5de88f4c7a0",
-                "multiqc_nanostat.yaml:md5,d4ad35da0e3cdb74a1ab8dbfe22ebf04"
+                "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-10-08T11:43:37.45654655",
+        "timestamp": "2026-10-13T14:16:25.585933286",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

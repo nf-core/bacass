@@ -299,12 +299,9 @@ def numeric_value(value):
 def sample_assembly_type(sample, default_assembly_type):
     if default_assembly_type != "auto":
         return default_assembly_type
-    if sample.startswith("short-"):
-        return "short"
-    if sample.startswith("long-"):
-        return "long"
-    if sample.startswith("hybrid-"):
-        return "hybrid"
+    for assembly_type in ("short", "long", "hybrid"):
+        if sample.endswith(f"-{assembly_type}"):
+            return assembly_type
     return "NA"
 
 

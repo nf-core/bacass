@@ -154,11 +154,11 @@
                     "description": "Assembly mode to use for all samples, or per-sample autodetection when set to `auto`.",
                     "enum": ["short", "long", "hybrid", "auto"]
                 },
-                "assembly_type_prefix": {
+                "assembly_type_label": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Prefix sample IDs in output files with the assembly type.",
-                    "help_text": "When enabled, output sample IDs are prefixed with `short-`, `long-`, or `hybrid-`. In `--assembly_type auto` mode, the prefix is based on the per-sample assembly type detected from the samplesheet. In explicit `short`, `long`, or `hybrid` mode, the selected assembly type is used. Existing `short_`, `short-`, `long_`, `long-`, `hybrid_`, or `hybrid-` prefixes in the samplesheet ID are normalised to the detected/selected prefix to avoid duplicated labels. Disable this option to keep the original samplesheet IDs in output names."
+                    "description": "Add the detected assembly type to output sample IDs in auto mode.",
+                    "help_text": "Only applies when `--assembly_type auto` is used. When enabled, `-short`, `-long`, or `-hybrid` is added after the samplesheet sample ID and before the assembler name, according to the assembly type detected from the reads. Disable this option to keep the original samplesheet IDs in output names."
                 },
                 "unicycler_args": {
                     "type": "string",

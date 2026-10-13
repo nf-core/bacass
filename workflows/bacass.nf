@@ -63,7 +63,6 @@ include { paramsSummaryMap                      } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText                } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
-include { buildAssemblyTypeSampleId             } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
 include { detectAssemblyType                    } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
 include { normaliseInputFiles                   } from '../subworkflows/local/utils_nfcore_bacass_pipeline'
 
@@ -114,10 +113,11 @@ workflow BACASS {
             // Annotate per-sample assembly type
             if (params.assembly_type == 'auto') {
                 new_meta.assembly_type = detectAssemblyType(short_read_files, long_read_files)
+                new_meta.id = params.assembly_type_label ? "${meta.sample}-${new_meta.assembly_type}" : meta.sample
             } else {
                 new_meta.assembly_type = params.assembly_type
+                new_meta.id = meta.sample
             }
-            new_meta.id = params.assembly_type_prefix ? buildAssemblyTypeSampleId(meta.sample, new_meta.assembly_type) : meta.sample
             return [ new_meta, short_read_files, long_read_files, fast5_files  ] }
         .multiMap (criteria)
         .set { ch_input }
