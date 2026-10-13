@@ -12,23 +12,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#317](https://github.com/nf-core/bacass/pull/317) Improve MultiQC assembly summary tables
 - [#324](https://github.com/nf-core/bacass/pull/324) Improved kmerfinder_summary_download subworkflow for correct reference matching
 - [#326](https://github.com/nf-core/bacass/pull/326) Fix/busco ci network stability
-- [#315](https://github.com/nf-core/bacass/pull/315) Replace MultiQC general statistics with custom tables better suited to the new `assembly_mode` and multi-assembler strategy
-- [#315](https://github.com/nf-core/bacass/pull/315) Skip Canu when `gsize` is missing
-- [#315](https://github.com/nf-core/bacass/pull/315) Default `--assembly_type` is now `auto`, enabling per-sample assembly-type detection from the reads in the samplesheet
+- [#315](https://github.com/nf-core/bacass/pull/315) Replace MultiQC general statistics with custom tables better suited to per-sample `--assembly_type` routing and the multi-assembler strategy
+- [#315](https://github.com/nf-core/bacass/pull/315) Default `--assembly_type` is now `auto`, detecting each sample's read type and running compatible assemblers
 - [#315](https://github.com/nf-core/bacass/pull/315) Rename Miniasm/Racon consensus assemblies from `*.consensus.fasta.gz` to `*_assembly_consensus.fasta.gz`
 
 ### `Added`
 
 - [#310](https://github.com/nf-core/bacass/pull/310) Add BUSCO output to MultiQC
 - [#314](https://github.com/nf-core/bacass/pull/314) Add stub support for modules used in stub-run testing
-- [#315](https://github.com/nf-core/bacass/pull/315) Add an automatic assembly mode based on each sample's read type
-- [#315](https://github.com/nf-core/bacass/pull/315) Add `--assembly_type_label` to suffix automatic-mode output sample IDs with the detected assembly type
+- [#315](https://github.com/nf-core/bacass/pull/315) Add `--assembly_type_label` to suffix automatically routed output sample IDs with `-short`, `-long`, or `-hybrid`
 
 ### `Fixed`
 
 - [#291](https://github.com/nf-core/bacass/pull/291) Fix BUSCO `busco_downloads` publish errors and publish only summary/log files
 - [#315](https://github.com/nf-core/bacass/pull/315) Fix Medaka nf-test to avoid launching polishing when `skip_polish=true`
 - [#315](https://github.com/nf-core/bacass/pull/315) Restore Medaka and Nanopolish polishing for hybrid assemblies while respecting `--skip_polish`
+- [#315](https://github.com/nf-core/bacass/pull/315) Skip Canu when `gsize` is missing
+- [#315](https://github.com/nf-core/bacass/pull/315) Accept raw-base and `k`, `m`, or `g` genome sizes in the samplesheet
+- [#315](https://github.com/nf-core/bacass/pull/315) Retain QUAST genome-fraction metrics when a reference is provided and KmerFinder is skipped
 
 ### `Dependencies`
 
