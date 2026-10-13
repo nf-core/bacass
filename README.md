@@ -21,7 +21,7 @@
 
 ## Introduction
 
-**nf-core/bacass** is a bioinformatics best-practice analysis pipeline for simple bacterial assembly and annotation. The pipeline is able to assemble short reads, long reads, or a mixture of short and long reads (hybrid assembly). By default, bacass detects the available read type for each sample and routes it to compatible assembly strategies automatically.
+**nf-core/bacass** is a bioinformatics best-practice analysis pipeline for simple bacterial assembly and annotation. The pipeline is able to assemble short reads, long reads, or a mixture of short and long reads (hybrid assembly). By default, nf-core/bacass detects the available read type for each sample and routes it to compatible assembly strategies automatically.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community!
 
@@ -73,13 +73,13 @@ shortNlong      ./data/S1_R1.fastq.gz       ./data/S1_R2.fastq.gz       ./data/S
 
 Each row represents a fastq file (single-end) or a pair of fastq files (paired end).
 
-Run bacass with automatic per-sample assembly mode detection:
+Run nf-core/bacass with automatic per-sample assembly mode detection:
 
 ```console
 nextflow run nf-core/bacass -profile <docker/singularity/podman/shifter/charliecloud/conda/institute> --input samplesheet.tsv --outdir results
 ```
 
-bacass will detect whether each sample has short reads, long reads, or both, and will run only the assemblers compatible with that sample. If you prefer to force one mode for all samples, use `--assembly_type short`, `--assembly_type long`, or `--assembly_type hybrid`.
+nf-core/bacass will detect whether each sample has short reads, long reads, or both, and will run only the assemblers compatible with that sample. If you prefer to force one mode for all samples, use `--assembly_type short`, `--assembly_type long`, or `--assembly_type hybrid`.
 
 Example forcing long read assembly with Miniasm:
 
