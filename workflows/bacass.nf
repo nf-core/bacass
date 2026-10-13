@@ -405,7 +405,6 @@ workflow BACASS {
     if ( params.assembler.tokenize(",").contains("unicycler") ) {
         ch_for_assembly
             .filter{ meta, _sr, _lr -> !meta.subsample } // subsamples are not entering. i.e. anything with "meta.subsample"
-            .filter{ meta, _sr, _lr -> meta.assembly_type in ['short', 'long', 'hybrid'] } // unicycler supports all types
             .map{ meta, sr, lr ->
                 def new_meta = meta.clone()
                 new_meta.assembler = "unicycler"
