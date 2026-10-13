@@ -157,6 +157,7 @@
                 "assembly_type_label": {
                     "type": "boolean",
                     "default": true,
+                    "fa_icon": "fas fa-tag",
                     "description": "Add the detected assembly type to output sample IDs in auto mode.",
                     "help_text": "Only applies when `--assembly_type auto` is used. When enabled, `-short`, `-long`, or `-hybrid` is added after the samplesheet sample ID and before the assembler name, according to the assembly type detected from the reads. Disable this option to keep the original samplesheet IDs in output names."
                 },

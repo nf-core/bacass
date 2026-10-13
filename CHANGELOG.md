@@ -15,12 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#315](https://github.com/nf-core/bacass/pull/315) Replace MultiQC general statistics with custom tables better suited to the new `assembly_mode` and multi-assembler strategy
 - [#315](https://github.com/nf-core/bacass/pull/315) Skip Canu when `gsize` is missing
 - [#315](https://github.com/nf-core/bacass/pull/315) Default `--assembly_type` is now `auto`, enabling per-sample assembly-type detection from the reads in the samplesheet
+- [#315](https://github.com/nf-core/bacass/pull/315) Rename Miniasm/Racon consensus assemblies from `*.consensus.fasta.gz` to `*_assembly_consensus.fasta.gz`
 
 ### `Added`
 
 - [#310](https://github.com/nf-core/bacass/pull/310) Add BUSCO output to MultiQC
 - [#314](https://github.com/nf-core/bacass/pull/314) Add stub support for modules used in stub-run testing
-- [#315](https://github.com/nf-core/bacass/pull/315) Add an automatic assembly mode based on each sample’s read type
+- [#315](https://github.com/nf-core/bacass/pull/315) Add an automatic assembly mode based on each sample's read type
+- [#315](https://github.com/nf-core/bacass/pull/315) Add `--assembly_type_label` to suffix automatic-mode output sample IDs with the detected assembly type
 
 ### `Fixed`
 
