@@ -49,9 +49,11 @@ process CUSTOM_MULTIQC {
         cp extra/* multiqc_data/
     fi
 
-    ## Create the custom assembly table only when KmerFinder was run.
-    if [ -s multiqc_data/multiqc_kmerfinder.yaml ]; then
-        multiqc_to_custom_csv.py --assembly_type $params.assembly_type
+    ## Create custom summary tables from parsed MultiQC data.
+    multiqc_to_custom_csv.py --assembly_type $params.assembly_type
+
+    ## Replace the sparse built-in General Stats table when custom summary tables are available.
+    if compgen -G "summary_*_assembly_metrics_mqc.yaml" > /dev/null; then
         printf "%s\n" "exclude_modules:" "  - general_stats" > multiqc_kmerfinder_config.yaml
         custom_config_args="\$custom_config_args --config multiqc_kmerfinder_config.yaml"
     fi

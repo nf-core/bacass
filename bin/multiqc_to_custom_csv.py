@@ -46,6 +46,17 @@ SAMPLE_FIELDS = [
     "Best assembly genome fraction (%)",
 ]
 
+KMERFINDER_FIELDS = [
+    "# Best hit (KmerFinder)",
+    "# Best hit assembly ID (KmerFinder)",
+    "# Best hit query coverage (KmerFinder)",
+    "# Best hit depth (KmerFinder)",
+    "# Second hit (KmerFinder)",
+    "# Second hit assembly ID (KmerFinder)",
+    "# Second hit query coverage (KmerFinder)",
+    "# Second hit depth (KmerFinder)",
+]
+
 ASSEMBLY_FIELDS = [
     "Sample",
     "Assembly type",
@@ -288,12 +299,9 @@ def numeric_value(value):
 def sample_assembly_type(sample, default_assembly_type):
     if default_assembly_type != "auto":
         return default_assembly_type
-    if sample.startswith("short-"):
-        return "short"
-    if sample.startswith("long-"):
-        return "long"
-    if sample.startswith("hybrid-"):
-        return "hybrid"
+    for assembly_type in ("short", "long", "hybrid"):
+        if sample.endswith(f"-{assembly_type}"):
+            return assembly_type
     return "NA"
 
 
@@ -432,6 +440,10 @@ def add_reference_quast_metrics(assembly_rows, quast_dir):
     rows_by_sample_assembler = {
         assembly_match_key(assembly_id): row for assembly_id, row in assembly_rows.items()
     }
+    reference_metrics_found = any(
+        clean_value(row.get("# Genome fraction (%)")) != "NA"
+        for row in assembly_rows.values()
+    )
 
     for report_tsv in find_quast_reports(quast_dir):
         for assembly_id, metrics in read_quast_report_tsv(report_tsv).items():
@@ -442,6 +454,9 @@ def add_reference_quast_metrics(assembly_rows, quast_dir):
             row = rows_by_sample_assembler.get((sample, assembler))
             if row:
                 row["# Genome fraction (%)"] = clean_value(genome_fraction)
+                reference_metrics_found = True
+
+    return reference_metrics_found
 
 
 def add_best_assembly_metrics(sample_rows, assembly_rows):
@@ -472,9 +487,11 @@ def add_best_assembly_metrics(sample_rows, assembly_rows):
         ]
 
 
-def table_fields(include_reference_metrics):
+def table_fields(include_kmerfinder_metrics, include_reference_metrics):
     sample_fields = list(SAMPLE_FIELDS)
     assembly_fields = list(ASSEMBLY_FIELDS)
+    if not include_kmerfinder_metrics:
+        sample_fields = [field for field in sample_fields if field not in KMERFINDER_FIELDS]
     if not include_reference_metrics:
         sample_fields.remove("Best assembly genome fraction (%)")
         assembly_fields.remove("# Genome fraction (%)")
@@ -544,11 +561,12 @@ def main(args=None):
 
     sample_rows = load_sample_rows(args.MULTIQC_DATA_DIR, args.ASSEMBLY_TYPE)
     assembly_rows = load_assembly_rows(args.MULTIQC_DATA_DIR, args.ASSEMBLY_TYPE)
-    include_reference_metrics = kmerfinder_was_run(args.MULTIQC_DATA_DIR)
-    if include_reference_metrics:
-        add_reference_quast_metrics(assembly_rows, args.QUAST_DIR)
+    include_kmerfinder_metrics = kmerfinder_was_run(args.MULTIQC_DATA_DIR)
+    include_reference_metrics = add_reference_quast_metrics(assembly_rows, args.QUAST_DIR)
     add_best_assembly_metrics(sample_rows, assembly_rows)
-    sample_fields, assembly_fields = table_fields(include_reference_metrics)
+    sample_fields, assembly_fields = table_fields(
+        include_kmerfinder_metrics, include_reference_metrics
+    )
 
     write_table(
         rows=sample_rows,
@@ -558,7 +576,7 @@ def main(args=None):
         yaml_file=args.OUT_PREFIX + "_sample_assembly_metrics_mqc.yaml",
         section_id="sample_summary_assembly_metrics",
         section_name="Sample summary",
-        description="One row per sample with read QC, KmerFinder taxonomy and the best assembly by N50.",
+        description="One row per sample with read QC, optional KmerFinder taxonomy and the best assembly by N50.",
         header_config=SAMPLE_HEADER_CONFIG,
     )
     write_table(

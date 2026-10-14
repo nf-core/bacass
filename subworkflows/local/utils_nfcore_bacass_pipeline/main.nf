@@ -216,7 +216,7 @@ def validateInputParameters() {
         def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
             "  Assembly type not provided.\n" +
             "  Please specify the '--assembly_type' parameter to perform the assembly.\n" +
-            "  Accepted: short, long, hybrid.\n" +
+            "  Accepted: short, long, hybrid, auto.\n" +
             "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         error(error_string)
     }
@@ -235,32 +235,35 @@ def validateInputParameters() {
     }
 
     // Check compatibility between assembly_type and selected assembler(s)
+    // Skip this check in 'auto' mode — incompatible assemblers are silently skipped per-sample
     def selected_assemblers = params.assembler.tokenize(",").collect { v -> v.trim() }.findAll { v -> v }
-    Map<String, Map<String, Boolean>> assembler_capabilities = [
-        unicycler : [short: true,  long: true,  hybrid: true ],
-        megahit   : [short: true,  long: false, hybrid: false],
-        canu      : [short: false, long: true,  hybrid: false],
-        dragonflye: [short: false, long: true,  hybrid: true ],
-        flye      : [short: false, long: true,  hybrid: false],
-        miniasm   : [short: false, long: true,  hybrid: false],
-        raven     : [short: false, long: true,  hybrid: false],
-        autocycler: [short: false, long: true,  hybrid: false]
-    ]
-    def incompatible_assemblers = selected_assemblers.findAll { assembler ->
-        !assembler_capabilities.containsKey(assembler) || !assembler_capabilities[assembler][params.assembly_type]
-    }
-    if (incompatible_assemblers) {
-        def compatible_for_type = compatible_assemblers.findAll { assembler ->
-            assembler_capabilities[assembler]?.get(params.assembly_type) == true
+    if (params.assembly_type != 'auto') {
+        Map<String, Map<String, Boolean>> assembler_capabilities = [
+            unicycler : [short: true,  long: true,  hybrid: true ],
+            megahit   : [short: true,  long: false, hybrid: false],
+            canu      : [short: false, long: true,  hybrid: false],
+            dragonflye: [short: false, long: true,  hybrid: true ],
+            flye      : [short: false, long: true,  hybrid: false],
+            miniasm   : [short: false, long: true,  hybrid: false],
+            raven     : [short: false, long: true,  hybrid: false],
+            autocycler: [short: false, long: true,  hybrid: false]
+        ]
+        def incompatible_assemblers = selected_assemblers.findAll { assembler ->
+            !assembler_capabilities.containsKey(assembler) || !assembler_capabilities[assembler][params.assembly_type]
         }
-        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
-            "  Incompatible assembler(s) for the selected assembly type.\n" +
-            "  assembly_type: ${params.assembly_type}\n" +
-            "  selected: ${selected_assemblers.join(", ")}\n" +
-            "  incompatible: ${incompatible_assemblers.join(", ")}\n" +
-            "  compatible for ${params.assembly_type}: ${compatible_for_type.join(", ")}\n" +
-            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        error(error_string)
+        if (incompatible_assemblers) {
+            def compatible_for_type = compatible_assemblers.findAll { assembler ->
+                assembler_capabilities[assembler]?.get(params.assembly_type) == true
+            }
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Incompatible assembler(s) for the selected assembly type.\n" +
+                "  assembly_type: ${params.assembly_type}\n" +
+                "  selected: ${selected_assemblers.join(", ")}\n" +
+                "  incompatible: ${incompatible_assemblers.join(", ")}\n" +
+                "  compatible for ${params.assembly_type}: ${compatible_for_type.join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string)
+        }
     }
 
     // Check that assemblers for Autocycler are chosen correctly
@@ -305,6 +308,43 @@ def resolveFilePath(filePath) {
     } catch (Exception e) {
         log.warn "Could not resolve file path for ${filePath}: ${e.message}"
         return filePath
+    }
+}
+
+//
+// Normalise optional samplesheet inputs after grouping.
+//
+def normaliseInputFiles(value) {
+    def values = value instanceof List ? value.flatten() : [ value ]
+    values.findAll { item ->
+        if (item == null) {
+            return false
+        }
+        def item_string = item.toString().trim()
+        item_string && item_string != 'NA'
+    }
+}
+
+//
+// Detect assembly type for a sample based on available inputs.
+// Returns 'short', 'long', or 'hybrid'.
+//
+def detectAssemblyType(fastqs, longreads) {
+    def has_short = fastqs && fastqs[0] && fastqs[0] != 'NA' && fastqs[0] != ''
+    def has_long  = longreads && longreads != 'NA' && longreads != '' && !(longreads instanceof List && longreads.isEmpty())
+    // Handle list of longreads (after groupTuple)
+    if (longreads instanceof List) {
+        has_long = longreads.any { lr -> lr && lr != 'NA' && lr != '' }
+    }
+
+    if (has_short && has_long) {
+        return 'hybrid'
+    } else if (has_short) {
+        return 'short'
+    } else if (has_long) {
+        return 'long'
+    } else {
+        error("ERROR: Sample has no usable read input. Please check your samplesheet — at least R1 or LongFastQ must be provided.")
     }
 }
 

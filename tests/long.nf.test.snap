@@ -1,16 +1,10 @@
 {
     "-profile test_long": {
         "content": [
-            10,
+            8,
             {
                 "GUNZIP": {
                     "gunzip": 1.13
-                },
-                "GUNZIP_MEDAKA": {
-                    "gunzip": 1.13
-                },
-                "MEDAKA": {
-                    "medaka": "2.2.2"
                 },
                 "NANOPLOT": {
                     "nanoplot": "1.46.1"
@@ -37,11 +31,8 @@
             [
                 "annotation",
                 "annotation/prokka",
-                "annotation/prokka/TestMe-unicycler-medaka",
+                "annotation/prokka/TestMe-unicycler",
                 "assembly",
-                "assembly/polishing",
-                "assembly/polishing/medaka",
-                "assembly/polishing/medaka/TestMe-unicycler-medaka_polished_genome.fa.gz",
                 "assembly/unicycler",
                 "assembly/unicycler/TestMe-unicycler.assembly.gfa.gz",
                 "assembly/unicycler/TestMe-unicycler.scaffolds.fa.gz",
@@ -53,7 +44,7 @@
                 "assembly_qc/quast/overall/report/basic_stats",
                 "assembly_qc/quast/overall/report/basic_stats/GC_content_plot.pdf",
                 "assembly_qc/quast/overall/report/basic_stats/Nx_plot.pdf",
-                "assembly_qc/quast/overall/report/basic_stats/TestMe-unicycler-medaka_polished_genome_GC_content_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/TestMe-unicycler.scaffolds_GC_content_plot.pdf",
                 "assembly_qc/quast/overall/report/basic_stats/cumulative_plot.pdf",
                 "assembly_qc/quast/overall/report/icarus.html",
                 "assembly_qc/quast/overall/report/icarus_viewers",
@@ -75,12 +66,13 @@
                 "multiqc/multiqc_data/mqc_prokka_plot_1.yaml",
                 "multiqc/multiqc_data/mqc_quast_num_contigs_1.yaml",
                 "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_assembly_comparison_metrics-plot.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
-                "multiqc/multiqc_data/multiqc_general_stats.yaml",
                 "multiqc/multiqc_data/multiqc_nanostat.yaml",
                 "multiqc/multiqc_data/multiqc_prokka.yaml",
                 "multiqc/multiqc_data/multiqc_quast.yaml",
+                "multiqc/multiqc_data/multiqc_sample_summary_assembly_metrics-plot.yaml",
                 "multiqc/multiqc_data/multiqc_software_versions.yaml",
                 "multiqc/multiqc_data/multiqc_sources.yaml",
                 "multiqc/multiqc_data/porechop.yaml",
@@ -119,6 +111,8 @@
                 "multiqc/multiqc_plots/svg/mqc_quast_num_contigs_1.svg",
                 "multiqc/multiqc_plots/svg/mqc_quast_num_contigs_1_pc.svg",
                 "multiqc/multiqc_report.html",
+                "multiqc/summary_comparison_assembly_metrics.csv",
+                "multiqc/summary_sample_assembly_metrics.csv",
                 "pipeline_info",
                 "pipeline_info/nf_core_bacass_software_mqc_versions.yml",
                 "reads_qc",
@@ -138,7 +132,7 @@
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d"
             ]
         ],
-        "timestamp": "2026-09-09T11:18:56.083225783",
+        "timestamp": "2026-10-13T14:24:23.777754044",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
