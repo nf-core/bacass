@@ -332,6 +332,7 @@
                 "multiqc/multiqc_report.html",
                 "multiqc/summary_comparison_assembly_metrics.csv",
                 "multiqc/summary_sample_assembly_metrics.csv",
+                "multiqc/versions.yml",
                 "pipeline_info",
                 "pipeline_info/nf_core_bacass_software_mqc_versions.yml",
                 "reads_qc",
@@ -380,10 +381,11 @@
                 "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
                 "multiqc_fastqc.yaml:md5,a97dc5b92fd375b5ef1f30c821f6fc75",
                 "multiqc_fastqc_1.yaml:md5,fe20c9d7004011d7456d976b290d7325",
-                "multiqc_nanostat.yaml:md5,665cec4fa2ffaf72757368c759df22e2"
+                "multiqc_nanostat.yaml:md5,665cec4fa2ffaf72757368c759df22e2",
+                "versions.yml:md5,d8c305029a7779733503c2f7cf69eb55"
             ]
         ],
-        "timestamp": "2026-10-13T13:27:50.793265632",
+        "timestamp": "2026-10-15T11:12:06.332315572",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

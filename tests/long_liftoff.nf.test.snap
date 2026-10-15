@@ -234,6 +234,7 @@
                 "multiqc/multiqc_report.html",
                 "multiqc/summary_comparison_assembly_metrics.csv",
                 "multiqc/summary_sample_assembly_metrics.csv",
+                "multiqc/versions.yml",
                 "pipeline_info",
                 "pipeline_info/nf_core_bacass_software_mqc_versions.yml",
                 "reads_qc",
@@ -272,10 +273,11 @@
                 "ERR064912-unicycler.scaffolds.fa.gz:md5,0965953c184cd27da1550b757d7911c7",
                 "multiqc_citations.yaml:md5,1e250cafd020a40dca465d4a93786848",
                 "multiqc_fastqc.yaml:md5,05172556a25feb1277e789e91031d3bc",
-                "multiqc_fastqc_1.yaml:md5,ea1b355716cd910e4e23ae33c6cfcc10"
+                "multiqc_fastqc_1.yaml:md5,ea1b355716cd910e4e23ae33c6cfcc10",
+                "versions.yml:md5,d8c305029a7779733503c2f7cf69eb55"
             ]
         ],
-        "timestamp": "2026-10-13T14:27:53.329390222",
+        "timestamp": "2026-10-15T11:41:52.332541681",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
