@@ -58,8 +58,6 @@ runs:
 
     - name: Run nf-test
       shell: bash
-      env:
-        NFT_WORKDIR: ${{ env.NFT_WORKDIR }}
       run: |
         nf-test test \
           --profile=+${{ inputs.profile }} \

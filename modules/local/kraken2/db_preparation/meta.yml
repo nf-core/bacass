@@ -1,0 +1,43 @@
+name: kraken2_db_preparation
+description: Extract Kraken2 database archives and stage index files for downstream classification
+keywords:
+  - kraken2
+  - database
+  - tar
+  - extraction
+  - k2d
+tools:
+  - tar:
+      description: |
+        GNU tar is used to extract Kraken2 database archives.
+      documentation: https://www.gnu.org/software/tar/manual/
+      licence: ["GPL-3.0-or-later"]
+      identifier: biotools:tar
+input:
+  - db:
+      type: file
+      description: |
+        Compressed Kraken2 database archive (for example .tar.gz or .tgz).
+output:
+  db:
+    - - db_name:
+          type: string
+          description: |
+            Base name of the input archive, used as database identifier.
+      - database:
+          type: directory
+          description: Directory containing extracted Kraken2 index files (*.k2d).
+          pattern: "database/"
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@d4straub"
+  - "@Daniel-VM"
+maintainers:
+  - "@d4straub"
+  - "@Daniel-VM"
