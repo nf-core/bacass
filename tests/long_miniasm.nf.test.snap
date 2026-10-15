@@ -234,7 +234,7 @@
                 "TestMe_longreads.kraken2.report.txt:md5,4c2a95acdff03caa1524a5328c6ab2f5"
             ]
         ],
-        "timestamp": "2026-10-13T14:21:40.512577465",
+        "timestamp": "2026-10-15T11:35:46.059637207",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

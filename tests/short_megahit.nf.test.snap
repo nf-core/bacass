@@ -245,7 +245,7 @@
                 "multiqc_fastqc_1.yaml:md5,c49034e44bd4443a60839d4b2c17aa2b"
             ]
         ],
-        "timestamp": "2026-10-13T14:28:43.012651937",
+        "timestamp": "2026-10-15T11:42:56.486636166",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
