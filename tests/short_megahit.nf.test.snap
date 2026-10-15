@@ -22,7 +22,7 @@
                     "quast": "5.3.0"
                 },
                 "Workflow": {
-                    "nf-core/bacass": "v2.7.0dev"
+                    "nf-core/bacass": "v2.7.0"
                 }
             },
             [

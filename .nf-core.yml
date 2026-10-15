@@ -21,3 +21,4 @@ template:
   outdir: .
   skip_features:
     - igenomes
+  version: 2.7.0
