@@ -40,4 +40,18 @@ process DFAST {
         dfast: \$( dfast --version | sed -e "s/DFAST ver. //g" )
     END_VERSIONS
     """
+
+    stub:
+    def prefix  = task.ext.prefix ?: "${meta.id}"
+    """
+    mkdir -p ${prefix}_results
+    touch ${prefix}_results/${prefix}.gff
+    touch ${prefix}_results/${prefix}.faa
+    touch ${prefix}_results/${prefix}.ffn
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        dfast: 1.3.9
+    END_VERSIONS
+    """
 }

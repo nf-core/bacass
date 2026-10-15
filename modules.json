@@ -52,7 +52,7 @@
                     },
                     "canu": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "cat/fastq": {
@@ -72,12 +72,12 @@
                     },
                     "fastqc": {
                         "branch": "master",
-                        "git_sha": "5bdb098216aaf5df9c3b6343e6204cd932503c16",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["fastq_trim_fastp_fastqc"]
                     },
                     "filtlong": {
                         "branch": "master",
-                        "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
+                        "git_sha": "83819fff250f4fe6747fd8855fb3039eea22e5b7",
                         "installed_by": ["modules"]
                     },
                     "flye": {
@@ -100,6 +100,11 @@
                         "git_sha": "81880787133db07d9b4c1febd152c090eb8325dc",
                         "installed_by": ["modules"]
                     },
+                    "medaka": {
+                        "branch": "master",
+                        "git_sha": "13c499c244bf0e46ec222ae4fcb4074cf5eef1fe",
+                        "installed_by": ["modules"]
+                    },
                     "megahit": {
                         "branch": "master",
                         "git_sha": "e4f18d1cecc86b39daafe8bf22343b868e696c15",
@@ -107,7 +112,7 @@
                     },
                     "miniasm": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "minimap2/align": {
@@ -117,7 +122,7 @@
                     },
                     "multiqc": {
                         "branch": "master",
-                        "git_sha": "af27af1be706e6a2bb8fe454175b0cdf77f47b49",
+                        "git_sha": "98403d15b0e50edae1f3fec5eae5e24982f1fade",
                         "installed_by": ["modules"]
                     },
                     "nanoplot": {
@@ -143,17 +148,17 @@
                     },
                     "racon": {
                         "branch": "master",
-                        "git_sha": "3f5420aa22e00bd030a2556dfdffc9e164ec0ec5",
+                        "git_sha": "6f5e41545241b6c85909febd385dad1664cd5dec",
                         "installed_by": ["modules"]
                     },
                     "rasusa": {
                         "branch": "master",
-                        "git_sha": "35b7d3eeaccbc0c82fae2ef675b00c028b9282ca",
+                        "git_sha": "157ed9432d12a18a40e308dcd0a7a0b2a0245d2e",
                         "installed_by": ["modules"]
                     },
                     "raven": {
                         "branch": "master",
-                        "git_sha": "6479ace28248469b1231819b66e0572a0af51379",
+                        "git_sha": "7f2af264386af99e70dc68ced1a46ee759f5756b",
                         "installed_by": ["modules"]
                     },
                     "samtools/index": {
@@ -173,8 +178,9 @@
                     },
                     "unicycler": {
                         "branch": "master",
-                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
-                        "installed_by": ["modules"]
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/unicycler/unicycler.diff"
                     },
                     "untar": {
                         "branch": "master",
@@ -197,17 +203,17 @@
                     },
                     "utils_nextflow_pipeline": {
                         "branch": "master",
-                        "git_sha": "05954dab2ff481bcb999f24455da29a5828af08d",
+                        "git_sha": "c2b22d85f30a706a3073387f30380704fcae013b",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nfcore_pipeline": {
                         "branch": "master",
-                        "git_sha": "271e7fc14eb1320364416d996fb077421f3faed2",
+                        "git_sha": "a3fb7351b1fdb2b1de282b765816bbea190e86a8",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nfschema_plugin": {
                         "branch": "master",
-                        "git_sha": "fdc08b8b1ae74f56686ce21f7ea11ad11990ce57",
+                        "git_sha": "a7b27fd25bfa8dcc07d299e88bd790585901a436",
                         "installed_by": ["subworkflows"]
                     }
                 }

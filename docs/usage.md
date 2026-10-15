@@ -6,7 +6,7 @@
 
 ## Introduction
 
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated or tab-separated file with 6 columns, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
@@ -27,14 +27,14 @@ shortNlong    ./data/S1_R1.fastq.gz    ./data/S1_R2.fastq.gz    ./data/S1_long_f
 
 > **NB:** `./data/FAST5` points at a folder containing all (i.e. one or mutiple) fast5 files that correspond to the long reads. `NA` indicates that the file is missing.
 
-| Column       | Description                                                                                                                                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`     | Custom sample name. May not contain spaces.                                                                                                                                 |
-| `R1`         | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.         |
-| `R2`         | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.         |
-| `LongFastQ`  | Full path to FastQ file for ONT long reads. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.                 |
-| `Fast5`      | Full path to a folder containing Fast5 file(s) for ONT long reads. `NA` indicates that there are no Fast5 files available.                                                  |
-| `GenomeSize` | Expected genome size. For example, `2.8m` means 2.8 million basepairs genome size expected. This is only used by Canu assembler. `NA` indicates that this value is unknown. |
+| Column       | Description                                                                                                                                                                                                                                     |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sample`     | Custom sample name. May not contain spaces.                                                                                                                                                                                                     |
+| `R1`         | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.                                                                             |
+| `R2`         | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.                                                                             |
+| `LongFastQ`  | Full path to FastQ file for ONT long reads. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". `NA` indicates that the file is missing.                                                                                     |
+| `Fast5`      | Full path to a folder containing Fast5 file(s) for ONT long reads. `NA` indicates that there are no Fast5 files available.                                                                                                                      |
+| `GenomeSize` | Expected genome size in base pairs or using `k`, `m`, or `g` suffixes. For example, `2.8m` means an expected genome size of 2.8 million base pairs. This is required by Canu and Autocycler; samples with `NA` are skipped by those assemblers. |
 
 An [example samplesheet](../assets/samplesheet.tsv) has been provided with the pipeline.
 
@@ -43,10 +43,10 @@ An [example samplesheet](../assets/samplesheet.tsv) has been provided with the p
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/bacass --input samplesheet.tsv --outdir results  -profile docker --assembly_type 'short' --skip_kraken2
+nextflow run nf-core/bacass --input samplesheet.tsv --outdir results -profile docker
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+This will launch the pipeline with the `docker` configuration profile. By default, `--assembly_type auto` detects whether each sample contains short reads, long reads, or both, and routes it only to compatible assemblers. See below for more information about profiles.
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -62,7 +62,7 @@ If you wish to repeatedly use the same parameters for multiple runs, rather than
 Pipeline settings can be provided in a `yaml` or `json` file via `-params-file <file>`.
 
 > [!WARNING]
-> Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources), other infrastructural tweaks (such as output directories), or module arguments (args).
+> Do not use `-c <file>` to specify parameters as this will result in errors. Custom config files specified with `-c` must only be used for [tuning process resource specifications](https://nf-co.re/docs/running/run-pipelines#configuring-pipelines), other infrastructural tweaks (such as output directories), or module arguments (args).
 
 The above pipeline run specified with a params file in yaml format:
 
@@ -84,7 +84,7 @@ You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-c
 
 Assemblers have often specific biases originating from their specific implementation. Assembler performance is often sample and context dependent. Therefore, it can be of advantage to compare the outcome of several tools.
 
-This pipeline integrates multiple assembler tools that are all activated by default, allowing a comparison and choice based on the results. However, that can lead to unwanted overhead. The assemblers applied to the data can be restricted with the [--assembler](https://nf-co.re/bacass/parameters/#assembler) parameter.
+This pipeline integrates multiple assembler tools that are all activated by default, allowing a comparison and choice based on the results. With the default `--assembly_type auto`, each sample is routed only to assemblers compatible with its detected read type. The assemblers applied to the data can be restricted with the [--assembler](https://nf-co.re/bacass/parameters/#assembler) parameter to reduce runtime.
 
 > [!TIP]
 > Autocycler uses several long-read assemblers and combines their results, reducing assembler-specific biases. The assemblers used for Autocycler can be restricted with the [--autocycler_assemblers](https://nf-co.re/bacass/parameters#autocycler_assemblers) parameter.
@@ -153,7 +153,7 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
 - `apptainer`
   - A generic configuration profile to be used with [Apptainer](https://apptainer.org/)
 - `wave`
-  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow ` 24.03.0-edge` or later).
+  - A generic configuration profile to enable [Wave](https://seqera.io/wave/) containers. Use together with one of the above (requires Nextflow `24.03.0-edge` or later).
 - `conda`
   - A generic configuration profile to be used with [Conda](https://conda.io/docs/). Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker, Singularity, Podman, Shifter, Charliecloud, or Apptainer.
 
@@ -173,19 +173,19 @@ Specify the path to a specific config file (this is a core Nextflow command). Se
 
 Whilst the default requirements set within the pipeline will hopefully work for most people and with most input data, you may find that you want to customise the compute resources that the pipeline requests. Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the pipeline steps, if the job exits with any of the error codes specified [here](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/base.config#L18) it will automatically be resubmitted with higher resources request (2 x original, then 3 x original). If it still fails after the third attempt then the pipeline execution is stopped.
 
-To change the resource requests, please see the [max resources](https://nf-co.re/docs/usage/configuration#max-resources) and [tuning workflow resources](https://nf-co.re/docs/usage/configuration#tuning-workflow-resources) section of the nf-core website.
+To change the resource requests, please see the [max resources](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#set-max-resources) and [customise process resources](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#customize-process-resources) section of the nf-core website.
 
 ### Custom Containers
 
 In some cases, you may wish to change the container or conda environment used by a pipeline steps for a particular tool. By default, nf-core pipelines use containers and software from the [biocontainers](https://biocontainers.pro/) or [bioconda](https://bioconda.github.io/) projects. However, in some cases the pipeline specified version maybe out of date.
 
-To use a different container from the default container or conda environment specified in a pipeline, please see the [updating tool versions](https://nf-co.re/docs/usage/configuration#updating-tool-versions) section of the nf-core website.
+To use a different container from the default container or conda environment specified in a pipeline, please see the [updating tool versions](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#update-tool-versions) section of the nf-core website.
 
 ### Custom Tool Arguments
 
 A pipeline might not always support every possible argument or option of a particular tool used in pipeline. Fortunately, nf-core pipelines provide some freedom to users to insert additional parameters that the pipeline does not include by default.
 
-To learn how to provide additional arguments to a particular tool of the pipeline, please see the [customising tool arguments](https://nf-co.re/docs/usage/configuration#customising-tool-arguments) section of the nf-core website.
+To learn how to provide additional arguments to a particular tool of the pipeline, please see the [customising tool arguments](https://nf-co.re/docs/running/configuration/nextflow-for-your-system#modifying-tool-arguments) section of the nf-core website.
 
 ### nf-core/configs
 
