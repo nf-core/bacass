@@ -250,7 +250,6 @@
                 "multiqc/multiqc_report.html",
                 "multiqc/summary_comparison_assembly_metrics.csv",
                 "multiqc/summary_sample_assembly_metrics.csv",
-                "multiqc/versions.yml",
                 "pipeline_info",
                 "pipeline_info/nf_core_bacass_software_mqc_versions.yml",
                 "reads_qc",
@@ -288,7 +287,6 @@
                 "multiqc_citations.yaml:md5,0842be95dd6c2081198f682f370c7f0a",
                 "multiqc_fastqc.yaml:md5,4c4e1b713139eef4b82e3aa9e6dbaca2",
                 "multiqc_fastqc_1.yaml:md5,c49034e44bd4443a60839d4b2c17aa2b",
-                "versions.yml:md5,d8c305029a7779733503c2f7cf69eb55"
             ]
         ],
         "timestamp": "2026-10-15T11:15:39.201185738",

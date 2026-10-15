@@ -113,7 +113,6 @@
                 "multiqc/multiqc_report.html",
                 "multiqc/summary_comparison_assembly_metrics.csv",
                 "multiqc/summary_sample_assembly_metrics.csv",
-                "multiqc/versions.yml",
                 "pipeline_info",
                 "pipeline_info/nf_core_bacass_software_mqc_versions.yml",
                 "reads_qc",
@@ -131,7 +130,6 @@
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
                 "multiqc_citations.yaml:md5,389ae569c7527f217109c5de88f4c7a0",
                 "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d",
-                "versions.yml:md5,d8c305029a7779733503c2f7cf69eb55"
             ]
         ],
         "timestamp": "2026-10-15T11:38:33.857841361",
