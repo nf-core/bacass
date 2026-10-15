@@ -292,7 +292,7 @@
                 "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
                 "multiqc_fastqc.yaml:md5,a0b5fd24bb745bb77511c1962086fcf0",
                 "multiqc_fastqc_1.yaml:md5,daf5f34bdacbbc207f86fc95768ce9a2",
-                "multiqc_nanostat.yaml:md5,cff0c79f74776d0e8c451e87bb332d2d",
+                "multiqc_nanostat.yaml:md5,cff0c79f74776d0e8c451e87bb332d2d"
             ]
         ],
         "timestamp": "2026-10-15T11:30:52.35347338",
