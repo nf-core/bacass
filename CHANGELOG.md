@@ -112,6 +112,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
+- [#329](https://github.com/nf-core/bacass/pull/329) Update module Nanoplot (to 1.48.0).
 - [#257](https://github.com/nf-core/bacass/pull/257) Update module Nanoplot (to 1.46.1).
 - [#254](https://github.com/nf-core/bacass/pull/254) Bump version v2.5.0.
 - [#253](https://github.com/nf-core/bacass/pull/253) Update Template to 3.3.2.
@@ -124,6 +125,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#329](https://github.com/nf-core/bacass/pull/329) Prepare release 2.7.0
 - [#248](https://github.com/nf-core/bacass/pull/248) Fix CAT_FASTQ handling for long reads and hybrid assembly modes.
 - [#237](https://github.com/nf-core/bacass/issues/237) Add LIFTOFF nf-core module
 - Added [ToulligQC](https://github.com/GenomiqueENS/toulligQC) for Nanopore Raw Reads
