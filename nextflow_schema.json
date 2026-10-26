@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/bacass/main/nextflow_schema.json",
+    "$id": "https://raw.githubusercontent.com/nf-core/bacass/master/nextflow_schema.json",
     "title": "nf-core/bacass pipeline parameters",
     "description": "Simple bacterial assembly and annotation",
     "type": "object",
@@ -175,7 +175,7 @@
                 },
                 "trace_report_suffix": {
                     "type": "string",
-                    "fa_icon": "far calendar",
+                    "fa_icon": "far fa-calendar",
                     "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
                     "hidden": true
                 },
