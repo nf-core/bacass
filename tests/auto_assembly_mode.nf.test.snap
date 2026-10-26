@@ -28,7 +28,7 @@
                     "megahit": "1.2.9"
                 },
                 "NANOPLOT": {
-                    "nanoplot": "1.46.1"
+                    "NanoPlot": "1.48.0"
                 },
                 "PORECHOP_PORECHOP": {
                     "porechop": "0.2.4"
@@ -380,10 +380,10 @@
                 "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
                 "multiqc_fastqc.yaml:md5,a97dc5b92fd375b5ef1f30c821f6fc75",
                 "multiqc_fastqc_1.yaml:md5,fe20c9d7004011d7456d976b290d7325",
-                "multiqc_nanostat.yaml:md5,665cec4fa2ffaf72757368c759df22e2"
+                "multiqc_nanostat.yaml:md5,9b89b60299599b57907b92e71d024fed"
             ]
         ],
-        "timestamp": "2026-10-15T11:12:06.332315572",
+        "timestamp": "2026-10-26T14:34:23.791402321",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
