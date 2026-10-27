@@ -29,7 +29,7 @@
                     "minimap2": "2.24-r1122"
                 },
                 "NANOPLOT": {
-                    "nanoplot": "1.46.1"
+                    "NanoPlot": "1.48.0"
                 },
                 "PORECHOP_PORECHOP": {
                     "porechop": "0.2.4"
@@ -47,7 +47,7 @@
                     "toulligqc": "2.8.4"
                 },
                 "Workflow": {
-                    "nf-core/bacass": "v2.7.0dev"
+                    "nf-core/bacass": "v2.7.0"
                 }
             },
             [
@@ -230,11 +230,11 @@
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
                 "multiqc_citations.yaml:md5,39184731ae65903be446f425a59a2127",
                 "multiqc_kraken.yaml:md5,2579a276fcd6e51c35b361fd803d6d0b",
-                "multiqc_nanostat.yaml:md5,3707e05541222ccbe609d6b751f33d0d",
+                "multiqc_nanostat.yaml:md5,ec9280905dc2e3f3961092b982638926",
                 "TestMe_longreads.kraken2.report.txt:md5,4c2a95acdff03caa1524a5328c6ab2f5"
             ]
         ],
-        "timestamp": "2026-10-15T11:35:46.059637207",
+        "timestamp": "2026-10-26T14:57:45.611309945",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

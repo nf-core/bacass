@@ -22,7 +22,7 @@
                     "medaka": "2.2.2"
                 },
                 "NANOPLOT": {
-                    "nanoplot": "1.46.1"
+                    "NanoPlot": "1.48.0"
                 },
                 "PORECHOP_PORECHOP": {
                     "porechop": "0.2.4"
@@ -40,7 +40,7 @@
                     "unicycler": "0.5.1"
                 },
                 "Workflow": {
-                    "nf-core/bacass": "v2.7.0dev"
+                    "nf-core/bacass": "v2.7.0"
                 }
             },
             [
@@ -297,10 +297,10 @@
                 "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
                 "multiqc_fastqc.yaml:md5,68dcba3602303c17700845789c5228fb",
                 "multiqc_fastqc_1.yaml:md5,74f3e473f28a113f93f22dbe95a29274",
-                "multiqc_nanostat.yaml:md5,bf3d441612c2ffddcf3065777c889d7d"
+                "multiqc_nanostat.yaml:md5,9b89b60299599b57907b92e71d024fed"
             ]
         ],
-        "timestamp": "2026-10-15T11:27:31.233317469",
+        "timestamp": "2026-10-26T14:49:28.603465013",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"

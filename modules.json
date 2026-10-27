@@ -127,7 +127,7 @@
                     },
                     "nanoplot": {
                         "branch": "master",
-                        "git_sha": "9322f997f94451510f974e417ec5277869030b44",
+                        "git_sha": "c50a9a357df7406d7fc7d4d63e2f868ca79cc5ad",
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/nanoplot/nanoplot.diff"
                     },
@@ -143,7 +143,7 @@
                     },
                     "quast": {
                         "branch": "master",
-                        "git_sha": "55cca688337cfaec60e8cd32021bb4cd19f3a501",
+                        "git_sha": "9a034dd2c5df2c9b283e09ddf2667d9118b4ccd7",
                         "installed_by": ["modules"]
                     },
                     "racon": {
