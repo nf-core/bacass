@@ -28,7 +28,7 @@
                     "porechop": "0.2.4"
                 },
                 "PROKKA": {
-                    "prokka": "1.14.6"
+                    "prokka": "1.15.6"
                 },
                 "QUAST": {
                     "quast": "5.3.0"
@@ -292,10 +292,10 @@
                 "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
                 "multiqc_fastqc.yaml:md5,a0b5fd24bb745bb77511c1962086fcf0",
                 "multiqc_fastqc_1.yaml:md5,daf5f34bdacbbc207f86fc95768ce9a2",
-                "multiqc_nanostat.yaml:md5,3fa809f73abad34133af8f77d458b699"
+                "multiqc_nanostat.yaml:md5,5bb17356a66868a511ca720ddb63231a"
             ]
         ],
-        "timestamp": "2026-10-26T14:52:28.588395323",
+        "timestamp": "2026-10-27T15:16:25.287041236",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
