@@ -101,6 +101,12 @@ use_filename_as_sample_name:
   - prokka
   - bakta
 
+# NanoPlot prefixes NanoStats outputs with the sample ID. Retain the conventional
+# filename suffix while keeping the sample IDs displayed by MultiQC unchanged.
+sample_names_replace_regex: true
+sample_names_replace:
+  "_NanoStats$": ""
+
 # Customise the module search patterns to speed up execution time.
 sp:
   fastp:
