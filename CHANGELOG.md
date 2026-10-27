@@ -3,10 +3,11 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v2.7.0 nf-core/bacass - (date)
+## v2.7.0 nf-core/bacass - "Scarlet Brass Nautilus" (2026/10/27)
 
 ### `Changed`
 
+- [#329](https://github.com/nf-core/bacass/pull/329) Update module Nanoplot (to 1.48.0).
 - [#310](https://github.com/nf-core/bacass/pull/310) Use nf-core Medaka, add BUSCO to MultiQC, and fix Dragonflye channels
 - [#316](https://github.com/nf-core/bacass/pull/316) Reorganize result output directories
 - [#317](https://github.com/nf-core/bacass/pull/317) Improve MultiQC assembly summary tables
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
+- [#329](https://github.com/nf-core/bacass/pull/329) Prepare release 2.7.0
 - [#310](https://github.com/nf-core/bacass/pull/310) Add BUSCO output to MultiQC
 - [#314](https://github.com/nf-core/bacass/pull/314) Add stub support for modules used in stub-run testing
 - [#315](https://github.com/nf-core/bacass/pull/315) Add `--assembly_type_label` to suffix automatically routed output sample IDs with `-short`, `-long`, or `-hybrid`
@@ -33,10 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Dependencies`
 
-| Tool   | Previous version | New version |
-| ------ | ---------------- | ----------- |
-| Canu   | 2.2              | 2.3         |
-| Medaka | 2.2.1            | 2.2.2       |
+| Tool      | Previous version | New version |
+| ------    | ---------------- | ----------- |
+| Canu      | 2.2              | 2.3         |
+| Medaka    | 2.2.1            | 2.2.2       |
+| Nanoplot  | 1.46.1           | 1.48.0      |
 
 ### `Deprecated`
 
@@ -112,7 +115,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- [#329](https://github.com/nf-core/bacass/pull/329) Update module Nanoplot (to 1.48.0).
 - [#257](https://github.com/nf-core/bacass/pull/257) Update module Nanoplot (to 1.46.1).
 - [#254](https://github.com/nf-core/bacass/pull/254) Bump version v2.5.0.
 - [#253](https://github.com/nf-core/bacass/pull/253) Update Template to 3.3.2.
@@ -125,7 +127,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
-- [#329](https://github.com/nf-core/bacass/pull/329) Prepare release 2.7.0
 - [#248](https://github.com/nf-core/bacass/pull/248) Fix CAT_FASTQ handling for long reads and hybrid assembly modes.
 - [#237](https://github.com/nf-core/bacass/issues/237) Add LIFTOFF nf-core module
 - Added [ToulligQC](https://github.com/GenomiqueENS/toulligQC) for Nanopore Raw Reads
