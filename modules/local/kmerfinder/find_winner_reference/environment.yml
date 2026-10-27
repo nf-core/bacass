@@ -1,0 +1,7 @@
+name: kmerfinder_find_winner_reference
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.10
+  - requests=2.26.0

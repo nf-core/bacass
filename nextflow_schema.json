@@ -15,13 +15,12 @@
                 "input": {
                     "type": "string",
                     "format": "file-path",
-                    "exists": true,
+                    "exist": true,
                     "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/bacass/usage#samplesheet-input).",
-                    "fa_icon": "fas fa-file-csv"
+                    "description": "Path to tab-separated sample sheet",
+                    "help_text": "Path to sample sheet, either tab-separated (.tsv), comma-separated (.csv), or in YAML format (.yml/.yaml), that points to compressed fastq files.\n\nThe sample sheet must have six tab-separated columns/entries with the following headers: \n- `ID` (required): Unique sample IDs, must start with a letter, and can only contain letters, numbers or underscores\n- `R1` (optional): Paths to (forward) reads zipped FastQ files\n- `R2` (optional): Paths to reverse reads zipped FastQ files, required if the data is paired-end\n- `LongFastQ` (optional): Paths to long reads zipped FastQ files\n- `Fast5` (optional): Paths to the directory containing FAST5 files\n- `GenomeSize` (optional): A number in base pairs or ending with `k`, `m`, or `g` (including decimals), representing genome size and required by Canu and Autocycler.\n\nPlease be aware that files will be required based on the selected `--assembly_type`: `short`, `long`, and `hybrid` force one mode for all samples, while `auto` detects the mode independently for each sample from its available reads.",
+                    "fa_icon": "fas fa-dna"
                 },
                 "outdir": {
                     "type": "string",
@@ -35,11 +34,335 @@
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
-                },
-                "multiqc_title": {
+                }
+            }
+        },
+        "qc_and_trim": {
+            "title": "QC and Trim",
+            "type": "object",
+            "description": "Parameters for QC and trim short-reads",
+            "default": "",
+            "properties": {
+                "fastp_args": {
                     "type": "string",
-                    "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
-                    "fa_icon": "fas fa-file-signature"
+                    "description": "This can be used to pass arguments to [Fastp](https://github.com/OpenGene/fastp)"
+                },
+                "save_trimmed": {
+                    "type": "boolean",
+                    "description": "save trimmed files"
+                },
+                "save_trimmed_fail": {
+                    "type": "boolean",
+                    "description": "save files that failed to pass trimming thresholds ending in `*.fail.fastq.gz`"
+                },
+                "skip_fastqc": {
+                    "type": "boolean",
+                    "description": "Skip FastQC"
+                },
+                "skip_nanoplot": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip Nanoplot"
+                },
+                "skip_toulligqc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip ToulligQC"
+                },
+                "skip_fastp": {
+                    "type": "boolean",
+                    "description": "Skip FastP"
+                },
+                "discard_trimmed_pass": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Specify true to not write any reads that pass trimming thresholds.This can be used to use fastp for the output report only."
+                },
+                "long_reads_filtering": {
+                    "type": "string",
+                    "default": "porechop",
+                    "description": "Tool for ONT read filtering"
+                },
+                "filtlong_args": {
+                    "type": "string",
+                    "description": "Arguments for running Filtlong"
+                },
+                "filtlong_minlen": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Minimun length for Filtlong to work"
+                },
+                "rasusa": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Use Rasusa to downsample reads to a target coverage",
+                    "fa_icon": "fas fa-compress-arrows-alt"
+                },
+                "rasusa_coverage": {
+                    "type": "integer",
+                    "default": 100,
+                    "description": "Target coverage for Rasusa read downsampling"
+                }
+            }
+        },
+        "contamination_screening": {
+            "title": "Contamination Screening",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-box",
+            "properties": {
+                "kraken2db": {
+                    "type": "string",
+                    "fa_icon": "fab fa-gitkraken",
+                    "help_text": "See [Kraken2 homepage](https://benlangmead.github.io/aws-indexes/k2) for download\nlinks. Minikraken2 8GB is a reasonable choice, since we run Kraken here mainly just to check for\nsample purity.",
+                    "description": "Path to Kraken2 database."
+                },
+                "kmerfinderdb": {
+                    "type": "string",
+                    "description": "Path to the KmerFinder bacteria database (e.g. `/path_to/kmerfinder/`, `/path_to/kmerfinder/bacteria/` or `/path_to/kmerfinder/bacteria.tar.gz`). Only taxonomic group `bacteria` is supported. If a directory is provided, the pipeline auto-detects whether it already includes the `bacteria/` level. See installation guidelines: [https://bitbucket.org/genomicepidemiology/kmerfinder_db/src/master/](https://bitbucket.org/genomicepidemiology/kmerfinder_db/src/master/). Example: `--kmerfinderdb 'ftp://ftp.cbs.dtu.dk/public/CGE/databases/KmerFinder/version/latest/bacteria.tar.gz'` (FTP download is ~30GB and can be slow; prefer pre-downloading and passing a local `.tar.gz`). Older version: [https://zenodo.org/records/13447056/files/20190108_kmerfinder_stable_dirs.tar.gz](https://zenodo.org/records/13447056/files/20190108_kmerfinder_stable_dirs.tar.gz)."
+                },
+                "reference_fasta": {
+                    "type": "string",
+                    "description": "Reference FASTA file."
+                },
+                "reference_gff": {
+                    "type": "string",
+                    "description": "Reference GFF file."
+                }
+            }
+        },
+        "assembly_parameters": {
+            "title": "Assembly parameters",
+            "type": "object",
+            "description": "Parameters for the assembly",
+            "default": "",
+            "fa_icon": "fas fa-puzzle-piece",
+            "properties": {
+                "assembler": {
+                    "type": "string",
+                    "default": "autocycler,canu,dragonflye,flye,megahit,miniasm,unicycler,raven",
+                    "fa_icon": "fas fa-puzzle-piece",
+                    "description": "The assembler(s) to use for assembly.",
+                    "help_text": "Use the appropriate assembler(s) according to the chosen assembly_type. Can be one or multiple of the available assemblers (e.g. unicycler, megahit, canu, miniasm, dragonflye, autocycler, raven, flye, ...) as comma separated string (e.g. `-- assembler \"megahit,unicycler\"`)."
+                },
+                "assembly_type": {
+                    "type": "string",
+                    "default": "auto",
+                    "fa_icon": "fas fa-fingerprint",
+                    "help_text": "Controls how samples are routed for genome assembly. Use `short`, `long`, or `hybrid` to force the same assembly mode for all samples. Use `auto` to infer the assembly mode independently for each sample from the reads provided in the samplesheet: short-read only samples are treated as `short`, long-read only samples as `long`, and samples with both short and long reads as `hybrid`. Assemblers are then run only for compatible sample and assembly-mode combinations.",
+                    "description": "Assembly mode to use for all samples, or per-sample autodetection when set to `auto`.",
+                    "enum": ["short", "long", "hybrid", "auto"]
+                },
+                "assembly_type_label": {
+                    "type": "boolean",
+                    "default": true,
+                    "fa_icon": "fas fa-tag",
+                    "description": "Add the detected assembly type to output sample IDs in auto mode.",
+                    "help_text": "Only applies when `--assembly_type auto` is used. When enabled, `-short`, `-long`, or `-hybrid` is added after the samplesheet sample ID and before the assembler name, according to the assembly type detected from the reads. Disable this option to keep the original samplesheet IDs in output names."
+                },
+                "unicycler_args": {
+                    "type": "string",
+                    "fa_icon": "fas fa-bicycle",
+                    "description": "Extra arguments for Unicycler",
+                    "help_text": "This advanced option allows you to pass extra arguments to Unicycler (e.g. `\"--mode conservative\"` or `\"--mode bold --kmers 51\"`). For this to work you need to quote the arguments and add at least one space."
+                },
+                "canu_mode": {
+                    "type": "string",
+                    "enum": ["-pacbio", "-nanopore", "-pacbio-hifi", "null"],
+                    "description": "Allowed technologies for long read assembly with CANU."
+                },
+                "canu_args": {
+                    "type": "string",
+                    "fa_icon": "fas fa-ship",
+                    "description": "This can be used to supply [extra options](https://canu.readthedocs.io/en/latest/quick-start.html) to the Canu assembler. Will be ignored when other assemblers are used."
+                },
+                "dragonflye_args": {
+                    "type": "string",
+                    "description": "Extra arguments for [Dragonflye](https://github.com/rpetit3/dragonflye#usage)",
+                    "help_text": "This advanced option allows you to add extra arguments to Dragonflye (e.g.: `\"--gsize 2.4m\"`). For those arguments with no values/options associated (e.g.: `\"--nopolish\"` or `\"--nofilter\"`...) you need to add an extra space at the begining of the input string to params.dragonflye_args. Example: `--params.dragonflye_args ' --nopolish'`"
+                },
+                "megahit_args": {
+                    "type": "string",
+                    "description": "Extra arguments for [MEGAHIT](https://github.com/voutcn/megahit#usage)",
+                    "help_text": "This advanced option allows you to pass extra arguments to MEGAHIT for short-read assembly (e.g. `\"--min-contig-len 500\"`)."
+                },
+                "autocycler_assemblers": {
+                    "type": "string",
+                    "default": "canu,flye,miniasm,raven",
+                    "description": "What assemblers to use for autocycler",
+                    "help_text": "Comma separated string of assemblers. For example 'canu,flye,raven'. Allowed is any subset and combination of canu, flye, raven, miniasm ..."
+                },
+                "autocycler_subsample_count": {
+                    "type": "integer",
+                    "default": 4,
+                    "description": "Number of subsets to assemble."
+                },
+                "autocycler_subsample_mindepth": {
+                    "type": "integer",
+                    "default": 25,
+                    "description": "Minimum depth for subsets to assemble."
+                },
+                "autocycler_cluster_args": {
+                    "type": "string",
+                    "description": "Arguments to autocycler cluster.",
+                    "help_text": "--cutoff <CUTOFF>: cutoff distance threshold for hierarchical clustering [default: 0.2]; --min_assemblies <MIN_ASSEMBLIES>: exclude clusters with fewer than this many assemblies [default: automatic]; --max_contigs <MAX_CONTIGS>: refuse to run if mean contigs per assembly exceeds this value [default: 25]."
+                },
+                "flye_mode": {
+                    "type": "string",
+                    "default": "--nano-raw",
+                    "enum": [
+                        "--pacbio-raw",
+                        "--pacbio-corr",
+                        "--pacbio-hifi",
+                        "--nano-raw",
+                        "--nano-corr",
+                        "--nano-hq"
+                    ],
+                    "description": "Allowed technologies for long read assembly with Flye."
+                }
+            }
+        },
+        "busco_options": {
+            "title": "BUSCO options",
+            "type": "object",
+            "description": "Options for running BUSCO",
+            "default": "",
+            "fa_icon": "fas fa-dna",
+            "properties": {
+                "busco_lineage": {
+                    "type": "string",
+                    "default": "bacteria_odb10",
+                    "description": "BUSCO lineage to use, you can use other BUSCO lineages, these are available in: https://busco.ezlab.org/list_of_lineages.html"
+                },
+                "busco_mode": {
+                    "type": "string",
+                    "default": "genome",
+                    "description": "BUSCO mode to use",
+                    "enum": ["genome", "proteins", "transcriptome"]
+                },
+                "busco_db_path": {
+                    "type": ["string", "null"],
+                    "description": "Path to BUSCO database"
+                },
+                "busco_config_file": {
+                    "type": ["string", "null"],
+                    "description": "Path to BUSCO config file"
+                },
+                "busco_clean_intermediates": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Clean intermediate BUSCO files"
+                }
+            }
+        },
+        "assembly_polishing": {
+            "title": "Assembly Polishing",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-user-astronaut",
+            "properties": {
+                "polish_method": {
+                    "type": "string",
+                    "default": "medaka",
+                    "fa_icon": "fas fa-hotdog",
+                    "description": "Which assembly polishing method to use.",
+                    "help_text": "Defines the polishing method for assemblies that include ONT long reads.",
+                    "enum": ["medaka", "nanopolish", "none"]
+                }
+            }
+        },
+        "annotation": {
+            "title": "Annotation",
+            "type": "object",
+            "description": "Parameters for the annotation",
+            "default": "",
+            "fa_icon": "fas fa-align-left",
+            "properties": {
+                "annotation_tool": {
+                    "type": "string",
+                    "default": "prokka",
+                    "description": "The annotation method to annotate the final assembly.",
+                    "enum": ["prokka", "bakta", "dfast", "liftoff"]
+                },
+                "prokka_args": {
+                    "type": "string",
+                    "description": "Extra arguments for prokka annotation tool.",
+                    "help_text": "This advanced option allows you to pass extra arguments to Prokka (e.g. `\" --rfam\"` or `\" --genus name\"`). For this to work you need to quote the arguments and add at least one space between the arguments. Example:\n\n```bash\n--prokka_args `--rfam --genus Escherichia Coli`\n```\n"
+                },
+                "prokka_proteins": {
+                    "type": "string",
+                    "description": "FASTA file with protein sequences to be used as reference by PROKKA.",
+                    "help_text": "If a file with protein sequences are provided, PROKKA will use this to annotate proteins in the assembly."
+                },
+                "baktadb": {
+                    "type": "string",
+                    "description": "Path to Bakta database"
+                },
+                "baktadb_download": {
+                    "type": "boolean",
+                    "description": "Download Bakta database"
+                },
+                "baktadb_download_args": {
+                    "type": "string",
+                    "default": "--type light",
+                    "description": "This can be used to supply [extra options](https://github.com/oschwengers/bakta#database-download) to the Bakta download module",
+                    "enum": ["--type light", "--type full"]
+                },
+                "dfast_config": {
+                    "type": "string",
+                    "default": "assets/test_config_dfast.py",
+                    "description": "Specifies a configuration file for the [DFAST](https://github.com/nigyta/dfast_core) annotation method.",
+                    "help_text": "If you want to know how to create your config file, please refer to the [DFAST](https://github.com/nigyta/dfast_core) readme on how to create one.  The default config (`assets/test_config_dfast.py`) is just included for testing, so if you want to annotate using DFAST, you have to create a config!"
+                },
+                "liftoff_ref_from_kmerfinder": {
+                    "type": "boolean",
+                    "description": "Use the reference files (.fasta, .gff) from kmerfinder step for LIFTOFF."
+                }
+            }
+        },
+        "skipping_options": {
+            "title": "Skipping Options",
+            "type": "object",
+            "description": "",
+            "default": "",
+            "fa_icon": "fas fa-forward",
+            "properties": {
+                "skip_kraken2": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip running Kraken2 classifier on reads."
+                },
+                "skip_kmerfinder": {
+                    "type": "boolean",
+                    "description": "Skip contamination analysis with [Kmerfinder](https://bitbucket.org/genomicepidemiology/kmerfinder/src/master/)",
+                    "fa_icon": "fas fa-forward"
+                },
+                "skip_annotation": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip annotating the assembly with Prokka /DFAST."
+                },
+                "skip_pycoqc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip running `PycoQC` on long read input."
+                },
+                "skip_busco": {
+                    "type": "boolean",
+                    "description": "Skip BUSCO",
+                    "fa_icon": "fas fa-forward"
+                },
+                "skip_polish": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip Medaka or Nanopolish polishing for long-read and hybrid assemblies."
+                },
+                "skip_multiqc": {
+                    "type": "boolean",
+                    "description": "Skip MultiQC",
+                    "fa_icon": "fas fa-forward"
                 }
             }
         },
@@ -112,6 +435,11 @@
                     "fa_icon": "fas fa-copy",
                     "enum": ["symlink", "rellink", "link", "copy", "copyNoFollow", "move"],
                     "hidden": true
+                },
+                "multiqc_title": {
+                    "type": "string",
+                    "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
+                    "fa_icon": "fas fa-file-signature"
                 },
                 "email_on_fail": {
                     "type": "string",
@@ -197,6 +525,27 @@
     "allOf": [
         {
             "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/qc_and_trim"
+        },
+        {
+            "$ref": "#/$defs/contamination_screening"
+        },
+        {
+            "$ref": "#/$defs/assembly_parameters"
+        },
+        {
+            "$ref": "#/$defs/busco_options"
+        },
+        {
+            "$ref": "#/$defs/assembly_polishing"
+        },
+        {
+            "$ref": "#/$defs/annotation"
+        },
+        {
+            "$ref": "#/$defs/skipping_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

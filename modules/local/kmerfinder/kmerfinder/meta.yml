@@ -1,0 +1,71 @@
+name: kmerfinder_kmerfinder
+description: Taxonomic assignment and species hit reporting using KmerFinder
+keywords:
+  - kmerfinder
+  - taxonomy
+  - contamination
+  - bacteria
+  - fastq
+  - screening
+tools:
+  - kmerfinder:
+      description: |
+        KmerFinder identifies bacterial species from sequencing reads using k-mer matching.
+      homepage: https://bitbucket.org/genomicepidemiology/kmerfinder/src/master/
+      documentation: https://bitbucket.org/genomicepidemiology/kmerfinder/src/master/
+      doi: "10.1128/JCM.02487-13"
+      identifier: biotools:kmerfinder
+input:
+  - - meta:
+        type: map
+        description: |
+          Groovy Map containing sample information
+          e.g. [ id:'test', single_end:false ]
+    - reads:
+        type: file
+        description: |
+          Input read file(s), either one file (single-end/long-read) or two files (paired-end).
+        ontologies: []
+  - kmerfinderdb_path:
+      type: directory
+      description: |
+        Path to the KmerFinder database directory (already unpacked and prepared).
+  - tax_group:
+      type: string
+      description: Taxonomic group used by KmerFinder (for example bacteria)
+output:
+  report:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*_results.txt":
+          type: file
+          description: KmerFinder tabular results report for the sample
+          pattern: "*_results.txt"
+          ontologies: []
+  json:
+    - - meta:
+          type: map
+          description: |
+            Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
+      - "*_data.json":
+          type: file
+          description: KmerFinder JSON output with species hit details
+          pattern: "*_data.json"
+          ontologies: []
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@Daniel-VM"
+  - "@rpalcab"
+maintainers:
+  - "@Daniel-VM"
+  - "@rpalcab"

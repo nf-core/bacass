@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "KMERFINDER_SUMMARY_DOWNLOAD"
+description: Run KmerFinder, build summary metrics, and fetch winner references for reference-aware downstream QC
+keywords:
+  - kmerfinder
+  - contamination
+  - taxonomy
+  - reference
+  - ncbi
+  - quast
+components:
+  - untar
+  - kmerfinder/kmerfinder
+  - kmerfinder/summary
+  - kmerfinder/find/winner/reference
+  - ncbi/datasets/download
+input:
+  - reads:
+      type: file
+      description: |
+        Structure: [ val(meta), path(reads) ]
+        Input reads for KmerFinder classification.
+  - ch_assembly:
+      type: file
+      description: |
+        Structure: [ val(meta), path(assembly) ]
+        Assembly FASTA files associated with the same samples.
+output:
+  - summary_yaml:
+      type: file
+      description: |
+        Structure: [ path(kmerfinder_summary.yaml) ]
+        YAML summary table derived from consolidated KmerFinder results.
+      pattern: "*.yaml"
+  - consensus_byrefseq:
+      type: file
+      description: |
+        Structure: [ val(refmeta), val(meta), path(consensus_fasta), path(reference_fna), path(reference_gff) ]
+        Assemblies grouped by inferred reference accession together with downloaded reference genome files.
+  - versions:
+      type: file
+      description: |
+        Structure: [ path(versions.yml) ]
+        Collated software versions from all executed modules in this subworkflow.
+      pattern: "versions.yml"
+authors:
+  - "@Daniel-VM"
+  - "@d4straub"
+maintainers:
+  - "@Daniel-VM"
+  - "@d4straub"
