@@ -292,10 +292,10 @@
                 "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
                 "multiqc_fastqc.yaml:md5,a0b5fd24bb745bb77511c1962086fcf0",
                 "multiqc_fastqc_1.yaml:md5,daf5f34bdacbbc207f86fc95768ce9a2",
-                "multiqc_nanostat.yaml:md5,5bb17356a66868a511ca720ddb63231a"
+                "multiqc_nanostat.yaml:md5,cff0c79f74776d0e8c451e87bb332d2d"
             ]
         ],
-        "timestamp": "2026-10-27T15:16:25.287041236",
+        "timestamp": "2026-10-28T10:50:03.166415979",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
