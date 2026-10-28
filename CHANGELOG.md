@@ -3,6 +3,47 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.7.0 nf-core/bacass - "Scarlet Brass Nautilus" (2026/10/27)
+
+### `Changed`
+
+- [#329](https://github.com/nf-core/bacass/pull/329) Update module Nanoplot (to 1.48.0).
+- [#310](https://github.com/nf-core/bacass/pull/310) Use nf-core Medaka, add BUSCO to MultiQC, and fix Dragonflye channels
+- [#316](https://github.com/nf-core/bacass/pull/316) Reorganize result output directories
+- [#317](https://github.com/nf-core/bacass/pull/317) Improve MultiQC assembly summary tables
+- [#324](https://github.com/nf-core/bacass/pull/324) Improved kmerfinder_summary_download subworkflow for correct reference matching
+- [#326](https://github.com/nf-core/bacass/pull/326) Fix/busco ci network stability
+- [#315](https://github.com/nf-core/bacass/pull/315) Replace MultiQC general statistics with custom tables better suited to per-sample `--assembly_type` routing and the multi-assembler strategy
+- [#315](https://github.com/nf-core/bacass/pull/315) Default `--assembly_type` is now `auto`, detecting each sample's read type and running compatible assemblers
+- [#315](https://github.com/nf-core/bacass/pull/315) Rename Miniasm/Racon consensus assemblies from `*.consensus.fasta.gz` to `*_assembly_consensus.fasta.gz`
+
+### `Added`
+
+- [#329](https://github.com/nf-core/bacass/pull/329) Prepare release 2.7.0
+- [#310](https://github.com/nf-core/bacass/pull/310) Add BUSCO output to MultiQC
+- [#314](https://github.com/nf-core/bacass/pull/314) Add stub support for modules used in stub-run testing
+- [#315](https://github.com/nf-core/bacass/pull/315) Add `--assembly_type_label` to suffix automatically routed output sample IDs with `-short`, `-long`, or `-hybrid`
+
+### `Fixed`
+
+- [#332](https://github.com/nf-core/bacass/pull/332) Fix NanoPlot output collisions in auto mode
+- [#291](https://github.com/nf-core/bacass/pull/291) Fix BUSCO `busco_downloads` publish errors and publish only summary/log files
+- [#315](https://github.com/nf-core/bacass/pull/315) Fix Medaka nf-test to avoid launching polishing when `skip_polish=true`
+- [#315](https://github.com/nf-core/bacass/pull/315) Restore Medaka and Nanopolish polishing for hybrid assemblies while respecting `--skip_polish`
+- [#315](https://github.com/nf-core/bacass/pull/315) Skip Canu when `gsize` is missing
+- [#315](https://github.com/nf-core/bacass/pull/315) Accept raw-base and `k`, `m`, or `g` genome sizes in the samplesheet
+- [#315](https://github.com/nf-core/bacass/pull/315) Retain QUAST genome-fraction metrics when a reference is provided and KmerFinder is skipped
+
+### `Dependencies`
+
+| Tool     | Previous version | New version |
+| -------- | ---------------- | ----------- |
+| Canu     | 2.2              | 2.3         |
+| Medaka   | 2.2.1            | 2.2.2       |
+| Nanoplot | 1.46.1           | 1.48.0      |
+
+### `Deprecated`
+
 ## v2.6.1 nf-core/bacass - "Crimson Titanium Seahorse" 2026/06/10
 
 ### `Changed`
@@ -16,6 +57,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [#309](https://github.com/nf-core/bacass/pull/309) Fix git CI resource limits
 
 ### `Dependencies`
+
+| Tool   | Previous version | New version |
+| ------ | ---------------- | ----------- |
+| Medaka | 2.2.1            | 2.2.2       |
 
 ### `Deprecated`
 
