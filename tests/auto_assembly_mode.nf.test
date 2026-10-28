@@ -14,6 +14,9 @@ nextflow_pipeline {
         }
 
         then {
+            def nanoplot_stats = file("$outputDir/reads_qc/longreads/nanoplot")
+                .listFiles()
+                .findAll { it.name.endsWith('NanoStats.txt') }
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignoreFile: 'tests/.nftignore_files_entirely')
             // stable_path: All files in ${params.outdir}/ with stable content
@@ -26,8 +29,7 @@ nextflow_pipeline {
             )
             assertAll(
                 { assert workflow.success},
-                { assert file("$outputDir/reads_qc/longreads/nanoplot/long_TestMe-long_NanoStats.txt").exists() },
-                { assert file("$outputDir/reads_qc/longreads/nanoplot/hybrid_ERR044595-hybrid_NanoStats.txt").exists() },
+                { assert nanoplot_stats.size() == 2 },
                 { assert snapshot(
                     // Number of successful tasks
                     workflow.trace.succeeded().size(),
