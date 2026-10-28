@@ -128,8 +128,7 @@
                     "nanoplot": {
                         "branch": "master",
                         "git_sha": "c50a9a357df7406d7fc7d4d63e2f868ca79cc5ad",
-                        "installed_by": ["modules"],
-                        "patch": "modules/nf-core/nanoplot/nanoplot.diff"
+                        "installed_by": ["modules"]
                     },
                     "porechop/porechop": {
                         "branch": "master",

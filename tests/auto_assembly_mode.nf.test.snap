@@ -380,10 +380,10 @@
                 "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
                 "multiqc_fastqc.yaml:md5,a97dc5b92fd375b5ef1f30c821f6fc75",
                 "multiqc_fastqc_1.yaml:md5,fe20c9d7004011d7456d976b290d7325",
-                "multiqc_nanostat.yaml:md5,9b89b60299599b57907b92e71d024fed"
+                "multiqc_nanostat.yaml:md5,665cec4fa2ffaf72757368c759df22e2"
             ]
         ],
-        "timestamp": "2026-10-26T14:34:23.791402321",
+        "timestamp": "2026-10-28T10:31:55.77180412",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
