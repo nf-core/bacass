@@ -1,0 +1,46 @@
+process MINIASM {
+    tag "$meta.id"
+    label 'process_high'
+
+    conda "${moduleDir}/environment.yml"
+    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/miniasm:0.3_r179--h5bf99c6_2' :
+        'quay.io/biocontainers/miniasm:0.3_r179--h5bf99c6_2' }"
+
+    input:
+    tuple val(meta), path(reads), path(paf)
+
+    output:
+    tuple val(meta), path("*.gfa.gz")  , emit: gfa
+    tuple val(meta), path("*.fasta.gz"), emit: assembly
+    tuple val("${task.process}"), val('miniasm'), eval('miniasm -V 2>&1'), emit: versions_miniasm, topic: versions
+
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    miniasm \\
+        $args \\
+        -f $reads \\
+        $paf > \\
+        ${prefix}.gfa
+
+    awk '/^S/{print ">"\$2"\\n"\$3}' "${prefix}.gfa" | fold > ${prefix}.fasta
+
+    gzip -n ${prefix}.gfa
+    gzip -n ${prefix}.fasta
+
+    """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    echo "" | gzip > ${prefix}.gfa.gz
+    echo "" | gzip > ${prefix}.fasta.gz
+
+    """
+
+}

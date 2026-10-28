@@ -31,7 +31,7 @@ workflow PIPELINE_INITIALISATION {
     monochrome_logs   // boolean: Do not use coloured log outputs
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
-    input             //  string: Path to input samplesheet
+    input            //  string: Path to input samplesheet
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
@@ -100,26 +100,38 @@ workflow PIPELINE_INITIALISATION {
     )
 
     //
+    // Custom validation for pipeline parameters
+    //
+    validateInputParameters()
+
+    //
     // Create channel from input file provided through params.input
     //
 
     channel
         .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
         .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
+            meta, fastq_1, fastq_2, longreads, fast5 ->
+
+            // Resolve input paths when they are symbolic links - https://github.com/nf-core/bacass/issues/215
+            def resolved_fastq_1    = resolveFilePath(fastq_1)
+            def resolved_fastq_2    = resolveFilePath(fastq_2)
+            def resolved_longreads  = resolveFilePath(longreads)
+            def resolved_fast5      = resolveFilePath(fast5)
+
+            if (!resolved_fastq_2 || resolved_fastq_2 == 'NA') {
+                return [ meta.sample, meta + [ single_end:true ], [ resolved_fastq_1 ], resolved_longreads, resolved_fast5 ]
+            } else {
+                return [ meta.sample, meta + [ single_end:false ], [ resolved_fastq_1, resolved_fastq_2 ], resolved_longreads, resolved_fast5 ]
+            }
         }
         .groupTuple()
         .map { samplesheet ->
             validateInputSamplesheet(samplesheet)
         }
         .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
+            meta, fastqs, longread, fast5 ->
+                return [ meta, fastqs.flatten(), longread, fast5[0] ]
         }
         .set { ch_samplesheet }
 
@@ -178,31 +190,197 @@ workflow PIPELINE_COMPLETION {
     FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
+//
+// Check and validate pipeline parameters
+//
+def validateInputParameters() {
+    // Add functions here for parameters validation
+    // Check Kraken2 dependencies
+    if (!params.skip_kraken2 && !params.kraken2db) {
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Kraken2 database not provided.\n" +
+            "  Please specify the '--kraken2db' parameter to provide the necessary database.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
+    }
+
+    // Check kmerfinder dependencies
+    if (!params.skip_kmerfinder) {
+        if (!params.kmerfinderdb ) {
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Kmerfinder database not provided.\n" +
+                "  Please specify the '--kmerfinderdb'  parameter to provide the necessary database.\n"
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string)
+        }
+    }
+
+    // Check assembly type
+    if (!params.assembly_type) {
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Assembly type not provided.\n" +
+            "  Please specify the '--assembly_type' parameter to perform the assembly.\n" +
+            "  Accepted: short, long, hybrid, auto.\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
+    }
+
+    // Check that assemblers are chosen correctly
+    String[] compatible_assemblers = [
+        "autocycler","canu","dragonflye","flye","megahit","miniasm","raven","unicycler"
+    ]
+    if ( params.assembler.tokenize(",").findAll { e -> compatible_assemblers.contains( e ) }.size() != params.assembler.tokenize(",").size() ) {
+        def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+        "  Incompatible assembler specified.\n" +
+        "  Please use for '--assembler' a comma separated list of available assemblers.\n" +
+        "  Compatible assemblers: ${compatible_assemblers.join(", ")}\n" +
+        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+        error(error_string)
+    }
+
+    // Check compatibility between assembly_type and selected assembler(s)
+    // Skip this check in 'auto' mode — incompatible assemblers are silently skipped per-sample
+    def selected_assemblers = params.assembler.tokenize(",").collect { v -> v.trim() }.findAll { v -> v }
+    if (params.assembly_type != 'auto') {
+        Map<String, Map<String, Boolean>> assembler_capabilities = [
+            unicycler : [short: true,  long: true,  hybrid: true ],
+            megahit   : [short: true,  long: false, hybrid: false],
+            canu      : [short: false, long: true,  hybrid: false],
+            dragonflye: [short: false, long: true,  hybrid: true ],
+            flye      : [short: false, long: true,  hybrid: false],
+            miniasm   : [short: false, long: true,  hybrid: false],
+            raven     : [short: false, long: true,  hybrid: false],
+            autocycler: [short: false, long: true,  hybrid: false]
+        ]
+        def incompatible_assemblers = selected_assemblers.findAll { assembler ->
+            !assembler_capabilities.containsKey(assembler) || !assembler_capabilities[assembler][params.assembly_type]
+        }
+        if (incompatible_assemblers) {
+            def compatible_for_type = compatible_assemblers.findAll { assembler ->
+                assembler_capabilities[assembler]?.get(params.assembly_type) == true
+            }
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                "  Incompatible assembler(s) for the selected assembly type.\n" +
+                "  assembly_type: ${params.assembly_type}\n" +
+                "  selected: ${selected_assemblers.join(", ")}\n" +
+                "  incompatible: ${incompatible_assemblers.join(", ")}\n" +
+                "  compatible for ${params.assembly_type}: ${compatible_for_type.join(", ")}\n" +
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string)
+        }
+    }
+
+    // Check that assemblers for Autocycler are chosen correctly
+    String[] autocycler_compatible_assemblers = [
+        "canu","flye","miniasm","raven"
+    ]
+    if ( params.assembler.tokenize(",").contains("autocycler") ){
+        if ( params.autocycler_assemblers.tokenize(",").findAll { e -> autocycler_compatible_assemblers.contains( e ) }.size() != params.autocycler_assemblers.tokenize(",").size() ) {
+            def error_string = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            "  Incompatible assemblers for Autocycler specified.\n" +
+            "  Please use for '--autocycler_assemblers' a comma separated list of compatible longread assemblers.\n" +
+            "  Compatible assemblers: ${autocycler_compatible_assemblers.join(", ")}\n" +
+            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+            error(error_string)
+        }
+    }
+}
 
 //
 // Validate channels from input samplesheet
 //
 def validateInputSamplesheet(input) {
-    def (metas, fastqs) = input[1..2]
-
+    def (metas, fastqs, longread, fast5) = input[1..4]
     // Check that multiple runs of the same sample are of the same datatype i.e. single-end / paired-end
     def endedness_ok = metas.collect{ meta -> meta.single_end }.unique().size == 1
     if (!endedness_ok) {
-        error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].id}")
+        error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].sample}")
     }
 
-    return [ metas[0], fastqs ]
+    return [ metas[0], fastqs, longread, fast5]
 }
+
+//
+// Resolve symbolic link accesibility
+//
+def resolveFilePath(filePath) {
+    if (filePath == 'NA' || filePath == null || filePath == '') {
+        return filePath
+    }
+    try {
+        return file(filePath, checkIfExists: true)
+    } catch (Exception e) {
+        log.warn "Could not resolve file path for ${filePath}: ${e.message}"
+        return filePath
+    }
+}
+
+//
+// Normalise optional samplesheet inputs after grouping.
+//
+def normaliseInputFiles(value) {
+    def values = value instanceof List ? value.flatten() : [ value ]
+    values.findAll { item ->
+        if (item == null) {
+            return false
+        }
+        def item_string = item.toString().trim()
+        item_string && item_string != 'NA'
+    }
+}
+
+//
+// Detect assembly type for a sample based on available inputs.
+// Returns 'short', 'long', or 'hybrid'.
+//
+def detectAssemblyType(fastqs, longreads) {
+    def has_short = fastqs && fastqs[0] && fastqs[0] != 'NA' && fastqs[0] != ''
+    def has_long  = longreads && longreads != 'NA' && longreads != '' && !(longreads instanceof List && longreads.isEmpty())
+    // Handle list of longreads (after groupTuple)
+    if (longreads instanceof List) {
+        has_long = longreads.any { lr -> lr && lr != 'NA' && lr != '' }
+    }
+
+    if (has_short && has_long) {
+        return 'hybrid'
+    } else if (has_short) {
+        return 'short'
+    } else if (has_long) {
+        return 'long'
+    } else {
+        error("ERROR: Sample has no usable read input. Please check your samplesheet — at least R1 or LongFastQ must be provided.")
+    }
+}
+
 //
 // Generate methods description for MultiQC
 //
 def toolCitationText() {
-    // TODO nf-core: Optionally add in-text citation tools to this list.
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "Tool (Foo et al. 2023)" : "",
     // Uncomment function in methodsDescriptionText to render in MultiQC report
     def citation_text = [
             "Tools used in the workflow included:",
             "FastQC (Andrews 2010),",
+            "ProeChop (Wick RR et al. 2017)",
+            "Nanoplot (Wouter De Coster and Rosa Rademakers 2023)",
+            "PycoQC (Adrien Leger & Tommaso Leonardi 2019)",
+            "Kraken2 (Derrick E. Wood et al. 2019)",
+            "Kmerfinder (Larsen et al. 2014)",
+            "Unicycler (Ryan R Wick et al. 2017)",
+            "MEGAHIT (Li D et al. 2015)",
+            "Minimap & Miniasm (Heng Li 2016)",
+            "Dragonflye (Robert A Petit III )",
+            "Racon (Vaser R et al. 2017)",
+            "Canu (Sergey Koren et al. 2017)",
+            "Flye (Mikhail Kolmogorov et al. 2020)",
+            "Raven (Rayan Vaser & Mile Sikic 2021)",
+            "Autocycler (Ryan R Wick et al. 2025)",
+            "Medaka (Heng Li)",
+            "Nanopolish (Loman 2015)",
+            "Quast (Alexey Gurevich et al. 2013)",
+            "Prokka (Torsten Seemann 2014)",
+            "Bakta (Oliver Schwengers 2021)",
+            "Dfast(Yasuhiro Tanizawa et al. 2018)",
             "MultiQC (Ewels et al. 2016)",
             "."
         ].join(' ').trim()
@@ -211,11 +389,31 @@ def toolCitationText() {
 }
 
 def toolBibliographyText() {
-    // TODO nf-core: Optionally add bibliographic entries to this list.
     // Can use ternary operators to dynamically construct based conditions, e.g. params["run_xyz"] ? "<li>Author (2023) Pub name, Journal, DOI</li>" : "",
     // Uncomment function in methodsDescriptionText to render in MultiQC report
     def reference_text = [
             "<li>Andrews S, (2010) FastQC, URL: https://www.bioinformatics.babraham.ac.uk/projects/fastqc/).</li>",
+            "<li>Wick RR, Judd LM, Gorrie CL, Holt KE. Completing bacterial genome assemblies with multiplex MinION sequencing. Microb Genom. 2017;3(10):e000132. Published 2017 Sep 14. doi:10.1099/mgen.0.000132</li>",
+            "<li>Wouter De Coster, Rosa Rademakers, NanoPack2: population-scale evaluation of long-read sequencing data, Bioinformatics, Volume 39, Issue 5, May 2023, btad311, https://doi.org/10.1093/bioinformatics/btad311</li>",
+            "<li>Leger et al., (2019). pycoQC, interactive quality control for Oxford Nanopore Sequencing. Journal of Open Source Software, 4(34), 1236, https://doi.org/10.21105/joss.01236</li>",
+            "<li>Wood, D.E., Lu, J. & Langmead, B. Improved metagenomic analysis with Kraken 2. Genome Biol 20, 257 (2019). https://doi.org/10.1186/s13059-019-1891-0</li>",
+            "<li>RBenchmarking of Methods for Genomic Taxonomy. Larsen MV, Cosentino S, Lukjancenko O, Saputra D, Rasmussen S, Hasman H, Sicheritz-Pontén T, Aarestrup FM, Ussery DW, Lund O. J Clin Microbiol. 2014 Feb 26.</li>",
+            "<li>Wick RR, Judd LM, Gorrie CL, Holt KE. Unicycler: Resolving bacterial genome assemblies from short and long sequencing reads. PLoS Comput Biol. 2017 Jun 8;13(6):e1005595. doi: 10.1371/journal.pcbi.1005595.</li>",
+            "<li>Li D, Liu CM, Luo R, Sadakane K, Lam TW. MEGAHIT: an ultra-fast single-node solution for large and complex metagenomics assembly via succinct de Bruijn graph. Bioinformatics. 2015 May 15;31(10):1674-6. doi: 10.1093/bioinformatics/btv033.</li>",
+            "<li>Heng Li, Minimap and miniasm: fast mapping and de novo assembly for noisy long sequences, Bioinformatics, Volume 32, Issue 14, July 2016, Pages 2103–2110, https://doi.org/10.1093/bioinformatics/btw152</li>",
+            "<li>Petit III, R. A. dragonflye: assemble bacterial isolate genomes from Nanopore reads (Version 1.1.2). https://github.com/rpetit3/dragonflye</li>",
+            "<li>Vaser R, Sović I, Nagarajan N, Šikić M. Fast and accurate de novo genome assembly from long uncorrected reads. Genome Res. 2017 May;27(5):737-746. doi: 10.1101/gr.214270.116.</li>",
+            "<li>Koren S, Walenz BP, Berlin K, Miller JR, Bergman NH, Phillippy AM. Canu: scalable and accurate long-read assembly via adaptive k-mer weighting and repeat separation. Genome Res. 2017 May;27(5):722-736. doi: 10.1101/gr.215087.116.</li>",
+            "<li>Kolmogorov M, Bickhart DM, Behsaz B, Gurevich A, Rayko M, Shin SB, Kuhn K, Yuan J, Polevikov E, Smith TPL, Pevzner PA. metaFlye: scalable long-read metagenome assembly using repeat graphs. Nat Methods. 2020 Nov;17(11):1103-1110. doi: 10.1038/s41592-020-00971-x.</li>",
+            "<li>Vaser R, Šikić M. Time- and memory-efficient genome assembly with Raven. Nat Comput Sci. 2021;1:332-336. doi: 10.1038/s43588-021-00073-4.</li>",
+            "<li>Wick RR, Howden BP, Stinear TP. Autocycler: long-read consensus assembly for bacterial genomes. Bioinformatics. 2025;41(9):btaf474. doi: 10.1093/bioinformatics/btaf474.</li>",
+            "<li>Medaka: Sequence correction provided by ONT Research. https://github.com/nanoporetech/medaka,</li>",
+            "<li>Loman, N., Quick, J. & Simpson, J. A complete bacterial genome assembled de novo using only nanopore sequencing data. Nat Methods 12, 733–735 (2015). https://doi.org/10.1038/nmeth.3444</li>",
+            "<li>Gurevich A, Saveliev V, Vyahhi N, Tesler G. QUAST: quality assessment tool for genome assemblies. Bioinformatics. 2013 Apr 15;29(8):1072-5. doi: 10.1093/bioinformatics/btt086. Epub 2013 Feb 19.</li>",
+            "<li>Manni M., Berkeley M.R., Seppey M., Simao F.A., Zdobnov E.M. 2021. BUSCO update: novel and streamlined workflows along with broader and deeper phylogenetic coverage for scoring of eukaryotic, prokaryotic, and viral genomes. arXiv:2106.11799 [q-bio] [Internet]. Available from: http://arxiv.org/abs/2106.11799</li>",
+            "<li>Seemann T. Prokka: rapid prokaryotic genome annotation. Bioinformatics. 2014 Jul 15;30(14):2068-9. doi: 10.1093/bioinformatics/btu153.</li>",
+            "<li>Schwengers O, Jelonek L, Dieckmann MA, Beyvers S, Blom J, Goesmann A. Bakta: rapid and standardized annotation of bacterial genomes via alignment-free sequence identification. Microb Genom. 2021 Nov;7(11):000685. doi: 10.1099/mgen.0.000685.</li>",
+            "<li>Tanizawa Y, Fujisawa T, Nakamura Y. DFAST: a flexible prokaryotic genome annotation pipeline for faster genome publication. Bioinformatics. 2018 Mar 15;34(6):1037-1039. doi: 10.1093/bioinformatics/btx713.</li>",
             "<li>Ewels, P., Magnusson, M., Lundin, S., & Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics , 32(19), 3047–3048. doi: /10.1093/bioinformatics/btw354</li>"
         ].join(' ').trim()
 
@@ -246,9 +444,9 @@ def methodsDescriptionText(mqc_methods_yaml) {
     meta["tool_citations"] = ""
     meta["tool_bibliography"] = ""
 
-    // TODO nf-core: Only uncomment below if logic in toolCitationText/toolBibliographyText has been filled!
-    // meta["tool_citations"] = toolCitationText().replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
-    // meta["tool_bibliography"] = toolBibliographyText()
+    // Tool citations and bibliography
+    meta["tool_citations"] = toolCitationText().replaceAll(", \\.", ".").replaceAll("\\. \\.", ".").replaceAll(", \\.", ".")
+    meta["tool_bibliography"] = toolBibliographyText()
 
 
     def methods_text = mqc_methods_yaml.text

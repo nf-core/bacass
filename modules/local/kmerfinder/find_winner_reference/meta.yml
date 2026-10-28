@@ -1,0 +1,63 @@
+name: kmerfinder_find_winner_reference
+description: Identify the winning reference accession from grouped KmerFinder reports
+keywords:
+  - kmerfinder
+  - reference
+  - accession
+  - grouping
+  - selection
+tools:
+  - python:
+      description: |
+        Python is used to run the helper script that determines the common reference accession.
+      homepage: https://www.python.org/
+      documentation: https://docs.python.org/3/
+input:
+  - - refmeta:
+        type: string
+        description: Group identifier for a set of reports sharing the same reference context
+    - report:
+        type: file
+        description: Per-sample KmerFinder report files to evaluate
+        pattern: "reports/results_*.txt"
+        ontologies: []
+output:
+  references_tsv:
+    - - refmeta:
+          type: string
+          description: Group identifier for the selected reference set
+      - references_found.tsv:
+          type: file
+          description: TSV file listing candidate references and support counts
+          pattern: "references_found.tsv"
+          ontologies:
+            - edam: http://edamontology.org/format_3475 # TSV
+  winner:
+    - - refmeta:
+          type: string
+          description: Group identifier for the selected reference set
+      - "*.winner":
+          type: file
+          description: File containing the winning full accession
+          pattern: "*.winner"
+          ontologies: []
+  base_accession:
+    - - refmeta:
+          type: string
+          description: Group identifier for the selected reference set
+      - "${refmeta}_base_accession":
+          type: string
+          description: Base accession value emitted by the module
+  versions:
+    - versions.yml:
+        type: file
+        description: File containing software versions
+        pattern: "versions.yml"
+        ontologies:
+          - edam: http://edamontology.org/format_3750 # YAML
+authors:
+  - "@Daniel-VM"
+  - "@d4straub"
+maintainers:
+  - "@Daniel-VM"
+  - "@d4straub"

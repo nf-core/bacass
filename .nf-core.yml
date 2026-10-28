@@ -1,11 +1,11 @@
 lint:
-  files_exist:
-    - conf/igenomes.config
-    - .github/workflows/linting_comment.yml
   files_unchanged:
     - .github/PULL_REQUEST_TEMPLATE.md
     - .github/workflows/branch.yml
     - .github/workflows/linting.yml
+  files_exist:
+    - conf/igenomes.config
+    - .github/workflows/linting_comment.yml
   nextflow_config:
     - config_defaults:
         - params.dfast_config
@@ -21,3 +21,4 @@ template:
   outdir: .
   skip_features:
     - igenomes
+  version: 2.7.0

@@ -1,0 +1,204 @@
+{
+    "-profile test_multiassembler": {
+        "content": [
+            {
+                "AUTOCYCLER_CLUSTER": {
+                    "autocycler": "0.5.2"
+                },
+                "AUTOCYCLER_COMBINE": {
+                    "autocycler": "0.5.2"
+                },
+                "AUTOCYCLER_COMPRESS": {
+                    "autocycler": "0.5.2"
+                },
+                "AUTOCYCLER_RESOLVE": {
+                    "autocycler": "0.5.2"
+                },
+                "AUTOCYCLER_SUBSAMPLE": {
+                    "autocycler": "0.5.2"
+                },
+                "AUTOCYCLER_TRIM": {
+                    "autocycler": "0.5.2"
+                },
+                "FLYE": {
+                    "flye": "2.9.5-b1801"
+                },
+                "GUNZIP": {
+                    "gunzip": 1.13
+                },
+                "GUNZIP_MEDAKA": {
+                    "gunzip": 1.13
+                },
+                "MEDAKA": {
+                    "medaka": "2.2.2"
+                },
+                "MINIASM": {
+                    "miniasm": "0.3-r179"
+                },
+                "MINIMAP2_ALIGN": {
+                    "minimap2": "2.24-r1122"
+                },
+                "MINIMAP2_CONSENSUS": {
+                    "minimap2": "2.24-r1122"
+                },
+                "NANOPLOT": {
+                    "NanoPlot": "1.48.0"
+                },
+                "PORECHOP_PORECHOP": {
+                    "porechop": "0.2.4"
+                },
+                "PROKKA": {
+                    "prokka": "1.14.6"
+                },
+                "QUAST": {
+                    "quast": "5.3.0"
+                },
+                "RACON": {
+                    "racon": "1.4.20"
+                },
+                "RAVEN": {
+                    "raven": "1.6.1"
+                },
+                "TOULLIGQC": {
+                    "toulligqc": "2.8.4"
+                },
+                "Workflow": {
+                    "nf-core/bacass": "v2.7.0"
+                }
+            },
+            [
+                "annotation",
+                "annotation/prokka",
+                "annotation/prokka/TestMe-autocycler-medaka",
+                "annotation/prokka/TestMe-miniasm-medaka",
+                "annotation/prokka/TestMe-raven-medaka",
+                "assembly",
+                "assembly/autocycler",
+                "assembly/autocycler/combine",
+                "assembly/autocycler/combine/TestMe-autocycler",
+                "assembly/autocycler/combine/TestMe-autocycler/consensus_assembly.fasta",
+                "assembly/autocycler/combine/TestMe-autocycler/consensus_assembly.gfa",
+                "assembly/autocycler/combine/TestMe-autocycler/consensus_assembly.yaml",
+                "assembly/autocycler/flye",
+                "assembly/autocycler/flye/TestMe-sample_01-flye.assembly.fasta.gz",
+                "assembly/autocycler/flye/TestMe-sample_02-flye.assembly.fasta.gz",
+                "assembly/autocycler/raven",
+                "assembly/autocycler/raven/TestMe-sample_01-raven.fasta.gz",
+                "assembly/autocycler/raven/TestMe-sample_02-raven.fasta.gz",
+                "assembly/miniasm",
+                "assembly/miniasm/TestMe-miniasm.fasta.gz",
+                "assembly/miniasm/TestMe-miniasm_assembly_consensus.fasta.gz",
+                "assembly/polishing",
+                "assembly/polishing/medaka",
+                "assembly/polishing/medaka/TestMe-autocycler-medaka_polished_genome.fa.gz",
+                "assembly/polishing/medaka/TestMe-miniasm-medaka_polished_genome.fa.gz",
+                "assembly/polishing/medaka/TestMe-raven-medaka_polished_genome.fa.gz",
+                "assembly/raven",
+                "assembly/raven/TestMe-raven.fasta.gz",
+                "assembly_qc",
+                "assembly_qc/quast",
+                "assembly_qc/quast/overall",
+                "assembly_qc/quast/overall/report",
+                "assembly_qc/quast/overall/report/basic_stats",
+                "assembly_qc/quast/overall/report/basic_stats/GC_content_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/Nx_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/TestMe-autocycler-medaka_polished_genome_GC_content_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/TestMe-miniasm-medaka_polished_genome_GC_content_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/TestMe-raven-medaka_polished_genome_GC_content_plot.pdf",
+                "assembly_qc/quast/overall/report/basic_stats/cumulative_plot.pdf",
+                "assembly_qc/quast/overall/report/icarus.html",
+                "assembly_qc/quast/overall/report/icarus_viewers",
+                "assembly_qc/quast/overall/report/icarus_viewers/contig_size_viewer.html",
+                "assembly_qc/quast/overall/report/quast.log",
+                "assembly_qc/quast/overall/report/report.html",
+                "assembly_qc/quast/overall/report/report.pdf",
+                "assembly_qc/quast/overall/report/report.tex",
+                "assembly_qc/quast/overall/report/report.tsv",
+                "assembly_qc/quast/overall/report/report.txt",
+                "assembly_qc/quast/overall/report/transposed_report.tex",
+                "assembly_qc/quast/overall/report/transposed_report.tsv",
+                "assembly_qc/quast/overall/report/transposed_report.txt",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/mqc_porechop-endtrim-barplot_1.yaml",
+                "multiqc/multiqc_data/mqc_porechop-middlesplit-barplot_1.yaml",
+                "multiqc/multiqc_data/mqc_porechop-starttrim-barplot_1.yaml",
+                "multiqc/multiqc_data/mqc_prokka_plot_1.yaml",
+                "multiqc/multiqc_data/mqc_quast_num_contigs_1.yaml",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc_assembly_comparison_metrics-plot.yaml",
+                "multiqc/multiqc_data/multiqc_citations.yaml",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_nanostat.yaml",
+                "multiqc/multiqc_data/multiqc_prokka.yaml",
+                "multiqc/multiqc_data/multiqc_quast.yaml",
+                "multiqc/multiqc_data/multiqc_sample_summary_assembly_metrics-plot.yaml",
+                "multiqc/multiqc_data/multiqc_software_versions.yaml",
+                "multiqc/multiqc_data/multiqc_sources.yaml",
+                "multiqc/multiqc_data/porechop.yaml",
+                "multiqc/multiqc_plots",
+                "multiqc/multiqc_plots/pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-endtrim-barplot_1.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-endtrim-barplot_1_pc.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-middlesplit-barplot_1.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-middlesplit-barplot_1_pc.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-starttrim-barplot_1.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_porechop-starttrim-barplot_1_pc.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_prokka_plot_1.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_prokka_plot_1_pc.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1.pdf",
+                "multiqc/multiqc_plots/pdf/mqc_quast_num_contigs_1_pc.pdf",
+                "multiqc/multiqc_plots/png",
+                "multiqc/multiqc_plots/png/mqc_porechop-endtrim-barplot_1.png",
+                "multiqc/multiqc_plots/png/mqc_porechop-endtrim-barplot_1_pc.png",
+                "multiqc/multiqc_plots/png/mqc_porechop-middlesplit-barplot_1.png",
+                "multiqc/multiqc_plots/png/mqc_porechop-middlesplit-barplot_1_pc.png",
+                "multiqc/multiqc_plots/png/mqc_porechop-starttrim-barplot_1.png",
+                "multiqc/multiqc_plots/png/mqc_porechop-starttrim-barplot_1_pc.png",
+                "multiqc/multiqc_plots/png/mqc_prokka_plot_1.png",
+                "multiqc/multiqc_plots/png/mqc_prokka_plot_1_pc.png",
+                "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1.png",
+                "multiqc/multiqc_plots/png/mqc_quast_num_contigs_1_pc.png",
+                "multiqc/multiqc_plots/svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-endtrim-barplot_1.svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-endtrim-barplot_1_pc.svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-middlesplit-barplot_1.svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-middlesplit-barplot_1_pc.svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-starttrim-barplot_1.svg",
+                "multiqc/multiqc_plots/svg/mqc_porechop-starttrim-barplot_1_pc.svg",
+                "multiqc/multiqc_plots/svg/mqc_prokka_plot_1.svg",
+                "multiqc/multiqc_plots/svg/mqc_prokka_plot_1_pc.svg",
+                "multiqc/multiqc_plots/svg/mqc_quast_num_contigs_1.svg",
+                "multiqc/multiqc_plots/svg/mqc_quast_num_contigs_1_pc.svg",
+                "multiqc/multiqc_report.html",
+                "multiqc/summary_comparison_assembly_metrics.csv",
+                "multiqc/summary_sample_assembly_metrics.csv",
+                "pipeline_info",
+                "pipeline_info/nf_core_bacass_software_mqc_versions.yml",
+                "reads_qc",
+                "reads_qc/longreads",
+                "reads_qc/longreads/nanoplot",
+                "reads_qc/longreads/porechop",
+                "reads_qc/longreads/porechop/TestMe.porechop.log",
+                "reads_qc/longreads/toulligqc"
+            ],
+            [
+                "TestMe-sample_01-raven.fasta.gz:md5,ebc67e9f0a5e5e8b20e23f90901139e2",
+                "TestMe-sample_02-raven.fasta.gz:md5,5fdfaf522526c9142bb9f62986726ca5",
+                "TestMe-miniasm.fasta.gz:md5,cfde74bc269a51162851d9ae7c76207b",
+                "TestMe-miniasm_assembly_consensus.fasta.gz:md5,4899e7b112077d045ecaf13daae4ae4a",
+                "TestMe-raven.fasta.gz:md5,5236a351461c22c5c6ca1f86cbd13f10",
+                "mqc_porechop-endtrim-barplot_1.yaml:md5,01be4aa5df6783634f6e8bb8208f550d",
+                "mqc_porechop-middlesplit-barplot_1.yaml:md5,d7c6c6307fa5a50527bd1aa179c0dab5",
+                "mqc_porechop-starttrim-barplot_1.yaml:md5,af425e12dc2f12ca3a611f24ec8cd5b7",
+                "multiqc_citations.yaml:md5,389ae569c7527f217109c5de88f4c7a0",
+                "multiqc_nanostat.yaml:md5,ec9280905dc2e3f3961092b982638926"
+            ]
+        ],
+        "timestamp": "2026-10-26T15:13:58.116964061",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}
