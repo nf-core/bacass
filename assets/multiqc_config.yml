@@ -105,7 +105,7 @@ use_filename_as_sample_name:
 # filename suffix while keeping the sample IDs displayed by MultiQC unchanged.
 sample_names_replace_regex: true
 sample_names_replace:
-  "_NanoStats$": ""
+  "-NanoStats$": ""
 
 # Customise the module search patterns to speed up execution time.
 sp:
