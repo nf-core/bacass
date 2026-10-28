@@ -26,6 +26,8 @@ nextflow_pipeline {
             )
             assertAll(
                 { assert workflow.success},
+                { assert file("$outputDir/reads_qc/longreads/nanoplot/long_TestMe-long_NanoStats.txt").exists() },
+                { assert file("$outputDir/reads_qc/longreads/nanoplot/hybrid_ERR044595-hybrid_NanoStats.txt").exists() },
                 { assert snapshot(
                     // Number of successful tasks
                     workflow.trace.succeeded().size(),
