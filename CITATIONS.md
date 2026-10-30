@@ -20,13 +20,23 @@
 
 - [Porechop](https://github.com/rrwick/Porechop)
 
+  > Wick RR. Porechop. https://github.com/rrwick/Porechop.
+
+- [Filtlong](https://github.com/rrwick/Filtlong)
+
+  > Wick RR. Filtlong. https://github.com/rrwick/Filtlong.
+
 - [NanoPlot](https://doi.org/10.1093/bioinformatics/bty149)
 
   > De Coster, W., D’Hert, S., Schultz, D. T., Cruts, M., & Van Broeckhoven, C. (2018). NanoPack: visualizing and processing long-read sequencing data. Bioinformatics, 34(15), 2666-2669. doi: 10.1093/bioinformatics/bty149.
 
 - [ToulligQC](https://github.com/GenomiqueENS/toulligQC)
 
+  > Dias K, Laffay B, Ferrato-Berberian L, Lemoine S, Hamraoui A, Thomas-Chollier M, Le Crom S, Jourdren L. ToulligQC. https://github.com/GenomiqueENS/toulligQC.
+
 - [pycoQC](https://github.com/tleonardi/pycoQC)
+
+  > Leger A, Leonardi T. pycoQC, interactive quality control for Oxford Nanopore Sequencing. J Open Source Softw. 2019;4(34):1236. doi: 10.21105/joss.01236.
 
 - [Unicycler](https://pubmed.ncbi.nlm.nih.gov/28594827/)
 
@@ -39,6 +49,10 @@
 - [Miniasm](https://github.com/lh3/miniasm) with [Racon](https://github.com/isovic/racon)
 
   > Li H. Minimap and miniasm: fast mapping and de novo assembly for noisy long sequences. Bioinformatics. 2016 Jul 15;32(14):2103-10. doi: 10.1093/bioinformatics/btw152. Epub 2016 Mar 19. PMID: 27153593; PMCID: PMC4937194.
+
+- [Racon](https://doi.org/10.1101/gr.214270.116)
+
+  > Vaser R, Sović I, Nagarajan N, Šikić M. Fast and accurate de novo genome assembly from long uncorrected reads. Genome Res. 2017 May;27(5):737-746. doi: 10.1101/gr.214270.116.
 
 - [Canu](https://pubmed.ncbi.nlm.nih.gov/28298431/)
 
@@ -56,6 +70,14 @@
 
   > Wick RR, Howden BP, Stinear TP. Autocycler: long-read consensus assembly for bacterial genomes. Bioinformatics. 2025 Sep 1;41(9):btaf474. doi: 10.1093/bioinformatics/btaf474. PMID: 40875535; PMCID: PMC12460055.
 
+- [Dragonflye](https://github.com/rpetit3/dragonflye)
+
+  > Petit III, R. A. dragonflye: Assemble bacterial isolate genomes from Nanopore reads (Version 1.1.2) [Computer software]. https://github.com/rpetit3/dragonflye.
+
+- [Minimap2](https://doi.org/10.1093/bioinformatics/bty191)
+
+  > Li H. Minimap2: pairwise alignment for nucleotide sequences. Bioinformatics. 2018 Sep 15;34(18):3094-3100. doi: 10.1093/bioinformatics/bty191.
+
 - [QUAST](https://pubmed.ncbi.nlm.nih.gov/23422339/)
 
   > Gurevich A, Saveliev V, Vyahhi N, Tesler G. QUAST: quality assessment tool for genome assemblies. Bioinformatics. 2013 Apr 15;29(8):1072-5. doi: 10.1093/bioinformatics/btt086. Epub 2013 Feb 19. PMID: 23422339; PMCID: PMC3624806.
@@ -63,6 +85,10 @@
 - [Prokka](https://pubmed.ncbi.nlm.nih.gov/24642063/)
 
   > Seemann T. Prokka: rapid prokaryotic genome annotation. Bioinformatics. 2014 Jul 15;30(14):2068-9. doi: 10.1093/bioinformatics/btu153. Epub 2014 Mar 18. PMID: 24642063.
+
+- [Bakta](https://doi.org/10.1099/mgen.0.000685)
+
+  > Schwengers O, Jelonek L, Dieckmann MA, Beyvers S, Blom J, Goesmann A. Bakta: rapid and standardized annotation of bacterial genomes via alignment-free sequence identification. Microb Genom. 2021 Nov;7(11):000685. doi: 10.1099/mgen.0.000685. PMID: 34739369; PMCID: PMC8743544.
 
 - [DFAST](https://pubmed.ncbi.nlm.nih.gov/29106469/)
 
@@ -74,7 +100,15 @@
 
 - [Medaka](https://github.com/nanoporetech/medaka)
 
+  > Oxford Nanopore Technologies. Medaka. https://github.com/nanoporetech/medaka.
+
 - [Nanopolish](https://github.com/jts/nanopolish)
+
+  > Loman NJ, Quick J, Simpson JT. A complete bacterial genome assembled de novo using only nanopore sequencing data. Nat Methods. 2015 Aug;12(8):733-735. doi: 10.1038/nmeth.3444.
+
+- [BUSCO](https://doi.org/10.1093/molbev/msab199)
+
+  > Manni M, Berkeley MR, Seppey M, Simão FA, Zdobnov EM. BUSCO Update: Novel and Streamlined Workflows along with Broader and Deeper Phylogenetic Coverage for Scoring of Eukaryotic, Prokaryotic, and Viral Genomes. Mol Biol Evol. 2021 Oct 9;38(10):4647-4654. doi: 10.1093/molbev/msab199.
 
 - [SAMtools](https://doi.org/10.1093/bioinformatics/btp352)
 
@@ -83,6 +117,10 @@
 - [Kraken2](https://doi.org/10.1186/s13059-019-1891-0)
 
   > Wood, D et al., 2019. Improved metagenomic analysis with Kraken 2. Genome Biology volume 20, Article number: 257. doi: 10.1186/s13059-019-1891-0.
+
+- [KmerFinder](https://doi.org/10.1128/JCM.02981-13)
+
+  > Larsen MV, Cosentino S, Lukjancenko O, Saputra D, Rasmussen S, Hasman H, Sicheritz-Pontén T, Aarestrup FM, Ussery DW, Lund O. Benchmarking of Methods for Genomic Taxonomy. J Clin Microbiol. 2014 May;52(5):1529-1539. doi: 10.1128/JCM.02981-13.
 
 - [Rasusa](https://doi.org/10.21105/joss.03942)
 
