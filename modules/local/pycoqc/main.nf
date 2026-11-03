@@ -38,4 +38,16 @@ process PYCOQC {
         pycoqc: \$(pycoQC --version 2>&1 | sed 's/^.*pycoQC v//; s/ .*\$//')
     END_VERSIONS
     """
+
+    stub:
+    def prefix      = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}.html
+    echo '{}' > ${prefix}.json
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        pycoqc: 2.5.2
+    END_VERSIONS
+    """
 }

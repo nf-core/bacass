@@ -1,5 +1,5 @@
 name: custom_multiqc
-description: Aggregate pipeline QC outputs into a custom MultiQC report with bacass-specific tables
+description: Aggregate pipeline QC outputs into a custom MultiQC report with tables specific to nf-core/bacass
 keywords:
   - multiqc
   - report

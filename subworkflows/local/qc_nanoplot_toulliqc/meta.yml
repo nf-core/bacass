@@ -42,17 +42,6 @@ output:
       description: |
         Structure: [ val(meta), path(*.txt) ]
         NanoPlot text statistics.
-  - nanoplot_log:
-      type: file
-      description: |
-        Structure: [ val(meta), path(*.log) ]
-        NanoPlot log files.
-  - nanoplot_version:
-      type: file
-      description: |
-        Structure: [ path(versions.yml) ]
-        Software versions emitted by the NanoPlot module.
-      pattern: "versions.yml"
   - toulligqc_report_data:
       type: file
       description: |

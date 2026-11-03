@@ -67,12 +67,12 @@
                 ]
             },
             "GenomeSize": {
-                "errorMessage": "A number (including decimals) ending with 'm', representing genome size. No spaces allowed.",
+                "errorMessage": "A number in base pairs or ending with 'k', 'm', or 'g' (including decimals), representing genome size. No spaces allowed.",
                 "meta": ["gsize"],
                 "anyOf": [
                     {
                         "type": ["string", "null"],
-                        "pattern": "(\\b\\d+\\.\\d+m\\b|NA)"
+                        "pattern": "^(\\d+(?:\\.\\d+)?[kKmMgG]?|NA)$"
                     },
                     {
                         "type": "string",

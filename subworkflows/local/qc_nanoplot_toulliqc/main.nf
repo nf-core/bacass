@@ -21,15 +21,11 @@ workflow QC_NANOPLOT_TOULLIGQC {
     nanoplot_png     = channel.empty()
     nanoplot_html    = channel.empty()
     nanoplot_txt     = channel.empty()
-    nanoplot_log     = channel.empty()
-    nanoplot_version = channel.empty()
     if (!skip_nanplot) {
         NANOPLOT ( ch_fastq )
         nanoplot_png     = NANOPLOT.out.png
         nanoplot_html    = NANOPLOT.out.html
         nanoplot_txt     = NANOPLOT.out.txt
-        nanoplot_log     = NANOPLOT.out.log
-        nanoplot_version = NANOPLOT.out.versions
     }
 
     /*
@@ -51,8 +47,6 @@ workflow QC_NANOPLOT_TOULLIGQC {
     nanoplot_png
     nanoplot_html
     nanoplot_txt
-    nanoplot_log
-    nanoplot_version
 
     toulligqc_report_data
     toulligqc_report_html
