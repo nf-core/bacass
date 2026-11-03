@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Fixed`
 
+- [#335](https://github.com/nf-core/bacass/pull/335) Fix test data path and add missing citations
 - [#332](https://github.com/nf-core/bacass/pull/332) Fix NanoPlot output collisions in auto mode
 - [#291](https://github.com/nf-core/bacass/pull/291) Fix BUSCO `busco_downloads` publish errors and publish only summary/log files
 - [#315](https://github.com/nf-core/bacass/pull/315) Fix Medaka nf-test to avoid launching polishing when `skip_polish=true`
