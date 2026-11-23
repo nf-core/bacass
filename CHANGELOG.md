@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- [#PRNUM](https://github.com/nf-core/bacass/pull/PRNUM) Bump version to 2.8.0dev after the 2.7.0 release
+- [#337](https://github.com/nf-core/bacass/pull/337) Bump version to 2.8.0dev after the 2.7.0 release
 
 ### `Added`
 
