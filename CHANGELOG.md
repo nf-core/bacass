@@ -3,6 +3,20 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.8.0dev - [date]
+
+### `Changed`
+
+- [#PRNUM](https://github.com/nf-core/bacass/pull/PRNUM) Bump version to 2.8.0dev after the 2.7.0 release
+
+### `Added`
+
+### `Fixed`
+
+### `Dependencies`
+
+### `Deprecated`
+
 ## v2.7.0 nf-core/bacass - "Scarlet Brass Nautilus" (2026/10/27)
 
 ### `Changed`
