@@ -1,15 +1,15 @@
 lint:
-  files_unchanged:
-    - .github/PULL_REQUEST_TEMPLATE.md
-    - .github/workflows/branch.yml
-    - .github/workflows/linting.yml
   files_exist:
     - conf/igenomes.config
     - .github/workflows/linting_comment.yml
+  files_unchanged:
+    - assets/nf-core-bacass_logo_light.png
+    - docs/images/nf-core-bacass_logo_light.png
+    - docs/images/nf-core-bacass_logo_dark.png
   nextflow_config:
     - config_defaults:
         - params.dfast_config
-nf_core_version: 4.1.0
+nf_core_version: 4.2.2
 repository_type: pipeline
 template:
   author: Andreas Wilm, Alexander Peltzer
