@@ -7,13 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Changed`
 
-- [#337](https://github.com/nf-core/bacass/pull/337) Bump version to 2.8.0dev after the 2.7.0 release
+- [#337](https://github.com/nf-core/bacass/pull/337) Bump version to 2.8.0dev after the 2.7.0 release (by @Daniel-VM)
+- [#338](https://github.com/nf-core/bacass/pull/338) Merge nf-core template update 4.2.2, including a FASTQC update to 0.13.0 (by @d4straub)
 
 ### `Added`
 
 ### `Fixed`
 
 ### `Dependencies`
+
+| Tool   | Previous version | New version |
+| ------ | ---------------- | ----------- |
+| FastQC | 0.12.1           | 0.13.0      |
 
 ### `Deprecated`
 
