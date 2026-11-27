@@ -13,10 +13,10 @@
                     "fastp": "1.0.1"
                 },
                 "FASTQC_RAW": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "FASTQC_TRIM": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "GUNZIP": {
                     "gunzip": 1.13
@@ -285,8 +285,8 @@
                 "ERR064912-unicycler.assembly.gfa.gz:md5,01faaeca29910ae15e49dd355dda556a",
                 "ERR064912-unicycler.scaffolds.fa.gz:md5,0965953c184cd27da1550b757d7911c7",
                 "multiqc_citations.yaml:md5,0842be95dd6c2081198f682f370c7f0a",
-                "multiqc_fastqc.yaml:md5,4c4e1b713139eef4b82e3aa9e6dbaca2",
-                "multiqc_fastqc_1.yaml:md5,c49034e44bd4443a60839d4b2c17aa2b"
+                "multiqc_fastqc.yaml:md5,f7e40c1a3102ee9ec6c53580a4bdfecb",
+                "multiqc_fastqc_1.yaml:md5,d18f415c017b261641a3f6549e2fab06"
             ]
         ],
         "timestamp": "2026-10-27T14:58:48.035832551",

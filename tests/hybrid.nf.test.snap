@@ -7,10 +7,10 @@
                     "fastp": "1.0.1"
                 },
                 "FASTQC_RAW": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "FASTQC_TRIM": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "GUNZIP": {
                     "gunzip": 1.13
@@ -295,8 +295,8 @@
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,844b018c7434ca59c893901eef530de8",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,e6cced8fc844dabd795ba0dfa6ec0e64",
                 "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
-                "multiqc_fastqc.yaml:md5,68dcba3602303c17700845789c5228fb",
-                "multiqc_fastqc_1.yaml:md5,74f3e473f28a113f93f22dbe95a29274",
+                "multiqc_fastqc.yaml:md5,5e239a0138a5ddba7fb8fef9b2bbda5f",
+                "multiqc_fastqc_1.yaml:md5,ac186da622f010cf271ad57af4fbd856",
                 "multiqc_nanostat.yaml:md5,bf3d441612c2ffddcf3065777c889d7d"
             ]
         ],
