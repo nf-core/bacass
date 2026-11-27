@@ -290,8 +290,8 @@
                 "mqc_porechop-middlesplit-barplot_1.yaml:md5,5e89ca1f45fb6876b58ddbb20b86ea77",
                 "mqc_porechop-starttrim-barplot_1.yaml:md5,34e8d91183bd582532ac654e8e287945",
                 "multiqc_citations.yaml:md5,d16d138907ea513c3999649469915108",
-                "multiqc_fastqc.yaml:md5,a0b5fd24bb745bb77511c1962086fcf0",
-                "multiqc_fastqc_1.yaml:md5,daf5f34bdacbbc207f86fc95768ce9a2",
+                "multiqc_fastqc.yaml:md5,7e32a6d57e620067d10d1cf733ca4c1b",
+                "multiqc_fastqc_1.yaml:md5,db277d253270329a90c6af40c2937c15",
                 "multiqc_nanostat.yaml:md5,cff0c79f74776d0e8c451e87bb332d2d"
             ]
         ],
